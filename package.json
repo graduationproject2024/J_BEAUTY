@@ -1,0 +1,1 @@
+{"name":"j-spa","version":"1.0.0","private":true,"type":"module","engines":{"node":">=24.0.0"},"scripts":{"start":"node server.mjs","test":"node tests/integration.mjs","create-owner":"node server.mjs --create-owner"}}

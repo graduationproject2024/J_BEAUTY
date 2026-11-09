@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-09T19:19:14.058Z",
+  "passed": [
+    "Seed catalog: 13 services and 4 computed packages",
+    "Guest persists pending request and WhatsApp handoff",
+    "Duplicate guest submission does not create another booking",
+    "Registration and pending verification cannot inherit guest history",
+    "Verification rejects incorrect reference and observed phone",
+    "Staff verifies matching reference and observed number once",
+    "Registered booking belongs to signed in customer",
+    "Pending and confirmed bookings earn zero points",
+    "Staff capacity prevents overlapping confirmations",
+    "Completed unpaid booking earns zero points",
+    "Verified payment awards actual spend and repeated save is idempotent",
+    "Customer cannot change payment or admin settings",
+    "Verified reviews require owned completed booking and moderation",
+    "Reward commit deducts points once",
+    "Unauthenticated admin request rejected",
+    "Cross-origin write rejected"
+  ]
+}
