@@ -171,7 +171,7 @@ export function home() {
         <section class="section timeline-section" data-reveal>
           <div class="section-head">
             <div>
-              <span class="eyebrow">${t('مسار الزيارة المنزلية', 'THE J Beauty EXPERIENCE')}</span>
+              <span class="eyebrow">${t('مسار الزيارة المنزلية', 'THE J BEAUTY EXPERIENCE')}</span>
               <h2>${t('من اختياركِ… حتى باب منزلكِ', 'From selection to calm home care')}</h2>
             </div>
             <a class="text-link" href="${href('occasions')}">${t('تنسيق جلسات المناسبات', 'Occasion Experiences')}</a>
@@ -206,7 +206,7 @@ export function home() {
           ${atelierMiniWidget()}
         </section>
 
-        <!-- 6. J Beauty loyalty: clear rules, never fictional balances -->
+        <!-- 6. J Beauty loyalty: archival botanical cameo + clear verified-only rules -->
         <section class='loyalty-band jb-loyalty-intro' data-reveal>
           <div class='loyalty-copy-col'>
             <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
@@ -217,10 +217,13 @@ export function home() {
               <a class='btn jb-quiet-link' href="${href('reviews')}">${t('اطّلعي على تجارب العميلات', 'Customer reviews')}</a>
             </div>
           </div>
-          <div class='jb-loyalty-steps' aria-label="${t('كيف يعمل برنامج البتلات', 'How Petals works')}">
-            <div class='jb-loyalty-step'><span>01</span><div><strong>${t('احجزي واستمتعي بالخدمة', 'Book and enjoy')}</strong><p>${t('يؤكد فريقنا الموعد ثم تُقدّم الخدمة.', 'Your appointment is confirmed and completed.')}</p></div></div>
-            <div class='jb-loyalty-step'><span>02</span><div><strong>${t('تُوثّق الزيارة والدفع', 'Verify your visit and payment')}</strong><p>${t('تُحتسب البتلات المستحقة وفق القواعد المعتمدة.', 'Eligible Petals are calculated under the program rules.')}</p></div></div>
-            <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتكِ', 'Choose your reward')}</strong><p>${t('يمكن طلب مكافأة متاحة وتطبيقها بعد موافقة الفريق على حجز مؤهل.', 'Request an eligible reward for staff-approved use on a future booking.')}</p></div></div>
+          <div class='jb-loyalty-side'>
+            <div class='jb-loyalty-steps' aria-label="${t('كيف يعمل برنامج البتلات', 'How Petals works')}">
+              <div class='jb-loyalty-step'><span>01</span><div><strong>${t('احجزي واستمتعي بالخدمة', 'Book and enjoy')}</strong><p>${t('يؤكد فريقنا الموعد ثم تُقدّم الخدمة.', 'Your appointment is confirmed and completed.')}</p></div></div>
+              <div class='jb-loyalty-step'><span>02</span><div><strong>${t('تُوثّق الزيارة والدفع', 'Verify your visit and payment')}</strong><p>${t('تُحتسب البتلات المستحقة وفق القواعد المعتمدة.', 'Eligible Petals are calculated under the program rules.')}</p></div></div>
+              <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتكِ', 'Choose your reward')}</strong><p>${t('يمكن طلب مكافأة متاحة وتطبيقها بعد موافقة الفريق على حجز مؤهل.', 'Request an eligible reward for staff-approved use on a future booking.')}</p></div></div>
+            </div>
+            <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(4, 8, false)}</div>
           </div>
         </section>
         <!-- 7. Genuine Beauty Stories / Verified Care Standards -->

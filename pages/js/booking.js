@@ -402,7 +402,7 @@ export function bookingSuccess() {
       <div class="content">
         <div class="success">
           <div class="row" style="margin-bottom:10px">
-            <h2 style="margin:0;font-size:24px">${t('تم تسجيل طلبكِ، وسيتم تأكيد الموعد بعد مراجعته مع فريق J Spa.', 'Your request is saved. J Beauty will review and personally confirm your appointment.')}</h2>
+            <h2 style="margin:0;font-size:24px">${t('تم تسجيل طلبكِ، وسيتم تأكيد الموعد بعد مراجعته مع فريق J Beauty.', 'Your request is saved. J Beauty will review and personally confirm your appointment.')}</h2>
             <span class="badge pending">${t('بانتظار التأكيد', 'Pending confirmation')}</span>
           </div>
           <p style="margin-bottom:0">${t('رقم الطلب المرجعي:', 'Booking Reference:')} <strong><bdi>${esc(r.booking?.reference)}</bdi></strong></p>

@@ -1,4 +1,4 @@
-# J SPA
+# J Beauty
 
 Local Arabic / English home-spa booking and operations application. Requires **Node.js 24.18 or later in the Node 24 LTS line**. No package installation, paid API, email provider, SMS gateway, or WhatsApp API is required.
 

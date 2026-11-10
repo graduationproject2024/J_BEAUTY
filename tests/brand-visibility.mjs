@@ -27,4 +27,7 @@ assert.ok(!account.includes('state.user ? 0 : 250'), 'Guest example balance must
 assert.ok(read('pages/js/pages-public.js').includes('jb-quick-paths'), 'Static showcase not synchronized');
 assert.ok(read('pages/js/components.js').includes('static preview on GitHub Pages'), 'Static preview notice missing');
 assert.ok(read('index.html').includes('J Beauty'), 'Static index not rebranded');
+for (const file of ['public/js/booking.js', 'public/js/pages-public.js', 'public/js/account.js', 'seo.mjs', 'server/booking.mjs', 'server/experiences.mjs', 'README.md']) {
+  assert.ok(!/J SPA/i.test(read(file)), `Stale J SPA brand reference in ${file}`);
+}
 console.log('PASS branding, navigation and rewards source checks; browser and backend suites still required.');

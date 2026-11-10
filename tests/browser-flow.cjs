@@ -134,11 +134,11 @@ let browser;
     // Step 5: Review & Submit
     await page.locator('[name=terms]').check();
     await page.locator('#booking-form button[type=submit]').click();
-    await page.getByText('Your request is saved. J SPA will review and personally confirm your appointment.').waitFor();
+    await page.getByText('Your request is saved. J Beauty will review and personally confirm your appointment.').waitFor();
 
     const wa = await page.locator('#whatsapp-handoff-link').getAttribute('href');
     assert.ok(wa.startsWith('https://wa.me/966500000011?text='));
-    assert.match(decodeURIComponent(wa), /J SPA/i);
+    assert.match(decodeURIComponent(wa), /J Beauty/i);
   }
 
   mkdirSync(out, { recursive: true });
@@ -318,7 +318,16 @@ let browser;
   await customer.screenshot({ path: join(out, 'customer-passport-desktop.png'), fullPage: true });
 
   await customer.goto(base + '/en/rewards');
-  await customer.locator('.loyalty-balance-num', { hasText: '250' }).waitFor();
+  await customer.locator('.jb-points-total', { hasText: '250' }).waitFor();
+  await customer.locator('[data-reward]').first().click();
+  await customer.getByText('Pending request active').first().waitFor();
+  await owner.locator('[data-admin-tab="rewards"]').click();
+  await owner.locator('[data-admin-form^="rewards/"] [name="action"]').first().selectOption('cancel');
+  await owner.locator('[data-admin-form^="rewards/"] button[type="submit"]').first().click();
+  await owner.locator('#confirm-yes').click();
+  await owner.getByText('Cancelled').first().waitFor();
+  await customer.reload();
+  await customer.locator('.jb-points-total', { hasText: '250' }).waitFor();
   await customer.evaluate(() =>
     Promise.all(
       [...document.images].map((img) =>

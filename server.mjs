@@ -365,7 +365,7 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
           expires_at: new Date(expires).toISOString(),
           whatsapp_url: whatsappUrl(
             helpers.settings(),
-            `مرحباً J SPA، أرجو تأكيد ملكية رقم جوالي ${user.phone}. رمز التحقق: ${reference}`,
+            `مرحباً J Beauty، أرجو تأكيد ملكية رقم جوالي ${user.phone}. رمز التحقق: ${reference}`,
           ),
         });
       }
@@ -457,7 +457,7 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
           fail('Invalid rating');
         }
         const reviewBody = text(body.body, 2000);
-        const displayName = optionalText(body.display_name, 60) || 'عميلة J SPA';
+        const displayName = optionalText(body.display_name, 60) || 'عميلة J Beauty';
         if (/(?:\+?966|05)\d{8,9}/.test(`${reviewBody} ${displayName}`)) {
           fail('Please remove phone numbers from your review');
         }
@@ -542,7 +542,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   } else {
     const port = Number(process.env.PORT || 3000);
     app.server.listen(port, process.env.HOST || '127.0.0.1', () => {
-      console.log(`J SPA running at http://${process.env.HOST || '127.0.0.1'}:${port}`);
+      console.log(`J Beauty running at http://${process.env.HOST || '127.0.0.1'}:${port}`);
     });
   }
 }

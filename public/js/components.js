@@ -18,7 +18,7 @@ export function icon(kind) {
     spark: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
     shield: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6l7-4z"/><path d="M9 12l2 2 4-4"/></svg>',
     user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>',
-    menu: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+    menu: '<svg class="menu-open-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="menu-close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     heart: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
     star: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><polygon points="12 2.5 15.09 8.76 22 9.77 17 14.64 18.18 21.5 12 18.26 5.82 21.5 7 14.64 2 9.77 8.91 8.76 12 2.5"/></svg>',
     calendar: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
@@ -286,7 +286,7 @@ export function reviewsContent(reviews = [], fallbackAsTrust = false) {
           </div>
           <div class="card">
             <span class="eyebrow">03</span>
-            <h3>${t('تأكيد بشري ومكافآت صادقة', 'Personal Care & Real Loyalty')}</h3>
+            <h3>${t('تأكيد شخصي وتقييمات موثقة', 'Personal Care & Verified Reviews')}</h3>
             <p class="muted">${t('لا توجد مراجعات منشورة بعد؛ تُنشر الآراء فقط بعد زيارة مكتملة ومراجعة الإدارة.', 'No reviews have been published yet; reviews appear strictly after verified completed visits.')}</p>
           </div>
         </div>
@@ -397,7 +397,8 @@ export function simpleTable(rows, keys) {
                         : typeof val === 'object'
                           ? JSON.stringify(val)
                           : String(val);
-                    return `<td>${esc(formatted)}</td>`;
+                    const isLtrMetric = k === 'points' || /^[+-]\d/.test(formatted);
+                    return `<td${isLtrMetric ? ' dir="ltr"' : ''}>${esc(formatted)}</td>`;
                   })
                   .join('')}</tr>`,
             )
@@ -419,7 +420,8 @@ export function simpleTable(rows, keys) {
                   : typeof val === 'object'
                     ? JSON.stringify(val)
                     : String(val);
-              return `<div class="kv-row"><span class="muted">${esc(fieldLabel(k))}</span><strong>${esc(formatted)}</strong></div>`;
+              const isLtrMetric = k === 'points' || /^[+-]\d/.test(formatted);
+              return `<div class="kv-row"><span class="muted">${esc(fieldLabel(k))}</span><strong${isLtrMetric ? ' dir="ltr"' : ''}>${esc(formatted)}</strong></div>`;
             })
             .join('')}
         </article>

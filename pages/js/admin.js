@@ -664,37 +664,69 @@ function adminContent() {
   }
 
   if (tab === 'rewards') {
+    const rewardStatusLabel = (s) =>
+      ({
+        pending: t('قيد المراجعة', 'Pending review'),
+        committed: t('معتمدة ومطبقة', 'Committed'),
+        cancelled: t('ملغاة', 'Cancelled'),
+      })[s] || s;
     return `
       <h2>${t('طلبات المكافآت ونادي بتلات J', 'Rewards & J Petals Club')}</h2>
       ${
         (a.reward_requests || [])
-          .map(
-            (r) => `
-        <details class="details">
-          <summary>${esc(r.id)} · ${esc(r.status)} · ${r.points} ${t('بتلة', 'petals')} (${money(r.value)})</summary>
-          <form data-admin-form="rewards/${esc(r.id)}">
-            <label class="field">
-              ${t('الحجز المؤهل', 'Eligible booking')}
-              <select name="booking_id" required>
-                <option value="">${t('اختاري الحجز', 'Choose booking')}</option>
-                ${bookings
-                  .filter((b) => b.user_id === r.user_id)
-                  .map((b) => `<option value="${esc(b.id)}">${esc(b.reference)} · ${money(b.total)} · ${statusLabel(b.status)}</option>`)
-                  .join('')}
-              </select>
-            </label>
-            <label class="field">
-              ${t('الإجراء', 'Action')}
-              <select name="action">
-                <option value="commit">${t('اعتماد وخصم البتلات', 'Commit & deduct petals')}</option>
-                <option value="cancel">${t('إلغاء الطلب / رد البتلات', 'Cancel / restore petals')}</option>
-              </select>
-            </label>
-            <button class="btn small" type="submit">${t('تنفيذ', 'Apply')}</button>
-          </form>
+          .map((r) => {
+            const eligible = bookings.filter(
+              (b) =>
+                b.user_id === r.user_id &&
+                ['pending_confirmation', 'confirmed'].includes(b.status) &&
+                !b.reward_id &&
+                !b.payment_verified &&
+                Number(b.total || 0) >= Number(r.value || 0),
+            );
+            const linked = r.booking_id ? bookings.find((b) => b.id === r.booking_id) : null;
+            return `
+        <details class="details" ${r.status === 'pending' ? 'open' : ''}>
+          <summary>${esc(r.id.slice(0, 8).toUpperCase())} · ${esc(rewardStatusLabel(r.status))} · ${num(r.points)} ${t('بتلة', 'petals')} (${money(r.value)})</summary>
+          ${
+            r.status === 'cancelled'
+              ? `<p class="muted" style="margin:10px 0 0">${t('تم إلغاء هذا الطلب ولا يلزم اتخاذ إجراء إضافي.', 'This reward request was cancelled; no further action is needed.')}</p>`
+              : `<form data-admin-form="rewards/${esc(r.id)}">
+                  ${
+                    r.status === 'committed'
+                      ? `<p class="muted" style="margin:6px 0">${t(`مطبقة على الحجز: ${linked?.reference || r.booking_id}`, `Applied to booking: ${linked?.reference || r.booking_id}`)}</p>
+                         <label class="field">
+                           ${t('الإجراء', 'Action')}
+                           <select name="action">
+                             <option value="cancel">${t('إلغاء المكافأة / رد البتلات قبل الدفع', 'Cancel reward / restore petals')}</option>
+                           </select>
+                         </label>`
+                      : `<label class="field">
+                           ${t('الحجز المؤهل غير المدفوع', 'Eligible unpaid booking')}
+                           <select name="booking_id">
+                             <option value="">${
+                               eligible.length
+                                 ? t('اختاري الحجز المؤهل للاعتماد', 'Choose eligible booking for commit')
+                                 : t('لا يوجد حجز مؤهل غير مدفوع (يمكن الإلغاء فقط)', 'No eligible unpaid booking (cancel only)')
+                             }</option>
+                             ${eligible
+                               .map((b) => `<option value="${esc(b.id)}">${esc(b.reference)} · ${money(b.total)} · ${esc(b.date || '')}</option>`)
+                               .join('')}
+                           </select>
+                         </label>
+                         <label class="field">
+                           ${t('الإجراء', 'Action')}
+                           <select name="action">
+                             ${eligible.length ? `<option value="commit">${t('اعتماد وتطبيق الخصم وخصم البتلات', 'Commit & deduct petals')}</option>` : ''}
+                             <option value="cancel">${t('إلغاء الطلب دون خصم', 'Cancel request')}</option>
+                           </select>
+                         </label>`
+                  }
+                  <button class="btn small" type="submit">${t('تنفيذ', 'Apply')}</button>
+                </form>`
+          }
         </details>
-      `,
-          )
+      `;
+          })
           .join('') || `<div class="empty muted">${t('لا توجد طلبات مكافآت معلقة.', 'No pending reward requests.')}</div>`
       }
       ${
@@ -985,6 +1017,13 @@ export function bindAdmin(renderFn) {
         if (d.date === old?.date) delete d.date;
         if (d.time === old?.time) delete d.time;
         if (!d.payment_method) delete d.payment_method;
+      }
+      if (route.startsWith('rewards/')) {
+        if (d.action === 'commit' && !d.booking_id) {
+          toast(t('اختاري حجزاً مؤهلاً غير مدفوع قبل اعتماد المكافأة.', 'Choose an eligible unpaid booking before committing the reward.'));
+          return;
+        }
+        if (d.action === 'cancel') delete d.booking_id;
       }
       const btn = e.submitter;
       const execSubmit = async () => {

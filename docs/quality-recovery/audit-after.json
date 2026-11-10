@@ -1,6 +1,6 @@
 {
   "phase": "after",
-  "timestamp": "2026-11-10T17:38:45.943Z",
+  "timestamp": "2026-11-10T20:02:29.054Z",
   "a11y": [
     {
       "route": "/ar/",
@@ -78,146 +78,146 @@
   "performance": [
     {
       "route": "/ar/",
-      "dcl": 53,
-      "load": 297,
+      "dcl": 102,
+      "load": 290,
       "fcp": 112,
-      "lcp": 292,
-      "cls": 0.0004
+      "lcp": 288,
+      "cls": 0
     },
     {
       "route": "/en/",
-      "dcl": 43,
-      "load": 47,
-      "fcp": 56,
-      "lcp": 120,
+      "dcl": 50,
+      "load": 59,
+      "fcp": 64,
+      "lcp": 148,
       "cls": 0
     },
     {
       "route": "/ar/services",
-      "dcl": 47,
-      "load": 47,
-      "fcp": 64,
-      "lcp": 96,
+      "dcl": 41,
+      "load": 41,
+      "fcp": 56,
+      "lcp": 80,
       "cls": 0
     },
     {
       "route": "/ar/services/gel-removal",
-      "dcl": 46,
-      "load": 46,
+      "dcl": 40,
+      "load": 40,
       "fcp": 44,
-      "lcp": 92,
+      "lcp": 84,
       "cls": 0
     },
     {
       "route": "/ar/packages",
-      "dcl": 43,
-      "load": 43,
-      "fcp": 40,
-      "lcp": 40,
+      "dcl": 42,
+      "load": 42,
+      "fcp": 44,
+      "lcp": 44,
       "cls": 0
     },
     {
       "route": "/ar/studio",
-      "dcl": 45,
-      "load": 46,
+      "dcl": 51,
+      "load": 52,
+      "fcp": 44,
+      "lcp": 44,
+      "cls": 0
+    },
+    {
+      "route": "/ar/atelier",
+      "dcl": 38,
+      "load": 38,
       "fcp": 36,
       "lcp": 36,
       "cls": 0
     },
     {
-      "route": "/ar/atelier",
-      "dcl": 35,
-      "load": 35,
-      "fcp": 36,
-      "lcp": 68,
-      "cls": 0
-    },
-    {
       "route": "/ar/lookbook",
-      "dcl": 37,
-      "load": 37,
-      "fcp": 36,
-      "lcp": 80,
+      "dcl": 33,
+      "load": 33,
+      "fcp": 40,
+      "lcp": 84,
       "cls": 0
     },
     {
       "route": "/ar/occasions",
-      "dcl": 43,
-      "load": 43,
-      "fcp": 48,
-      "lcp": 84,
+      "dcl": 35,
+      "load": 35,
+      "fcp": 36,
+      "lcp": 36,
       "cls": 0
     },
     {
       "route": "/ar/gifts",
-      "dcl": 45,
-      "load": 45,
-      "fcp": 40,
-      "lcp": 40,
-      "cls": 0
-    },
-    {
-      "route": "/ar/booking",
-      "dcl": 57,
-      "load": 57,
-      "fcp": 84,
-      "lcp": 84,
-      "cls": 0
-    },
-    {
-      "route": "/ar/account",
       "dcl": 37,
       "load": 37,
-      "fcp": 68,
-      "lcp": 68,
-      "cls": 0
-    },
-    {
-      "route": "/ar/petals",
-      "dcl": 32,
-      "load": 32,
-      "fcp": 40,
-      "lcp": 84,
-      "cls": 0
-    },
-    {
-      "route": "/ar/reviews",
-      "dcl": 43,
-      "load": 43,
-      "fcp": 44,
-      "lcp": 68,
-      "cls": 0
-    },
-    {
-      "route": "/ar/policies",
-      "dcl": 38,
-      "load": 38,
       "fcp": 32,
       "lcp": 32,
       "cls": 0
     },
     {
+      "route": "/ar/booking",
+      "dcl": 42,
+      "load": 42,
+      "fcp": 92,
+      "lcp": 92,
+      "cls": 0
+    },
+    {
+      "route": "/ar/account",
+      "dcl": 27,
+      "load": 28,
+      "fcp": 56,
+      "lcp": 56,
+      "cls": 0
+    },
+    {
+      "route": "/ar/petals",
+      "dcl": 31,
+      "load": 31,
+      "fcp": 28,
+      "lcp": 28,
+      "cls": 0
+    },
+    {
+      "route": "/ar/reviews",
+      "dcl": 34,
+      "load": 34,
+      "fcp": 32,
+      "lcp": 32,
+      "cls": 0
+    },
+    {
+      "route": "/ar/policies",
+      "dcl": 40,
+      "load": 40,
+      "fcp": 36,
+      "lcp": 36,
+      "cls": 0
+    },
+    {
       "route": "/ar/privacy",
-      "dcl": 72,
-      "load": 72,
-      "fcp": 72,
-      "lcp": 72,
+      "dcl": 30,
+      "load": 30,
+      "fcp": 28,
+      "lcp": 28,
       "cls": 0
     },
     {
       "route": "/ar/terms",
-      "dcl": 37,
-      "load": 37,
-      "fcp": 36,
-      "lcp": 68,
+      "dcl": 29,
+      "load": 29,
+      "fcp": 24,
+      "lcp": 60,
       "cls": 0
     },
     {
       "route": "/ar/contact",
-      "dcl": 48,
-      "load": 48,
+      "dcl": 31,
+      "load": 31,
       "fcp": 36,
-      "lcp": 36,
+      "lcp": 52,
       "cls": 0
     }
   ],
