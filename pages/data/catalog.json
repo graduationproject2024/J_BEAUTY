@@ -1,0 +1,469 @@
+{
+  "services": [
+    {
+      "id": "relaxation",
+      "name_ar": "مساج استرخائي",
+      "name_en": "Relaxation Massage",
+      "duration": 60,
+      "price_cents": 19500,
+      "category": "massage",
+      "active": true,
+      "description_ar": "جلسة تدليك هادئة بضغط لطيف إلى متوسط باستخدام زيوت نباتية دافئة لتخفيف التوتر اليومي واستعادة صفاء الذهن في هدوء منزلكِ.",
+      "description_en": "A soothing full-body massage with light-to-medium pressure and warm botanical oils to release everyday tension and restore calm at home.",
+      "inclusions_ar": [
+        "جلسة 60 دقيقة بتقنيات انسيابية مريحة",
+        "زيوت عطرية نباتية مختارة حسب راحتكِ",
+        "تهيئة أجواء هادئة بمستلزمات نظيفة ومعقمة"
+      ],
+      "inclusions_en": [
+        "60-minute rhythmic Swedish-inspired relaxation session",
+        "Warm botanical massage oil tailored to your preference",
+        "Freshly laundered linens and serene home setup"
+      ],
+      "precautions_ar": "لا يعد بديلاً عن الرعاية الطبية. يُرجى إبلاغ المختصة بأي حساسية جلدية أو حمل قبل الموعد.",
+      "precautions_en": "Not a substitute for medical care. Please share any skin sensitivities or pregnancy prior to your session.",
+      "image": "/J_BEAUTY/public/assets/images/services/relaxation.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 195
+    },
+    {
+      "id": "therapeutic",
+      "name_ar": "مساج علاجي",
+      "name_en": "Therapeutic Massage",
+      "duration": 60,
+      "price_cents": 22500,
+      "category": "massage",
+      "active": true,
+      "description_ar": "تدليك مركز يستهدف مواضع الشد العضلي في الكتفين والرقبة والظهر بضغط مدروس يخفف الإجهاد الحركي ويعزز الشعور بالمرونة.",
+      "description_en": "Targeted bodywork focusing on tight muscle groups across the neck, shoulders, and back using measured pressure to ease muscular strain.",
+      "inclusions_ar": [
+        "تقييم مبدئي سريع لمناطق الشد العضلي",
+        "تركيز متدرج على الأنسجة العميقة حسب التحمل",
+        "كمادات دافئة وبلسم عشبي مهدئ"
+      ],
+      "inclusions_en": [
+        "Brief pre-session check-in on areas of tension",
+        "Graduated deep-tissue techniques matched to comfort",
+        "Warm linen compress and soothing herbal balm"
+      ],
+      "precautions_ar": "تتطلب هذه الخدمة اعتماد المؤهلات المهنية والاحتياطات من الإدارة قبل تأكيد الحجز. غير مخصصة للحالات الطبية الحادة.",
+      "precautions_en": "Requires business credential approval and precaution review prior to confirmation. Not intended for acute medical conditions.",
+      "image": "/J_BEAUTY/public/assets/images/services/therapeutic.webp",
+      "credentials_required": true,
+      "credentials_approved": false,
+      "price": 225
+    },
+    {
+      "id": "hot-stone",
+      "name_ar": "مساج الأحجار الساخنة",
+      "name_en": "Hot Stone Massage",
+      "duration": 60,
+      "price_cents": 26500,
+      "category": "massage",
+      "active": true,
+      "description_ar": "تجربة استرخاء دافئة تعتمد على أحجار البازلت الملساء المسخّنة بعناية لتتغلغل حرارتها اللطيفة في العضلات وتمنحكِ سكينة عميقة.",
+      "description_en": "A deeply comforting treatment pairing smoothly polished heated basalt stones with slow massage strokes to melt away stiffness.",
+      "inclusions_ar": [
+        "تسخين مضبوط لأحجار البازلت الطبيعية الملساء",
+        "تدليك انسيابي بالزيت الدافئ والأحجار",
+        "عناية دقيقة باختبار حرارة الأحجار لراحتكِ"
+      ],
+      "inclusions_en": [
+        "Temperature-controlled smooth natural basalt stones",
+        "Fluid stone-and-oil massage strokes",
+        "Continuous comfort and warmth checks throughout"
+      ],
+      "precautions_ar": "غير مناسبة للبشرة شديدة الحساسية للحرارة أو حالات ارتفاع الحرارة أو الحمل المبكر.",
+      "precautions_en": "Not advised for heat-sensitive skin, fever, or early pregnancy; inform our team of sensitivities.",
+      "image": "/J_BEAUTY/public/assets/images/services/hot-stone.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 265
+    },
+    {
+      "id": "lymphatic",
+      "name_ar": "مساج التصريف اللمفاوي",
+      "name_en": "Lymphatic Drainage Massage",
+      "duration": 60,
+      "price_cents": 25500,
+      "category": "massage",
+      "active": true,
+      "description_ar": "تقنية تدليك إيقاعية شديدة اللطف تعتمد على حركات سطحية مدروسة تمنح الجسم إحساساً بالخفة والانتعاش والراحة.",
+      "description_en": "An ultra-gentle, rhythmic surface technique using light directional strokes designed to leave the body feeling refreshed and light.",
+      "inclusions_ar": [
+        "حركات يدوية لطيفة ومتسلسلة بإيقاع هادئ",
+        "تركيز متوازن على راحة الساقين والذراعين والرقبة",
+        "مراجعة الاحتياطات المسبقة مع الفريق قبل التأكيد"
+      ],
+      "inclusions_en": [
+        "Feather-light directional hand sequences",
+        "Balanced comfort care across limbs and upper body",
+        "Pre-booking precaution verification with our team"
+      ],
+      "precautions_ar": "تتطلب اعتماد المؤهلات والاحتياطات المهنية من الإدارة قبل التقديم. يُرجى استشارة الطبيب للحالات الصحية الخاصة.",
+      "precautions_en": "Requires business credential and precaution approval prior to delivery. Consult a physician for medical post-op or vascular conditions.",
+      "image": "/J_BEAUTY/public/assets/images/services/lymphatic.webp",
+      "credentials_required": true,
+      "credentials_approved": false,
+      "price": 255
+    },
+    {
+      "id": "classic",
+      "name_ar": "منيكير وبديكير كلاسيك",
+      "name_en": "Classic Manicure & Pedicure",
+      "duration": 75,
+      "price_cents": 18500,
+      "category": "nails",
+      "active": true,
+      "description_ar": "عناية شاملة لليدين والقدمين تشمل التنظيف الدقيق، تنسيق الأظافر، ترطيب البشرة، وطلاء كلاسيكي أنيق بأدوات معقمة فردياً.",
+      "description_en": "Complete hand and foot grooming with gentle soaking, cuticle refinement, nail shaping, soothing moisturizer, and classic polish.",
+      "inclusions_ar": [
+        "نقع دافئ وتقشير لطيف لليدين والقدمين",
+        "ترتيب الأظافر والعناية بالجلد المحيط",
+        "أدوات عناية معقمة ومغلفة لكل عميلة"
+      ],
+      "inclusions_en": [
+        "Warm botanical soak and gentle exfoliation for hands and feet",
+        "Precision shaping, cuticle care, and hydrating massage",
+        "Individually sanitized manicure & pedicure instruments"
+      ],
+      "precautions_ar": "يُرجى إبلاغنا مسبقاً بأي التهابات جلدية أو حساسية في الأظافر.",
+      "precautions_en": "Please let us know ahead of time if you have nail sensitivities or irritated skin.",
+      "image": "/J_BEAUTY/public/assets/images/services/classic.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 185
+    },
+    {
+      "id": "pedicure",
+      "name_ar": "بديكير",
+      "name_en": "Pedicure",
+      "duration": 45,
+      "price_cents": 12500,
+      "category": "nails",
+      "active": true,
+      "description_ar": "جلسة متخصصة لتدليل القدمين تبدأ بحمام مائي دافئ وإزالة الجلد الجاف وترطيب عميق مع ترتيب الأظافر بلمسة نظيفة وناعمة.",
+      "description_en": "Dedicated foot care beginning with a warm rose-petal soak, gentle smoothing of dry areas, nail shaping, and deep moisturizing.",
+      "inclusions_ar": [
+        "حمام دافئ للقدمين مع أملاح مهدئة",
+        "تنعيم الكعبين وترتيب أظافر القدمين",
+        "تدليك مرطب ومريح للقدمين"
+      ],
+      "inclusions_en": [
+        "Warm soothing foot bath with gentle mineral soak",
+        "Heel smoothing and clean nail shaping",
+        "Nourishing cream application with brief foot massage"
+      ],
+      "precautions_ar": "نستخدم حوضاً ومناشف وأدوات نظيفة مخصصة للخدمة المنزلية.",
+      "precautions_en": "Delivered with sanitized portable foot-care essentials and fresh linens.",
+      "image": "/J_BEAUTY/public/assets/images/services/pedicure.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 125
+    },
+    {
+      "id": "french-tip",
+      "name_ar": "منيكير فرنش تيب",
+      "name_en": "French Tip Manicure",
+      "duration": 60,
+      "price_cents": 15500,
+      "category": "nails",
+      "active": true,
+      "description_ar": "إطلالة كلاسيكية ناعمة تجمع بين عناية المنيكير الكاملة ورسم أطراف فرنسية دقيقة بلون عاجي نقي فوق قاعدة وردية شفافة.",
+      "description_en": "Timeless elegance pairing complete cuticle and nail care with crisp ivory French tips over a sheer blush-pink base.",
+      "inclusions_ar": [
+        "تحضير الأظافر وترطيب اليدين الكامل",
+        "طبقة أساس وردية شفافة ورسم طرف فرنسي متقن",
+        "طبقة حماية لامعة لثبات أجمل"
+      ],
+      "inclusions_en": [
+        "Full manicure preparation and hand hydration",
+        "Sheer blush base with precision ivory French tips",
+        "High-shine protective top coat finish"
+      ],
+      "precautions_ar": "يتطلب وقت جفاف قصير بعد الطلاء الكلاسيكي.",
+      "precautions_en": "Allow brief drying time after traditional polish application.",
+      "image": "/J_BEAUTY/public/assets/images/services/french-tip.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 155
+    },
+    {
+      "id": "french-polish",
+      "name_ar": "طلاء أظافر فرنسي",
+      "name_en": "French Polish",
+      "duration": 25,
+      "price_cents": 7000,
+      "category": "nails",
+      "active": true,
+      "description_ar": "خدمة سريعة لتنسيق وتلوين الأظافر بالنمط الفرنسي الأنيق لمن ترغب بتجديد إطلالتها بلمسة ناعمة ومرتبة.",
+      "description_en": "A crisp express French polish refresh with light nail shaping and neat ivory tips for an effortlessly polished finish.",
+      "inclusions_ar": [
+        "برد وتنسيق سريع لشكل الأظافر",
+        "تطبيق الطلاء الفرنسي الكلاسيكي",
+        "زيت مغذٍ لمحيط الظفر"
+      ],
+      "inclusions_en": [
+        "Quick nail shaping and surface buffing",
+        "Clean French polish base and tip application",
+        "Nourishing botanical cuticle oil drop"
+      ],
+      "precautions_ar": "خدمة تلوين وتنسيق سريعة لا تشمل نقعاً أو إزالة جل سابق.",
+      "precautions_en": "Express polish service; does not include full soak or prior gel removal.",
+      "image": "/J_BEAUTY/public/assets/images/services/french-polish.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 70
+    },
+    {
+      "id": "gel-polish",
+      "name_ar": "طلاء جل",
+      "name_en": "Gel Polish",
+      "duration": 45,
+      "price_cents": 11500,
+      "category": "gel",
+      "active": true,
+      "description_ar": "لون غني ولمعان ثابت يدوم طويلاً مع تثبيت بمصباح UV/LED احترافي وتجهيز نظيف لسطح الظفر.",
+      "description_en": "Rich, glossy color cured under a compact UV/LED lamp for durable chip-resistant wear and effortless everyday shine.",
+      "inclusions_ar": [
+        "تحضير الأظافر وتنظيف الزوائد الجلدية بلطف",
+        "طبقات جل عالية الثبات مع التثبيت الضوئي",
+        "تشكيلة مختارة من الدرجات الوردية والحيادية"
+      ],
+      "inclusions_en": [
+        "Gentle nail plate prep and neat cuticle tidying",
+        "Long-wear gel color coats cured under UV/LED light",
+        "Curated dusty-rose, neutral, and signature shades"
+      ],
+      "precautions_ar": "تتطلب الإزالة الآمنة لاحقاً خدمة إزالة جل متخصصة لتجنب إضعاف الظفر.",
+      "precautions_en": "For nail health, remove later with gentle soak-off care rather than peeling.",
+      "image": "/J_BEAUTY/public/assets/images/services/gel-polish.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 115
+    },
+    {
+      "id": "french-gel",
+      "name_ar": "جل فرنسي",
+      "name_en": "French Gel",
+      "duration": 55,
+      "price_cents": 14500,
+      "category": "gel",
+      "active": true,
+      "description_ar": "أناقة الطراز الفرنسي بلمعان الجل المتين؛ قاعدة وردية ناعمة وأطراف ناصعة متوازنة تدوم بجمالها أياماً طويلة.",
+      "description_en": "The signature French manicure elevated in glossy, long-lasting gel with a soft blush tint and clean ivory tips.",
+      "inclusions_ar": [
+        "تجهيز الظفر والعناية بمحيطه",
+        "رسم خطوط فرنسية دقيقة بالجل وتثبيتها",
+        "طبقة ختامية زجاجية اللمعان وزيت ترطيب"
+      ],
+      "inclusions_en": [
+        "Detailed cuticle preparation and nail shaping",
+        "Hand-painted gel French smile lines cured evenly",
+        "Glass-shine top coat and sweet-almond cuticle oil"
+      ],
+      "precautions_ar": "في حال وجود جل سابق على الأظافر، يُنصح بإضافة خدمة إزالة الجل.",
+      "precautions_en": "If wearing existing gel, consider adding Gel Removal to your appointment.",
+      "image": "/J_BEAUTY/public/assets/images/services/french-gel.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 145
+    },
+    {
+      "id": "colored-french",
+      "name_ar": "جل فرنسي بأطراف ملونة",
+      "name_en": "Colored French Gel",
+      "duration": 60,
+      "price_cents": 15500,
+      "category": "gel",
+      "active": true,
+      "description_ar": "لمسة عصرية على الفرنش الكلاسيكي بأطراف ملونة دقيقة بدرجات الورد الباستيل أو المريمية أو الألوان الموسمية حسب ذوقكِ.",
+      "description_en": "A modern twist on the classic French tip featuring delicate micro-tips in dusty rose, sage, or your favorite tonal palette.",
+      "inclusions_ar": [
+        "تحضير شامل للظفر واختيار الدرجة المناسبة",
+        "رسم أطراف ملونة دقيقة بتناسق عالٍ",
+        "لمعان جل ثابت ومقاوم للتقشر"
+      ],
+      "inclusions_en": [
+        "Complete nail prep and custom tip color selection",
+        "Precision micro-French colored tip artistry",
+        "Cured gloss seal and hydrating finish"
+      ],
+      "precautions_ar": "تأكدي من اختيار إزالة الجل إذا كانت أظافركِ تحتوي على جل حالي.",
+      "precautions_en": "Please add Gel Removal if removing previous gel at the same visit.",
+      "image": "/J_BEAUTY/public/assets/images/services/colored-french.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 155
+    },
+    {
+      "id": "gel-removal",
+      "name_ar": "إزالة الجل",
+      "name_en": "Gel Removal",
+      "duration": 25,
+      "price_cents": 5000,
+      "category": "gel",
+      "active": true,
+      "description_ar": "إزالة آمنة ولطيفة لطلاء الجل السابق باستخدام مزيل مخصص وتنعيم خفيف مع زيت مغذٍ يحافظ على صحة الظفر الطبيعي.",
+      "description_en": "Careful, non-damaging soak-off gel removal followed by gentle buffing and botanical cuticle oil to leave natural nails nourished.",
+      "inclusions_ar": [
+        "فك وإزالة الجل بلطف دون كشط قاسٍ",
+        "تلميع خفيف وترتيب طول الأظافر",
+        "ترطيب وتغذية بالزيوت النباتية"
+      ],
+      "inclusions_en": [
+        "Gentle wrap-and-soak gel removal without harsh scraping",
+        "Light surface buffing and neat shaping",
+        "Restorative botanical cuticle oil treatment"
+      ],
+      "precautions_ar": "مخصصة لإزالة طلاء الجل الناعم (Soak-Off Gel) وليس الأكريليك الصلب.",
+      "precautions_en": "Designed for soak-off soft gel polish; please note hard acrylic extensions separately.",
+      "image": "/J_BEAUTY/public/assets/images/services/gel-removal.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 50
+    },
+    {
+      "id": "gel-reapplication",
+      "name_ar": "إعادة تطبيق الجل",
+      "name_en": "Gel Reapplication",
+      "duration": 75,
+      "price_cents": 15000,
+      "category": "gel",
+      "active": true,
+      "description_ar": "تجديد متكامل يجمع بين الإزالة اللطيفة للجل السابق، تهيئة الظفر الطبيعي، وتطبيق طبقة جل جديدة بلونكِ المفضل.",
+      "description_en": "A seamless refresh combining gentle removal of existing gel, natural nail care, and a fresh cured coat in your chosen shade.",
+      "inclusions_ar": [
+        "إزالة لطيفة للجل القديم والعناية بالظفر",
+        "تنسيق الشكل وتنظيف محيط الظفر",
+        "تطبيق جل جديد بالكامل وتغذية اليدين"
+      ],
+      "inclusions_en": [
+        "Gentle soak-off removal of previous gel polish",
+        "Cuticle tidying and fresh nail shaping",
+        "Full base, color, and glossy top-coat gel reapplication"
+      ],
+      "precautions_ar": "مثالية للمحافظة على مظهر متجدد دون الإضرار بصفيحة الظفر.",
+      "precautions_en": "Ideal for keeping your gel finish fresh while protecting natural nail integrity.",
+      "image": "/J_BEAUTY/public/assets/images/services/gel-reapplication.webp",
+      "credentials_required": false,
+      "credentials_approved": false,
+      "price": 150
+    }
+  ],
+  "packages": [
+    {
+      "id": "nail-glow",
+      "name_ar": "باقة إشراقة J",
+      "name_en": "J Nail Glow",
+      "service_ids": [
+        "pedicure",
+        "french-gel"
+      ],
+      "price_cents": 23900,
+      "tagline_ar": "عناية هادئة لليدين والقدمين بلمسة فرنسية لامعة.",
+      "tagline_en": "A polished ritual combining soothing foot care and luminous French gel.",
+      "active": true,
+      "price": 239,
+      "original_total": 270,
+      "duration": 100
+    },
+    {
+      "id": "serenity",
+      "name_ar": "باقة لحظة هدوء",
+      "name_en": "J Serenity",
+      "service_ids": [
+        "relaxation",
+        "classic"
+      ],
+      "price_cents": 33900,
+      "tagline_ar": "توازن مثالي بين استرخاء الجسد وأناقة الأظافر الكلاسيكية.",
+      "tagline_en": "A calm pairing of full-body relaxation massage and classic mani-pedi care.",
+      "active": true,
+      "price": 339,
+      "original_total": 380,
+      "duration": 135
+    },
+    {
+      "id": "rose-ritual",
+      "name_ar": "باقة طقوس الورد",
+      "name_en": "J Rose Ritual",
+      "service_ids": [
+        "hot-stone",
+        "french-tip"
+      ],
+      "price_cents": 37900,
+      "tagline_ar": "دفء الأحجار البركانية مع نعومة الأطراف الفرنسية الكلاسيكية.",
+      "tagline_en": "Warm basalt stone therapy paired with timeless French-tip grooming.",
+      "active": true,
+      "price": 379,
+      "original_total": 420,
+      "duration": 120
+    },
+    {
+      "id": "signature",
+      "name_ar": "باقة J المميزة",
+      "name_en": "J Signature",
+      "service_ids": [
+        "therapeutic",
+        "classic",
+        "gel-polish"
+      ],
+      "price_cents": 46900,
+      "tagline_ar": "تجربة J SPA المتكاملة من العناية العميقة إلى اللمسة النهائية.",
+      "tagline_en": "Our complete signature home experience from targeted relief to glossy gel.",
+      "active": true,
+      "price": 469,
+      "original_total": 525,
+      "duration": 180
+    }
+  ],
+  "settings": {
+    "business_phone": "",
+    "instagram": "",
+    "tiktok": "",
+    "areas": [],
+    "capacity": 0,
+    "working_days": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "opening_time": "09:00",
+    "closing_time": "22:00",
+    "blocked_dates": [],
+    "travel_buffer": 30,
+    "lead_hours": 12,
+    "points_per_sar": 1,
+    "rewards": [
+      {
+        "id": "petal-200",
+        "points": 200,
+        "value": 10
+      },
+      {
+        "id": "petal-500",
+        "points": 500,
+        "value": 30
+      }
+    ],
+    "business_approved": false,
+    "about_ar": "",
+    "about_en": "",
+    "policies_ar": "",
+    "policies_en": "",
+    "privacy_ar": "",
+    "privacy_en": "",
+    "terms_ar": "",
+    "terms_en": "",
+    "faq_ar": "",
+    "faq_en": ""
+  },
+  "reviews": [],
+  "static_preview": true
+}

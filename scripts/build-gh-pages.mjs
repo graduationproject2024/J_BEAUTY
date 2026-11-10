@@ -5,18 +5,19 @@ import { createHelpers, openDatabase } from '../server/db.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
-const outArg = args.find((a) => !a.startsWith('--')) || 'dist-pages';
 const baseFlag = args.find((a) => a.startsWith('--base='));
 const BASE = (baseFlag ? baseFlag.slice(7) : '/J_BEAUTY').replace(/\/+$/, '');
-const OUT_DIR = path.resolve(ROOT, outArg);
+const ASSET_BASE = `${BASE}/public`;
+const APP_BASE = `${BASE}/pages`;
+const PAGES_DIR = path.join(ROOT, 'pages');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 
-rmSync(OUT_DIR, { recursive: true, force: true });
-mkdirSync(OUT_DIR, { recursive: true });
-cpSync(PUBLIC_DIR, OUT_DIR, { recursive: true });
-writeFileSync(path.join(OUT_DIR, '.nojekyll'), '');
+rmSync(PAGES_DIR, { recursive: true, force: true });
+mkdirSync(path.join(PAGES_DIR, 'js'), { recursive: true });
+mkdirSync(path.join(PAGES_DIR, 'data'), { recursive: true });
+writeFileSync(path.join(ROOT, '.nojekyll'), '');
 
-// Export catalog data directly from the canonical SQLite seed schema
+// Export catalog data directly from canonical SQLite seed schema
 const db = openDatabase(':memory:');
 const helpers = createHelpers(db);
 const catalog = {
@@ -25,7 +26,7 @@ const catalog = {
     .filter((s) => s.active)
     .map((s) => ({
       ...s,
-      image: typeof s.image === 'string' && s.image.startsWith('/assets/') ? `${BASE}${s.image}` : s.image,
+      image: typeof s.image === 'string' && s.image.startsWith('/assets/') ? `${ASSET_BASE}${s.image}` : s.image,
     })),
   packages: helpers.packages().filter((p) => p.active),
   settings: helpers.settings(),
@@ -34,66 +35,65 @@ const catalog = {
 };
 db.close();
 
-mkdirSync(path.join(OUT_DIR, 'data'), { recursive: true });
-writeFileSync(path.join(OUT_DIR, 'data', 'catalog.json'), JSON.stringify(catalog, null, 2));
+writeFileSync(path.join(PAGES_DIR, 'data', 'catalog.json'), JSON.stringify(catalog, null, 2));
 
 const rewriteHtml = (html) =>
   html
-    .replaceAll('href="/assets/', `href="${BASE}/assets/`)
-    .replaceAll('src="/assets/', `src="${BASE}/assets/`)
-    .replaceAll('href="/fonts/', `href="${BASE}/fonts/`)
-    .replaceAll('href="/styles.css"', `href="${BASE}/styles.css"`)
-    .replaceAll('href="/concepts.css"', `href="${BASE}/concepts.css"`)
-    .replaceAll('src="/app.js"', `src="${BASE}/app.js"`)
-    .replaceAll('src="/concepts.js"', `src="${BASE}/concepts.js"`)
+    .replaceAll('href="/assets/', `href="${ASSET_BASE}/assets/`)
+    .replaceAll('src="/assets/', `src="${ASSET_BASE}/assets/`)
+    .replaceAll('href="/fonts/', `href="${ASSET_BASE}/fonts/`)
+    .replaceAll('href="/styles.css"', `href="${APP_BASE}/styles.css"`)
+    .replaceAll('href="/concepts.css"', `href="${APP_BASE}/concepts.css"`)
+    .replaceAll('src="/app.js"', `src="${APP_BASE}/app.js"`)
+    .replaceAll('src="/concepts.js"', `src="${APP_BASE}/concepts.js"`)
     .replaceAll('href="/ar/booking"', `href="${BASE}/ar/booking"`)
     .replaceAll('href="/ar/"', `href="${BASE}/ar/"`);
 
-const indexHtml = rewriteHtml(readFileSync(path.join(OUT_DIR, 'index.html'), 'utf8'));
-writeFileSync(path.join(OUT_DIR, 'index.html'), indexHtml);
-writeFileSync(path.join(OUT_DIR, '404.html'), indexHtml);
+const indexHtml = rewriteHtml(readFileSync(path.join(PUBLIC_DIR, 'index.html'), 'utf8'));
+writeFileSync(path.join(ROOT, 'index.html'), indexHtml);
+writeFileSync(path.join(ROOT, '404.html'), indexHtml);
 
-const conceptsHtmlPath = path.join(OUT_DIR, 'concepts.html');
-writeFileSync(conceptsHtmlPath, rewriteHtml(readFileSync(conceptsHtmlPath, 'utf8')));
-
-for (const cssFile of ['styles.css', 'concepts.css']) {
-  const p = path.join(OUT_DIR, cssFile);
-  writeFileSync(p, readFileSync(p, 'utf8').replaceAll("url('/fonts/", "url('./fonts/"));
+for (const name of ['concepts.html', 'concepts.css', 'concepts.js']) {
+  const src = readFileSync(path.join(PUBLIC_DIR, name), 'utf8');
+  writeFileSync(
+    path.join(PAGES_DIR, name),
+    name === 'concepts.html' ? rewriteHtml(src) : src.replaceAll("url('/fonts/", `url('${ASSET_BASE}/fonts/`),
+  );
 }
+
+writeFileSync(
+  path.join(PAGES_DIR, 'styles.css'),
+  readFileSync(path.join(PUBLIC_DIR, 'styles.css'), 'utf8').replaceAll("url('/fonts/", `url('${ASSET_BASE}/fonts/`),
+);
 
 const rewriteAssetStrings = (code) =>
   code
-    .replaceAll('"/assets/', `"${BASE}/assets/`)
-    .replaceAll("'/assets/", `'${BASE}/assets/`)
-    .replaceAll('`/assets/', `\`${BASE}/assets/`);
+    .replaceAll('"/assets/', `"${ASSET_BASE}/assets/`)
+    .replaceAll("'/assets/", `'${ASSET_BASE}/assets/`)
+    .replaceAll('`/assets/', `\`${ASSET_BASE}/assets/`);
 
-// Update app.js internal route link selector for subpath deployment
-const appPath = path.join(OUT_DIR, 'app.js');
-let appCode = rewriteAssetStrings(readFileSync(appPath, 'utf8'));
+let appCode = rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'app.js'), 'utf8'));
 appCode = appCode.replace(
   'document.querySelectorAll(`a[href^="/${state.lang}/"]`)',
   "document.querySelectorAll(`a[href^=\"${href('')}\"]`)",
 );
-writeFileSync(appPath, appCode);
+writeFileSync(path.join(PAGES_DIR, 'app.js'), appCode);
 
-// Clarify static preview status in header announcement on GitHub Pages build
-const componentsPath = path.join(OUT_DIR, 'js', 'components.js');
-let compCode = rewriteAssetStrings(readFileSync(componentsPath, 'utf8'));
+let compCode = rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'js', 'components.js'), 'utf8'));
 compCode = compCode.replace(
   "t(\n        'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',\n        'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',\n      )",
   "t(\n        'معاينة واجهة J SPA على GitHub Pages · سبا نسائي منزلي في المدينة المنورة (للحجوزات الفعلية يلزم خادم Node.js)',\n        'J SPA GITHUB PAGES PREVIEW · AL MADINAH WOMEN’S HOME SPA (LIVE BOOKINGS REQUIRE NODE.JS SERVER)',\n      )",
 );
-writeFileSync(componentsPath, compCode);
+writeFileSync(path.join(PAGES_DIR, 'js', 'components.js'), compCode);
 
 for (const file of ['atelier.js', 'booking.js', 'experiences.js', 'motion.js', 'pages-public.js', 'account.js', 'admin.js']) {
-  const p = path.join(OUT_DIR, 'js', file);
-  writeFileSync(p, rewriteAssetStrings(readFileSync(p, 'utf8')));
+  writeFileSync(
+    path.join(PAGES_DIR, 'js', file),
+    rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'js', file), 'utf8')),
+  );
 }
 
-// Replace js/state.js network API wrapper cleanly with deterministic client-side static preview engine
-const statePath = path.join(OUT_DIR, 'js', 'state.js');
-let stateCode = readFileSync(statePath, 'utf8');
-
+let stateCode = readFileSync(path.join(PUBLIC_DIR, 'js', 'state.js'), 'utf8');
 const staticHelpers = `
 const SITE_BASE =
   location.pathname === '${BASE}' || location.pathname.startsWith('${BASE}/') ? '${BASE}' : '';
@@ -222,7 +222,7 @@ export async function api(path, body) {
   if (path === '/session') return { user: null, csrfToken: 'github-pages-preview' };
   if (path === '/catalog') {
     if (!cachedCatalog) {
-      const r = await fetch(\`\${SITE_BASE}/data/catalog.json\`);
+      const r = await fetch(\`\${SITE_BASE}/pages/data/catalog.json\`);
       cachedCatalog = await r.json();
     }
     return cachedCatalog;
@@ -295,6 +295,5 @@ export async function api(path, body) {
 }`,
 );
 
-writeFileSync(statePath, staticHelpers + '\n' + stateCode);
-console.log(`Built static GitHub Pages showcase in ${OUT_DIR} (base="${BASE || '/'}")`);
-
+writeFileSync(path.join(PAGES_DIR, 'js', 'state.js'), staticHelpers + '\n' + stateCode);
+console.log(`Built GitHub Pages root entrypoint (index.html, 404.html, .nojekyll, pages/) -> ${BASE || '/'}`);

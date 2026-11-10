@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>J SPA — Four Visual Design Explorations</title>
+  <link rel="icon" type="image/svg+xml" href="/J_BEAUTY/public/assets/brand/favicon.svg">
+  <link rel="stylesheet" href="/J_BEAUTY/pages/concepts.css">
+</head>
+<body>
+  <aside class="studio">
+    <a href="/J_BEAUTY/ar/" class="studio-logo">J SPA <span>DESIGN ATELIER · 4 CANDIDATES</span></a>
+    <div class="choices" role="group" aria-label="Design direction">
+      <button data-theme="synthesis" aria-pressed="true" type="button">D · Botanical Editorial Luxury <small>Selected</small></button>
+      <button data-theme="botanical" aria-pressed="false" type="button">A · Botanical Ritual</button>
+      <button data-theme="blush" aria-pressed="false" type="button">B · Modern Blush</button>
+      <button data-theme="editorial" aria-pressed="false" type="button">C · Luxury Editorial</button>
+    </div>
+    <div class="viewport-switch" role="group" aria-label="Preview viewport">
+      <button data-frame="desktop" aria-pressed="true" type="button">Desktop</button>
+      <button data-frame="mobile" aria-pressed="false" type="button">Mobile Hero</button>
+    </div>
+  </aside>
+
+  <main data-theme="synthesis" data-frame="desktop" id="canvas">
+    <nav class="nav">
+      <a class="wordmark" href="/J_BEAUTY/ar/">
+        <img src="/J_BEAUTY/public/assets/brand/monogram.svg" alt="" width="34" height="34">
+        <span>J SPA<i>HOME SPA · MADINAH</i></span>
+      </a>
+      <div class="nav-links">
+        <a href="#services">Rituals</a>
+        <a href="#atelier">Nail Atelier</a>
+        <a href="#collection">Packages</a>
+        <a href="#petals">J Petals</a>
+      </div>
+      <a class="outline" href="/J_BEAUTY/ar/booking">Book Your Moment</a>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">WOMEN’S HOME SPA · AL MADINAH</span>
+        <h1 id="heroTitle">Your Beauty.<br><em>Your Ritual. Your Moment.</em></h1>
+        <p class="arabic" lang="ar" dir="rtl">لحظتكِ الخاصة… في راحة بيتكِ</p>
+        <p id="heroDescription">Thoughtful massage, nail artistry, and botanical home spa care brought directly to your home in Madinah with personal team confirmation.</p>
+        <div class="hero-cta-row">
+          <a href="#booking" class="button">Explore your ritual <span>→</span></a>
+          <span class="hero-caption">Exclusively for women · Manual team confirmation</span>
+        </div>
+      </div>
+      <div class="hero-art">
+        <img src="/J_BEAUTY/public/assets/images/hero-sanctuary.webp" alt="Quiet luxury home spa vignette on travertine tray">
+        <div class="art-tag">Botanical Editorial Luxury <span>PROVISIONAL BRAND VISUAL</span></div>
+      </div>
+    </section>
+
+    <div class="promise">
+      <span>Women-only home sanctuary</span>
+      <i>✦</i>
+      <span>Interactive J Nail Atelier</span>
+      <i>✦</i>
+      <span>J Petals internal rewards</span>
+    </div>
+
+    <section class="section" id="services">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">01 · TREATMENT TAXONOMY</span>
+          <h2>Curated <em>rituals.</em></h2>
+        </div>
+        <p>Three serene categories spanning 13 editable home spa treatments.</p>
+      </div>
+      <div class="service-grid">
+        <article>
+          <div class="tile"><img src="/J_BEAUTY/public/assets/images/services/hot-stone.webp" alt="Hot Stone Massage"><span>01</span></div>
+          <div class="card-line"><h3>Massage Therapy</h3><span>From 195 SAR</span></div>
+          <p>Relaxation, therapeutic, heated basalt stones, and gentle lymphatic drainage.</p>
+        </article>
+        <article>
+          <div class="tile"><img src="/J_BEAUTY/public/assets/images/services/classic.webp" alt="Classic Manicure and Pedicure"><span>02</span></div>
+          <div class="card-line"><h3>Nail Care</h3><span>From 70 SAR</span></div>
+          <p>Classic manicure &amp; pedicure, restorative foot soaks, and crisp French tips.</p>
+        </article>
+        <article>
+          <div class="tile"><img src="/J_BEAUTY/public/assets/images/services/french-gel.webp" alt="French Gel Service"><span>03</span></div>
+          <div class="card-line"><h3>Gel Services</h3><span>From 50 SAR</span></div>
+          <p>Long-wear glossy gel polish, French gel, colored micro-tips, and removal.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section collection" id="collection">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">02 · PROVISIONAL PACKAGES</span>
+          <h2>Thoughtfully <em>paired.</em></h2>
+        </div>
+        <p>Provisional package pricing awaiting business approval.</p>
+      </div>
+      <div class="packages">
+        <article>
+          <span class="eyebrow">01 / NAIL GLOW</span>
+          <h3>J Nail Glow</h3>
+          <p>Pedicure + French Gel</p>
+          <div class="price">239 <small>SAR</small><del>270</del></div>
+          <a href="#booking">Select package →</a>
+        </article>
+        <article class="featured">
+          <span class="eyebrow">02 / SERENITY</span>
+          <h3>J Serenity</h3>
+          <p>Relaxation Massage + Classic Mani-Pedi</p>
+          <div class="price">339 <small>SAR</small><del>380</del></div>
+          <a href="#booking">Select package →</a>
+        </article>
+        <article>
+          <span class="eyebrow">03 / ROSE RITUAL</span>
+          <h3>J Rose Ritual</h3>
+          <p>Hot Stone Massage + French Tip Manicure</p>
+          <div class="price">379 <small>SAR</small><del>420</del></div>
+          <a href="#booking">Select package →</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="booking section" id="booking">
+      <div>
+        <span class="eyebrow">03 · BOOKING FLOW PREVIEW</span>
+        <h2>Your moment<br>starts <em>here.</em></h2>
+        <p>Category-first step selection, preferred time in Asia/Riyadh, and manual WhatsApp handoff.</p>
+        <div class="steps">
+          <span class="current">1 · Category</span>
+          <span>2 · Ritual</span>
+          <span>3 · Time</span>
+          <span>4 · Details</span>
+          <span>5 · Review</span>
+        </div>
+      </div>
+      <form id="previewForm">
+        <span class="eyebrow">STEP 1 PREVIEW · CONCEPT ONLY</span>
+        <label for="ritual">Choose a curated package</label>
+        <select id="ritual">
+          <option value="339">J Serenity — 339 SAR</option>
+          <option value="239">J Nail Glow — 239 SAR</option>
+          <option value="379">J Rose Ritual — 379 SAR</option>
+          <option value="469">J Signature — 469 SAR</option>
+        </select>
+        <div class="summary"><span>Estimated total</span><strong id="estimate">339 SAR</strong></div>
+        <button class="button" type="submit">Continue to rituals <span>→</span></button>
+        <p id="previewNotice" role="status">Visual concept preview only — open /ar/booking to submit requests.</p>
+      </form>
+    </section>
+
+    <section class="petals section" id="petals">
+      <div class="petal-mark" aria-hidden="true">
+        <svg viewBox="0 0 200 165" fill="none">
+          <ellipse cx="100" cy="48" rx="14" ry="34" transform="rotate(-120 100 100)" fill="#D9B7C0" stroke="#D4AF7C" stroke-width="1.5"/>
+          <ellipse cx="100" cy="48" rx="14" ry="34" transform="rotate(-60 100 100)" fill="#D9B7C0" stroke="#D4AF7C" stroke-width="1.5"/>
+          <ellipse cx="100" cy="48" rx="14" ry="34" transform="rotate(0 100 100)" fill="#D9B7C0" stroke="#D4AF7C" stroke-width="1.5"/>
+          <ellipse cx="100" cy="48" rx="14" ry="34" transform="rotate(60 100 100)" fill="#D9B7C0" stroke="#D4AF7C" stroke-width="1.5"/>
+          <ellipse cx="100" cy="48" rx="14" ry="34" transform="rotate(120 100 100)" fill="transparent" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="100" cy="100" r="16" stroke="#D4AF7C" stroke-width="1.5"/>
+          <text x="100" y="105" text-anchor="middle" fill="#D4AF7C" font-family="Georgia" font-size="16">J</text>
+        </svg>
+      </div>
+      <div>
+        <span class="eyebrow">04 · J PETALS CLUB</span>
+        <h2>Care that <em>blooms back.</em></h2>
+        <p>Earn 1 petal per eligible SAR after service completion, staff-verified payment, and verified phone ownership.</p>
+        <div class="reward-preview">
+          <span>200 Petals = 10 SAR</span>
+          <span>•</span>
+          <span>500 Petals = 30 SAR</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="/J_BEAUTY/ar/" class="wordmark"><span>J SPA</span></a>
+      <p dir="rtl" lang="ar">لحظتكِ الخاصة… في راحة بيتكِ</p>
+      <span>WOMEN’S HOME SPA · MADINAH</span>
+    </footer>
+  </main>
+  <script src="/J_BEAUTY/pages/concepts.js"></script>
+</body>
+</html>
