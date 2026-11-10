@@ -50,7 +50,7 @@ function updateMobileBar(cur) {
   const btn = $('#mobile-bar #mobile-book-btn');
   if (!bar || !btn) return;
   const isMobile = window.innerWidth <= 780;
-  const hideOn = ['booking', 'admin', 'account', 'bookings', 'rewards', 'login', 'register', 'reset', 'atelier', 'group-booking', 'gifts'];
+  const hideOn = ['booking', 'admin', 'account', 'bookings', 'rewards', 'login', 'register', 'reset', 'atelier', 'occasions', 'gifts'];
   const scrolledEnough = window.scrollY > 240;
   const show = isMobile && !hideOn.includes(cur) && scrolledEnough;
   bar.hidden = !show;
@@ -82,8 +82,12 @@ export async function render() {
     else if (cur === 'packages') body = packagesPage();
     else if (cur === 'studio') body = studioPage();
     else if (cur === 'lookbook') body = lookbookPage();
-    else if (cur === 'group-booking') body = groupBookingPage();
-    else if (cur === 'gifts') body = giftsPage();
+    else if (cur === 'occasions') {
+      if (location.pathname.endsWith('/group-booking')) {
+        history.replaceState({}, '', href('occasions') + location.search);
+      }
+      body = groupBookingPage();
+    } else if (cur === 'gifts') body = giftsPage();
     else if (cur === 'atelier') {
       const q = new URLSearchParams(location.search);
       const code = q.get('style');
@@ -119,8 +123,14 @@ export async function render() {
     } else if (['login', 'register', 'reset'].includes(cur)) body = auth(cur);
     else if (['account', 'bookings', 'rewards'].includes(cur)) body = await accountPage(cur);
     else if (cur === 'petals') body = petalsPage();
-    else if (cur === 'reviews') body = reviewsPage();
-    else if (['about', 'privacy', 'terms', 'policies'].includes(cur)) body = contentPage(cur);
+    else if (cur === 'reviews') {
+      if (state.user?.role === 'customer' && !state.account) {
+        try {
+          state.account = await api('/account');
+        } catch {}
+      }
+      body = reviewsPage();
+    } else if (['about', 'privacy', 'terms', 'policies'].includes(cur)) body = contentPage(cur);
     else if (cur === 'contact') body = contact();
     else if (cur === 'faq') body = faq();
     else if (cur === 'recovery') body = recovery();
@@ -132,11 +142,11 @@ export async function render() {
 
   $('#app').innerHTML = header() + body + footer();
   const titleMap = {
-    home: t('سبا منزلي المدينة المنورة', 'Home Spa Madinah'),
-    studio: t('استوديو الجمال J', 'J Ritual Studio'),
-    atelier: t('أتيليه الأظافر', 'J Nail Atelier'),
-    lookbook: t('معرض الإلهام', 'Beauty Lookbook'),
-    'group-booking': t('جلسة معاً', 'Beauty Together'),
+    home: t('سبا نسائي منزلي في المدينة المنورة', 'Home Spa Madinah'),
+    studio: t('استوديو اختيار الخدمات', 'J Ritual Studio'),
+    atelier: t('أتيليه J للأظافر', 'J Nail Atelier'),
+    lookbook: t('معرض الإطلالات', 'Beauty Lookbook'),
+    occasions: t('تنسيق جلسات المناسبات', 'Occasion Experiences'),
     gifts: t('أهدي لحظة عناية', 'Gift a Ritual'),
     account: t('جواز الجمال وحسابي', 'Beauty Passport & Account'),
   };
@@ -196,7 +206,7 @@ function bind(cur) {
     };
   });
 
-  bindPublicInteractions(go);
+  bindPublicInteractions(go, render);
   bindAtelier(go, render);
   bindExperiences(render);
   bindBooking(render);

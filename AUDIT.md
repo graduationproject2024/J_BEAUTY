@@ -1,6 +1,8 @@
 # J SPA — Audit & Remediation Report (`AUDIT.md`)
 
-Branch: `codex/jspa-premium-overhaul` (branched from `main` at `6e20931`)
+Branches:
+- `codex/jspa-premium-overhaul` / `feature/j-beauty-transformation`: Architecture, modularity, 5-step wizard, J Nail Atelier, J Ritual Studio, Beauty Passport, security & pagination foundation.
+- `fix/j-beauty-quality-recovery` (branched from `8de4ade`): **J SPA Premium Quality Recovery** — Saudi localization, `occasions` rebranding, real photography for `gel-removal.webp`, anatomical Atelier hand, botanical Peony emblem, and interactive 5-star review workflow.
 
 ## Issue Inventory & Fixes
 
@@ -88,4 +90,15 @@ Branch: `codex/jspa-premium-overhaul` (branched from `main` at `6e20931`)
 - **Root Cause:** Heart favorite toggle (`.fav-btn`) overlapped `.service-badge` on the top-start thumbnail edge; fixed `#toast` (`top: 20px`) overlapped the top-right header CTA; Gift Voucher rows in Admin rendered `gf.value` (`0 SAR`) instead of `gf.estimated_amount`; `.split` and `.content.card` sat too close to the footer on mobile/Studio views.
 - **Implemented Fix:** Anchored `.fav-btn` to `inset-inline-end: 12px`, repositioned `#toast` to bottom-end (`bottom: 24px`, `82px` with sticky mobile bar), displayed `gf.estimated_amount ?? gf.value ?? gf.chosen?.price`, added `padding-bottom` / `margin-bottom` spacing, and refined Atelier accent Arabic label (`زهرة ناعمة`).
 - **Status:** Fixed & Re-Verified Visually.
+
+### 13. Premium Quality Recovery (`P0` / `P1` — `fix/j-beauty-quality-recovery`)
+- **Affected Files:** `public/js/pages-public.js`, `public/js/atelier.js`, `public/js/motion.js`, `public/js/components.js`, `public/js/experiences.js`, `public/js/booking.js`, `public/js/account.js`, `public/js/admin.js`, `public/js/state.js`, `public/app.js`, `public/styles.css`, `server.mjs`, `server/experiences.mjs`, `server/booking.mjs`, `server/admin.mjs`, `seo.mjs`, `public/assets/images/services/gel-removal.webp`
+- **Root Causes Addressed:**
+  1. Egyptian colloquial Arabic (`عايزة`, `النهارده`, `إيه`, `أدلع`, `بجهز`, `جربي`) across UI & WhatsApp templates.
+  2. Inappropriate `حجز جماعي` / `Beauty Together` labeling & unaligned route naming.
+  3. Cartoonish vector SVG placeholder on `gel-removal.webp`.
+  4. Blocky rectangular finger illustration in **J Nail Atelier** & generic radial oval flower in **J Petals Club**.
+  5. Un-discoverable review submission flow missing interactive 5-star selection and explicit moderation status feedback; stale `state.admin` caching across admin tabs; review cards fading slowly with Arabic fallback names on EN pages; `#toast` contrast edge against dark footer.
+- **Implemented Fixes:** Complete Saudi MSA overhaul (`docs/localization/SAUDI-AR-COPY-AUDIT.md`), canonical **Occasion Experiences (`تنسيق جلسات المناسبات`)** at `/occasions` with `301` redirect from `/group-booking`, Wikimedia `CC BY 2.0` real photography for `gel-removal.webp` (`28.5 KB`), continuous dorsum anatomical Atelier hand (+ `Oval` shape & sticky mobile preview), asymmetric botanical Damascus Peony emblem, interactive `"قيّمي تجربتكِ معنا"` 5-star `radiogroup` workflow with `pending / approved / needs_edit` moderation & admin live tab reload, compact `01–04` Home Visit Timeline without unverified claims, and sticky Ritual Studio visual layout.
+- **Status:** Fixed & Verified Across Test Suites & Visual Screenshots.
 

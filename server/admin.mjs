@@ -425,8 +425,19 @@ export function handleAdminRoute({ db, helpers, user, route, query, body, checkR
     if (typeof body.approved !== 'boolean') fail('Invalid approval');
     const review = JSON.parse(row.data);
     review.approved = body.approved;
+    if (body.approved) {
+      review.moderation_status = 'approved';
+      review.moderation_note = '';
+    } else if (body.moderation_status === 'needs_edit') {
+      review.moderation_status = 'needs_edit';
+      review.moderation_note = body.moderation_note ? text(body.moderation_note, 300) : '';
+    } else {
+      review.moderation_status = 'pending';
+      review.moderation_note = '';
+    }
+    review.moderated_at = now();
     db.run('UPDATE reviews SET data=? WHERE id=?', JSON.stringify(review), row.id);
-    helpers.audit(user, 'review.moderate', row.id);
+    helpers.audit(user, 'review.moderate', row.id, JSON.stringify({ approved: review.approved, status: review.moderation_status }));
     return send({ review });
   }
 

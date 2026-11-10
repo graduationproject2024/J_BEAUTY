@@ -1,14 +1,14 @@
-import { $, api, esc, href, state, t, toast } from './state.js';
+import { $, api, esc, href, money, nameOf, state, t, toast } from './state.js';
 import { head } from './components.js';
 import { trackFunnel } from './motion.js';
 
 export const NAIL_SHADES = [
   { id: 'sheer-blush', hex: '#F3DCE1', ar: 'وردي شفاف', en: 'Sheer Blush' },
-  { id: 'warm-ivory', hex: '#F7EFE7', ar: 'عاجي دافئ', en: 'Milky Ivory' },
-  { id: 'dusty-rose', hex: '#D9B7C0', ar: 'وردي مغبر', en: 'Dusty Rose' },
+  { id: 'warm-ivory', hex: '#F7EFE7', ar: 'عاجي حليبي', en: 'Milky Ivory' },
+  { id: 'dusty-rose', hex: '#D9B7C0', ar: 'وردي ناعم', en: 'Dusty Rose' },
   { id: 'mauve-silk', hex: '#C49AA6', ar: 'موف حريري', en: 'Mauve Silk' },
-  { id: 'sage-mist', hex: '#A7B79F', ar: 'مريمية هادئة', en: 'Sage Mist' },
-  { id: 'caramel-nude', hex: '#D7B9A5', ar: 'نيود كراميل', en: 'Caramel Nude' },
+  { id: 'sage-mist', hex: '#A7B79F', ar: 'أخضر مريمية', en: 'Sage Mist' },
+  { id: 'caramel-nude', hex: '#D7B9A5', ar: 'نيود دافئ', en: 'Caramel Nude' },
   { id: 'rose-quartz', hex: '#E6BCC4', ar: 'كوارتز وردي', en: 'Rose Quartz' },
   { id: 'deep-plum', hex: '#5E3B49', ar: 'برقوقي عميق', en: 'Deep Plum' },
   { id: 'mocha-velvet', hex: '#7A5754', ar: 'موكا مخملي', en: 'Mocha Velvet' },
@@ -18,24 +18,24 @@ export const NAIL_SHADES = [
 export const TIP_SHADES = [
   { hex: '#FBF7F4', ar: 'عاجي كلاسيك', en: 'Classic Ivory' },
   { hex: '#D9B7C0', ar: 'وردي ناعم', en: 'Dusty Pink' },
-  { hex: '#607257', ar: 'أخضر مريمية', en: 'Deep Sage' },
+  { hex: '#607257', ar: 'مريمية داكن', en: 'Deep Sage' },
   { hex: '#D4AF7C', ar: 'ذهبي وردي', en: 'Rose Gold' },
   { hex: '#503C45', ar: 'برقوقي', en: 'Deep Plum' },
 ];
 
 export const SKIN_TONES = [
-  { id: 'fair', fill: '#F3D6C6', shadow: '#E2BCAE', ar: 'فاتحة', en: 'Fair' },
-  { id: 'warm', fill: '#E4BDA3', shadow: '#CFA084', ar: 'حنطية دافئة', en: 'Warm Sand' },
-  { id: 'olive', fill: '#D1A484', shadow: '#B78767', ar: 'قمحية زيتونية', en: 'Olive' },
-  { id: 'deep', fill: '#9E6D51', shadow: '#80533A', ar: 'سمراء غنية', en: 'Deep Rich' },
+  { id: 'fair', base: '#F4D7C8', mid: '#EAC4B1', shadow: '#D5A996', pocket: 'rgba(130, 82, 70, 0.20)', ar: 'فاتحة', en: 'Fair' },
+  { id: 'warm', base: '#E6BFA5', mid: '#D9AE91', shadow: '#C09172', pocket: 'rgba(115, 68, 52, 0.24)', ar: 'حنطية دافئة', en: 'Warm Sand' },
+  { id: 'olive', base: '#CFA180', mid: '#C1906D', shadow: '#A47555', pocket: 'rgba(92, 54, 40, 0.25)', ar: 'قمحية زيتونية', en: 'Olive' },
+  { id: 'deep', base: '#9B694E', mid: '#8C5B41', shadow: '#71442D', pocket: 'rgba(54, 28, 18, 0.30)', ar: 'سمراء غنية', en: 'Deep Rich' },
 ];
 
 const SHAPES = [
   ['almond', 'لوزي', 'Almond'],
-  ['squoval', 'مربع ناعم', 'Squoval'],
+  ['oval', 'بيضاوي', 'Oval'],
+  ['squoval', 'مربع ناعم', 'Soft Square'],
   ['square', 'مربع', 'Square'],
   ['coffin', 'كوفين أنيق', 'Coffin'],
-  ['natural', 'طبيعي قصير', 'Natural'],
 ];
 
 const LENGTHS = [
@@ -45,11 +45,11 @@ const LENGTHS = [
 ];
 
 const FRENCH_STYLES = [
-  ['none', 'لون كامل', 'Full Polish'],
+  ['none', 'طلاء كامل', 'Full Polish'],
   ['classic', 'فرنش كلاسيك', 'Classic French'],
   ['micro', 'مايكرو فرنش', 'Micro French'],
-  ['colored', 'فرنش ملون', 'Colored Tip'],
-  ['ombre', 'بيبي بومر / أومبري', 'Soft Ombre'],
+  ['colored', 'أطراف ملونة', 'Colored Tip'],
+  ['ombre', 'تدرج ناعم (أومبري)', 'Soft Ombre'],
 ];
 
 const FINISHES = [
@@ -59,10 +59,10 @@ const FINISHES = [
 ];
 
 const ACCENTS = [
-  ['none', 'بدون زخرفة', 'Clean'],
+  ['none', 'طلاء صافٍ', 'Clean'],
   ['gold_foil', 'رقائق ذهب وردي', 'Rose Gold Foil'],
   ['pearl_dot', 'نقطة لؤلؤ', 'Pearl Dot'],
-  ['floral_dot', 'زهرة ناعمة', 'Botanical Dot'],
+  ['floral_dot', 'لمسة زهرية ناعمة', 'Botanical Dot'],
 ];
 
 export function recommendedServiceForStyle(cfg) {
@@ -71,145 +71,225 @@ export function recommendedServiceForStyle(cfg) {
   return 'gel-polish';
 }
 
+function nailContour(cx, baseY, nailW, bedH, extH, shape) {
+  const half = nailW / 2;
+  const sideY = baseY - bedH * 0.62;
+  const freeY = baseY - bedH;
+  const topY = freeY - extH;
+  const s = shape === 'natural' ? 'oval' : shape || 'almond';
+
+  // Proximal cuticle pocket arc stays tucked smoothly inside the finger apex
+  const baseArc = `M ${cx - half * 0.88} ${sideY} C ${cx - half * 0.88} ${baseY - 1}, ${cx + half * 0.88} ${baseY - 1}, ${cx + half * 0.88} ${sideY}`;
+
+  if (s === 'square') {
+    return `${baseArc} L ${cx + half * 0.90} ${topY + 3.5} Q ${cx + half * 0.90} ${topY}, ${cx + half * 0.58} ${topY} L ${cx - half * 0.58} ${topY} Q ${cx - half * 0.90} ${topY}, ${cx - half * 0.90} ${topY + 3.5} Z`;
+  }
+  if (s === 'squoval') {
+    return `${baseArc} C ${cx + half * 0.92} ${freeY}, ${cx + half * 0.88} ${topY + 5}, ${cx + half * 0.66} ${topY + 1} C ${cx + half * 0.34} ${topY - 1}, ${cx - half * 0.34} ${topY - 1}, ${cx - half * 0.66} ${topY + 1} C ${cx - half * 0.88} ${topY + 5}, ${cx - half * 0.92} ${freeY}, ${cx - half * 0.88} ${sideY} Z`;
+  }
+  if (s === 'coffin') {
+    return `${baseArc} L ${cx + half * 0.85} ${freeY + 2} L ${cx + half * 0.44} ${topY + 1.5} Q ${cx} ${topY}, ${cx - half * 0.44} ${topY + 1.5} L ${cx - half * 0.85} ${freeY + 2} Z`;
+  }
+  if (s === 'oval') {
+    return `${baseArc} C ${cx + half * 0.92} ${freeY}, ${cx + half * 0.86} ${topY + 7}, ${cx + half * 0.50} ${topY + 1.5} C ${cx + half * 0.22} ${topY - 1.5}, ${cx - half * 0.22} ${topY - 1.5}, ${cx - half * 0.50} ${topY + 1.5} C ${cx - half * 0.86} ${topY + 7}, ${cx - half * 0.92} ${freeY}, ${cx - half * 0.88} ${sideY} Z`;
+  }
+  // Almond (default): graceful inward taper to an elliptical parabolic apex
+  return `${baseArc} C ${cx + half * 0.90} ${freeY}, ${cx + half * 0.72} ${topY + extH * 0.58 + 7}, ${cx + half * 0.24} ${topY + 1.2} C ${cx + half * 0.08} ${topY - 0.8}, ${cx - half * 0.08} ${topY - 0.8}, ${cx - half * 0.24} ${topY + 1.2} C ${cx - half * 0.72} ${topY + extH * 0.58 + 7}, ${cx - half * 0.90} ${freeY}, ${cx - half * 0.88} ${sideY} Z`;
+}
+
 export function renderNailPreviewSVG(cfg, lightX = 42) {
   const skin = SKIN_TONES.find((s) => s.id === (cfg.skin || 'warm')) || SKIN_TONES[1];
-  const lenScale = cfg.length === 'long' ? 1.24 : cfg.length === 'medium' ? 1.0 : 0.78;
+  const extMap = { short: 5.5, medium: 12.5, long: 19.5 };
+  const extBase = extMap[cfg.length] || 12.5;
+  const tipColor = cfg.tip_color || '#FBF7F4';
   const polish = cfg.polish_color || '#F3DCE1';
-  const tip = cfg.french_style === 'classic' ? '#FBF7F4' : cfg.tip_color || '#D9B7C0';
-  const glossOpacity = cfg.finish === 'matte' ? 0.08 : cfg.finish === 'pearl' ? 0.35 : 0.62;
+  const glossOffset = ((lightX - 50) / 50) * 3.8;
 
-  const fingers = [
-    { x: 64, y: 158, w: 32, h: 152, rot: -10, scale: 0.84 },
-    { x: 112, y: 98, w: 35, h: 196, rot: -3, scale: 0.96 },
-    { x: 168, y: 74, w: 37, h: 214, rot: 0, scale: 1.0 },
-    { x: 226, y: 102, w: 34, h: 188, rot: 4, scale: 0.93 },
+  // Anatomical 5-digit geometry matching a unified dorsum hand path (Pinky -> Ring -> Middle -> Index -> Thumb)
+  const digits = [
+    { id: 'pinky', cx: 82, baseY: 192, w: 16.5, bedH: 19, scale: 0.76, rot: -9.5, tx: 82, ty: 192 },
+    { id: 'ring', cx: 132, baseY: 130, w: 19.5, bedH: 23, scale: 0.94, rot: -3.2, tx: 132, ty: 130 },
+    { id: 'middle', cx: 186, baseY: 109, w: 20.5, bedH: 24.5, scale: 1.0, rot: 0, tx: 186, ty: 109 },
+    { id: 'index', cx: 240, baseY: 133, w: 19.8, bedH: 23, scale: 0.95, rot: 4.5, tx: 240, ty: 133 },
+    { id: 'thumb', cx: 315, baseY: 256, w: 22.5, bedH: 23.5, scale: 0.90, rot: 31, tx: 315, ty: 256 },
   ];
 
-  function nailPath(cx, topY, nw, nh) {
-    const hw = nw / 2;
-    if (cfg.shape === 'square') {
-      return `M${cx - hw} ${topY + nh} L${cx - hw} ${topY + 4} Q${cx - hw} ${topY} ${cx - hw + 4} ${topY} L${cx + hw - 4} ${topY} Q${cx + hw} ${topY} ${cx + hw} ${topY + 4} L${cx + hw} ${topY + nh} Q${cx} ${topY + nh + 6} ${cx - hw} ${topY + nh} Z`;
-    }
-    if (cfg.shape === 'coffin') {
-      const tipW = hw * 0.62;
-      return `M${cx - hw} ${topY + nh} L${cx - hw} ${topY + nh * 0.45} L${cx - tipW} ${topY + 2} Q${cx} ${topY} ${cx + tipW} ${topY + 2} L${cx + hw} ${topY + nh * 0.45} L${cx + hw} ${topY + nh} Q${cx} ${topY + nh + 6} ${cx - hw} ${topY + nh} Z`;
-    }
-    if (cfg.shape === 'almond') {
-      return `M${cx - hw} ${topY + nh} C${cx - hw} ${topY + nh * 0.38} ${cx - hw * 0.55} ${topY + 4} ${cx} ${topY} C${cx + hw * 0.55} ${topY + 4} ${cx + hw} ${topY + nh * 0.38} ${cx + hw} ${topY + nh} Q${cx} ${topY + nh + 6} ${cx - hw} ${topY + nh} Z`;
-    }
-    if (cfg.shape === 'natural') {
-      return `M${cx - hw} ${topY + nh} L${cx - hw} ${topY + 12} Q${cx} ${topY + 2} ${cx + hw} ${topY + 12} L${cx + hw} ${topY + nh} Q${cx} ${topY + nh + 6} ${cx - hw} ${topY + nh} Z`;
-    }
-    // squoval
-    return `M${cx - hw} ${topY + nh} L${cx - hw} ${topY + 8} Q${cx - hw} ${topY} ${cx} ${topY} Q${cx + hw} ${topY} ${cx + hw} ${topY + 8} L${cx + hw} ${topY + nh} Q${cx} ${topY + nh + 6} ${cx - hw} ${topY + nh} Z`;
-  }
+  const renderDigitNail = (d) => {
+    const ext = extBase * d.scale;
+    const totalH = d.bedH + ext;
+    const topY = d.baseY - totalH;
+    const freeEdgeY = d.baseY - d.bedH;
+    const path = nailContour(d.cx, d.baseY, d.w, d.bedH, ext, cfg.shape);
+    const clipId = `nclip-${d.id}`;
 
-  function renderNail(id, cx, baseTop, w, scale) {
-    const nw = w * 0.66;
-    const nh = 34 * lenScale * scale;
-    const topY = baseTop - (nh - 26 * scale);
-    const d = nailPath(cx, topY, nw, nh);
-    const tipBandH = cfg.french_style === 'micro' ? nh * 0.16 : cfg.french_style === 'ombre' ? nh * 0.45 : nh * 0.28;
+    let frenchOverlay = '';
+    if (cfg.french_style === 'classic' || cfg.french_style === 'colored') {
+      const smileDepth = Math.max(5.5, ext * 0.72 + 2.8);
+      const smileY = freeEdgeY - ext * 0.25;
+      frenchOverlay = `<path d="M ${d.cx - d.w} ${topY - 4} H ${d.cx + d.w} V ${smileY + 3} Q ${d.cx} ${smileY + smileDepth} ${d.cx - d.w} ${smileY + 3} Z" fill="${tipColor}" fill-opacity="0.96"/>`;
+    } else if (cfg.french_style === 'micro') {
+      const lineDepth = Math.max(3.6, ext * 0.34 + 1.8);
+      frenchOverlay = `<path d="M ${d.cx - d.w} ${topY - 3} H ${d.cx + d.w} V ${topY + lineDepth + 1.5} Q ${d.cx} ${topY + lineDepth + 4.5} ${d.cx - d.w} ${topY + lineDepth + 1.5} Z" fill="${tipColor}" fill-opacity="0.98"/>`;
+    } else if (cfg.french_style === 'ombre') {
+      frenchOverlay = `<rect x="${d.cx - d.w}" y="${topY - 2}" width="${d.w * 2}" height="${totalH * 0.72}" fill="url(#ombre-${d.id})"/>`;
+    }
+
+    let accentOverlay = '';
+    if (cfg.accent === 'gold_foil' && (d.id === 'ring' || d.id === 'middle')) {
+      accentOverlay = `
+        <path d="M ${d.cx - 3} ${d.baseY - 12} L ${d.cx + 1} ${d.baseY - 15} L ${d.cx + 4} ${d.baseY - 10} Z" fill="#D4AF7C" opacity="0.88"/>
+        <path d="M ${d.cx - 5.5} ${d.baseY - 19} L ${d.cx - 2} ${d.baseY - 21.5} L ${d.cx - 0.5} ${d.baseY - 17} Z" fill="#E6C697" opacity="0.78"/>
+      `;
+    } else if (cfg.accent === 'pearl_dot') {
+      accentOverlay = `<circle cx="${d.cx}" cy="${d.baseY - 6.5}" r="2.1" fill="#FBF7F4" stroke="#D4AF7C" stroke-width="0.65"/>`;
+    } else if (cfg.accent === 'floral_dot' && d.id === 'ring') {
+      const py = d.baseY - 10;
+      accentOverlay = `
+        <circle cx="${d.cx}" cy="${py - 3.2}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
+        <circle cx="${d.cx + 3}" cy="${py}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
+        <circle cx="${d.cx}" cy="${py + 3.2}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
+        <circle cx="${d.cx - 3}" cy="${py}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
+        <circle cx="${d.cx}" cy="${py}" r="1.4" fill="#D4AF7C"/>
+      `;
+    }
+
+    const highlightOpacity = cfg.finish === 'matte' ? 0.08 : cfg.finish === 'pearl' ? 0.34 : 0.54;
+    const lunulaOpacity = cfg.finish === 'matte' ? 0.14 : 0.26;
 
     return `
-      <g>
-        <clipPath id="nc-${id}"><path d="${d}"/></clipPath>
-        <path d="${d}" fill="${polish}"/>
-        ${
-          cfg.french_style === 'ombre'
-            ? `<rect x="${cx - nw}" y="${topY - 2}" width="${nw * 2}" height="${tipBandH + 6}" fill="url(#ombre-${id})" clip-path="url(#nc-${id})"/>`
-            : cfg.french_style !== 'none'
-              ? `<path d="M${cx - nw} ${topY - 2} H${cx + nw} V${topY + tipBandH} Q${cx} ${topY + tipBandH + 6} ${cx - nw} ${topY + tipBandH} Z" fill="${tip}" clip-path="url(#nc-${id})"/>`
+      <g transform="rotate(${d.rot} ${d.tx} ${d.ty})">
+        <defs>
+          <clipPath id="${clipId}"><path d="${path}"/></clipPath>
+        </defs>
+        <!-- Subtle lateral shadow framing proximal nail pocket -->
+        <path d="${path}" transform="translate(0, 1.3)" fill="${skin.pocket}"/>
+        <!-- Base sculpted nail polish plate -->
+        <path d="${path}" fill="${polish}"/>
+        <g clip-path="url(#${clipId})">
+          <!-- Soft natural lunula moon near proximal nail fold -->
+          <ellipse cx="${d.cx}" cy="${d.baseY - 1}" rx="${d.w * 0.42}" ry="5.5" fill="#FBF7F4" fill-opacity="${lunulaOpacity}"/>
+          <!-- Lateral nail bed edge depth for realistic dome curvature -->
+          <path d="${path}" fill="none" stroke="rgba(68, 42, 46, 0.22)" stroke-width="2.4"/>
+          ${frenchOverlay}
+          ${cfg.finish === 'pearl' ? `<rect x="${d.cx - d.w}" y="${topY - 3}" width="${d.w * 2}" height="${totalH + 6}" fill="url(#pearlSheen)"/>` : ''}
+          ${accentOverlay}
+          <!-- Directional dome gloss highlight tracking pointer -->
+          <path d="M ${d.cx - d.w * 0.34 + glossOffset} ${topY + 4} Q ${d.cx - d.w * 0.40 + glossOffset} ${d.baseY - d.bedH * 0.45}, ${d.cx - d.w * 0.28 + glossOffset} ${d.baseY - 4}"
+            stroke="white" stroke-width="${d.w * 0.16}" stroke-linecap="round" opacity="${highlightOpacity}" fill="none"/>
+          ${
+            cfg.finish === 'gloss'
+              ? `<path d="M ${d.cx + d.w * 0.25 + glossOffset * 0.5} ${topY + 6} Q ${d.cx + d.w * 0.30 + glossOffset * 0.5} ${topY + totalH * 0.34}, ${d.cx + d.w * 0.22 + glossOffset * 0.5} ${topY + totalH * 0.52}" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.34" fill="none"/>`
               : ''
-        }
-        ${
-          cfg.finish === 'pearl'
-            ? `<rect x="${cx - nw}" y="${topY}" width="${nw * 2}" height="${nh + 6}" fill="url(#pearlGrad)" opacity="0.45" clip-path="url(#nc-${id})"/>`
-            : ''
-        }
-        ${
-          cfg.accent === 'gold_foil' && (id === 'f2' || id === 'f3')
-            ? `<path d="M${cx - 3} ${topY + nh * 0.35} l5 -3 l3 6 l-6 4 Z M${cx + 3} ${topY + nh * 0.58} l3 -2 l2 4 l-4 2 Z" fill="#D4AF7C" opacity="0.9" clip-path="url(#nc-${id})"/>`
-            : cfg.accent === 'pearl_dot'
-              ? `<circle cx="${cx}" cy="${topY + nh - 7}" r="2.6" fill="#FBF7F4" stroke="#D4AF7C" stroke-width="0.7" clip-path="url(#nc-${id})"/>`
-              : cfg.accent === 'floral_dot' && id === 'f2'
-                ? `<g fill="#FBF7F4" stroke="#D4AF7C" stroke-width="0.5" clip-path="url(#nc-${id})">
-                     <circle cx="${cx}" cy="${topY + nh * 0.56 - 4}" r="2"/>
-                     <circle cx="${cx - 4}" cy="${topY + nh * 0.56}" r="2"/>
-                     <circle cx="${cx + 4}" cy="${topY + nh * 0.56}" r="2"/>
-                     <circle cx="${cx}" cy="${topY + nh * 0.56 + 4}" r="2"/>
-                     <circle cx="${cx}" cy="${topY + nh * 0.56}" r="1.4" fill="#D4AF7C"/>
-                   </g>`
-                : ''
-        }
-        <ellipse cx="${cx - nw * 0.16 + (lightX - 50) * 0.14}" cy="${topY + nh * 0.42}" rx="${nw * 0.14}" ry="${nh * 0.36}"
-          fill="#FFFFFF" opacity="${glossOpacity}" transform="rotate(-6 ${cx} ${topY + nh * 0.42})" clip-path="url(#nc-${id})"/>
-        <path d="${d}" fill="none" stroke="rgba(80,60,69,0.22)" stroke-width="0.9"/>
+          }
+        </g>
+        <!-- Proximal cuticle fold (eponychium) gentle lip seam -->
+        <path d="M ${d.cx - d.w * 0.44} ${d.baseY - d.bedH * 0.42} C ${d.cx - d.w * 0.40} ${d.baseY + 0.5}, ${d.cx + d.w * 0.40} ${d.baseY + 0.5}, ${d.cx + d.w * 0.44} ${d.baseY - d.bedH * 0.42}"
+          fill="none" stroke="${skin.shadow}" stroke-width="1.4" stroke-linecap="round" opacity="0.72"/>
       </g>
     `;
-  }
+  };
+
+  // Continuous organic dorsum hand outline (natural finger taper, angled palm, smooth web valleys, natural abducted thumb)
+  const handSilhouette = `
+    M 122 460
+    C 118 424, 114 394, 102 362
+    C 90 330, 86 300, 82 272
+    L 62 198
+    C 59 182, 65 166, 77 164
+    C 89 162, 97 175, 100 192
+    L 111 247
+    C 113 255, 117 256, 118 246
+    L 114 134
+    C 113 116, 121 103, 132 103
+    C 143 103, 151 116, 152 134
+    L 158 228
+    C 159 236, 165 236, 166 227
+    L 166 112
+    C 166 93, 175 81, 186 81
+    C 197 81, 206 93, 206 112
+    L 208 229
+    C 209 237, 214 237, 216 228
+    L 223 135
+    C 225 117, 234 106, 245 107
+    C 256 108, 263 121, 261 139
+    L 246 278
+    C 245 289, 250 293, 257 284
+    L 298 232
+    C 309 218, 325 218, 333 227
+    C 341 236, 338 253, 326 268
+    L 286 322
+    C 271 344, 258 370, 250 400
+    C 245 422, 243 442, 242 460
+    Z
+  `;
 
   return `
-    <svg class="atelier-hand-svg" viewBox="0 0 340 410" role="img" aria-label="${t('معاينة تفاعلية لتصميم الأظافر', 'Interactive nail style preview')}">
+    <svg class="atelier-hand-svg" viewBox="0 0 380 460" fill="none" role="img" aria-label="${t('معاينة تفاعلية لتصميم الأظافر على اليد', 'Interactive manicure design hand preview')}">
       <defs>
         <linearGradient id="bg-atelier" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="#FBF7F4"/>
-          <stop offset="100%" stop-color="#ECE1D9"/>
+          <stop offset="60%" stop-color="#F4EBE6"/>
+          <stop offset="100%" stop-color="#ECE0DA"/>
         </linearGradient>
-        <linearGradient id="skin-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="${skin.fill}"/>
+        <radialGradient id="skin-subsurface" cx="${Math.round(lightX)}%" cy="42%" r="65%">
+          <stop offset="0%" stop-color="${skin.base}"/>
+          <stop offset="62%" stop-color="${skin.mid}"/>
           <stop offset="100%" stop-color="${skin.shadow}"/>
+        </radialGradient>
+        <linearGradient id="pearlSheen" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.46"/>
+          <stop offset="48%" stop-color="#F7DCE5" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.06"/>
         </linearGradient>
-        <linearGradient id="pearlGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
-          <stop offset="50%" stop-color="#F3DCE1" stop-opacity="0.3"/>
-          <stop offset="100%" stop-color="#D4AF7C" stop-opacity="0.5"/>
-        </linearGradient>
-        ${fingers
+        ${digits
           .map(
-            (_, idx) => `
-          <linearGradient id="ombre-f${idx}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${tip}" stop-opacity="0.96"/>
-            <stop offset="100%" stop-color="${tip}" stop-opacity="0"/>
+            (d) => `
+          <linearGradient id="ombre-${d.id}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${tipColor}" stop-opacity="0.98"/>
+            <stop offset="60%" stop-color="${tipColor}" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="${tipColor}" stop-opacity="0"/>
           </linearGradient>`,
           )
           .join('')}
-        <linearGradient id="ombre-thumb" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${tip}" stop-opacity="0.96"/>
-          <stop offset="100%" stop-color="${tip}" stop-opacity="0"/>
-        </linearGradient>
-        <filter id="handShadow" x="-15%" y="-10%" width="130%" height="130%">
-          <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#503C45" flood-opacity="0.12"/>
+        <filter id="handSoftShadow" x="-15%" y="-10%" width="135%" height="125%">
+          <feDropShadow dx="4" dy="14" stdDeviation="12" flood-color="#503C45" flood-opacity="0.16"/>
         </filter>
       </defs>
 
-      <rect width="340" height="410" rx="22" fill="url(#bg-atelier)"/>
-      <circle cx="275" cy="72" r="56" fill="#D9B7C0" fill-opacity="0.18"/>
-      <path d="M24 360 Q70 300 45 220" stroke="#A7B79F" stroke-width="2" fill="none" opacity="0.55"/>
-      <ellipse cx="44" cy="242" rx="14" ry="7" transform="rotate(-30 44 242)" fill="#A7B79F" opacity="0.38"/>
-      <ellipse cx="62" cy="272" rx="16" ry="8" transform="rotate(24 62 272)" fill="#A7B79F" opacity="0.32"/>
+      <!-- Quiet-luxury linen background + subtle eucalyptus botanical shadow -->
+      <rect width="380" height="460" rx="22" fill="url(#bg-atelier)"/>
+      <circle cx="310" cy="76" r="78" fill="#D9B7C0" fill-opacity="0.14"/>
+      <path d="M22 418 C52 365 62 318 46 250" stroke="#A7B79F" stroke-width="1.4" opacity="0.45" fill="none"/>
+      <ellipse cx="44" cy="272" rx="13" ry="6" transform="rotate(-32 44 272)" fill="#A7B79F" opacity="0.28"/>
+      <ellipse cx="62" cy="304" rx="14" ry="6.5" transform="rotate(24 62 304)" fill="#A7B79F" opacity="0.24"/>
 
-      <g filter="url(#handShadow)">
-        <!-- Palm / Wrist silhouette -->
-        <path d="M96 410 L82 260 C78 215 110 198 165 198 C222 198 256 218 256 266 L244 410 Z" fill="url(#skin-grad)"/>
-        <!-- Thumb -->
-        <g transform="rotate(-24 252 292)">
-          <rect x="234" y="218" width="38" height="106" rx="19" fill="url(#skin-grad)"/>
-          ${renderNail('thumb', 253, 224, 35, 0.9)}
+      <!-- Anatomical Continuous Hand -->
+      <g filter="url(#handSoftShadow)">
+        <path d="${handSilhouette}" fill="url(#skin-subsurface)"/>
+        <!-- Subtle inner palm contour shadow & interdigital valley soft shading -->
+        <path d="M 118 250 C 145 232 195 232 238 250 C 216 266 144 266 118 250 Z" fill="${skin.shadow}" opacity="0.14"/>
+        <path d="M 244 292 C 258 318 242 356 218 378" stroke="${skin.shadow}" stroke-width="2" stroke-linecap="round" opacity="0.18" fill="none"/>
+
+        <!-- Fine anatomical phalanx knuckle creases -->
+        <g stroke="${skin.shadow}" stroke-width="1.1" stroke-linecap="round" fill="none" opacity="0.32">
+          <!-- Pinky PIP / DIP -->
+          <path d="M 73 216 Q 82 213 91 217"/>
+          <path d="M 78 240 Q 87 237 97 241"/>
+          <!-- Ring PIP / DIP -->
+          <path d="M 122 178 Q 134 174 146 178"/>
+          <path d="M 125 212 Q 137 209 149 213"/>
+          <!-- Middle PIP / DIP -->
+          <path d="M 174 162 Q 186 158 198 162"/>
+          <path d="M 176 198 Q 187 195 200 199"/>
+          <!-- Index PIP / DIP -->
+          <path d="M 229 180 Q 241 177 251 182"/>
+          <path d="M 225 214 Q 237 211 248 216"/>
+          <!-- Thumb IP joint -->
+          <path d="M 284 266 Q 294 269 301 278"/>
         </g>
-        <!-- Four fingers -->
-        ${fingers
-          .map(
-            (f, idx) => `
-          <g transform="rotate(${f.rot} ${f.x + f.w / 2} ${f.y + f.h})">
-            <rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="${f.w / 2}" fill="url(#skin-grad)"/>
-            <path d="M${f.x + 8} ${f.y + 62} H${f.x + f.w - 8}" stroke="rgba(80,60,69,0.12)" stroke-width="1.2" stroke-linecap="round"/>
-            <path d="M${f.x + 7} ${f.y + 114} H${f.x + f.w - 7}" stroke="rgba(80,60,69,0.1)" stroke-width="1.2" stroke-linecap="round"/>
-            ${renderNail('f' + idx, f.x + f.w / 2, f.y + 10, f.w, f.scale)}
-          </g>
-        `,
-          )
-          .join('')}
+
+        <!-- Sculpted Parametric Nails on All 5 Digits -->
+        ${digits.map(renderDigitNail).join('')}
       </g>
     </svg>
   `;
@@ -225,21 +305,21 @@ export function atelierMiniWidget() {
         </div>
         <div>
           <span class="eyebrow">J NAIL ATELIER · ${t('تجربة تفاعلية', 'INTERACTIVE STUDIO')}</span>
-          <h3>${t('صمّمي إطلالة أظافركِ قبل الحجز', 'Preview your nail ritual before booking')}</h3>
+          <h3>${t('صمّمي إطلالة أظافركِ قبل الحجز', 'Preview your manicure look before booking')}</h3>
           <p class="muted">${t(
-            'جرّبي شكل الظفر ودرجات الجل والفرنش فوراً، واحفظي إطلالتكِ المفضلة أو ابدئي حجزها مباشرة.',
+            'اختاري شكل الظفر ودرجات الجل أو الفرنش مع معاينة فورية متكاملة، واحفظي التصميم أو ابدئي حجزه مباشرة.',
             'Explore nail shapes, polish shades, and French tips in real time, then save or book your signature look.',
           )}</p>
           <div class="swatch-row" style="margin:14px 0">
             ${NAIL_SHADES.slice(0, 6)
               .map(
                 (s) =>
-                  `<button type="button" class="swatch ${cfg.polish_color === s.hex ? 'active' : ''}" data-mini-shade="${s.hex}" title="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
+                  `<button type="button" class="swatch ${cfg.polish_color === s.hex ? 'active' : ''}" data-mini-shade="${s.hex}" title="${t(s.ar, s.en)}" aria-label="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
               )
               .join('')}
           </div>
           <div class="chip-row" style="margin-bottom:18px">
-            ${SHAPES.slice(0, 3)
+            ${SHAPES.slice(0, 4)
               .map(
                 ([id, ar, en]) =>
                   `<button type="button" class="mini-chip ${cfg.shape === id ? 'active' : ''}" data-mini-shape="${id}">${t(ar, en)}</button>`,
@@ -262,32 +342,30 @@ export function atelierPage() {
     <main id="main" class="wrap">
       ${head(
         t('أتيليه J للأظافر', 'J Nail Atelier'),
-        t('اختاري الشكل والطول واللون والفرنش واللمعة بمعاينة فورية قبل طلب موعدكِ.', 'Customize shape, length, polish shade, French tip, and finish with live studio preview.'),
+        t('اختاري الشكل والطول واللون والفرنش واللمعة النهائية مع معاينة فورية دقيقة قبل طلب موعدكِ.', 'Customize nail shape, length, polish shade, French tip, and finish with live anatomical preview.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('أتيليه الأظافر', 'J Nail Atelier'), '']],
       )}
 
       <div class="atelier-layout">
-        <div class="atelier-preview-col">
-          <div class="atelier-canvas-card" id="atelier-canvas-wrap">
+        <div class="atelier-canvas-card card">
+          <div id="atelier-canvas-wrap" class="atelier-stage" title="${t('حرّكي المؤشر لمعاينة انعكاس الإضاءة', 'Move pointer to shift studio specular highlight')}">
             ${renderNailPreviewSVG(cfg, cfg.lightX || 45)}
-            <div class="atelier-skin-bar">
-              <span class="muted">${t('لون البشرة:', 'Skin undertone:')}</span>
-              <div class="swatch-row">
-                ${SKIN_TONES.map(
-                  (sk) =>
-                    `<button type="button" class="swatch small ${cfg.skin === sk.id ? 'active' : ''}" data-at-skin="${sk.id}" title="${t(sk.ar, sk.en)}" style="background:${sk.fill}"></button>`,
-                ).join('')}
-              </div>
+          </div>
+          <div class="atelier-skin-bar">
+            <span class="muted">${t('لون البشرة:', 'Skin undertone:')}</span>
+            <div class="swatch-row">
+              ${SKIN_TONES.map(
+                (sk) =>
+                  `<button type="button" class="swatch small ${(cfg.skin || 'warm') === sk.id ? 'active' : ''}" data-at-skin="${sk.id}" title="${t(sk.ar, sk.en)}" aria-label="${t(sk.ar, sk.en)}" style="background:${sk.base}"></button>`,
+              ).join('')}
             </div>
           </div>
           ${
             cfg.lastShareUrl
-              ? `<div class="success" style="margin-top:14px">
-                   <strong>${t('رابط مشاركة الإطلالة:', 'Shareable look link:')}</strong>
-                   <div class="row" style="margin-top:8px">
-                     <code style="font-size:12px;overflow-wrap:anywhere">${esc(cfg.lastShareUrl)}</code>
-                     <button type="button" class="btn small light" id="copy-style-url">${t('نسخ', 'Copy')}</button>
-                   </div>
+              ? `<div class="success" style="margin-top:14px;text-align:start">
+                   <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بكِ:', 'Your share link is ready:')}</strong></p>
+                   <pre style="margin:0;padding:8px 10px;font-size:11.5px">${esc(cfg.lastShareUrl)}</pre>
+                   <button type="button" class="btn small light" id="copy-style-url" style="margin-top:8px">${t('نسخ الرابط', 'Copy URL')}</button>
                  </div>`
               : ''
           }
@@ -295,14 +373,12 @@ export function atelierPage() {
 
         <div class="atelier-controls card">
           <div class="control-group">
-            <label class="field">
-              ${t('اسم الإطلالة (اختياري للحفظ)', 'Look name')}
-              <input type="text" id="at-name" value="${esc(cfg.name || '')}" maxlength="60" placeholder="${t('مثال: فرنش ناعم للعيد', 'e.g. Soft Eid French')}">
-            </label>
+            <label class="control-label" for="at-name">${t('اسم التصميم (اختياري للحفظ)', 'Look name')}</label>
+            <input id="at-name" type="text" maxlength="80" value="${esc(cfg.name || '')}" placeholder="${t('مثال: فرنش لؤلؤي ناعم', 'e.g. Eid Soft French')}">
           </div>
 
           <div class="control-group">
-            <span class="control-label">${t('١. شكل الظفر', '1. Nail Shape')}</span>
+            <span class="control-label">1. ${t('شكل الظفر', 'Nail Shape')}</span>
             <div class="chip-row">
               ${SHAPES.map(
                 ([id, ar, en]) =>
@@ -312,7 +388,7 @@ export function atelierPage() {
           </div>
 
           <div class="control-group">
-            <span class="control-label">${t('٢. الطول', '2. Length')}</span>
+            <span class="control-label">2. ${t('طول الأظافر', 'Length')}</span>
             <div class="chip-row">
               ${LENGTHS.map(
                 ([id, ar, en]) =>
@@ -322,17 +398,17 @@ export function atelierPage() {
           </div>
 
           <div class="control-group">
-            <span class="control-label">${t('٣. لون الأساس', '3. Base Shade')}</span>
+            <span class="control-label">3. ${t('درجة اللون الأساسية', 'Base Shade')}</span>
             <div class="swatch-row">
               ${NAIL_SHADES.map(
                 (s) =>
-                  `<button type="button" class="swatch ${cfg.polish_color === s.hex ? 'active' : ''}" data-at-color="${s.hex}" title="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
+                  `<button type="button" class="swatch ${cfg.polish_color === s.hex ? 'active' : ''}" data-at-color="${s.hex}" title="${t(s.ar, s.en)}" aria-label="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
               ).join('')}
             </div>
           </div>
 
           <div class="control-group">
-            <span class="control-label">${t('٤. نمط الفرنش', '4. Tip / French Style')}</span>
+            <span class="control-label">4. ${t('نمط الفرنش والأطراف', 'Tip / French Style')}</span>
             <div class="chip-row">
               ${FRENCH_STYLES.map(
                 ([id, ar, en]) =>
@@ -342,13 +418,13 @@ export function atelierPage() {
           </div>
 
           ${
-            cfg.french_style !== 'none' && cfg.french_style !== 'classic'
+            cfg.french_style !== 'none'
               ? `<div class="control-group">
-                   <span class="control-label">${t('لون الطرف', 'Tip Shade')}</span>
+                   <span class="control-label">${t('لون الطرف الفرنسي', 'French Tip Shade')}</span>
                    <div class="swatch-row">
                      ${TIP_SHADES.map(
                        (s) =>
-                         `<button type="button" class="swatch ${cfg.tip_color === s.hex ? 'active' : ''}" data-at-tip="${s.hex}" title="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
+                         `<button type="button" class="swatch small ${cfg.tip_color === s.hex ? 'active' : ''}" data-at-tip="${s.hex}" title="${t(s.ar, s.en)}" aria-label="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
                      ).join('')}
                    </div>
                  </div>`
@@ -356,7 +432,7 @@ export function atelierPage() {
           }
 
           <div class="control-group">
-            <span class="control-label">${t('٥. اللمعة واللمسة النهائية', '5. Finish & Detail')}</span>
+            <span class="control-label">5. ${t('اللمسة النهائية والزخرفة', 'Finish & Detail')}</span>
             <div class="chip-row" style="margin-bottom:10px">
               ${FINISHES.map(
                 ([id, ar, en]) =>
@@ -374,11 +450,11 @@ export function atelierPage() {
           <div class="atelier-action-box">
             ${
               svc
-                ? `<p class="muted" style="margin-bottom:12px">${t('الخدمة المقترحة لهذا التصميم:', 'Suggested matching service:')} <strong>${esc(svc[`name_${state.lang}`])}</strong> (${svc.price} ${t('ر.س', 'SAR')})</p>`
+                ? `<p class="muted" style="margin-bottom:12px">${t('الخدمة المقترحة لهذا التصميم:', 'Suggested matching service:')} <strong>${esc(nameOf(svc))}</strong> (<bdi>${money(svc.price)}</bdi>)</p>`
                 : ''
             }
             <div class="hero-actions" style="gap:10px">
-              <button type="button" class="btn" id="at-book-look">${t('احجزي هذا التصميم', 'Book This Look')}</button>
+              <button type="button" class="btn" id="at-book-look">${t('اطلبي الخدمة بهذا التصميم', 'Book This Look')}</button>
               <button type="button" class="btn light" id="at-save-look">${t('حفظ في جواز الجمال', 'Save to Passport')}</button>
               <button type="button" class="btn light" id="at-share-look">${t('إنشاء رابط مشاركة', 'Share Look')}</button>
             </div>
@@ -467,7 +543,7 @@ export function bindAtelier(goFn, renderFn) {
 
   $('#at-save-look')?.addEventListener('click', async () => {
     if (!state.user) {
-      toast(t('سجلي الدخول أولاً لحفظ التصميم في جواز الجمال', 'Sign in to save this style to your Beauty Passport'));
+      toast(t('يرجى تسجيل الدخول أولاً لحفظ التصميم في جواز الجمال', 'Sign in to save this style to your Beauty Passport'));
       goFn('login');
       return;
     }
@@ -478,7 +554,7 @@ export function bindAtelier(goFn, renderFn) {
         share: false,
       });
       state.account = null;
-      toast(t('تم حفظ الإطلالة في جواز جمالكِ', 'Style saved to your Beauty Passport'));
+      toast(t('تم حفظ التصميم في جواز جمالكِ', 'Style saved to your Beauty Passport'));
       trackFunnel('atelier_save');
       return saved;
     } catch (err) {
@@ -490,7 +566,7 @@ export function bindAtelier(goFn, renderFn) {
     try {
       const res = await api('/atelier/styles', {
         ...state.atelier,
-        name: state.atelier.name || t('إطلالة J Nail Atelier', 'J Nail Atelier Look'),
+        name: state.atelier.name || t('تصميم من أتيليه J للأظافر', 'J Nail Atelier Look'),
         share: true,
       });
       state.atelier.lastShareUrl = new URL(href('atelier') + '?style=' + res.style.share_code, location.origin).href;
@@ -503,7 +579,7 @@ export function bindAtelier(goFn, renderFn) {
   $('#copy-style-url')?.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(state.atelier.lastShareUrl || '');
-      toast(t('تم نسخ الرابط', 'Link copied'));
+      toast(t('تم نسخ الرابط بنجاح', 'Link copied'));
     } catch {}
   });
 }

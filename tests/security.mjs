@@ -57,7 +57,11 @@ try {
  await owner.call('/api/admin/settings',{settings:{capacity:1,areas:['Security district'],working_days:[0,1,2,3,4,5,6],opening_time:'08:00',closing_time:'22:00',lead_hours:1,travel_buffer:30,business_approved:true}});
  const request={service_ids:['relaxation'],name:'Security customer',phone:'0509000002',date:future,time:'12:00',neighborhood:'Security district',terms:true,idempotency_key:'security-booking-1'};
  const booked=(await customer.call('/api/bookings',request,201)).booking;
- await test('One customer cannot obtain another customer’s account bookings',async()=>{assert.equal((await other.call('/api/account')).bookings.some(b=>b.id===booked.id),false);await other.call('/api/admin',undefined,403);});
+ await test('One customer cannot obtain another customer’s account bookings or review them',async()=>{
+  assert.equal((await other.call('/api/account')).bookings.some(b=>b.id===booked.id),false);
+  await other.call('/api/admin',undefined,403);
+  await other.call('/api/reviews',{booking_id:booked.id,rating:5,body:'Forbidden attempt'},403);
+ });
  await owner.call('/api/admin/bookings/'+booked.id,{status:'confirmed'});
  await test('Travel buffer prevents adjacent service confirmation',async()=>{
   const adjacent=(await customer.call('/api/bookings',{...request,time:'13:00',idempotency_key:'security-adjacent'},201)).booking;

@@ -137,16 +137,16 @@ function stepOneCategoryHtml() {
   ];
 
   return `
-    <h3>${t('ما الفئة التي تبحثين عنها اليوم؟', 'Which ritual category would you like today?')}</h3>
+    <h3>${t('اختاري فئة الخدمة المناسبة لكِ', 'Choose your service category')}</h3>
     ${
       lastBooking
         ? `<div class="card repeat-banner" style="background:var(--sage-tint);margin-bottom:18px;border-color:var(--sage-deep)">
              <div class="row">
                <div>
-                 <span class="eyebrow" style="margin-bottom:2px">${t('اختصار سريع لحسابكِ', 'RETURNING GUEST')}</span>
-                 <strong>${t('كرري آخر حجز:', 'Repeat your last booking:')} ${(lastBooking.items || []).map((i) => esc(nameOf(i))).join(' + ')}</strong>
+                 <span class="eyebrow" style="margin-bottom:2px">${t('اختصار لعميلاتنا', 'RETURNING GUEST')}</span>
+                 <strong>${t('إعادة طلب آخر زيارة:', 'Repeat your last booking:')} ${(lastBooking.items || []).map((i) => esc(nameOf(i))).join(' + ')}</strong>
                </div>
-               <button type="button" class="btn small sage" id="repeat-last-booking">${t('كرري آخر حجز', 'Repeat last booking')}</button>
+               <button type="button" class="btn small sage" id="repeat-last-booking">${t('إعادة طلب آخر زيارة', 'Repeat last booking')}</button>
              </div>
            </div>`
         : ''

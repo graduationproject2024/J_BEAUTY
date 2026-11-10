@@ -15,7 +15,9 @@ import {
   field,
   head,
   openDialog,
+  openReviewModal,
   petalBloomSVG,
+  reviewModerationStatusBadge,
   simpleTable,
   statusBadge,
 } from './components.js';
@@ -107,17 +109,18 @@ export function bookingCard(b) {
         <h3 style="margin:0"><bdi>${esc(b.reference)}</bdi></h3>
         ${statusBadge(b.status)}
       </div>
-      <p class="muted" style="margin-bottom:8px">${esc(b.date)} · ${esc(b.time)} · ${esc(b.neighborhood)}</p>
+      <p class="muted" style="margin-bottom:8px"><bdi>${esc(b.date)} · ${esc(b.time)}</bdi> · ${esc(b.neighborhood)}</p>
       <p style="margin-bottom:12px">${(b.items || []).map((i) => esc(nameOf(i) || i.name)).join(' · ')}</p>
       <div class="row">
-        <strong>${money(b.total)}</strong>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn small light" data-rebook="${esc(b.id)}" type="button">${t('كرري الحجز', 'Rebook')}</button>
+        <strong><bdi>${money(b.total)}</bdi></strong>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          ${existingReview ? reviewModerationStatusBadge(existingReview) : ''}
+          <button class="btn small light" data-rebook="${esc(b.id)}" type="button">${t('إعادة الحجز', 'Rebook')}</button>
           ${
             canReview
               ? existingReview
-                ? `<button class="btn small light" data-review="${esc(b.id)}" data-edit-review="true" type="button">${t('تعديل تقييمكِ', 'Edit review')}</button>`
-                : `<button class="btn small light" data-review="${esc(b.id)}" type="button">${t('شاركي تجربتكِ', 'Share your experience')}</button>`
+                ? `<button class="btn small light" data-review="${esc(b.id)}" data-edit-review="true" type="button">${t('تعديل التقييم', 'Edit review')}</button>`
+                : `<button class="btn small light" data-review="${esc(b.id)}" type="button">${t('قيّمي تجربتكِ معنا', 'Rate your experience')}</button>`
               : ''
           }
         </div>
@@ -337,7 +340,7 @@ export async function accountPage(section) {
 
   return `
     <main id="main" class="wrap">
-      ${head(t('جواز جمال ', 'Beauty Passport · ') + esc(state.user.name))}
+      ${head(t('جواز الجمال · ', 'Beauty Passport · ') + esc(state.user.name))}
       <div class="account-grid">
         <aside class="side-nav">
           <h3 style="margin-bottom:2px">${t('حسابكِ', 'Your journal')}</h3>
@@ -401,7 +404,7 @@ export async function accountPage(section) {
                    }
                    ${
                      (passport.group_requests || []).length || (passport.gift_requests || []).length
-                       ? `<h3 style="margin-top:24px">${t('طلبات الجماعات والإهداء', 'Group & Gift Requests')}</h3>
+                       ? `<h3 style="margin-top:24px">${t('طلبات المناسبات والإهداء', 'Occasion & Gift Requests')}</h3>
                           ${[...(passport.group_requests || []), ...(passport.gift_requests || [])]
                             .map(
                               (req) => `<div class="booking-card"><div class="row"><strong><bdi>${esc(req.reference)}</bdi></strong>${statusBadge(req.status)}</div><p class="muted">${esc(req.created_at?.slice(0, 10) || '')}</p></div>`,
@@ -567,47 +570,15 @@ export function bindAccount(goFn, renderFn) {
 
   document.querySelectorAll('[data-review]').forEach((btn) => {
     btn.onclick = () => {
-      const bookingId = btn.dataset.review;
-      const isEdit = btn.dataset.editReview === 'true';
-      const existing = state.account?.reviews?.find((r) => r.booking_id === bookingId);
-      openDialog(`
-        <h2>${isEdit ? t('تعديل تجربتكِ', 'Edit your experience') : t('كيف كانت لحظتكِ؟', 'How was your moment?')}</h2>
-        <form id="review-form">
-          <label class="field">
-            ${t('التقييم', 'Rating')}
-            <select name="rating">
-              ${[5, 4, 3, 2, 1]
-                .map((n) => `<option value="${n}" ${existing?.rating === n ? 'selected' : ''}>${n} / 5</option>`)
-                .join('')}
-            </select>
-          </label>
-          ${field(t('الاسم الظاهر للعامة (اختياري)', 'Public display name (optional)'), 'display_name', 'text', existing?.display_name || '', 'maxlength="60"')}
-          <label class="field">
-            ${t('تجربتكِ', 'Your experience')}
-            <textarea name="body" required maxlength="2000">${esc(existing?.body || '')}</textarea>
-          </label>
-          <p class="muted">${t('لا تضعي رقم الجوال أو العنوان. تُراجع الآراء قبل نشرها.', 'Do not include phone numbers or addresses. Reviews are moderated before publication.')}</p>
-          <button class="btn" type="submit">${t('إرسال للمراجعة', 'Submit for moderation')}</button>
-        </form>
-      `);
-      $('#review-form').onsubmit = async (ev) => {
-        ev.preventDefault();
-        try {
-          const d = Object.fromEntries(new FormData(ev.target));
-          await api('/reviews', {
-            ...d,
-            booking_id: bookingId,
-            rating: Number(d.rating),
-            edit: isEdit,
-          });
-          $('#modal').close();
+      openReviewModal({
+        bookings: state.account?.bookings || [],
+        existingReviews: state.account?.reviews || [],
+        initialBookingId: btn.dataset.review,
+        onSaved: async () => {
           state.account = null;
-          toast(t('شكراً لمشاركة تجربتكِ', 'Thank you for sharing'));
           renderFn();
-        } catch (err) {
-          toast(err.message);
-        }
-      };
+        },
+      });
     };
   });
 }

@@ -145,6 +145,19 @@ let browser;
   await book(guest, false, true);
   await guest.screenshot({ path: join(out, 'guest-booking-success-mobile.png'), fullPage: true });
 
+  // Unauthenticated visitor clicks Rate Your Experience CTA on /en/reviews
+  await guest.goto(base + '/en/reviews');
+  await guest.locator('#open-review-cta').click();
+  await guest.getByText('reviewing requires a signed-in verified customer account').waitFor();
+  await guest.screenshot({ path: join(out, 'reviews-unauthenticated-mobile.png'), fullPage: true });
+  await guest.locator('#close-dialog').click();
+
+  // Mobile Nail Atelier close-up inspection
+  await guest.goto(base + '/ar/atelier');
+  await guest.locator('[data-at-shape="oval"]').click();
+  await guest.locator('[data-at-finish="gloss"]').click();
+  await guest.screenshot({ path: join(out, 'nail-atelier-mobile.png'), fullPage: false });
+
   await customer.goto(base + '/en/register');
   await customer.locator('[name=name]').fill('Browser Customer');
   await customer.locator('[name=phone]').fill('0500000012');
@@ -165,10 +178,16 @@ let browser;
     checked: true,
   });
 
-  // Customer tests J Nail Atelier customization, Save to Passport & Studio recommendations
+  // Verified customer with NO completed bookings clicks Rate Your Experience
+  await customer.goto(base + '/en/reviews');
+  await customer.locator('#open-review-cta').click();
+  await customer.getByText('No Completed Visit Available Yet').waitFor();
+  await customer.locator('#close-dialog').click();
+
+  // Customer tests J Nail Atelier oval customization, Save to Passport & Studio recommendations
   await customer.goto(base + '/en/atelier');
-  await customer.locator('#at-name').fill('Almond Blush Pearls');
-  await customer.locator('[data-at-shape="almond"]').click();
+  await customer.locator('#at-name').fill('Oval Blush Pearls');
+  await customer.locator('[data-at-shape="oval"]').click();
   await customer.locator('[data-at-finish="pearl"]').click();
   await customer.locator('[data-at-accent="gold_foil"]').click();
   await customer.locator('#at-save-look').click();
@@ -181,7 +200,9 @@ let browser;
   await customer.getByText('Book this option').first().waitFor();
   await customer.screenshot({ path: join(out, 'ritual-studio-desktop.png'), fullPage: true });
 
+  // Verify legacy /en/group-booking redirects cleanly to /en/occasions
   await customer.goto(base + '/en/group-booking');
+  await customer.waitForURL('**/en/occasions');
   await customer.locator('#group-form [name=date]').fill(new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10));
   await customer.locator('#group-form [name=time]').fill('16:00');
   await customer.locator('#group-form [name=neighborhood]').selectOption({ label: 'Test district' });
@@ -226,12 +247,59 @@ let browser;
   await f.locator('button[type=submit]').click();
   await owner.waitForTimeout(300);
 
+  // Customer WITH completed booking opens 5-star Review flow on /en/reviews
+  await customer.goto(base + '/en/reviews');
+  await customer.locator('#open-review-cta').click();
+  await customer.locator('#star-picker').waitFor();
+  await customer.locator('#submit-review-btn').click();
+  await customer.getByText('Please choose a rating between 1 and 5 stars.').waitFor();
+
+  // Click each star 1..5 and test keyboard interaction
+  for (const n of [1, 2, 3, 4, 5]) {
+    await customer.locator(`#star-picker [data-star="${n}"]`).click();
+  }
+  await customer.locator('#star-picker [data-star="5"]').press('ArrowLeft');
+  await customer.getByText('4 / 5').waitFor();
+  await customer.locator('#star-picker [data-star="4"]').press('End');
+  await customer.getByText('5 / 5').waitFor();
+  await customer.locator('#review-body-input').fill('Serene Madinah home visit, calm and punctual arrival.');
+  await customer.screenshot({ path: join(out, 'reviews-star-picker-modal.png'), fullPage: false });
+  await customer.locator('#submit-review-btn').click();
+  await customer.getByText('Pending review').waitFor();
+  await customer.screenshot({ path: join(out, 'reviews-pending-customer.png'), fullPage: true });
+
+  // Owner moderation flow: Needs revision -> Approve publication -> public display
+  await owner.locator('[data-admin-tab="reviews"]').click();
+  await owner.locator('[data-mod-status="needs_edit"]').first().click();
+  await owner.getByText('Saved', { exact: true }).waitFor();
+  await customer.reload();
+  await customer.getByText('Needs revision').waitFor();
+
+  await owner.locator('[data-mod-status="approved"]').first().click();
+  await owner.getByText('Saved', { exact: true }).waitFor();
+  await owner.screenshot({ path: join(out, 'admin-reviews-moderation.png'), fullPage: true });
+
+  await guest.goto(base + '/en/reviews');
+  await guest.getByText('Serene Madinah home visit, calm and punctual arrival.').waitFor();
+  await guest.screenshot({ path: join(out, 'reviews-public-approved.png'), fullPage: true });
+
+  // Editing review returns it to Pending review & removes from public until re-moderated
+  await customer.reload();
+  await customer.locator('[data-edit-my-review]').first().click();
+  await customer.locator('#review-body-input').fill('Updated review awaiting second moderation.');
+  await customer.locator('#submit-review-btn').click();
+  await customer.getByText('Pending review').waitFor();
+
+  await guest.reload();
+  const leakedAfterEdit = await guest.getByText('Updated review awaiting second moderation.').count();
+  assert.equal(leakedAfterEdit, 0, 'Edited review must require re-moderation before public display');
+
   await owner.locator('[data-admin-tab="group_gifts"]').click();
   await owner.getByText('Dear Sister').first().waitFor();
   await owner.screenshot({ path: join(out, 'admin-group-gifts-desktop.png'), fullPage: true });
 
   await customer.goto(base + '/en/account');
-  await customer.getByText('Almond Blush Pearls').waitFor();
+  await customer.getByText('Oval Blush Pearls').waitFor();
   await customer.locator('#passport-prefs-form [name=pressure]').selectOption('light');
   await customer.locator('#passport-prefs-form button[type=submit]').click();
   await customer.getByText('Preferences saved').waitFor();
@@ -265,12 +333,14 @@ let browser;
         date: new Date().toISOString(),
         passed: [
           'Guest 5-step package booking with clean Packages tab, validation, and WhatsApp handoff',
+          'Reviews unauthenticated CTA guard and verified customer zero-booking eligibility pathway',
           'Customer registration and WhatsApp manual verification reference',
-          'J Nail Atelier interactive customization and Save to Beauty Passport',
-          'J Ritual Studio deterministic catalog-backed recommendation flow',
-          'Beauty Together group request and Gift a Ritual manual payment-verified workflow',
-          'Registered 5-step service booking with zero checkbox focus loss',
-          'Staff confirmation, progress, completion, verified cash payment, and Admin Funnel / Group & Gift management',
+          'J Nail Atelier anatomical hand with Oval shape customization, Save to Passport, and mobile sticky preview',
+          'J Ritual Studio refined visual recommendation flow',
+          'Legacy /group-booking redirect to /occasions and Occasion Experiences + Gift request workflows',
+          'Registered 5-step service booking preserving DOM checkbox focus',
+          'Staff confirmation, completion, verified cash payment, and Admin Funnel / Occasions & Gifts UI',
+          'Interactive 5-star review validation, click & keyboard selection, moderation statuses (Pending, Needs revision, Published), and re-moderation on edit',
           'Customer Beauty Passport preferences, saved nail look, and J Petals Club balance (250) verified',
           'Admin calendar timeline, payments field alignment, and audit log rendering verified',
         ],

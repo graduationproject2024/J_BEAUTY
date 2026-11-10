@@ -5,8 +5,8 @@ const TITLES = {
   studio: ['استوديو J لاختيار طقسكِ المناسب', 'J Ritual Studio — Personalized Discovery'],
   atelier: ['أتيليه الأظافر التفاعلي | J Nail Atelier', 'J Nail Atelier — Interactive Nail Customizer'],
   lookbook: ['معرض الإطلالات والأناقة | Beauty Lookbook', 'Beauty Lookbook — Curated Styles'],
-  'group-booking': ['طقوس جماعية | Beauty Together', 'Beauty Together — Group Home Spa'],
-  gifts: ['أهدي لحظة عناية | Gift a Ritual', 'Gift a Ritual — Digital Spa Gift Request'],
+  occasions: ['تنسيق جلسات المناسبات | J SPA', 'Occasion Experiences | J SPA'],
+  gifts: ['أهدي لحظة عناية | قسائم الإهداء', 'Gift a Ritual — Digital Spa Gift Request'],
   petals: ['نادي بتلات J للولاء', 'J Petals Club Loyalty Program'],
   about: ['عن J SPA — سبا منزلي للسيدات', 'About J SPA — Women’s Home Spa'],
   contact: ['تواصلي معنا ومناطق الخدمة بالمدينة', 'Contact & Madinah Service Areas'],
@@ -57,9 +57,9 @@ const DESCRIPTIONS = {
     'استلهمي إطلالات أظافر وجلسات سبا منزلية منتقاة بعناية من J SPA.',
     'Browse curated home spa and nail inspiration in the J SPA Beauty Lookbook.',
   ],
-  'group-booking': [
-    'اطلبي جلسة سبا منزلية جماعية للصديقات أو العائلة في المدينة المنورة مع تنسيق السعة وتأكيد الفريق.',
-    'Request a coordinated women’s group home spa appointment in Madinah with manual staff scheduling.',
+  occasions: [
+    'اطلبي تنسيق جلسات العناية والسبا للمناسبات في المدينة المنورة مع مراجعة السعة وتأكيد الفريق.',
+    'Coordinate bespoke women’s home spa and beauty appointments for special occasions in Madinah with manual staff scheduling.',
   ],
   gifts: [
     'اختاري خدمة أو باقة لإهدائها لمن تحبين مع تنسيق يدوي متكامل من فريق J SPA.',

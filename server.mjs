@@ -119,6 +119,15 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
         return res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}</urlset>`);
       }
 
+      if (['GET', 'HEAD'].includes(method) && /^\/(ar|en)\/group-booking\/?$/.test(route)) {
+        const lang = route.split('/')[1];
+        res.writeHead(301, {
+          Location: `/${lang}/occasions${url.search}`,
+          'Cache-Control': 'no-cache',
+        });
+        return res.end();
+      }
+
       if (['GET', 'HEAD'].includes(method) && (route === '/' || /^\/(ar|en)(\/|$)/.test(route))) {
         const entry = path.join(PUBLIC_DIR, 'index.html');
         const allSvcs = helpers.services();
@@ -464,6 +473,8 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
             body: reviewBody,
             display_name: displayName,
             approved: false,
+            moderation_status: 'pending',
+            moderation_note: '',
             updated_at: now(),
           };
           db.run('UPDATE reviews SET data=? WHERE id=?', JSON.stringify(updated), existingRow.id);
@@ -476,6 +487,8 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
           body: reviewBody,
           display_name: displayName,
           approved: false,
+          moderation_status: 'pending',
+          moderation_note: '',
           created_at: now(),
         };
         db.run('INSERT INTO reviews VALUES(?,?,?,?)', review.id, user.id, b.id, JSON.stringify(review));

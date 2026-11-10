@@ -16,6 +16,9 @@ import {
   confirmActionDialog,
   field,
   head,
+  icon,
+  reviewAuthorName,
+  reviewModerationStatusBadge,
   simpleTable,
   statusBadge,
 } from './components.js';
@@ -36,13 +39,13 @@ function groupAndGiftView(a) {
   const groups = a.group_requests || [];
   const gifts = a.gift_requests || [];
   return `
-    <h2>${t('طلبات الجلسات الجماعية والإهداء', 'Group Sessions & Gift Requests')}</h2>
+    <h2>${t('طلبات تنسيق المناسبات والإهداء', 'Occasion & Gift Requests')}</h2>
     <p class="muted">${t(
-      'يخضع الحجز الجماعي لموافقة الفريق وسعة الجلسات المتزامنة، وتصدر قسائم الإهداء بعد التحقق اليدوي من الدفع فقط.',
-      'Group requests require staff capacity approval, and gift vouchers become active only after staff verifies payment receipt.',
+      'تخضع طلبات المناسبات لمراجعة الإدارة وسعة الجلسات المتزامنة، وتصدر قسائم الإهداء بعد التحقق اليدوي من الدفع فقط.',
+      'Occasion coordination requests require staff capacity approval, and gift vouchers become active only after staff verifies payment receipt.',
     )}</p>
 
-    <h3 style="margin-top:20px">${t('جلسات معاً (جماعية)', 'Beauty Together Group Requests')} (${groups.length})</h3>
+    <h3 style="margin-top:20px">${t('طلبات تنسيق جلسات المناسبات', 'Occasion Experience Requests')} (${groups.length})</h3>
     ${
       groups.length
         ? groups
@@ -52,14 +55,14 @@ function groupAndGiftView(a) {
             <summary>
               <div class="row">
                 <span><strong><bdi>${esc(g.reference || g.id)}</bdi></strong> · ${esc(g.organizer_name)} · <bdi>${esc(g.date)} ${esc(g.time)}</bdi></span>
-                <span>${g.participant_count || (g.participants || []).length} ${t('ضيفات', 'guests')} · ${money(g.estimated_total)} · <span class="badge">${esc(g.status)}</span></span>
+                <span><bdi>${g.participant_count || (g.participants || []).length}</bdi> ${t('مستفيدات', 'participants')} · <bdi>${money(g.estimated_total)}</bdi> · ${statusBadge(g.status)}</span>
               </div>
             </summary>
             <div style="margin-top:12px">
-              <p class="muted"><bdi>${esc(g.organizer_phone)}</bdi> · ${esc(g.neighborhood)} · ${minutes(g.estimated_duration)}</p>
+              <p class="muted"><bdi>${esc(g.organizer_phone)}</bdi> · ${esc(g.neighborhood)} · <bdi>${minutes(g.estimated_duration)}</bdi></p>
               <form data-admin-form="group-requests/${esc(g.id)}">
                 <label class="field">
-                  ${t('حالة الطلب الجماعي', 'Group request status')}
+                  ${t('حالة طلب المناسبة', 'Occasion request status')}
                   <select name="status">
                     ${[
                       ['pending_approval', 'بانتظار الموافقة', 'Pending approval'],
@@ -70,14 +73,14 @@ function groupAndGiftView(a) {
                       .join('')}
                   </select>
                 </label>
-                <button class="btn small" type="submit">${t('حفظ حالة المجموعة', 'Save group status')}</button>
+                <button class="btn small" type="submit">${t('حفظ حالة المناسبة', 'Save occasion status')}</button>
               </form>
             </div>
           </details>
         `,
             )
             .join('')
-        : `<div class="empty muted">${t('لا توجد طلبات جماعية مسجلة.', 'No group requests recorded.')}</div>`
+        : `<div class="empty muted">${t('لا توجد طلبات مناسبات مسجلة.', 'No occasion requests recorded.')}</div>`
     }
 
     <h3 style="margin-top:24px">${t('طلبات الإهداء (قيد المراجعة / مدفوعة)', 'Gift Voucher Requests')} (${gifts.length})</h3>
@@ -524,7 +527,7 @@ function adminContent() {
                  <div class="stat">${t('حفظ تصاميم الأظافر', 'Atelier saves')}<b>${funnel.atelier_save || 0}</b></div>
                  <div class="stat">${t('بدء الحجز / إرسال الطلب', 'Start / Submitted')}<b>${funnel.booking_start || 0} / ${funnel.booking_submitted || 0}</b></div>
                  <div class="stat">${t('نقرات واتساب (نية فقط)', 'WhatsApp clicks')}<b>${funnel.whatsapp_handoff_click || 0}</b></div>
-                 <div class="stat">${t('جماعي / إهداء', 'Group / Gift reqs')}<b>${(a.group_requests || []).length} / ${(a.gift_requests || []).length}</b></div>
+                 <div class="stat">${t('مناسبات / إهداء', 'Occasion / Gift reqs')}<b>${(a.group_requests || []).length} / ${(a.gift_requests || []).length}</b></div>
                </div>
              </div>`
           : ''
@@ -741,13 +744,25 @@ function adminContent() {
           .map(
             (r) => `
         <article class="card" style="margin-bottom:14px">
-          <div class="stars">${'★'.repeat(r.rating)}</div>
+          <div class="row" style="margin-bottom:8px">
+            <div class="review-stars" aria-label="${r.rating} / 5">${Array.from({ length: 5 }, (_, idx) => `<span class="star-static ${idx < r.rating ? 'is-filled' : ''}">${icon('star')}</span>`).join('')}</div>
+            ${reviewModerationStatusBadge(r)}
+          </div>
           <p>${esc(r.body)}</p>
-          <div class="row">
-            <span class="muted">${esc(r.display_name)} · ${r.approved ? t('منشور', 'Published') : t('بانتظار الموافقة', 'Unpublished')}</span>
-            <button class="btn small light" data-moderate="${esc(r.id)}" data-approved="${!r.approved}" type="button">
-              ${r.approved ? t('إلغاء النشر', 'Unpublish') : t('اعتماد النشر', 'Approve publication')}
-            </button>
+          ${r.moderation_note ? `<div class="notice" style="margin:8px 0;padding:8px 12px">${esc(r.moderation_note)}</div>` : ''}
+          <div class="row" style="gap:10px;flex-wrap:wrap">
+            <span class="muted">${esc(reviewAuthorName(r))}</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn small ${r.approved ? 'light' : ''}" data-moderate="${esc(r.id)}" data-approved="true" data-mod-status="approved" type="button">
+                ${t('اعتماد النشر', 'Approve publication')}
+              </button>
+              <button class="btn small light" data-moderate="${esc(r.id)}" data-approved="false" data-mod-status="pending" type="button">
+                ${r.approved ? t('إلغاء النشر', 'Unpublish') : t('إبقاء قيد المراجعة', 'Keep pending')}
+              </button>
+              <button class="btn small light" data-moderate="${esc(r.id)}" data-approved="false" data-mod-status="needs_edit" type="button">
+                ${t('يتطلب تعديلاً', 'Needs revision')}
+              </button>
+            </div>
           </div>
         </article>
       `,
@@ -839,7 +854,7 @@ export async function adminPage() {
   const tabs = [
     ['overview', 'نظرة عامة', 'Overview', ''],
     ['bookings', 'الحجوزات', 'Bookings', pendingCount || ''],
-    ['group_gifts', 'الجماعي والإهداء', 'Group & Gifts', ggCount || ''],
+    ['group_gifts', 'المناسبات والإهداء', 'Occasions & Gifts', ggCount || ''],
     ['calendar', 'التقويم والسعة', 'Calendar', ''],
     ['customers', 'العميلات والتوثيق', 'Customers & Verify', verifyCount || ''],
     ...(isOwner() ? [['payments', 'المدفوعات', 'Payments', '']] : []),
@@ -895,6 +910,7 @@ export function bindAdmin(renderFn) {
   document.querySelectorAll('[data-admin-tab]').forEach((btn) => {
     btn.onclick = () => {
       state.adminTab = btn.dataset.adminTab;
+      state.admin = null;
       renderFn();
     };
   });
@@ -921,8 +937,13 @@ export function bindAdmin(renderFn) {
   document.querySelectorAll('[data-moderate]').forEach((btn) => {
     btn.onclick = async () => {
       try {
+        const modStatus = btn.dataset.modStatus || (btn.dataset.approved === 'true' ? 'approved' : 'pending');
         await api('/admin/reviews/' + btn.dataset.moderate, {
           approved: btn.dataset.approved === 'true',
+          moderation_status: modStatus,
+          ...(modStatus === 'needs_edit'
+            ? { moderation_note: t('يرجى مراجعة النص أو إزالة أي بيانات شخصية وإعادة الإرسال.', 'Please review your note and resubmit for moderation.') }
+            : {}),
         });
         await refreshAdmin(renderFn);
       } catch (err) {

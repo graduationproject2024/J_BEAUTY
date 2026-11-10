@@ -61,11 +61,12 @@ mkdirSync(out, { recursive: true });
     '/en/',
     '/ar/services',
     '/ar/services/relaxation',
+    '/ar/services/gel-removal',
     '/ar/packages',
     '/ar/studio',
     '/ar/atelier',
     '/ar/lookbook',
-    '/ar/group-booking',
+    '/ar/occasions',
     '/ar/gifts',
     '/ar/booking',
     '/ar/account',
@@ -82,6 +83,9 @@ mkdirSync(out, { recursive: true });
     assert.equal(r404.status, 404, 'Unknown route must return HTTP 404');
     const html404 = await r404.text();
     assert.ok(html404.includes('noindex'), '404 route must include noindex');
+    const rRedir = await fetch(base + '/ar/group-booking', { redirect: 'manual' });
+    assert.equal(rRedir.status, 301, 'Legacy group-booking route must 301 redirect to occasions');
+    assert.equal(rRedir.headers.get('location'), '/ar/occasions');
 
     for (const width of [360, 390, 430, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: width >= 1024 ? 1000 : 844 });
@@ -123,6 +127,7 @@ mkdirSync(out, { recursive: true });
             scroll: document.documentElement.scrollWidth,
             client: document.documentElement.clientWidth,
             text: document.body.innerText.length,
+            bodyText: document.body.innerText,
             dir: document.documentElement.dir,
             h1,
             brokenImgs,
@@ -133,6 +138,10 @@ mkdirSync(out, { recursive: true });
         assert.ok(info.text > 100, `Empty page ${route}`);
         assert.ok(info.h1.length > 0, `Missing h1 on ${route}`);
         assert.ok(!/هذه الصفحة غير موجودة|This page isn’t here/i.test(info.h1), `404 rendered on ${route}`);
+        assert.ok(
+          !/عايزة|النهارده|إيه|أدلع|بجهز|حجز جماعي|Beauty Together/i.test(info.bodyText),
+          `Colloquial or forbidden group wording found on ${route}`,
+        );
         assert.deepEqual(info.brokenImgs, [], `Broken images on ${route}: ${info.brokenImgs}`);
         assert.equal(info.unrevealed, 0, `Above-fold elements stuck invisible on ${route} at ${width}px`);
         assert.ok(info.hasBookCta, `Missing booking CTA on ${route} at ${width}px`);
@@ -150,11 +159,12 @@ mkdirSync(out, { recursive: true });
             '/en/',
             '/ar/services',
             '/ar/services/relaxation',
+            '/ar/services/gel-removal',
             '/ar/packages',
             '/ar/studio',
             '/ar/atelier',
             '/ar/lookbook',
-            '/ar/group-booking',
+            '/ar/occasions',
             '/ar/gifts',
             '/ar/booking',
             '/ar/account',

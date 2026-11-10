@@ -51,20 +51,22 @@ try{
  await test('Reward commit deducts points once',async()=>{const a=await customer.call('/api/account');const rw=a.rewards.find(x=>x.points===200);await customer.call('/api/rewards/request',{reward_id:rw.id});const admin=await owner.call('/api/admin');const pending=admin.reward_requests.find(x=>x.user_id===user.id);const b=await customer.call('/api/bookings',{...request,time:'18:00',idempotency_key:'reward-booking-001'});await owner.call(`/api/admin/rewards/${pending.id}`,{booking_id:b.booking.id,action:'commit'});assert.equal((await customer.call('/api/account')).balance,50);assert.ok((await owner.call(`/api/admin/rewards/${pending.id}`,{booking_id:b.booking.id,action:'commit'},null)).status>=400);assert.equal((await customer.call('/api/account')).balance,50)});
  await test('Unauthenticated admin request rejected',async()=>{assert.ok((await guest.call('/api/admin',undefined,null)).status>=400)});
  await test('Cross-origin write rejected',async()=>{const r=await fetch(base+'/api/bookings',{method:'POST',headers:{Origin:'https://evil.invalid','Content-Type':'application/json'},body:JSON.stringify(request)});assert.ok(r.status>=400)});
- await test('Unknown routes return HTTP 404 with noindex SSR HTML',async()=>{
+ await test('Unknown routes return HTTP 404 and legacy group-booking redirects 301 to occasions',async()=>{
   const r1=await fetch(base+'/ar/unknown-xyz');assert.equal(r1.status,404);
   const r2=await fetch(base+'/en/services/nonexistent-ritual');assert.equal(r2.status,404);
+  const r3=await fetch(base+'/ar/group-booking',{redirect:'manual'});assert.equal(r3.status,301);assert.equal(r3.headers.get('location'),'/ar/occasions');
+  const r4=await fetch(base+'/ar/occasions');assert.equal(r4.status,200);assert.ok((await r4.text()).includes('تنسيق جلسات المناسبات'));
  });
  await test('Ritual Studio returns deterministic catalog-backed recommendations',async()=>{
   const rec=await guest.call('/api/studio/recommend',{mood:'unwind',minutes_available:90,budget:300,format:'either'});
   assert.ok(Array.isArray(rec.recommendations)&&rec.recommendations.length>=1);
   assert.ok(rec.recommendations[0].reasons_ar&&rec.recommendations[0].reasons_en);
  });
- await test('Nail Atelier save, share code, Passport favorites & preferences work',async()=>{
-  const saved=await customer.call('/api/atelier/styles',{name:'Test Almond Blush',shape:'almond',length:'medium',polish_color:'#D9B7C0',french_style:'classic',tip_color:'#FBF7F4',finish:'gloss',accent:'none',share:true});
+ await test('Nail Atelier supports oval shape, save, share code, Passport favorites & preferences',async()=>{
+  const saved=await customer.call('/api/atelier/styles',{name:'Test Oval Blush',shape:'oval',length:'medium',polish_color:'#D9B7C0',french_style:'classic',tip_color:'#FBF7F4',finish:'gloss',accent:'none',share:true});
   assert.ok(saved.style.share_code);
   const loaded=await guest.call(`/api/atelier/styles/${saved.style.share_code}`);
-  assert.equal(loaded.style.shape,'almond');
+  assert.equal(loaded.style.shape,'oval');
   await customer.call('/api/passport/favorites',{service_id:'relaxation',action:'add'});
   await customer.call('/api/passport/preferences',{preferred_neighborhood:'Test district',pressure:'medium',nail_finish:'gloss',reminder_opt_in:true,scent_note:'Lavender'});
   const acc=await customer.call('/api/account');

@@ -58,8 +58,8 @@ export const state = {
     time: '',
     neighborhood: '',
     participants: [
-      { label: 'ضيفة 1', service_ids: ['relaxation'] },
-      { label: 'ضيفة 2', service_ids: ['classic'] },
+      { label: 'المستفيدة 1', service_ids: ['relaxation'] },
+      { label: 'المستفيدة 2', service_ids: ['classic'] },
     ],
   },
   groupResult: null,
@@ -91,6 +91,7 @@ export function page() {
   const clean = raw.replace(/\/$/, '') || 'home';
   if (clean === 'loyalty') return 'petals';
   if (clean === 'passport') return 'account';
+  if (clean === 'group-booking') return 'occasions';
   return clean;
 }
 

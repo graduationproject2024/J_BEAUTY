@@ -2,9 +2,13 @@ import { $, api, descOf, esc, href, minutes, money, nameOf, state, t, toast } fr
 import {
   head,
   icon,
+  openDialog,
+  openReviewModal,
   packageCard,
   petalBloomSVG,
   provisional,
+  reviewAuthorName,
+  reviewModerationStatusBadge,
   reviewsContent,
   serviceArt,
   serviceCard,
@@ -14,33 +18,33 @@ import { atelierMiniWidget } from './atelier.js';
 const MOODS = [
   {
     id: 'unwind',
-    ar: 'عايزة أسترخي',
+    ar: 'أرغب في الاسترخاء',
     en: 'Unwind & Release',
-    sub_ar: 'مساج استرخائي أو بالأحجار الساخنة يهدّئ يومكِ.',
+    sub_ar: 'جلسات مساج هادئة لتخفيف التوتر واستعادة التوازن.',
     sub_en: 'Soothing or hot-stone massage to ease tension.',
     ids: ['relaxation', 'hot-stone'],
   },
   {
     id: 'pamper',
-    ar: 'عايزة أدلع نفسي',
-    en: 'Pamper Myself',
-    sub_ar: 'توازن بين تدليك مريح وعناية كلاسيكية لليدين والقدمين.',
+    ar: 'أبحث عن لحظة عناية خاصة',
+    en: 'Personal Pampering',
+    sub_ar: 'تجمع بين الاسترخاء الجسدي والعناية المتكاملة باليدين والقدمين.',
     sub_en: 'Combined body relaxation and classic mani-pedi care.',
     ids: ['classic', 'pedicure'],
   },
   {
     id: 'nails',
-    ar: 'عايزة أظافر جديدة',
-    en: 'Fresh Nails',
-    sub_ar: 'طلاء جل، فرنش كلاسيك، أو أطراف ملونة بتصميمكِ.',
+    ar: 'أرغب في تجديد إطلالة أظافري',
+    en: 'Refresh My Nails',
+    sub_ar: 'طلاء جل، فرنش كلاسيكي، أو أطراف ملونة بتصميمكِ.',
     sub_en: 'Glossy gel polish, classic French, or custom tips.',
     ids: ['gel-polish', 'french-gel'],
   },
   {
     id: 'occasion',
-    ar: 'بجهز لمناسبة',
-    en: 'Special Occasion',
-    sub_ar: 'أطراف فرنش جل مع عناية كاملة لليوم المنتظر.',
+    ar: 'أستعد لمناسبة خاصة',
+    en: 'Special Occasion Prep',
+    sub_ar: 'إطلالة أظافر فرنسية متقنة مع عناية شاملة تليق بمناسبتكِ.',
     sub_en: 'French tip artistry paired with glowing hand and foot prep.',
     ids: ['french-tip', 'colored-french'],
   },
@@ -58,7 +62,7 @@ function moodPreviewHtml() {
           <div class="mood-match-card">
             <div>
               <strong>${esc(nameOf(s))}</strong>
-              <span class="muted">${minutes(s.duration)} · ${money(s.price)}</span>
+              <span class="muted"><bdi>${minutes(s.duration)}</bdi> · <bdi>${money(s.price)}</bdi></span>
             </div>
             <a class="btn small" href="${href('booking')}?service=${esc(s.id)}">${t('اختاريها', 'Select')}</a>
           </div>
@@ -68,7 +72,7 @@ function moodPreviewHtml() {
       </div>
       <div class="row" style="margin-top:14px">
         <span class="muted">${esc(t(m.sub_ar, m.sub_en))}</span>
-        <a class="text-link" href="${href('studio')}">${t('جربي استوديو الترشيح الكامل ←', 'Try full J Ritual Studio →')}</a>
+        <a class="text-link" href="${href('studio')}">${t('اكتشفي الخدمات المناسبة لكِ ←', 'Discover suitable services →')}</a>
       </div>
     </div>
   `;
@@ -116,10 +120,10 @@ export function home() {
         <section class="section-tight mood-band" data-reveal>
           <div class="section-head" style="margin-bottom:20px">
             <div>
-              <span class="eyebrow">${t('اكتشاف شخصي سريع', 'DISCOVERY BY MOOD')}</span>
-              <h2>${t('إيه نوع العناية اللي محتاجاها النهارده؟', 'What kind of care are you craving today?')}</h2>
+              <span class="eyebrow">${t('اختيار سريع يناسبكِ', 'TAILORED DISCOVERY')}</span>
+              <h2>${t('ما نوع العناية التي ترغبين بها اليوم؟', 'What kind of care would you like today?')}</h2>
             </div>
-            <a class="text-link" href="${href('studio')}">${t('استوديو J للاختيار', 'Open J Ritual Studio')}</a>
+            <a class="text-link" href="${href('studio')}">${t('استوديو اختيار الخدمات', 'Open J Ritual Studio')}</a>
           </div>
           <div class="mood-grid">
             ${MOODS.map(
@@ -139,9 +143,9 @@ export function home() {
           <div class="section-head">
             <div>
               <span class="eyebrow">${t('مختارات J SPA', 'FEATURED RITUALS')}</span>
-              <h2>${t('جلسات منتقاة لراحتكِ', 'Curated moments of care')}</h2>
+              <h2>${t('جلسات مختارة لراحتكِ', 'Curated moments of care')}</h2>
             </div>
-            <a class="text-link" href="${href('services')}">${t('تصفحي كل الخدمات (13) ←', 'Browse all 13 services →')}</a>
+            <a class="text-link" href="${href('services')}">${t('استكشفي جميع الخدمات (13) ←', 'Browse all 13 services →')}</a>
           </div>
           ${provisional()}
           <div class="grid four-cols">
@@ -149,33 +153,38 @@ export function home() {
           </div>
         </section>
 
-        <!-- 4. The J SPA Experience -->
-        <section class="section" style="padding-top:12px" data-reveal>
+        <!-- 4. The J SPA Experience (Refined Compact Editorial Timeline) -->
+        <section class="section timeline-section" data-reveal>
           <div class="section-head">
             <div>
-              <span class="eyebrow">${t('كيف تتم الزيارة المنزلية؟', 'THE J SPA EXPERIENCE')}</span>
-              <h2>${t('من اختياركِ… حتى باب بيتكِ', 'From request to serene home ritual')}</h2>
+              <span class="eyebrow">${t('مسار الزيارة المنزلية', 'THE J SPA EXPERIENCE')}</span>
+              <h2>${t('من اختياركِ… حتى باب منزلكِ', 'From selection to calm home care')}</h2>
             </div>
-            <a class="text-link" href="${href('group-booking')}">${t('حجز جماعي (Beauty Together)', 'Beauty Together group visits')}</a>
+            <a class="text-link" href="${href('occasions')}">${t('تنسيق جلسات المناسبات', 'Occasion Experiences')}</a>
           </div>
-          <div class="steps four">
+          <ol class="visit-timeline">
             ${[
-              ['01', t('تقديم الطلب', 'Request Online'), t('اختاري فئة الخدمة والوقت المفضل في المدينة المنورة.', 'Pick your category, rituals, and preferred Madinah time.')],
-              ['02', t('تأكيد الفريق', 'Staff Confirmation'), t('تتواصل الموظفة عبر واتساب لمراجعة السعة وتأكيد الموعد.', 'Our team checks staff capacity and confirms manually on WhatsApp.')],
-              ['03', t('تحضير معقم ومرتب', 'Home Preparation'), t('نصل بمستلزمات نظيفة ومناشف مرتبة وتجهيز هادئ.', 'Sanitized instruments and fresh linens arrive neatly prepared.')],
-              ['04', t('لحظتكِ الهادئة', 'The Ritual Experience'), t('تستمتعين بجلستكِ في خصوصية منزلكِ ثم تُحتسب البتلات.', 'Unwind in total privacy; points accrue once completed & paid.')],
+              ['01', 'calendar', t('تقديم الطلب', 'Request Online'), t('اختاري فئة الخدمة والموعد المفضل في المدينة المنورة.', 'Select your service category and preferred time in Madinah.')],
+              ['02', 'user', t('تأكيد الفريق', 'Team Confirmation'), t('تتواصل الموظفة عبر واتساب لمراجعة السعة وتأكيد الموعد.', 'Our team checks neighborhood capacity and confirms via WhatsApp.')],
+              ['03', 'spark', t('تهيئة مستلزمات الزيارة', 'Calm Preparation'), t('نصل بمستلزمات نظيفة ومرتبة تلائم خصوصية منزلكِ.', 'Fresh linens and neatly prepared tools arrive at your home.')],
+              ['04', 'check', t('الخدمة واحتساب البتلات', 'Service & Petals'), t('تستمتعين بجلستكِ، وتُضاف البتلات تلقائياً بعد إتمام الزيارة والدفع.', 'Relax in complete privacy; Petals credit after completed payment.')],
             ]
               .map(
-                ([num, title, copy]) => `
-              <div class="step-card">
-                <span class="step-num">${num}</span>
-                <h3>${title}</h3>
-                <p class="muted">${copy}</p>
-              </div>
+                ([num, ico, title, copy]) => `
+              <li class="timeline-step">
+                <div class="timeline-marker">
+                  <span class="timeline-num">${num}</span>
+                  <span class="timeline-icon" aria-hidden="true">${icon(ico)}</span>
+                </div>
+                <div class="timeline-body">
+                  <h3>${title}</h3>
+                  <p class="muted">${copy}</p>
+                </div>
+              </li>
             `,
               )
               .join('')}
-          </div>
+          </ol>
         </section>
 
         <!-- 5. Nail Atelier Preview -->
@@ -365,13 +374,55 @@ export function packagesPage() {
 }
 
 export function reviewsPage() {
+  const myReviews = state.account?.reviews || [];
   return `
     <main id="main" class="wrap">
       ${head(
         t('تجارب وآراء العميلات', 'Verified Customer Reviews'),
         t('كل تقييم منشور مرتبط بزيارة مكتملة وموثقة وتمت مراجعته قبل النشر.', 'Every published review is connected to a genuinely completed booking and moderated before publication.'),
-        [[t('الرئيسية', 'Home'), 'home'], [t('الآراء', 'Reviews'), '']],
+        [[t('الرئيسية', 'Home'), 'home'], [t('آراء العميلات', 'Reviews'), '']],
       )}
+
+      <div class="card reviews-cta-card">
+        <div>
+          <span class="eyebrow">${t('شاركينا انطباعكِ', 'SHARE YOUR IMPRESSION')}</span>
+          <h2 style="margin:4px 0 8px">${t('هل زرتنا مؤخراً؟ رأيكِ يهمنا', 'Visited recently? Share your thoughts')}</h2>
+          <p class="muted" style="margin:0">${t(
+            'التقييم متاح للعميلات بعد إتمام زيارة منزلية وتوثيق الحساب، ويُراجع إدارياً قبل النشر العام.',
+            'Available for verified accounts with completed visits. Reviews undergo staff moderation before appearing publicly.',
+          )}</p>
+        </div>
+        <button type="button" class="btn" id="open-review-cta">${t('قيّمي تجربتكِ معنا', 'Rate Your Experience')}</button>
+      </div>
+
+      ${
+        myReviews.length
+          ? `<section class="section-tight" style="padding-top:0">
+               <h3>${t('تقييماتكِ المرسلة', 'Your Submitted Reviews')}</h3>
+               <div class="grid two">
+                 ${myReviews
+                   .map(
+                     (r) => `
+                   <article class="card">
+                     <div class="row" style="margin-bottom:8px">
+                       <div class="review-stars" aria-label="${r.rating} / 5">${Array.from({ length: 5 }, (_, idx) => `<span class="star-static ${idx < r.rating ? 'is-filled' : ''}">${icon('star')}</span>`).join('')}</div>
+                       ${reviewModerationStatusBadge(r)}
+                     </div>
+                     <p style="margin-bottom:8px">${esc(r.body)}</p>
+                     ${r.moderation_note ? `<div class="notice" style="margin:8px 0;padding:8px 12px">${esc(r.moderation_note)}</div>` : ''}
+                     <div class="row">
+                       <span class="muted">${esc(reviewAuthorName(r))}</span>
+                       <button type="button" class="btn small light" data-edit-my-review="${esc(r.booking_id)}">${t('تعديل التقييم', 'Edit review')}</button>
+                     </div>
+                   </article>
+                 `,
+                   )
+                   .join('')}
+               </div>
+             </section>`
+          : ''
+      }
+
       <section class="section-tight" style="padding-top:0">
         ${reviewsContent(state.catalog.reviews, false)}
       </section>
@@ -580,13 +631,105 @@ export function notFound() {
   `;
 }
 
-export function bindPublicInteractions(goFn) {
+export function bindPublicInteractions(goFn, renderFn) {
   document.querySelectorAll('[data-mood-pick]').forEach((btn) => {
     btn.onclick = () => {
       state.homeMood = btn.dataset.moodPick;
       document.querySelectorAll('[data-mood-pick]').forEach((x) => x.classList.toggle('active', x === btn));
       const box = $('#mood-result');
       if (box) box.outerHTML = moodPreviewHtml();
+    };
+  });
+
+  const bindModalNav = () => {
+    document.querySelectorAll('[data-modal-go]').forEach((btn) => {
+      btn.onclick = () => {
+        $('#modal')?.close();
+        goFn(btn.dataset.modalGo);
+      };
+    });
+  };
+
+  $('#open-review-cta')?.addEventListener('click', async () => {
+    if (!state.user) {
+      openDialog(`
+        <h2>${t('قيّمي تجربتكِ معنا', 'Rate Your Experience')}</h2>
+        <p class="muted">${t(
+          'لضمان أن تعكس الآراء تجارب حقيقية، يتطلب إرسال التقييم تسجيل الدخول بحساب عميلة موثق وزيارة منزلية مكتملة. لا يتم ربط طلبات الزائرات تلقائياً برقم الجوال حفاظاً على الخصوصية.',
+          'To keep feedback genuine, reviewing requires a signed-in verified customer account with a completed home visit. Guest bookings are never auto-linked by phone number.',
+        )}</p>
+        <div class="hero-actions" style="margin-top:20px">
+          <button type="button" class="btn small" data-modal-go="login">${t('تسجيل الدخول', 'Sign in')}</button>
+          <button type="button" class="btn small light" data-modal-go="register">${t('إنشاء حساب', 'Create account')}</button>
+          <button type="button" class="text-link" data-modal-go="recovery">${t('استعادة حساب سابق', 'Account recovery')}</button>
+        </div>
+      `);
+      bindModalNav();
+      return;
+    }
+    if (!state.user.verified) {
+      openDialog(`
+        <h2>${t('يتطلب توثيق رقم الجوال', 'Phone Verification Required')}</h2>
+        <p class="muted">${t(
+          'يرجى توثيق ملكية رقم جوالكِ عبر واتساب من صفحة جواز الجمال قبل إضافة التقييم.',
+          'Please complete manual WhatsApp phone ownership verification in your Beauty Passport before submitting a review.',
+        )}</p>
+        <div class="hero-actions" style="margin-top:20px">
+          <button type="button" class="btn small" data-modal-go="account">${t('الذهاب للتوثيق في جواز الجمال', 'Go to Beauty Passport')}</button>
+        </div>
+      `);
+      bindModalNav();
+      return;
+    }
+
+    try {
+      const acc = state.account || (await api('/account'));
+      state.account = acc;
+      const completed = (acc.bookings || []).filter((b) => b.status === 'completed');
+      if (!completed.length) {
+        openDialog(`
+          <h2>${t('لا توجد زيارة مكتملة مؤهلة بعد', 'No Completed Visit Available Yet')}</h2>
+          <p class="muted">${t(
+            'ستتمكنين من تقييم تجربتكِ واختيار التقييم بالنجوم فور اكتمال أول موعد منزلي لكِ في حسابكِ.',
+            'Once your first home spa visit is marked completed in your account, you can rate your experience here.',
+          )}</p>
+          <div class="hero-actions" style="margin-top:20px">
+            <button type="button" class="btn small" data-modal-go="booking">${t('تقديم طلب موعد', 'Request an appointment')}</button>
+          </div>
+        `);
+        bindModalNav();
+        return;
+      }
+      openReviewModal({
+        bookings: acc.bookings || [],
+        existingReviews: acc.reviews || [],
+        onSaved: async () => {
+          state.account = await api('/account');
+          if (renderFn) renderFn();
+        },
+      });
+    } catch (err) {
+      toast(err.message);
+    }
+  });
+
+  document.querySelectorAll('[data-edit-my-review]').forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        const acc = state.account || (await api('/account'));
+        state.account = acc;
+        openReviewModal({
+          bookings: acc.bookings || [],
+          existingReviews: acc.reviews || [],
+          initialBookingId: btn.dataset.editMyReview,
+          onSaved: async () => {
+            state.account = await api('/account');
+            if (renderFn) renderFn();
+          },
+        });
+      } catch (err) {
+        toast(err.message);
+      }
     };
   });
 

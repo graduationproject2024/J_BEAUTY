@@ -86,8 +86,8 @@ export function recommendRituals(helpers, input = {}) {
       const catRank = preferredCats.indexOf(svc.category);
       if (catRank !== -1) {
         score += 40 - catRank * 10;
-        reasons_ar.push('يتناغم مع المزاج والنتيجة التي تبحثين عنها');
-        reasons_en.push('Matches your desired ritual mood');
+        reasons_ar.push('تتوافق مع نوع العناية الذي اخترتِه');
+        reasons_en.push('Matches your desired service preference');
       }
       if (svc.duration <= maxMinutes) {
         score += 25;
@@ -128,8 +128,8 @@ export function recommendRituals(helpers, input = {}) {
       const catHits = pkgSvcs.filter((sv) => preferredCats.includes(sv.category)).length;
       score += catHits * 18;
       if (catHits > 0) {
-        reasons_ar.push('باقة تجمع عدة طقوس متوافقة مع اختياركِ');
-        reasons_en.push('Combines complementary rituals aligned with your goal');
+        reasons_ar.push('باقة متكاملة تجمع خدمات متوافقة مع اختياركِ');
+        reasons_en.push('Combines complementary services aligned with your goal');
       }
       if (pkg.duration <= maxMinutes) {
         score += 22;
@@ -168,7 +168,7 @@ export function recommendRituals(helpers, input = {}) {
   return results.sort((a, b) => b.score - a.score).slice(0, 4);
 }
 
-const VALID_SHAPES = new Set(['almond', 'square', 'squoval', 'coffin', 'natural']);
+const VALID_SHAPES = new Set(['almond', 'oval', 'squoval', 'square', 'coffin', 'natural']);
 const VALID_LENGTHS = new Set(['short', 'medium', 'long']);
 const VALID_FRENCH = new Set(['none', 'classic', 'micro', 'colored', 'ombre']);
 const VALID_FINISH = new Set(['gloss', 'matte', 'pearl']);
@@ -411,15 +411,15 @@ export function createGroupRequest(db, helpers, user, body) {
   });
 
   const message =
-    `مرحباً J Spa 🌸\n` +
-    `طلب جلسة جماعية (Beauty Together)\n` +
+    `مرحباً J SPA،\n` +
+    `طلب تنسيق جلسات المناسبات\n` +
     `رقم الطلب: ${reference}\n` +
-    `المنسّقة: ${organizerName}\n` +
-    `عدد المشاركات: ${participants.length}\n` +
+    `منسّقة المناسبة: ${organizerName}\n` +
+    `عدد المستفيدات: ${participants.length}\n` +
     `التاريخ والوقت المفضل: ${body.date} ${body.time}\n` +
     `الحي: ${neighborhood}\n` +
     `الإجمالي التقديري: ${totalPrice} ر.س\n` +
-    `أرجو مراجعة توفر الفريق وتأكيد التنسيق.`;
+    `يرجى مراجعة توفر الفريق وتأكيد التنسيق.`;
 
   return { group_request: reqObj, message, whatsapp_url: whatsappUrl(s, message) };
 }
@@ -467,14 +467,14 @@ export function createGiftRequest(db, helpers, user, body) {
   });
 
   const message =
-    `مرحباً J Spa 🎁\n` +
-    `أرغب في طلب إهداء تجربة سبا (Gift a Ritual)\n` +
+    `مرحباً J SPA،\n` +
+    `أرغب في طلب بطاقة إهداء من J SPA\n` +
     `مرجع الطلب: ${reference}\n` +
     `من: ${senderName}\n` +
     `إلى: ${recipientName}\n` +
-    `الهدية: ${chosen.name_ar}\n` +
+    `الخدمة أو الباقة المختارة: ${chosen.name_ar}\n` +
     `القيمة التقديرية: ${chosen.price} ر.س\n` +
-    `أرجو تنسيق تأكيد الإهداء والدفع يدوياً.`;
+    `يرجى تنسيق تأكيد الإهداء والدفع يدوياً.`;
 
   return { gift_request: reqObj, message, whatsapp_url: whatsappUrl(helpers.settings(), message) };
 }

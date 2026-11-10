@@ -70,8 +70,8 @@ export function validateSchedule(helpers, booking, confirmed = false, enforceLea
 export function formatBookingResult(helpers, booking) {
   const notesLine = booking.notes ? `\nملاحظات: ${booking.notes}` : '';
   const message =
-    `مرحباً J Spa\n` +
-    `أرغب في طلب حجز منزلي.\n` +
+    `مرحباً J SPA،\n` +
+    `أرغب في تقديم طلب حجز منزلي.\n` +
     `رقم الطلب: ${booking.reference}\n` +
     `الاسم: ${booking.name}\n` +
     `الخدمة: ${booking.items.map((i) => i.name_ar).join('، ')}\n` +
@@ -80,7 +80,7 @@ export function formatBookingResult(helpers, booking) {
     `الحي: ${booking.neighborhood}\n` +
     `الإجمالي التقديري: ${booking.total} ر.س` +
     `${notesLine}\n` +
-    `أرجو تأكيد توفر الموعد.`;
+    `يرجى تأكيد توفر الموعد.`;
   return {
     booking,
     message,

@@ -1,4 +1,4 @@
-import { descOf, esc, href, minutes, money, nameOf, page, safeURL, state, t } from './state.js';
+import { $, api, descOf, esc, href, minutes, money, nameOf, page, safeURL, state, t, toast } from './state.js';
 import { renderSignatureBloomSVG } from './motion.js';
 
 export function monogramSvg(cls = 'brand-mark') {
@@ -20,6 +20,9 @@ export function icon(kind) {
     user: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>',
     menu: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
     heart: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+    star: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><polygon points="12 2.5 15.09 8.76 22 9.77 17 14.64 18.18 21.5 12 18.26 5.82 21.5 7 14.64 2 9.77 8.91 8.76 12 2.5"/></svg>',
+    calendar: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
+    check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 13l4 4L19 7"/></svg>',
   };
   return icons[kind] || '';
 }
@@ -108,7 +111,7 @@ export function footer() {
                 <small>${t('سبا نسائي منزلي', 'HOME SPA · MADINAH')}</small>
               </span>
             </a>
-            <p>${t('جمالكِ. طقوسكِ. لحظتكِ. خدمات مساج وعناية بالأظافر والجل مخصصة للسيدات في المدينة المنورة.', 'Your Beauty. Your Ritual. Your Moment. Women-only massage, nail care, and gel rituals in Al Madinah.')}</p>
+            <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلكِ.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
           </div>
           <div class="footer-links">
             <strong>${t('التجارب والخدمات', 'Experiences')}</strong>
@@ -116,9 +119,9 @@ export function footer() {
               ['services', 'جميع الخدمات (13)', 'All services (13)'],
               ['packages', 'الباقات', 'Packages'],
               ['atelier', 'أتيليه J للأظافر', 'J Nail Atelier'],
-              ['studio', 'استوديو الاختيار', 'J Ritual Studio'],
+              ['studio', 'استوديو اختيار الخدمات', 'J Ritual Studio'],
               ['lookbook', 'معرض الإطلالات', 'Beauty Lookbook'],
-              ['group-booking', 'جلسة جماعية', 'Beauty Together'],
+              ['occasions', 'تنسيق جلسات المناسبات', 'Occasion Experiences'],
               ['gifts', 'أهدي لحظة عناية', 'Gift a Ritual'],
               ['petals', 'نادي بتلات J', 'J Petals Club'],
             ]
@@ -253,6 +256,18 @@ export function packageCard(p, i) {
   `;
 }
 
+export function reviewAuthorName(r) {
+  const raw = String(r?.display_name || '').trim();
+  return !raw || raw === 'عميلة J SPA' || raw === 'عميلة موثقة'
+    ? t('عميلة J SPA', 'J SPA Client')
+    : raw;
+}
+
+function editableDisplayName(existing) {
+  const raw = String(existing?.display_name || '').trim();
+  return !raw || raw === 'عميلة J SPA' || raw === 'عميلة موثقة' ? '' : raw;
+}
+
 export function reviewsContent(reviews = [], fallbackAsTrust = false) {
   if (!reviews.length) {
     if (fallbackAsTrust) {
@@ -286,15 +301,16 @@ export function reviewsContent(reviews = [], fallbackAsTrust = false) {
       </div>
     `;
   }
+
   return `
     <div class="grid">
       ${reviews
         .map(
           (r) => `
-          <article class="card" data-reveal>
-            <div class="stars" aria-label="${r.rating} / 5">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+          <article class="card review-card">
+            <div class="review-stars" aria-label="${r.rating} / 5">${Array.from({ length: 5 }, (_, idx) => `<span class="star-static ${idx < r.rating ? 'is-filled' : ''}">${icon('star')}</span>`).join('')}</div>
             <p>${esc(r.body)}</p>
-            <span class="muted">${esc(r.display_name || t('عميلة J SPA', 'J SPA guest'))} · ${t('زيارة مكتملة وموثقة', 'Verified completed visit')}</span>
+            <span class="muted">${esc(reviewAuthorName(r))} · ${t('زيارة مكتملة وموثقة', 'Verified completed visit')}</span>
           </article>
         `,
         )
@@ -411,6 +427,199 @@ export function simpleTable(rows, keys) {
         .join('')}
     </div>
   `;
+}
+
+export const starRatingLabels = () => [
+  '',
+  t('نجمة واحدة', 'One star'),
+  t('نجمتان', 'Two stars'),
+  t('ثلاث نجوم', 'Three stars'),
+  t('أربع نجوم', 'Four stars'),
+  t('خمس نجوم', 'Five stars'),
+];
+
+export function reviewModerationStatusBadge(r) {
+  if (r?.approved) {
+    return `<span class="badge">${t('منشور', 'Published')}</span>`;
+  }
+  if (r?.moderation_status === 'needs_edit') {
+    return `<span class="badge danger">${t('يتطلب تعديلاً', 'Needs revision')}</span>`;
+  }
+  return `<span class="badge pending">${t('بانتظار المراجعة', 'Pending review')}</span>`;
+}
+
+export function openReviewModal({ bookings = [], existingReviews = [], initialBookingId = '', onSaved }) {
+  const completedBookings = bookings.filter((b) => b.status === 'completed');
+  if (!completedBookings.length) return;
+  const chosenId = initialBookingId && completedBookings.some((b) => b.id === initialBookingId)
+    ? initialBookingId
+    : completedBookings[0].id;
+  const labels = starRatingLabels();
+
+  const findReview = (bid) => existingReviews.find((r) => r.booking_id === bid) || null;
+  let currentBookingId = chosenId;
+  let existing = findReview(currentBookingId);
+  let selectedRating = Number(existing?.rating || 0);
+
+  openDialog(`
+    <h2>${existing ? t('تعديل تقييمكِ', 'Edit your review') : t('قيّمي تجربتكِ معنا', 'Rate Your Experience')}</h2>
+    <p class="muted" style="margin-bottom:14px">${t(
+      'تُراجع التقييمات من فريقنا قبل نشرها لضمان المصداقية وحماية خصوصيتكِ.',
+      'All reviews are verified against completed appointments and moderated before publication.',
+    )}</p>
+    <form id="review-form" novalidate>
+      <div id="review-form-error" role="alert"></div>
+      <label class="field">
+        ${t('الزيارة المكتملة', 'Completed appointment')}
+        <select name="booking_id" id="review-booking-select">
+          ${completedBookings
+            .map((b) => {
+              const ex = findReview(b.id);
+              const itemsText = (b.items || []).map((i) => esc(nameOf(i) || i.name)).join(' + ');
+              return `<option value="${esc(b.id)}" ${b.id === currentBookingId ? 'selected' : ''}>${esc(b.reference)} · ${esc(b.date)} · ${itemsText}${ex ? ` (${t('تقييم سابق', 'Reviewed')})` : ''}</option>`;
+            })
+            .join('')}
+        </select>
+      </label>
+
+      <div class="control-group">
+        <span class="control-label" id="star-group-label">${t('التقييم العام *', 'Your star rating *')}</span>
+        <div class="star-picker" id="star-picker" role="radiogroup" aria-labelledby="star-group-label">
+          ${[1, 2, 3, 4, 5]
+            .map(
+              (n) => `
+            <button type="button" class="star-btn ${n <= selectedRating ? 'is-filled' : ''}" role="radio"
+              aria-checked="${n === selectedRating ? 'true' : 'false'}"
+              aria-label="${esc(labels[n])}"
+              data-star="${n}" tabindex="${n === (selectedRating || 1) ? '0' : '-1'}">
+              ${icon('star')}
+            </button>`,
+            )
+            .join('')}
+        </div>
+        <div class="muted" id="star-rating-caption" aria-live="polite" style="font-size:13px;margin-top:6px">
+          ${selectedRating ? `${selectedRating} / 5 · ${esc(labels[selectedRating])}` : t('اختاري من نجمة واحدة إلى خمس نجوم', 'Select between 1 and 5 stars')}
+        </div>
+      </div>
+
+      ${field(t('الاسم الظاهر للعامة (اختياري)', 'Public display name (optional)'), 'display_name', 'text', editableDisplayName(existing), 'maxlength="60" placeholder="' + t('مثال: نورة ع.', 'e.g. Noura A.') + '"')}
+      <label class="field">
+        ${t('تفاصيل تجربتكِ *', 'Your experience *')}
+        <textarea name="body" id="review-body-input" required maxlength="2000" placeholder="${t('شاركينا رأيكِ في جودة الخدمة، اللباقة، وترتيب الزيارة...', 'Share your honest impression of service care and attention...')}">${esc(existing?.body || '')}</textarea>
+      </label>
+      <p class="muted" style="font-size:12px">${t(
+        'حفاظاً على خصوصيتكِ، يُرجى عدم إدراج رقم الجوال أو العنوان التفصيلي.',
+        'For your privacy, please do not include phone numbers or home addresses.',
+      )}</p>
+      <button class="btn" type="submit" id="submit-review-btn">${existing ? t('إرسال التعديل للمراجعة', 'Update & submit for review') : t('إرسال التقييم للمراجعة', 'Submit review for moderation')}</button>
+    </form>
+  `);
+
+  const paintStars = (hoverVal = 0) => {
+    const activeCount = hoverVal || selectedRating;
+    document.querySelectorAll('#star-picker [data-star]').forEach((btn) => {
+      const val = Number(btn.dataset.star);
+      btn.classList.toggle('is-filled', val <= selectedRating);
+      btn.classList.toggle('is-hover', hoverVal > 0 && val <= hoverVal);
+      btn.setAttribute('aria-checked', String(val === selectedRating));
+      btn.setAttribute('tabindex', val === (selectedRating || 1) ? '0' : '-1');
+      if (hoverVal > 0) btn.classList.toggle('is-preview', val <= activeCount);
+      else btn.classList.remove('is-preview');
+    });
+    const cap = $('#star-rating-caption');
+    if (cap) {
+      cap.textContent = selectedRating
+        ? `${selectedRating} / 5 · ${labels[selectedRating]}`
+        : t('اختاري من نجمة واحدة إلى خمس نجوم', 'Select between 1 and 5 stars');
+    }
+  };
+
+  const starButtons = [...document.querySelectorAll('#star-picker [data-star]')];
+  starButtons.forEach((btn) => {
+    const val = Number(btn.dataset.star);
+    btn.addEventListener('mouseenter', () => paintStars(val));
+    btn.addEventListener('mouseleave', () => paintStars(0));
+    btn.addEventListener('click', () => {
+      selectedRating = val;
+      paintStars(0);
+    });
+    btn.addEventListener('keydown', (ev) => {
+      const isRtl = document.documentElement.dir === 'rtl';
+      let next = null;
+      if (ev.key === 'ArrowRight') next = isRtl ? val - 1 : val + 1;
+      else if (ev.key === 'ArrowLeft') next = isRtl ? val + 1 : val - 1;
+      else if (ev.key === 'ArrowUp') next = val + 1;
+      else if (ev.key === 'ArrowDown') next = val - 1;
+      else if (ev.key === 'Home') next = 1;
+      else if (ev.key === 'End') next = 5;
+      else if (ev.key === ' ' || ev.key === 'Enter') {
+        ev.preventDefault();
+        selectedRating = val;
+        paintStars(0);
+        return;
+      }
+      if (next !== null) {
+        ev.preventDefault();
+        const clamped = Math.max(1, Math.min(5, next));
+        selectedRating = clamped;
+        paintStars(0);
+        starButtons[clamped - 1]?.focus();
+      }
+    });
+  });
+
+  $('#review-booking-select')?.addEventListener('change', (ev) => {
+    currentBookingId = ev.target.value;
+    existing = findReview(currentBookingId);
+    selectedRating = Number(existing?.rating || 0);
+    const bodyEl = $('#review-body-input');
+    const nameEl = document.querySelector('#review-form [name="display_name"]');
+    const btnEl = $('#submit-review-btn');
+    if (bodyEl) bodyEl.value = existing?.body || '';
+    if (nameEl) nameEl.value = editableDisplayName(existing);
+    if (btnEl) {
+      btnEl.textContent = existing
+        ? t('إرسال التعديل للمراجعة', 'Update & submit for review')
+        : t('إرسال التقييم للمراجعة', 'Submit review for moderation');
+    }
+    paintStars(0);
+  });
+
+  $('#review-form')?.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const errEl = $('#review-form-error');
+    if (!Number.isInteger(selectedRating) || selectedRating < 1 || selectedRating > 5) {
+      errEl.innerHTML = `<div class="error">${t('يرجى اختيار عدد النجوم من 1 إلى 5.', 'Please choose a rating between 1 and 5 stars.')}</div>`;
+      starButtons[0]?.focus();
+      return;
+    }
+    const f = ev.target;
+    const d = Object.fromEntries(new FormData(f));
+    const reviewText = String(d.body || '').trim();
+    if (!reviewText) {
+      errEl.innerHTML = `<div class="error">${t('يرجى كتابة نص التقييم قبل الإرسال.', 'Please share your written review before submitting.')}</div>`;
+      $('#review-body-input')?.focus();
+      return;
+    }
+    const submitBtn = $('#submit-review-btn');
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+      await api('/reviews', {
+        booking_id: currentBookingId,
+        rating: selectedRating,
+        display_name: d.display_name,
+        body: reviewText,
+        edit: Boolean(existing),
+      });
+      $('#modal')?.close();
+      state.account = null;
+      toast(t('تم استلام تقييمكِ بنجاح؛ بانتظار مراجعة الإدارة قبل النشر.', 'Thank you — your review is saved and pending moderation.'));
+      if (onSaved) await onSaved();
+    } catch (err) {
+      errEl.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
 }
 
 export function openDialog(content) {
