@@ -1,11 +1,14 @@
 {
-  "date": "2026-11-10T12:09:44.292Z",
+  "date": "2026-11-10T13:23:49.783Z",
   "passed": [
-    "Guest package booking with clean Packages tab (no auto-select), validation and WhatsApp message",
+    "Guest 5-step package booking with clean Packages tab, validation, and WhatsApp handoff",
     "Customer registration and WhatsApp manual verification reference",
-    "Registered service booking",
-    "Staff confirmation, progress, completion and verified cash payment through UI",
-    "Customer J Petals Club balance (250) displayed after verified payment",
+    "J Nail Atelier interactive customization and Save to Beauty Passport",
+    "J Ritual Studio deterministic catalog-backed recommendation flow",
+    "Beauty Together group request and Gift a Ritual manual payment-verified workflow",
+    "Registered 5-step service booking with zero checkbox focus loss",
+    "Staff confirmation, progress, completion, verified cash payment, and Admin Funnel / Group & Gift management",
+    "Customer Beauty Passport preferences, saved nail look, and J Petals Club balance (250) verified",
     "Admin calendar timeline, payments field alignment, and audit log rendering verified"
   ],
   "errors": []

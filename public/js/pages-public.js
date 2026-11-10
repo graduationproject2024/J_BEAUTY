@@ -1,4 +1,4 @@
-import { descOf, esc, href, minutes, money, nameOf, state, t } from './state.js';
+import { $, api, descOf, esc, href, minutes, money, nameOf, state, t, toast } from './state.js';
 import {
   head,
   icon,
@@ -9,64 +9,96 @@ import {
   serviceArt,
   serviceCard,
 } from './components.js';
+import { atelierMiniWidget } from './atelier.js';
+
+const MOODS = [
+  {
+    id: 'unwind',
+    ar: 'عايزة أسترخي',
+    en: 'Unwind & Release',
+    sub_ar: 'مساج استرخائي أو بالأحجار الساخنة يهدّئ يومكِ.',
+    sub_en: 'Soothing or hot-stone massage to ease tension.',
+    ids: ['relaxation', 'hot-stone'],
+  },
+  {
+    id: 'pamper',
+    ar: 'عايزة أدلع نفسي',
+    en: 'Pamper Myself',
+    sub_ar: 'توازن بين تدليك مريح وعناية كلاسيكية لليدين والقدمين.',
+    sub_en: 'Combined body relaxation and classic mani-pedi care.',
+    ids: ['classic', 'pedicure'],
+  },
+  {
+    id: 'nails',
+    ar: 'عايزة أظافر جديدة',
+    en: 'Fresh Nails',
+    sub_ar: 'طلاء جل، فرنش كلاسيك، أو أطراف ملونة بتصميمكِ.',
+    sub_en: 'Glossy gel polish, classic French, or custom tips.',
+    ids: ['gel-polish', 'french-gel'],
+  },
+  {
+    id: 'occasion',
+    ar: 'بجهز لمناسبة',
+    en: 'Special Occasion',
+    sub_ar: 'أطراف فرنش جل مع عناية كاملة لليوم المنتظر.',
+    sub_en: 'French tip artistry paired with glowing hand and foot prep.',
+    ids: ['french-tip', 'colored-french'],
+  },
+];
+
+function moodPreviewHtml() {
+  const m = MOODS.find((x) => x.id === state.homeMood) || MOODS[0];
+  const matched = state.catalog.services.filter((s) => m.ids.includes(s.id));
+  return `
+    <div class="mood-result" id="mood-result">
+      <div class="mood-result-grid">
+        ${matched
+          .map(
+            (s) => `
+          <div class="mood-match-card">
+            <div>
+              <strong>${esc(nameOf(s))}</strong>
+              <span class="muted">${minutes(s.duration)} · ${money(s.price)}</span>
+            </div>
+            <a class="btn small" href="${href('booking')}?service=${esc(s.id)}">${t('اختاريها', 'Select')}</a>
+          </div>
+        `,
+          )
+          .join('')}
+      </div>
+      <div class="row" style="margin-top:14px">
+        <span class="muted">${esc(t(m.sub_ar, m.sub_en))}</span>
+        <a class="text-link" href="${href('studio')}">${t('جربي استوديو الترشيح الكامل ←', 'Try full J Ritual Studio →')}</a>
+      </div>
+    </div>
+  `;
+}
 
 export function home() {
   const s = state.catalog.services || [];
-  const categories = [
-    {
-      id: 'massage',
-      title: t('خدمات المساج', 'Massage Therapy'),
-      sub: t(
-        'تدليك استرخائي وعلاجي وبالأحجار الساخنة والتصريف اللمفاوي في هدوء منزلكِ.',
-        'Relaxation, therapeutic, heated basalt stone, and gentle lymphatic care at home.',
-      ),
-      img: '/assets/images/services/hot-stone.webp',
-      count: s.filter((x) => x.category === 'massage').length,
-      from: Math.min(...s.filter((x) => x.category === 'massage').map((x) => x.price), 195),
-    },
-    {
-      id: 'nails',
-      title: t('العناية بالأظافر', 'Nail Care'),
-      sub: t(
-        'منيكير وبديكير كلاسيك، عناية بالأقدام، ورسم الأطراف الفرنسية بأدوات معقمة.',
-        'Classic manicure & pedicure, restorative foot soaks, and crisp French tips.',
-      ),
-      img: '/assets/images/services/classic.webp',
-      count: s.filter((x) => x.category === 'nails').length,
-      from: Math.min(...s.filter((x) => x.category === 'nails').map((x) => x.price), 70),
-    },
-    {
-      id: 'gel',
-      title: t('خدمات الجل', 'Gel Services'),
-      sub: t(
-        'طلاء جل ثابت، فرنش جل، أطراف ملونة، وإزالة لطيفة تحافظ على صحة أظافركِ.',
-        'Long-wear glossy gel polish, French gel, colored micro-tips, and gentle removal.',
-      ),
-      img: '/assets/images/services/french-gel.webp',
-      count: s.filter((x) => x.category === 'gel').length,
-      from: Math.min(...s.filter((x) => x.category === 'gel').map((x) => x.price), 50),
-    },
-  ];
+  const featuredIds = ['relaxation', 'hot-stone', 'classic', 'french-gel'];
+  const featured = featuredIds.map((id) => s.find((x) => x.id === id)).filter(Boolean);
 
   return `
     <main id="main">
       <div class="wrap">
+        <!-- 1. Premium Cinematic Hero -->
         <section class="hero">
           <div class="hero-copy">
-            <span class="eyebrow">${t('للسيدات فقط · المدينة المنورة', 'EXCLUSIVELY FOR WOMEN · MADINAH')}</span>
-            <h1>${t('لحظتكِ الخاصة…<br>في راحة بيتكِ', 'Your Moment of Beauty,<br>At Home.')}</h1>
+            <span class="eyebrow">${t('للسيدات فقط · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</span>
+            <h1>${t('جمالكِ. طقوسكِ.<br>لحظتكِ الخاصة في بيتكِ.', 'Your Beauty.<br>Your Ritual. Your Moment.')}</h1>
             <p class="hero-lead">${t(
-              'طقوس عناية منزلية هادئة من المساج إلى العناية بالأظافر والجل — تأتيكِ أينما كنتِ في المدينة المنورة بتفاصيل مرتبة وتأكيد شخصي.',
-              'Quiet-luxury spa and nail rituals brought directly to your home in Al Madinah, with personal confirmation and calm attention to every detail.',
+              'عناية منزلية نسائية فاخرة من المساج إلى أتيليه الأظافر والجل — تصل إلى منزلكِ في المدينة المنورة بتفاصيل هادئة وتأكيد شخصي.',
+              'Quiet-luxury massage, nail artistry, and botanical home spa rituals delivered across Madinah with personal team confirmation.',
             )}</p>
             <div class="hero-actions">
               <a class="btn" href="${href('booking')}">${t('احجزي موعدكِ', 'Book your moment')}</a>
-              <a class="text-link" href="${href('services')}">${t('اكتشفي خدماتنا (13)', 'Explore our rituals (13)')}</a>
+              <a class="text-link" href="${href('services')}">${t('اكتشفي خدماتنا (13)', 'Explore all rituals')}</a>
             </div>
             <div class="hero-trust">
-              <span>✓ ${t('خدمة منزلية للسيدات فقط', 'Women-only home visits')}</span>
-              <span>✓ ${t('تأكيد يدوي شخصي عبر الفريق', 'Personal team confirmation')}</span>
-              <span>✓ ${t('برنامج بتلات J بعد الدفع المؤكد', 'J Petals loyalty rewards')}</span>
+              <span>✓ ${t('للسيدات فقط', 'Women only')}</span>
+              <span>✓ ${t('تأكيد يدوي شخصي', 'Personal team confirmation')}</span>
+              <span>✓ ${t('أتيليه أظافر تفاعلي', 'Interactive Nail Atelier')}</span>
             </div>
           </div>
           <div class="hero-visual">
@@ -75,105 +107,63 @@ export function home() {
             </div>
             <div class="hero-seal">
               <strong>J SPA · ${t('المدينة المنورة', 'MADINAH')}</strong>
-              <span>${t('عناية نسائية منزلية هادئة، بتأكيد شخصي لموعدكِ.', 'Quiet women’s home care, personally confirmed.')}</span>
+              <span>${t('لحظتكِ الخاصة… في راحة بيتكِ', 'Your Moment of Beauty, At Home.')}</span>
             </div>
           </div>
         </section>
 
-        <section class="benefits" aria-label="${t('مزايا التجربة', 'Experience pillars')}">
-          <div class="benefit-item">
-            <div class="benefit-icon">${icon('home')}</div>
+        <!-- 2. Choose Your Mood -->
+        <section class="section-tight mood-band" data-reveal>
+          <div class="section-head" style="margin-bottom:20px">
             <div>
-              <strong>${t('في خصوصية منزلكِ', 'In Your Own Sanctuary')}</strong>
-              <span>${t('نصل إليكِ بكامل المستلزمات النظيفة والمعقمة دون عناء التنقل.', 'We bring sanitized essentials and calm setup right to your door.')}</span>
+              <span class="eyebrow">${t('اكتشاف شخصي سريع', 'DISCOVERY BY MOOD')}</span>
+              <h2>${t('إيه نوع العناية اللي محتاجاها النهارده؟', 'What kind of care are you craving today?')}</h2>
             </div>
+            <a class="text-link" href="${href('studio')}">${t('استوديو J للاختيار', 'Open J Ritual Studio')}</a>
           </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">${icon('spark')}</div>
-            <div>
-              <strong>${t('تأكيد شخصي ومرن', 'Personal Confirmation')}</strong>
-              <span>${t('يراجع فريقنا الوقت والحي والطاقة الاستيعابية ويتواصل معكِ عبر واتساب.', 'Every request is personally checked and confirmed by our team via WhatsApp.')}</span>
-            </div>
+          <div class="mood-grid">
+            ${MOODS.map(
+              (m) => `
+              <button type="button" class="mood-btn ${state.homeMood === m.id ? 'active' : ''}" data-mood-pick="${m.id}">
+                <strong>${t(m.ar, m.en)}</strong>
+                <span>${t(m.sub_ar, m.sub_en)}</span>
+              </button>
+            `,
+            ).join('')}
           </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">${icon('shield')}</div>
-            <div>
-              <strong>${t('نقاط بتلات شفافة', 'Honest Petals Rewards')}</strong>
-              <span>${t('تُحتسب البتلات تلقائياً بعد اكتمال الزيارة وتوثيق الدفع والحساب.', 'Points are credited automatically only after completed, verified-paid visits.')}</span>
-            </div>
-          </div>
+          ${moodPreviewHtml()}
         </section>
 
+        <!-- 3. Featured Rituals -->
         <section class="section">
           <div class="section-head">
             <div>
-              <span class="eyebrow">${t('قائمة الطقوس', 'CURATED CATEGORIES')}</span>
-              <h2>${t('ثلاثة عوالم للعناية بكِ', 'Three worlds of calm care')}</h2>
+              <span class="eyebrow">${t('مختارات J SPA', 'FEATURED RITUALS')}</span>
+              <h2>${t('جلسات منتقاة لراحتكِ', 'Curated moments of care')}</h2>
             </div>
-            <a class="text-link" href="${href('services')}">${t('عرض جميع الخدمات (13)', 'View all 13 rituals')}</a>
-          </div>
-          <div class="category-grid">
-            ${categories
-              .map(
-                (c) => `
-              <a class="category-card" href="${href('services')}?cat=${c.id}">
-                <div class="category-media">
-                  <img src="${c.img}" alt="${esc(c.title)}" loading="lazy">
-                  <span class="category-pill">${c.count} ${t('خدمات', 'services')}</span>
-                </div>
-                <div class="category-body">
-                  <h3>${c.title}</h3>
-                  <p>${c.sub}</p>
-                  <div class="category-foot">
-                    <span>${t('تبدأ من', 'From')} ${money(c.from)}</span>
-                    <span>${t('تصفحي القسم ←', 'Explore →')}</span>
-                  </div>
-                </div>
-              </a>
-            `,
-              )
-              .join('')}
-          </div>
-        </section>
-
-        <section class="section" style="padding-top:12px">
-          <div class="section-head">
-            <div>
-              <span class="eyebrow">${t('باقات متكاملة', 'THOUGHTFULLY PAIRED')}</span>
-              <h2>${t('باقات تجمع ما تحبين', 'Curated Gift Collections')}</h2>
-            </div>
-            <a class="text-link" href="${href('packages')}">${t('جميع الباقات', 'All packages')}</a>
+            <a class="text-link" href="${href('services')}">${t('تصفحي كل الخدمات (13) ←', 'Browse all 13 services →')}</a>
           </div>
           ${provisional()}
-          <div class="packages-grid">
-            ${(state.catalog.packages || []).map(packageCard).join('')}
+          <div class="grid four-cols">
+            ${featured.map(serviceCard).join('')}
           </div>
         </section>
 
-        <section class="section" style="padding-top:12px">
+        <!-- 4. The J SPA Experience -->
+        <section class="section" style="padding-top:12px" data-reveal>
           <div class="section-head">
             <div>
-              <span class="eyebrow">${t('خطوات واضحة', 'HOW IT WORKS')}</span>
-              <h2>${t('من اختياركِ… إلى باب منزلكِ', 'From selection to your doorstep')}</h2>
+              <span class="eyebrow">${t('كيف تتم الزيارة المنزلية؟', 'THE J SPA EXPERIENCE')}</span>
+              <h2>${t('من اختياركِ… حتى باب بيتكِ', 'From request to serene home ritual')}</h2>
             </div>
+            <a class="text-link" href="${href('group-booking')}">${t('حجز جماعي (Beauty Together)', 'Beauty Together group visits')}</a>
           </div>
-          <div class="steps">
+          <div class="steps four">
             ${[
-              [
-                '01',
-                t('اختاري طقسكِ أو باقتكِ', 'Choose your ritual'),
-                t('حددي خدمة واحدة أو عدة خدمات أو إحدى الباقات المتناغمة.', 'Pick one or multiple treatments, or one of our paired packages.'),
-              ],
-              [
-                '02',
-                t('أرسلي طلبكِ عبر واتساب', 'Send via WhatsApp'),
-                t('يُحفظ طلبكِ لدينا وتُفتح رسالة واتساب جاهزة لتضغطي إرسال بنفسكِ.', 'Your request is saved and WhatsApp opens with a prepared Arabic message for you to send.'),
-              ],
-              [
-                '03',
-                t('نؤكد الموعد شخصياً', 'Personal confirmation'),
-                t('تراجع الموظفة الوقت والحي والسعة ثم تؤكد الموعد معكِ يدوياً.', 'Staff checks neighborhood capacity and manually confirms your final appointment.'),
-              ],
+              ['01', t('تقديم الطلب', 'Request Online'), t('اختاري فئة الخدمة والوقت المفضل في المدينة المنورة.', 'Pick your category, rituals, and preferred Madinah time.')],
+              ['02', t('تأكيد الفريق', 'Staff Confirmation'), t('تتواصل الموظفة عبر واتساب لمراجعة السعة وتأكيد الموعد.', 'Our team checks staff capacity and confirms manually on WhatsApp.')],
+              ['03', t('تحضير معقم ومرتب', 'Home Preparation'), t('نصل بمستلزمات نظيفة ومناشف مرتبة وتجهيز هادئ.', 'Sanitized instruments and fresh linens arrive neatly prepared.')],
+              ['04', t('لحظتكِ الهادئة', 'The Ritual Experience'), t('تستمتعين بجلستكِ في خصوصية منزلكِ ثم تُحتسب البتلات.', 'Unwind in total privacy; points accrue once completed & paid.')],
             ]
               .map(
                 ([num, title, copy]) => `
@@ -188,21 +178,27 @@ export function home() {
           </div>
         </section>
 
-        <section class="loyalty-band">
+        <!-- 5. Nail Atelier Preview -->
+        <section class="section-tight" data-reveal>
+          ${atelierMiniWidget()}
+        </section>
+
+        <!-- 6. J Petals Club -->
+        <section class="loyalty-band" data-reveal style="margin-block:48px">
           <div>
             <span class="eyebrow">J PETALS CLUB</span>
             <h2>${t('نادي بتلات J… كل زيارة تزهر مكافأة', 'J Petals Club. Care that blooms.')}</h2>
             <p>${t(
-              'مع كل زيارة مكتملة ومدفوعة بتحقق الموظفة، تضاف البتلات تلقائياً إلى حسابكِ الموثق لتستبدليها بخصومات على حجوزاتكِ القادمة.',
-              'Collect petals on every completed, staff-verified paid visit in your verified account and redeem beauty rewards on upcoming bookings.',
+              'تُمنح البتلات حصرياً وفق القواعد المعتمدة بعد اكتمال الخدمة والتحقق من الدفع وتوثيق ملكية حسابكِ. لا تُضاف نقاط قبل الدفع الفعلي.',
+              'Petals are issued exclusively after completed service, staff-verified payment receipt, and verified phone ownership.',
             )}</p>
             <div class="hero-actions" style="margin-top:24px">
               <a class="btn rose" href="${href('petals')}">${t('استكشفي نادي بتلات J', 'Discover J Petals Club')}</a>
-              <a class="text-link" href="${href('register')}">${t('أنشئي حسابكِ', 'Create an account')}</a>
+              <a class="text-link" href="${href('gifts')}">${t('أهدي تجربة سبا', 'Gift a Ritual')}</a>
             </div>
           </div>
           <div class="loyalty-card">
-            <span class="eyebrow" style="margin-bottom:6px">${t('مثال توضيحي للبرنامج', 'PROGRAM PREVIEW')}</span>
+            <span class="eyebrow" style="margin-bottom:4px">${t('مثال توضيحي للبرنامج', 'PROGRAM PREVIEW')}</span>
             <div class="petal-arc-wrap">
               ${petalBloomSVG(5, 8)}
               <div class="loyalty-balance-num">${t('١ ر.س = ١ بتلة', '1 SAR = 1 Petal')}</div>
@@ -211,22 +207,27 @@ export function home() {
           </div>
         </section>
 
+        <!-- 7. Genuine Beauty Stories / Verified Care Standards -->
         <section class="section">
           <div class="section-head">
             <div>
-              <span class="eyebrow">${t('كلمات صادقة', 'GENUINE VOICES')}</span>
-              <h2>${t('تجارب العميلات', 'Customer Reviews')}</h2>
+              <span class="eyebrow">${t('الشفافية والثقة', 'GENUINE BEAUTY STORIES')}</span>
+              <h2>${state.catalog.reviews?.length ? t('كلمات من تجارب حقيقية', 'Verified Customer Stories') : t('معايير عناية تُشعركِ بالطمأنينة', 'Standards built on honesty')}</h2>
             </div>
-            <a class="text-link" href="${href('reviews')}">${t('صفحة التقييمات', 'All reviews')}</a>
+            <a class="text-link" href="${href('reviews')}">${t('صفحة التقييمات', 'Reviews page')}</a>
           </div>
-          ${reviewsContent(state.catalog.reviews)}
+          ${reviewsContent(state.catalog.reviews, true)}
         </section>
 
-        <section class="cta-band">
-          <span class="eyebrow">${t('جاهزة للحظتكِ؟', 'TAKE A BREATH')}</span>
-          <h2>${t('لحظتكِ الهادئة تبدأ بخطوة بسيطة', 'Your quiet moment starts here.')}</h2>
-          <p>${t('اختاري خدمتكِ الآن، واتركي الباقي لتنسيق فريق J SPA في المدينة المنورة.', 'Select your treatment and let our Madinah team coordinate the rest.')}</p>
-          <a class="btn" href="${href('booking')}">${t('ابدئي طلب الحجز الآن', 'Request your appointment')}</a>
+        <!-- 8. Final Booking CTA -->
+        <section class="cta-band" data-reveal>
+          <span class="eyebrow">${t('جاهزة للحظتكِ؟', 'YOUR MOMENT AWAITS')}</span>
+          <h2>${t('احجزي طقسكِ المنزلي اليوم', 'Reserve your calm moment at home')}</h2>
+          <p>${t('ابدئي باختيار فئة الخدمة، أو صممي إطلالة أظافركِ، أو دعي استوديو J يقترح عليكِ الأنسب.', 'Start your appointment request, explore J Nail Atelier, or get tailored studio suggestions.')}</p>
+          <div class="hero-actions" style="justify-content:center">
+            <a class="btn" href="${href('booking')}">${t('ابدئي طلب الحجز الآن', 'Request your appointment')}</a>
+            <a class="btn light" href="${href('lookbook')}">${t('تصفحي معرض الإطلالات', 'Browse Lookbook')}</a>
+          </div>
         </section>
       </div>
     </main>
@@ -253,7 +254,7 @@ export function services() {
       ${head(
         t('خدماتنا المنزلية', 'Home Spa & Nail Rituals'),
         t('13 خدمة مصممة لعناية مريحة ومتكاملة للسيدات في المدينة المنورة.', '13 women-only treatments crafted for comfort and calm care at home in Madinah.'),
-        [[t('الرئيسية', 'home'), 'home'], [t('الخدمات', 'Services'), '']],
+        [[t('الرئيسية', 'Home'), 'home'], [t('الخدمات', 'Services'), '']],
       )}
       ${provisional()}
       <div class="filter" role="tablist" aria-label="${t('تصنيف الخدمات', 'Service categories')}">
@@ -284,6 +285,7 @@ export function detail(id) {
   const related = (state.catalog.services || [])
     .filter((x) => x.category === s.category && x.id !== s.id)
     .slice(0, 3);
+  const isFav = state.favorites.includes(s.id);
 
   return `
     <main id="main" class="wrap">
@@ -299,7 +301,12 @@ export function detail(id) {
       <div class="split section-tight" style="padding-top:0">
         ${serviceArt(s, 'detail-art')}
         <div>
-          <span class="eyebrow">${minutes(s.duration)} · ${money(s.price)}</span>
+          <div class="row" style="margin-bottom:10px">
+            <span class="eyebrow" style="margin:0">${minutes(s.duration)} · ${money(s.price)}</span>
+            <button type="button" class="btn small light" data-fav-toggle="${esc(s.id)}" aria-pressed="${isFav}">
+              ${icon('heart')} ${isFav ? t('محفوظة بالمفضلة', 'Saved') : t('أضيفي للمفضلة', 'Save favorite')}
+            </button>
+          </div>
           <p style="font-size:16.5px;margin-bottom:22px">${esc(descOf(s))}</p>
           ${
             inclusions.length
@@ -366,7 +373,7 @@ export function reviewsPage() {
         [[t('الرئيسية', 'Home'), 'home'], [t('الآراء', 'Reviews'), '']],
       )}
       <section class="section-tight" style="padding-top:0">
-        ${reviewsContent(state.catalog.reviews)}
+        ${reviewsContent(state.catalog.reviews, false)}
       </section>
     </main>
   `;
@@ -571,4 +578,43 @@ export function notFound() {
       </div>
     </main>
   `;
+}
+
+export function bindPublicInteractions(goFn) {
+  document.querySelectorAll('[data-mood-pick]').forEach((btn) => {
+    btn.onclick = () => {
+      state.homeMood = btn.dataset.moodPick;
+      document.querySelectorAll('[data-mood-pick]').forEach((x) => x.classList.toggle('active', x === btn));
+      const box = $('#mood-result');
+      if (box) box.outerHTML = moodPreviewHtml();
+    };
+  });
+
+  document.querySelectorAll('[data-fav-toggle]').forEach((btn) => {
+    btn.onclick = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!state.user) {
+        toast(t('سجلي الدخول لحفظ خدماتكِ المفضلة في جواز الجمال', 'Sign in to save favorites to your Beauty Passport'));
+        goFn('login');
+        return;
+      }
+      const id = btn.dataset.favToggle;
+      const isFav = state.favorites.includes(id);
+      try {
+        const res = await api('/passport/favorites', {
+          service_id: id,
+          action: isFav ? 'remove' : 'add',
+        });
+        state.favorites = res.favorites;
+        state.account = null;
+        const nowFav = state.favorites.includes(id);
+        btn.classList.toggle('active', nowFav);
+        btn.setAttribute('aria-pressed', String(nowFav));
+        toast(nowFav ? t('أُضيفت إلى المفضلة', 'Saved to favorites') : t('أُزيلت من المفضلة', 'Removed from favorites'));
+      } catch (err) {
+        toast(err.message);
+      }
+    };
+  });
 }

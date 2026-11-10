@@ -2,6 +2,7 @@ import { employeeCustomerView, hash, hashPassword, publicUser, token } from './a
 import { now, uid, DEFAULT_SETTINGS } from './db.mjs';
 import { processRewardAction, reconcileLoyalty } from './loyalty.mjs';
 import { updateBookingAdmin } from './booking.mjs';
+import { getFunnelSummary } from './experiences.mjs';
 import { fail, maskPhone, money, phone, safeImageUrl, safeSocialUrl, text } from './validation.mjs';
 
 function filterEmployeeBookings(allBookings, pendingRewardBookingIds) {
@@ -40,9 +41,21 @@ function filterEmployeeBookings(allBookings, pendingRewardBookingIds) {
     });
 }
 
-export function getAdminPayload(db, helpers, user) {
+function paginate(items, pageParam, limitParam, defaultLimit = 50) {
+  const limit = Math.min(200, Math.max(1, Number(limitParam) || defaultLimit));
+  const total = items.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const page = Math.min(totalPages, Math.max(1, Number(pageParam) || 1));
+  const start = (page - 1) * limit;
+  return {
+    items: items.slice(start, start + limit),
+    meta: { page, limit, total, totalPages },
+  };
+}
+
+export function getAdminPayload(db, helpers, user, query = {}) {
   const isOwner = user.role === 'owner';
-  const allBookings = helpers.bookings();
+  const allBookings = helpers.bookings().sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   const activeVerifications = db.all(
     'SELECT id,user_id,expires,used FROM verification WHERE used=0 AND expires>?',
     Date.now(),
@@ -58,14 +71,33 @@ export function getAdminPayload(db, helpers, user) {
   const allPackages = helpers.packages();
   const currentSettings = helpers.settings();
 
+  const allGroups = db
+    .all('SELECT reference, data, created_at FROM group_requests ORDER BY created_at DESC LIMIT 100')
+    .map((r) => ({ ...JSON.parse(r.data), reference: r.reference, created_at: r.created_at }));
+
+  const allGifts = db
+    .all('SELECT reference, data, created_at FROM gift_requests ORDER BY created_at DESC LIMIT 100')
+    .map((r) => ({ ...JSON.parse(r.data), reference: r.reference, created_at: r.created_at }));
+
   if (!isOwner) {
+    const empBookings = filterEmployeeBookings(allBookings, pendingRewardBookingIds);
+    const pagedBookings = paginate(empBookings, query.bookings_page, query.bookings_limit, 50);
     return {
-      bookings: filterEmployeeBookings(allBookings, pendingRewardBookingIds),
+      bookings: pagedBookings.items,
+      pagination: { bookings: pagedBookings.meta },
       customers: rawCustomers.map((c) => employeeCustomerView(c, pendingVerifySet.has(c.id))),
       verifications: activeVerifications,
       payments: [],
       ledger: [],
       reward_requests: pendingRewards,
+      group_requests: allGroups.map((g) => ({
+        ...g,
+        organizer_phone: g.status === 'pending_approval' ? g.organizer_phone : maskPhone(g.organizer_phone),
+      })),
+      gift_requests: allGifts.map((g) => ({
+        ...g,
+        sender_phone: maskPhone(g.sender_phone),
+      })),
       services: allServices,
       packages: allPackages,
       schedule_config: {
@@ -106,21 +138,44 @@ export function getAdminPayload(db, helpers, user) {
       service_date: b.date,
     }));
 
-  const auditRows = db.all('SELECT * FROM audit ORDER BY id DESC LIMIT 500').map((row) => {
-    const actorInfo = row.actor ? allUsersById.get(row.actor) : null;
-    return {
-      ...row,
-      actor_name: actorInfo ? `${actorInfo.name} (${actorInfo.role})` : row.actor || 'System',
-    };
-  });
+  const auditPage = Math.max(1, Number(query.audit_page) || 1);
+  const auditLimit = Math.min(200, Math.max(1, Number(query.audit_limit) || 50));
+  const auditTotal = db.get('SELECT COUNT(*) AS n FROM audit').n;
+  const auditRows = db
+    .all('SELECT * FROM audit ORDER BY id DESC LIMIT ? OFFSET ?', auditLimit, (auditPage - 1) * auditLimit)
+    .map((row) => {
+      const actorInfo = row.actor ? allUsersById.get(row.actor) : null;
+      return {
+        ...row,
+        actor_name: actorInfo ? `${actorInfo.name} (${actorInfo.role})` : row.actor || 'System',
+      };
+    });
+
+  const ledgerPage = Math.max(1, Number(query.ledger_page) || 1);
+  const ledgerLimit = Math.min(200, Math.max(1, Number(query.ledger_limit) || 50));
+  const ledgerTotal = db.get('SELECT COUNT(*) AS n FROM ledger').n;
+  const ledgerRows = db.all(
+    'SELECT * FROM ledger ORDER BY created_at DESC LIMIT ? OFFSET ?',
+    ledgerLimit,
+    (ledgerPage - 1) * ledgerLimit,
+  );
+
+  const pagedBookings = paginate(allBookings, query.bookings_page, query.bookings_limit, 100);
 
   return {
-    bookings: allBookings,
+    bookings: pagedBookings.items,
+    pagination: {
+      bookings: pagedBookings.meta,
+      audit: { page: auditPage, limit: auditLimit, total: auditTotal, totalPages: Math.max(1, Math.ceil(auditTotal / auditLimit)) },
+      ledger: { page: ledgerPage, limit: ledgerLimit, total: ledgerTotal, totalPages: Math.max(1, Math.ceil(ledgerTotal / ledgerLimit)) },
+    },
     customers: rawCustomers.map(publicUser),
     verifications: activeVerifications,
     payments,
-    ledger: db.all('SELECT * FROM ledger ORDER BY created_at DESC LIMIT 500'),
+    ledger: ledgerRows,
     reward_requests: allRewardRequests,
+    group_requests: allGroups,
+    gift_requests: allGifts,
     services: allServices,
     packages: allPackages,
     reviews: db.all('SELECT * FROM reviews').map((r) => ({ ...JSON.parse(r.data), booking_id: r.booking_id })),
@@ -150,18 +205,57 @@ export function getAdminPayload(db, helpers, user) {
           count: allBookings.filter((b) => b.items.some((item) => item.id === s.id)).length,
         }))
         .sort((a, b) => b.count - a.count),
+      funnel: getFunnelSummary(db),
     },
   };
 }
 
-export function handleAdminRoute({ db, helpers, user, route, body, checkRate, send }) {
+export function handleAdminRoute({ db, helpers, user, route, query, body, checkRate, send }) {
   if (route === '/api/admin' && !body) {
-    return send(getAdminPayload(db, helpers, user));
+    return send(getAdminPayload(db, helpers, user, query));
   }
 
   if (/^\/api\/admin\/bookings\/[^/]+$/.test(route)) {
     const id = route.split('/').pop();
     return send({ booking: updateBookingAdmin(db, helpers, user, id, body) });
+  }
+
+  if (/^\/api\/admin\/group-requests\/[^/]+$/.test(route)) {
+    const id = route.split('/').pop();
+    const row = db.get('SELECT * FROM group_requests WHERE id=?', id);
+    if (!row) fail('Group request not found', 404);
+    const reqObj = JSON.parse(row.data);
+    if (!['pending_approval', 'approved', 'cancelled'].includes(body.status)) {
+      fail('Invalid status');
+    }
+    reqObj.status = body.status;
+    reqObj.updated_at = now();
+    db.run('UPDATE group_requests SET data=? WHERE id=?', JSON.stringify(reqObj), id);
+    helpers.audit(user, 'group.update', id, JSON.stringify({ status: body.status }));
+    return send({ group_request: reqObj });
+  }
+
+  if (/^\/api\/admin\/gift-requests\/[^/]+$/.test(route)) {
+    const id = route.split('/').pop();
+    const row = db.get('SELECT * FROM gift_requests WHERE id=?', id);
+    if (!row) fail('Gift request not found', 404);
+    const reqObj = JSON.parse(row.data);
+    if (body.status && ['pending_staff_payment', 'approved_ready', 'redeemed', 'cancelled'].includes(body.status)) {
+      if (body.status === 'redeemed' && !reqObj.payment_verified && body.payment_verified !== true) {
+        fail('Gift payment must be verified before redemption');
+      }
+      reqObj.status = body.status;
+      if (body.status === 'redeemed') reqObj.redeemed = true;
+    }
+    if (typeof body.payment_verified === 'boolean') {
+      reqObj.payment_verified = body.payment_verified;
+      if (reqObj.payment_verified && !reqObj.payment_verified_at) {
+        reqObj.payment_verified_at = now();
+      }
+    }
+    db.run('UPDATE gift_requests SET data=? WHERE id=?', JSON.stringify(reqObj), id);
+    helpers.audit(user, 'gift.update', id, JSON.stringify({ status: reqObj.status, payment_verified: reqObj.payment_verified }));
+    return send({ gift_request: reqObj });
   }
 
   if (route === '/api/admin/verify') {
@@ -230,7 +324,6 @@ export function handleAdminRoute({ db, helpers, user, route, body, checkRate, se
     return send({ reward_request: processRewardAction(db, helpers, user, id, body) });
   }
 
-  // Everything below requires Owner privilege
   if (user.role !== 'owner') fail('Owner access required', 403);
 
   if (route === '/api/admin/services') {
@@ -386,4 +479,3 @@ export function handleAdminRoute({ db, helpers, user, route, body, checkRate, se
 
   fail('Not found', 404);
 }
-

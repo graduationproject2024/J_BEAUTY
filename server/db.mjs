@@ -443,9 +443,18 @@ export function openDatabase(dbPath) {
     CREATE TABLE IF NOT EXISTS reviews(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,booking_id TEXT UNIQUE NOT NULL,data TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY AUTOINCREMENT,actor TEXT,action TEXT NOT NULL,target TEXT,detail TEXT,created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS rate_limits(key TEXT PRIMARY KEY,count INTEGER NOT NULL,until INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS passport_favorites(user_id TEXT NOT NULL,service_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(user_id,service_id));
+    CREATE TABLE IF NOT EXISTS nail_styles(id TEXT PRIMARY KEY,user_id TEXT,share_code TEXT UNIQUE,data TEXT NOT NULL,created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS passport_prefs(user_id TEXT PRIMARY KEY,data TEXT NOT NULL,updated_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS group_requests(id TEXT PRIMARY KEY,reference TEXT UNIQUE NOT NULL,user_id TEXT,data TEXT NOT NULL,created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS gift_requests(id TEXT PRIMARY KEY,reference TEXT UNIQUE NOT NULL,user_id TEXT,data TEXT NOT NULL,created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS funnel_events(day TEXT NOT NULL,event TEXT NOT NULL,count INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(day,event));
     CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
     CREATE INDEX IF NOT EXISTS idx_ledger_user ON ledger(user_id);
     CREATE INDEX IF NOT EXISTS idx_audit_created ON audit(created_at);
+    CREATE INDEX IF NOT EXISTS idx_nail_styles_user ON nail_styles(user_id);
+    CREATE INDEX IF NOT EXISTS idx_group_requests_user ON group_requests(user_id);
+    CREATE INDEX IF NOT EXISTS idx_gift_requests_user ON gift_requests(user_id);
   `);
 
   const all = (q, ...args) => db.prepare(q).all(...args);

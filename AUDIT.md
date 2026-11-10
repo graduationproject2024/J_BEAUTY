@@ -63,3 +63,29 @@ Branch: `codex/jspa-premium-overhaul` (branched from `main` at `6e20931`)
 - **Implemented Fix:** Promoted `auth()` heading to `<h1>`, changed `.header-shell` to relative flow alongside the mobile bottom bar, formatted ISO timestamps & audit details cleanly, and tightened `.admin-grid` table cells.
 - **Status:** Fixed & Verified.
 
+### 9. Unknown Subroutes Returning HTTP 200 & Missing Open Graph Tags (`P1` — `feature/j-beauty-transformation`)
+- **Affected Files:** `seo.mjs`, `server.mjs`
+- **Root Cause:** SPA shell catch-all served HTTP `200` on invalid `/ar/...` and `/en/...` paths instead of `404` with `noindex`, and HTML lacked `og:*` / Twitter preview metadata.
+- **Implemented Fix:** Added `isKnownAppRoute(pathname, services)` in `seo.mjs`, returned HTTP `404` with `noindex,nofollow` HTML on unknown routes, and emitted Open Graph + Twitter metadata per route.
+- **Evidence:** Verified in `tests/integration.mjs` and `tests/browser.cjs` (`/ar/unknown-route-404` -> HTTP 404 + `noindex`).
+- **Status:** Fixed & Verified.
+
+### 10. Checkbox / Radio Focus Loss & 5-Step Booking Navigation (`P1`)
+- **Affected Files:** `public/js/booking.js`, `public/styles.css`
+- **Root Cause:** Re-rendering the full form tree on every checkbox toggle dropped DOM keyboard/screen-reader focus and required dense horizontal scrolling on mobile.
+- **Implemented Fix:** Upgraded to a true 5-step mobile-first wizard (`Category` -> `Ritual` -> `Time` -> `Details` -> `Review`) with returning-customer `"كرري آخر حجز"` shortcut, working-day/blocked-date chips, and incremental summary updates (`updateSelectionSummaryDOM()`) that preserve exact DOM focus on checked inputs.
+- **Evidence:** Verified in `tests/browser-flow.cjs` (`document.activeElement` stays on toggled checkbox) and mobile captures.
+- **Status:** Fixed & Verified.
+
+### 11. Admin Table Overflow, Irreversible Actions & Group/Gift Workflow (`P1`)
+- **Affected Files:** `public/js/components.js`, `public/js/admin.js`, `server/admin.mjs`, `server/experiences.mjs`, `public/styles.css`
+- **Root Cause:** Wide payments/ledger/audit tables truncated on narrow viewports, owner refunds/staff disables submitted without explicit confirmation, and group/gift requests lacked pagination/management UI.
+- **Implemented Fix:** Added automatic `.mobile-cards-list` rendering replacing `.desktop-table-wrap` below `780px`, `confirmActionDialog` before owner refunds, staff revocations, and reward commits, paginated `/api/admin` queries (`bookings_page`, `audit_page`, `ledger_page`), **Group & Gifts** tab, and privacy-safe aggregate **Digital Funnel Metrics** in Owner Overview.
+- **Status:** Fixed & Verified.
+
+### 12. Visual Overlap Discovered & Fixed During Screenshot Inspection (`P2`)
+- **Affected Files:** `public/styles.css`, `public/js/admin.js`, `public/js/atelier.js`
+- **Root Cause:** Heart favorite toggle (`.fav-btn`) overlapped `.service-badge` on the top-start thumbnail edge; fixed `#toast` (`top: 20px`) overlapped the top-right header CTA; Gift Voucher rows in Admin rendered `gf.value` (`0 SAR`) instead of `gf.estimated_amount`; `.split` and `.content.card` sat too close to the footer on mobile/Studio views.
+- **Implemented Fix:** Anchored `.fav-btn` to `inset-inline-end: 12px`, repositioned `#toast` to bottom-end (`bottom: 24px`, `82px` with sticky mobile bar), displayed `gf.estimated_amount ?? gf.value ?? gf.chosen?.price`, added `padding-bottom` / `margin-bottom` spacing, and refined Atelier accent Arabic label (`زهرة ناعمة`).
+- **Status:** Fixed & Re-Verified Visually.
+

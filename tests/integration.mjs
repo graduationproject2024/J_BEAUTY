@@ -51,6 +51,41 @@ try{
  await test('Reward commit deducts points once',async()=>{const a=await customer.call('/api/account');const rw=a.rewards.find(x=>x.points===200);await customer.call('/api/rewards/request',{reward_id:rw.id});const admin=await owner.call('/api/admin');const pending=admin.reward_requests.find(x=>x.user_id===user.id);const b=await customer.call('/api/bookings',{...request,time:'18:00',idempotency_key:'reward-booking-001'});await owner.call(`/api/admin/rewards/${pending.id}`,{booking_id:b.booking.id,action:'commit'});assert.equal((await customer.call('/api/account')).balance,50);assert.ok((await owner.call(`/api/admin/rewards/${pending.id}`,{booking_id:b.booking.id,action:'commit'},null)).status>=400);assert.equal((await customer.call('/api/account')).balance,50)});
  await test('Unauthenticated admin request rejected',async()=>{assert.ok((await guest.call('/api/admin',undefined,null)).status>=400)});
  await test('Cross-origin write rejected',async()=>{const r=await fetch(base+'/api/bookings',{method:'POST',headers:{Origin:'https://evil.invalid','Content-Type':'application/json'},body:JSON.stringify(request)});assert.ok(r.status>=400)});
+ await test('Unknown routes return HTTP 404 with noindex SSR HTML',async()=>{
+  const r1=await fetch(base+'/ar/unknown-xyz');assert.equal(r1.status,404);
+  const r2=await fetch(base+'/en/services/nonexistent-ritual');assert.equal(r2.status,404);
+ });
+ await test('Ritual Studio returns deterministic catalog-backed recommendations',async()=>{
+  const rec=await guest.call('/api/studio/recommend',{mood:'unwind',minutes_available:90,budget:300,format:'either'});
+  assert.ok(Array.isArray(rec.recommendations)&&rec.recommendations.length>=1);
+  assert.ok(rec.recommendations[0].reasons_ar&&rec.recommendations[0].reasons_en);
+ });
+ await test('Nail Atelier save, share code, Passport favorites & preferences work',async()=>{
+  const saved=await customer.call('/api/atelier/styles',{name:'Test Almond Blush',shape:'almond',length:'medium',polish_color:'#D9B7C0',french_style:'classic',tip_color:'#FBF7F4',finish:'gloss',accent:'none',share:true});
+  assert.ok(saved.style.share_code);
+  const loaded=await guest.call(`/api/atelier/styles/${saved.style.share_code}`);
+  assert.equal(loaded.style.shape,'almond');
+  await customer.call('/api/passport/favorites',{service_id:'relaxation',action:'add'});
+  await customer.call('/api/passport/preferences',{preferred_neighborhood:'Test district',pressure:'medium',nail_finish:'gloss',reminder_opt_in:true,scent_note:'Lavender'});
+  const acc=await customer.call('/api/account');
+  assert.ok(acc.passport.favorites.includes('relaxation'));
+  assert.ok(acc.passport.saved_styles.some(s=>s.id===saved.style.id));
+  assert.equal(acc.passport.preferences.reminder_opt_in,true);
+ });
+ await test('Group & Gift requests persist pending review and update via admin',async()=>{
+  const grp=await guest.call('/api/group-requests',{organizer_name:'Test Organizer',organizer_phone:'0500000005',date,time:'16:00',neighborhood:'Test district',participants:[{label:'Guest A',service_ids:['relaxation']},{label:'Guest B',service_ids:['classic']}],terms:true});
+  assert.equal(grp.group_request.status,'pending_approval');
+  await owner.call(`/api/admin/group-requests/${grp.group_request.id}`,{status:'approved'});
+  const gf=await guest.call('/api/gift-requests',{sender_name:'Sender',sender_phone:'0500000006',recipient_name:'Recipient',personal_message:'For you',service_id:'relaxation',terms:true});
+  assert.equal(gf.gift_request.status,'pending_staff_payment');
+  await owner.call(`/api/admin/gift-requests/${gf.gift_request.id}`,{status:'approved_ready',payment_verified:true});
+ });
+ await test('Telemetry funnel and admin pagination metadata work cleanly',async()=>{
+  await guest.call('/api/telemetry/event',{event:'home_view'});
+  const adm=await owner.call('/api/admin?bookings_page=1&bookings_limit=2');
+  assert.ok(adm.pagination.bookings.total>=1);
+  assert.ok(adm.analytics.funnel.home_view>=1);
+ });
  await customer.call('/api/logout',{});assert.equal((await customer.call('/api/session')).user,null);
  console.log(`\n${results.length} integration checks passed.`);
  writeFileSync(join(root,'TEST-RESULTS.json'),JSON.stringify({date:new Date().toISOString(),passed:results},null,2));

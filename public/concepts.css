@@ -54,9 +54,31 @@ main {
   margin: 24px auto;
   background: var(--bg);
   color: var(--ink);
-  transition: max-width 250ms ease, background 250ms ease;
+  transition: background-color 220ms cubic-bezier(0.23, 1, 0.32, 1);
   box-shadow: 0 20px 60px rgba(53, 47, 50, 0.08);
   overflow: hidden;
+}
+
+/* Direction D — Botanical Editorial Luxury (Selected Synthesis) */
+main[data-theme="synthesis"] {
+  --bg: #fbf7f4;
+  --surface: #f4ebe6;
+  --ink: #503c45;
+  --line: #e5d9d3;
+}
+main[data-theme="synthesis"] .hero-art {
+  border-radius: 260px 260px 20px 20px;
+  border: 1px solid #d4af7c;
+}
+main[data-theme="synthesis"] .art-tag {
+  border: 1px solid #d4af7c;
+}
+main[data-theme="synthesis"] .packages .featured {
+  background: #eaefe5;
+  border-color: #607257;
+}
+main[data-theme="synthesis"] .petals {
+  background: linear-gradient(135deg, #503c45, #352f32);
 }
 main[data-frame="mobile"] {
   max-width: 410px;

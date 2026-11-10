@@ -62,6 +62,11 @@ mkdirSync(out, { recursive: true });
     '/ar/services',
     '/ar/services/relaxation',
     '/ar/packages',
+    '/ar/studio',
+    '/ar/atelier',
+    '/ar/lookbook',
+    '/ar/group-booking',
+    '/ar/gifts',
     '/ar/booking',
     '/ar/account',
     '/ar/petals',
@@ -73,6 +78,11 @@ mkdirSync(out, { recursive: true });
 
   const results = [];
   try {
+    const r404 = await fetch(base + '/ar/unknown-route-404');
+    assert.equal(r404.status, 404, 'Unknown route must return HTTP 404');
+    const html404 = await r404.text();
+    assert.ok(html404.includes('noindex'), '404 route must include noindex');
+
     for (const width of [360, 390, 430, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: width >= 1024 ? 1000 : 844 });
       for (const route of routes) {
@@ -89,6 +99,7 @@ mkdirSync(out, { recursive: true });
           window.scrollTo({ top: 0, behavior: 'instant' });
         });
         await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(120);
         const info = await page.evaluate(async () => {
           const imgs = [...document.querySelectorAll('img')];
           await Promise.all(
@@ -104,6 +115,10 @@ mkdirSync(out, { recursive: true });
           );
           const brokenImgs = imgs.filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.src);
           const h1 = document.querySelector('h1')?.innerText?.trim() || '';
+          const unrevealed = [...document.querySelectorAll('[data-reveal]')].filter((el) => {
+            const rect = el.getBoundingClientRect();
+            return rect.top < window.innerHeight && getComputedStyle(el).opacity === '0';
+          }).length;
           return {
             scroll: document.documentElement.scrollWidth,
             client: document.documentElement.clientWidth,
@@ -111,6 +126,7 @@ mkdirSync(out, { recursive: true });
             dir: document.documentElement.dir,
             h1,
             brokenImgs,
+            unrevealed,
             hasBookCta: !!document.querySelector('a[href*="/booking"]'),
           };
         });
@@ -118,6 +134,7 @@ mkdirSync(out, { recursive: true });
         assert.ok(info.h1.length > 0, `Missing h1 on ${route}`);
         assert.ok(!/هذه الصفحة غير موجودة|This page isn’t here/i.test(info.h1), `404 rendered on ${route}`);
         assert.deepEqual(info.brokenImgs, [], `Broken images on ${route}: ${info.brokenImgs}`);
+        assert.equal(info.unrevealed, 0, `Above-fold elements stuck invisible on ${route} at ${width}px`);
         assert.ok(info.hasBookCta, `Missing booking CTA on ${route} at ${width}px`);
         assert.ok(
           info.scroll <= info.client + 1,
@@ -128,7 +145,22 @@ mkdirSync(out, { recursive: true });
 
         if (
           (width === 390 || width === 1440) &&
-          ['/ar/', '/en/', '/ar/services', '/ar/services/relaxation', '/ar/packages', '/ar/booking', '/ar/account', '/ar/petals', '/ar/reviews'].includes(route)
+          [
+            '/ar/',
+            '/en/',
+            '/ar/services',
+            '/ar/services/relaxation',
+            '/ar/packages',
+            '/ar/studio',
+            '/ar/atelier',
+            '/ar/lookbook',
+            '/ar/group-booking',
+            '/ar/gifts',
+            '/ar/booking',
+            '/ar/account',
+            '/ar/petals',
+            '/ar/reviews',
+          ].includes(route)
         ) {
           const slug = route.slice(1).replaceAll('/', '-') || 'home';
           await page.screenshot({ path: join(out, `${slug}-${width}.png`), fullPage: true });
@@ -136,14 +168,22 @@ mkdirSync(out, { recursive: true });
       }
     }
 
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto(base + '/ar/', { waitUntil: 'networkidle' });
+    const revealedOnReduce = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-reveal]')].every((el) => el.classList.contains('is-revealed')),
+    );
+    assert.ok(revealedOnReduce, 'prefers-reduced-motion must reveal all sections immediately');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+
     await page.goto(base + '/concepts.html', { waitUntil: 'networkidle' });
-    for (const theme of ['botanical', 'blush', 'editorial']) {
+    for (const theme of ['synthesis', 'botanical', 'blush', 'editorial']) {
       await page.locator(`button[data-theme="${theme}"]`).click();
       await page.waitForTimeout(150);
       await page.screenshot({ path: join(out, `concept-${theme}-1440.png`), fullPage: true });
     }
-    await page.locator('button[data-theme="botanical"]').click();
+    await page.locator('button[data-theme="synthesis"]').click();
     await page.screenshot({ path: join(out, 'concepts-desktop.png'), fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: join(out, 'concepts-mobile.png'), fullPage: true });

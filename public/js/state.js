@@ -15,16 +15,55 @@ export const state = {
   csrf: '',
   catalog: { services: [], packages: [], settings: {}, reviews: [] },
   account: null,
+  favorites: [],
   admin: null,
   adminTab: 'overview',
   adminBookingFilter: 'pending_confirmation',
   adminCalendarDate: '',
+  adminBookingsPage: 1,
+  adminAuditPage: 1,
+  adminLedgerPage: 1,
   bookingStep: 1,
   bookingMode: 'services',
-  bookingCategory: 'all',
+  bookingCategory: '',
   summaryExpanded: false,
   bookingResult: null,
   filter: 'all',
+  homeMood: 'unwind',
+  lookbookFilter: 'all',
+  atelier: {
+    name: '',
+    shape: 'almond',
+    length: 'medium',
+    polish_color: '#F3DCE1',
+    french_style: 'classic',
+    tip_color: '#FBF7F4',
+    finish: 'gloss',
+    accent: 'none',
+    skin: 'warm',
+    lightX: 45,
+    lastShareUrl: '',
+  },
+  studio: {
+    mood: 'unwind',
+    minutes_available: 75,
+    budget: 260,
+    format: 'either',
+    results: [],
+  },
+  groupDraft: {
+    organizer_name: '',
+    organizer_phone: '',
+    date: '',
+    time: '',
+    neighborhood: '',
+    participants: [
+      { label: 'ضيفة 1', service_ids: ['relaxation'] },
+      { label: 'ضيفة 2', service_ids: ['classic'] },
+    ],
+  },
+  groupResult: null,
+  giftResult: null,
   draft: {
     service_ids: [],
     package_id: null,
@@ -50,7 +89,9 @@ export const href = (r = '') => `/${state.lang}/${r}`;
 export function page() {
   const raw = location.pathname.split('/').slice(2).join('/') || 'home';
   const clean = raw.replace(/\/$/, '') || 'home';
-  return clean === 'loyalty' ? 'petals' : clean;
+  if (clean === 'loyalty') return 'petals';
+  if (clean === 'passport') return 'account';
+  return clean;
 }
 
 export function safeURL(s) {
@@ -90,6 +131,13 @@ export async function refreshSession() {
   const r = await api('/session');
   state.user = r.user;
   state.csrf = r.csrfToken;
+  if (r.user?.role === 'customer' && !state.favorites.length) {
+    try {
+      const acc = await api('/account');
+      state.account = acc;
+      state.favorites = acc.passport?.favorites || [];
+    } catch {}
+  }
   return r;
 }
 
@@ -109,4 +157,3 @@ export function isStaff() {
 export function isOwner() {
   return state.user?.role === 'owner';
 }
-

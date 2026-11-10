@@ -92,37 +92,51 @@ let browser;
   async function book(page, registered = false, packageBooking = false) {
     await page.goto(base + '/en/booking');
     await page.locator('#booking-form').waitFor();
+
+    // Step 1: Category card picker
+    if (packageBooking) {
+      await page.locator('[data-pick-category="packages"]').click();
+    } else {
+      await page.locator('[data-pick-category="massage"]').click();
+    }
+
+    // Step 2: Validation when empty + no auto-select + focus preservation on checkbox toggle
     await page.locator('#booking-form button[type=submit]').click();
     await page.getByText('Please choose a service or package.').waitFor();
 
     if (packageBooking) {
-      await page.locator('[data-booktype="packages"]').click();
-      // Verify packages tab does not auto-select the first package
       const checkedCount = await page.locator('[name=package]:checked').count();
       assert.equal(checkedCount, 0, 'Packages tab must not auto-select first package');
-      await page.screenshot({ path: join(out, 'booking-step1-packages-mobile.png'), fullPage: true });
+      await page.screenshot({ path: join(out, 'booking-step2-packages-mobile.png'), fullPage: true });
       await page.locator('[name=package][value=nail-glow]').check();
     } else {
-      await page.locator('[name=service][value=relaxation]').check();
+      const svcCb = page.locator('[name=service][value=relaxation]');
+      await svcCb.focus();
+      await svcCb.check();
+      const focusedVal = await page.evaluate(() => document.activeElement?.getAttribute('value'));
+      assert.equal(focusedVal, 'relaxation', 'Checkbox toggle must not lose DOM focus');
     }
     await page.locator('#booking-form button[type=submit]').click();
 
+    // Step 3: Preferred Date / Time / Neighborhood
     const targetDate = new Date(Date.now() + 8 * 86400000).toISOString().slice(0, 10);
     await page.locator('[name=date]').fill(targetDate);
     await page.locator('[name=time]').fill(registered ? '15:00' : '12:00');
     await page.locator('[name=neighborhood]').selectOption({ label: 'Test district' });
     await page.locator('#booking-form button[type=submit]').click();
 
+    // Step 4: Details
     await page.locator('[name=name]').fill(registered ? 'Browser Customer' : 'Guest Example');
     await page.locator('[name=phone]').fill(registered ? '0500000012' : '0500000013');
     await page.locator('[name=notes]').fill('Automated browser test only');
     await page.locator('#booking-form button[type=submit]').click();
 
+    // Step 5: Review & Submit
     await page.locator('[name=terms]').check();
     await page.locator('#booking-form button[type=submit]').click();
     await page.getByText('Your request is saved. J SPA will review and personally confirm your appointment.').waitFor();
 
-    const wa = await page.getByRole('link', { name: 'Open WhatsApp', exact: true }).getAttribute('href');
+    const wa = await page.locator('#whatsapp-handoff-link').getAttribute('href');
     assert.ok(wa.startsWith('https://wa.me/966500000011?text='));
     assert.match(decodeURIComponent(wa), /J SPA/i);
   }
@@ -151,12 +165,47 @@ let browser;
     checked: true,
   });
 
+  // Customer tests J Nail Atelier customization, Save to Passport & Studio recommendations
+  await customer.goto(base + '/en/atelier');
+  await customer.locator('#at-name').fill('Almond Blush Pearls');
+  await customer.locator('[data-at-shape="almond"]').click();
+  await customer.locator('[data-at-finish="pearl"]').click();
+  await customer.locator('[data-at-accent="gold_foil"]').click();
+  await customer.locator('#at-save-look').click();
+  await customer.getByText('Style saved to your Beauty Passport').waitFor();
+  await customer.screenshot({ path: join(out, 'nail-atelier-desktop.png'), fullPage: true });
+
+  await customer.goto(base + '/en/studio');
+  await customer.locator('#studio-form [name="mood"]').selectOption('pamper');
+  await customer.locator('#studio-form button[type=submit]').click();
+  await customer.getByText('Book this option').first().waitFor();
+  await customer.screenshot({ path: join(out, 'ritual-studio-desktop.png'), fullPage: true });
+
+  await customer.goto(base + '/en/group-booking');
+  await customer.locator('#group-form [name=date]').fill(new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10));
+  await customer.locator('#group-form [name=time]').fill('16:00');
+  await customer.locator('#group-form [name=neighborhood]').selectOption({ label: 'Test district' });
+  await customer.locator('#group-form [name=terms]').check();
+  await customer.locator('#group-form button[type=submit]').click();
+  await customer.getByText('Awaiting Admin Approval & Capacity Review').waitFor();
+
+  await customer.goto(base + '/en/gifts');
+  await customer.locator('#gift-form [name=recipient_name]').fill('Dear Sister');
+  await customer.locator('#gift-form [name=personal_message]').fill('Wishing you calm moments');
+  await customer.locator('#gift-form [name=terms]').check();
+  await customer.locator('#gift-form button[type=submit]').click();
+  await customer.getByText('Pending Staff Review & Manual Payment Verification').waitFor();
+
   await book(customer, true, false);
   const adm = await api(owner, '/admin');
   const booking = adm.bookings.find((b) => b.user_id === session.user.id);
   assert.ok(booking);
 
   await owner.reload();
+  await owner.locator('[data-admin-tab="overview"]').click();
+  await owner.getByText('Digital Funnel Metrics').waitFor();
+  await owner.screenshot({ path: join(out, 'admin-overview-desktop.png'), fullPage: true });
+
   await owner.locator('[data-admin-tab="bookings"]').click();
   await owner.locator('[data-admin-bfilter="all"]').click();
 
@@ -177,10 +226,22 @@ let browser;
   await f.locator('button[type=submit]').click();
   await owner.waitForTimeout(300);
 
+  await owner.locator('[data-admin-tab="group_gifts"]').click();
+  await owner.getByText('Dear Sister').first().waitFor();
+  await owner.screenshot({ path: join(out, 'admin-group-gifts-desktop.png'), fullPage: true });
+
+  await customer.goto(base + '/en/account');
+  await customer.getByText('Almond Blush Pearls').waitFor();
+  await customer.locator('#passport-prefs-form [name=pressure]').selectOption('light');
+  await customer.locator('#passport-prefs-form button[type=submit]').click();
+  await customer.getByText('Preferences saved').waitFor();
+  await customer.screenshot({ path: join(out, 'customer-passport-desktop.png'), fullPage: true });
+
   await customer.goto(base + '/en/rewards');
   await customer.locator('.loyalty-balance-num', { hasText: '250' }).waitFor();
   await customer.screenshot({ path: join(out, 'customer-loyalty-desktop.png'), fullPage: true });
 
+  await owner.locator('[data-admin-tab="bookings"]').click();
   await owner.screenshot({ path: join(out, 'admin-bookings-desktop.png'), fullPage: true });
   await owner.locator('[data-admin-tab="calendar"]').click();
   await owner.locator('#cal-date-input').fill(booking.date);
@@ -203,11 +264,14 @@ let browser;
       {
         date: new Date().toISOString(),
         passed: [
-          'Guest package booking with clean Packages tab (no auto-select), validation and WhatsApp message',
+          'Guest 5-step package booking with clean Packages tab, validation, and WhatsApp handoff',
           'Customer registration and WhatsApp manual verification reference',
-          'Registered service booking',
-          'Staff confirmation, progress, completion and verified cash payment through UI',
-          'Customer J Petals Club balance (250) displayed after verified payment',
+          'J Nail Atelier interactive customization and Save to Beauty Passport',
+          'J Ritual Studio deterministic catalog-backed recommendation flow',
+          'Beauty Together group request and Gift a Ritual manual payment-verified workflow',
+          'Registered 5-step service booking with zero checkbox focus loss',
+          'Staff confirmation, progress, completion, verified cash payment, and Admin Funnel / Group & Gift management',
+          'Customer Beauty Passport preferences, saved nail look, and J Petals Club balance (250) verified',
           'Admin calendar timeline, payments field alignment, and audit log rendering verified',
         ],
         errors,

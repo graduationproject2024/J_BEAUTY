@@ -13,12 +13,119 @@ import {
   toast,
 } from './state.js';
 import {
+  confirmActionDialog,
   field,
   head,
   simpleTable,
   statusBadge,
 } from './components.js';
 import { auth } from './account.js';
+
+function paginationBar(meta, stateKey) {
+  if (!meta || meta.totalPages <= 1) return '';
+  return `
+    <div class="pagination-bar">
+      <button type="button" class="btn small light" data-admin-page="${stateKey}" data-dir="-1" ${meta.page <= 1 ? 'disabled' : ''}>${t('السابق', 'Previous')}</button>
+      <span class="muted">${t(`صفحة ${meta.page} من ${meta.totalPages} (${meta.total})`, `Page ${meta.page} of ${meta.totalPages} (${meta.total})`)}</span>
+      <button type="button" class="btn small light" data-admin-page="${stateKey}" data-dir="1" ${meta.page >= meta.totalPages ? 'disabled' : ''}>${t('التالي', 'Next')}</button>
+    </div>
+  `;
+}
+
+function groupAndGiftView(a) {
+  const groups = a.group_requests || [];
+  const gifts = a.gift_requests || [];
+  return `
+    <h2>${t('طلبات الجلسات الجماعية والإهداء', 'Group Sessions & Gift Requests')}</h2>
+    <p class="muted">${t(
+      'يخضع الحجز الجماعي لموافقة الفريق وسعة الجلسات المتزامنة، وتصدر قسائم الإهداء بعد التحقق اليدوي من الدفع فقط.',
+      'Group requests require staff capacity approval, and gift vouchers become active only after staff verifies payment receipt.',
+    )}</p>
+
+    <h3 style="margin-top:20px">${t('جلسات معاً (جماعية)', 'Beauty Together Group Requests')} (${groups.length})</h3>
+    ${
+      groups.length
+        ? groups
+            .map(
+              (g) => `
+          <details class="details">
+            <summary>
+              <div class="row">
+                <span><strong><bdi>${esc(g.reference || g.id)}</bdi></strong> · ${esc(g.organizer_name)} · <bdi>${esc(g.date)} ${esc(g.time)}</bdi></span>
+                <span>${g.participant_count || (g.participants || []).length} ${t('ضيفات', 'guests')} · ${money(g.estimated_total)} · <span class="badge">${esc(g.status)}</span></span>
+              </div>
+            </summary>
+            <div style="margin-top:12px">
+              <p class="muted"><bdi>${esc(g.organizer_phone)}</bdi> · ${esc(g.neighborhood)} · ${minutes(g.estimated_duration)}</p>
+              <form data-admin-form="group-requests/${esc(g.id)}">
+                <label class="field">
+                  ${t('حالة الطلب الجماعي', 'Group request status')}
+                  <select name="status">
+                    ${[
+                      ['pending_approval', 'بانتظار الموافقة', 'Pending approval'],
+                      ['approved', 'معتمد', 'Approved'],
+                      ['cancelled', 'ملغي', 'Cancelled'],
+                    ]
+                      .map(([val, ar, en]) => `<option value="${val}" ${g.status === val ? 'selected' : ''}>${t(ar, en)}</option>`)
+                      .join('')}
+                  </select>
+                </label>
+                <button class="btn small" type="submit">${t('حفظ حالة المجموعة', 'Save group status')}</button>
+              </form>
+            </div>
+          </details>
+        `,
+            )
+            .join('')
+        : `<div class="empty muted">${t('لا توجد طلبات جماعية مسجلة.', 'No group requests recorded.')}</div>`
+    }
+
+    <h3 style="margin-top:24px">${t('طلبات الإهداء (قيد المراجعة / مدفوعة)', 'Gift Voucher Requests')} (${gifts.length})</h3>
+    ${
+      gifts.length
+        ? gifts
+            .map(
+              (gf) => `
+          <details class="details">
+            <summary>
+              <div class="row">
+                <span><strong><bdi>${esc(gf.reference || gf.id)}</bdi></strong> · ${esc(gf.sender_name)} ← ${esc(gf.recipient_name)}</span>
+                <span>${money(gf.estimated_amount ?? gf.value ?? gf.chosen?.price ?? 0)} · <span class="badge ${gf.payment_verified ? 'ok' : ''}">${esc(gf.status)}</span></span>
+              </div>
+            </summary>
+            <div style="margin-top:12px">
+              <p class="muted"><bdi>${esc(gf.sender_phone)}</bdi>${gf.chosen ? ` · ${esc(nameOf(gf.chosen))}` : ''}${gf.personal_message ? ` · "${esc(gf.personal_message)}"` : ''}</p>
+              <form data-admin-form="gift-requests/${esc(gf.id)}">
+                <div class="form-grid">
+                  <label class="field">
+                    ${t('حالة بطاقة الإهداء', 'Gift status')}
+                    <select name="status">
+                      ${[
+                        ['pending_staff_payment', 'بانتظار توثيق الدفع', 'Pending payment verification'],
+                        ['approved_ready', 'جاهزة للإهداء', 'Approved & ready'],
+                        ['redeemed', 'تم استخدامها', 'Redeemed'],
+                        ['cancelled', 'ملغاة', 'Cancelled'],
+                      ]
+                        .map(([val, ar, en]) => `<option value="${val}" ${gf.status === val ? 'selected' : ''}>${t(ar, en)}</option>`)
+                        .join('')}
+                    </select>
+                  </label>
+                  <label class="check" style="align-self:end">
+                    <input type="checkbox" name="payment_verified" ${gf.payment_verified ? 'checked' : ''}>
+                    <span>${t('تحققت من استلام قيمة الإهداء فعلياً', 'Gift payment receipt verified')}</span>
+                  </label>
+                </div>
+                <button class="btn small" type="submit">${t('تحديث حالة الإهداء', 'Update gift status')}</button>
+              </form>
+            </div>
+          </details>
+        `,
+            )
+            .join('')
+        : `<div class="empty muted">${t('لا توجد طلبات إهداء مسجلة.', 'No gift requests recorded.')}</div>`
+    }
+  `;
+}
 
 function statusLabel(s) {
   return (
@@ -387,6 +494,7 @@ function adminContent() {
 
   if (tab === 'overview') {
     const analytics = a.analytics || {};
+    const funnel = analytics.funnel || {};
     const pendingList = bookings.filter((b) => b.status === 'pending_confirmation');
     return `
       <h2>${t('ملخص العمليات', 'Operations Overview')}</h2>
@@ -403,6 +511,21 @@ function adminContent() {
                <div class="stat">${t('مكتملة غير مدفوعة', 'Unpaid completed')}<b>${analytics.unpaid || 0}</b></div>
                <div class="stat">${t('عميلات عائدات', 'Returning guests')}<b>${analytics.returning_customers || 0}</b></div>
                <div class="stat">${t('بتلات صادرة / مستبدلة', 'Petals issued / redeemed')}<b>${analytics.points_issued || 0} / ${analytics.points_redeemed || 0}</b></div>
+             </div>
+             <div class="card" style="margin-bottom:20px">
+               <h3 style="margin-top:0">${t('مسار التحويل الرقمي (تقديري مقابل المؤكد)', 'Digital Funnel Metrics')}</h3>
+               <p class="muted" style="margin-bottom:14px">${t(
+                 'نُفرّق بوضوح بين فتح واتساب أو الاستوديو كنية اهتمام، وبين الحجوزات المؤكدة والمكتملة فعلياً.',
+                 'Distinguishes anonymous navigation intent (Studio, Atelier, WhatsApp click) from staff-confirmed and completed appointments.',
+               )}</p>
+               <div class="stats" style="margin-bottom:0">
+                 <div class="stat">${t('زيارات الرئيسية', 'Home views')}<b>${funnel.home_view || 0}</b></div>
+                 <div class="stat">${t('توصيات استوديو J', 'Ritual Studio')}<b>${funnel.studio_complete || 0}</b></div>
+                 <div class="stat">${t('حفظ تصاميم الأظافر', 'Atelier saves')}<b>${funnel.atelier_save || 0}</b></div>
+                 <div class="stat">${t('بدء الحجز / إرسال الطلب', 'Start / Submitted')}<b>${funnel.booking_start || 0} / ${funnel.booking_submitted || 0}</b></div>
+                 <div class="stat">${t('نقرات واتساب (نية فقط)', 'WhatsApp clicks')}<b>${funnel.whatsapp_handoff_click || 0}</b></div>
+                 <div class="stat">${t('جماعي / إهداء', 'Group / Gift reqs')}<b>${(a.group_requests || []).length} / ${(a.gift_requests || []).length}</b></div>
+               </div>
              </div>`
           : ''
       }
@@ -436,8 +559,11 @@ function adminContent() {
           .join('')}
       </div>
       ${adminBookings(filtered)}
+      ${paginationBar(a.pagination?.bookings, 'adminBookingsPage')}
     `;
   }
+
+  if (tab === 'group_gifts') return groupAndGiftView(a);
 
   if (tab === 'calendar') return calendarView(a);
 
@@ -571,6 +697,7 @@ function adminContent() {
         isOwner()
           ? `<h3 style="margin-top:24px">${t('سجل حركات البتلات', 'Loyalty Ledger')}</h3>
              ${simpleTable(a.ledger || [], ['created_at', 'user_id', 'booking_id', 'points', 'reason'])}
+             ${paginationBar(a.pagination?.ledger, 'adminLedgerPage')}
              <details class="details">
                <summary>${t('تعديل نقاط يدوي (بصلاحية المالكة)', 'Owner Manual Point Adjustment')}</summary>
                <form data-admin-form="adjustment">
@@ -686,6 +813,7 @@ function adminContent() {
     return `
       <h2>${t('سجل التدقيق', 'Audit Log')}</h2>
       ${simpleTable(rows, ['created_at', 'actor_name', 'action', 'target', 'detail'])}
+      ${paginationBar(a.pagination?.audit, 'adminAuditPage')}
     `;
   }
 
@@ -698,14 +826,20 @@ export async function adminPage() {
     return `<main id="main" class="wrap">${head(t('الدخول مخصص للفريق', 'Staff access only'))}<div class="empty">${t('هذا القسم مخصص للموظفات والإدارة فقط.', 'Your account does not have staff access.')}</div></main>`;
   }
   if (!state.admin) {
-    state.admin = await api('/admin');
+    state.admin = await api(
+      `/admin?bookings_page=${state.adminBookingsPage}&audit_page=${state.adminAuditPage}&ledger_page=${state.adminLedgerPage}`,
+    );
   }
 
   const pendingCount = (state.admin.bookings || []).filter((b) => b.status === 'pending_confirmation').length;
   const verifyCount = (state.admin.verifications || []).length;
+  const ggCount =
+    (state.admin.group_requests || []).filter((g) => g.status === 'pending_approval').length +
+    (state.admin.gift_requests || []).filter((g) => g.status === 'pending_staff_payment').length;
   const tabs = [
     ['overview', 'نظرة عامة', 'Overview', ''],
     ['bookings', 'الحجوزات', 'Bookings', pendingCount || ''],
+    ['group_gifts', 'الجماعي والإهداء', 'Group & Gifts', ggCount || ''],
     ['calendar', 'التقويم والسعة', 'Calendar', ''],
     ['customers', 'العميلات والتوثيق', 'Customers & Verify', verifyCount || ''],
     ...(isOwner() ? [['payments', 'المدفوعات', 'Payments', '']] : []),
@@ -797,6 +931,16 @@ export function bindAdmin(renderFn) {
     };
   });
 
+  document.querySelectorAll('[data-admin-page]').forEach((btn) => {
+    btn.onclick = () => {
+      const key = btn.dataset.adminPage;
+      const dir = Number(btn.dataset.dir || 0);
+      state[key] = Math.max(1, (state[key] || 1) + dir);
+      state.admin = null;
+      renderFn();
+    };
+  });
+
   document.querySelectorAll('[data-admin-form]').forEach((f) => {
     f.onsubmit = async (e) => {
       e.preventDefault();
@@ -821,23 +965,42 @@ export function bindAdmin(renderFn) {
         if (!d.payment_method) delete d.payment_method;
       }
       const btn = e.submitter;
-      btn.disabled = true;
-      try {
-        const r = await api('/admin/' + route, d);
-        if (route === 'recovery') {
-          f.querySelector('.admin-result').innerHTML = `
-            <div class="success">
-              <p>${t('انسخي الرابط وأرسليه يدوياً للعميلة المتحقق منها.', 'Copy the link and manually send it to the verified customer.')}</p>
-              <pre>${esc(r.reset_url ? new URL(r.reset_url, location.origin).href : r.token)}</pre>
-            </div>
-          `;
-          btn.disabled = false;
-        } else {
-          await refreshAdmin(renderFn);
+      const execSubmit = async () => {
+        if (btn) btn.disabled = true;
+        try {
+          const r = await api('/admin/' + route, d);
+          if (route === 'recovery') {
+            f.querySelector('.admin-result').innerHTML = `
+              <div class="success">
+                <p>${t('انسخي الرابط وأرسليه يدوياً للعميلة المتحقق منها.', 'Copy the link and manually send it to the verified customer.')}</p>
+                <pre>${esc(r.reset_url ? new URL(r.reset_url, location.origin).href : r.token)}</pre>
+              </div>
+            `;
+            if (btn) btn.disabled = false;
+          } else {
+            await refreshAdmin(renderFn);
+          }
+        } catch (err) {
+          toast(err.message);
+          if (btn) btn.disabled = false;
         }
-      } catch (err) {
-        toast(err.message);
-        btn.disabled = false;
+      };
+
+      const isIrreversible =
+        f.dataset.refund === 'true' ||
+        (route.startsWith('staff/') && d.action === 'disable') ||
+        route.startsWith('rewards/');
+
+      if (isIrreversible) {
+        const msg =
+          f.dataset.refund === 'true'
+            ? t('هل أنتِ متأكدة من تسجيل هذا الاسترداد وتعديل نقاط البتلات تلقائياً؟', 'Confirm recording this refund and adjusting Petals points accordingly?')
+            : route.startsWith('staff/')
+              ? t('هل أنتِ متأكدة من تعطيل حساب هذه الموظفة وإنهاء جلساتها فوراً؟', 'Confirm disabling this employee account and revoking active sessions?')
+              : t('هل أنتِ متأكدة من تنفيذ إجراء المكافأة المحدد؟', 'Confirm executing this reward action?');
+        confirmActionDialog(msg, execSubmit);
+      } else {
+        await execSubmit();
       }
     };
   });

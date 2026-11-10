@@ -1,62 +1,69 @@
 const TITLES = {
-  '': [
-    'سبا نسائي منزلي في المدينة المنورة',
-    'Women’s Home Spa in Madinah',
-  ],
-  services: [
-    'خدمات المساج والعناية بالأظافر والجل',
-    'Massage, Nail Care & Gel Services',
-  ],
-  packages: [
-    'باقات السبا المنزلي في المدينة المنورة',
-    'Home Spa Packages in Madinah',
-  ],
-  petals: [
-    'نادي بتلات J للولاء',
-    'J Petals Club Loyalty Program',
-  ],
-  about: [
-    'عن J SPA — سبا منزلي للسيدات',
-    'About J SPA — Women’s Home Spa',
-  ],
-  contact: [
-    'تواصلي معنا ومناطق الخدمة بالمدينة',
-    'Contact & Madinah Service Areas',
-  ],
-  faq: [
-    'الأسئلة الشائعة عن الحجز المنزلي',
-    'Frequently Asked Questions',
-  ],
-  reviews: [
-    'تجارب وآراء العميلات',
-    'Verified Customer Reviews',
-  ],
-  policies: [
-    'سياسة الحجز والمواعيد',
-    'Booking Policies',
-  ],
-  privacy: [
-    'سياسة الخصوصية وحماية البيانات',
-    'Privacy Policy',
-  ],
-  terms: [
-    'الشروط والأحكام',
-    'Terms & Conditions',
-  ],
+  '': ['سبا نسائي منزلي في المدينة المنورة', 'Women’s Home Spa in Madinah'],
+  services: ['خدمات المساج والعناية بالأظافر والجل', 'Massage, Nail Care & Gel Services'],
+  packages: ['باقات السبا المنزلي في المدينة المنورة', 'Home Spa Packages in Madinah'],
+  studio: ['استوديو J لاختيار طقسكِ المناسب', 'J Ritual Studio — Personalized Discovery'],
+  atelier: ['أتيليه الأظافر التفاعلي | J Nail Atelier', 'J Nail Atelier — Interactive Nail Customizer'],
+  lookbook: ['معرض الإطلالات والأناقة | Beauty Lookbook', 'Beauty Lookbook — Curated Styles'],
+  'group-booking': ['طقوس جماعية | Beauty Together', 'Beauty Together — Group Home Spa'],
+  gifts: ['أهدي لحظة عناية | Gift a Ritual', 'Gift a Ritual — Digital Spa Gift Request'],
+  petals: ['نادي بتلات J للولاء', 'J Petals Club Loyalty Program'],
+  about: ['عن J SPA — سبا منزلي للسيدات', 'About J SPA — Women’s Home Spa'],
+  contact: ['تواصلي معنا ومناطق الخدمة بالمدينة', 'Contact & Madinah Service Areas'],
+  faq: ['الأسئلة الشائعة عن الحجز المنزلي', 'Frequently Asked Questions'],
+  reviews: ['تجارب وآراء العميلات', 'Verified Customer Reviews'],
+  policies: ['سياسة الحجز والمواعيد', 'Booking Policies'],
+  privacy: ['سياسة الخصوصية وحماية البيانات', 'Privacy Policy'],
+  terms: ['الشروط والأحكام', 'Terms & Conditions'],
 };
+
+const APP_ONLY_ROUTES = new Set([
+  'home',
+  'booking',
+  'account',
+  'passport',
+  'bookings',
+  'rewards',
+  'loyalty',
+  'admin',
+  'login',
+  'register',
+  'recovery',
+  'reset',
+]);
 
 const DESCRIPTIONS = {
   '': [
-    'J SPA — سبا نسائي منزلي في المدينة المنورة. مساج استرخائي وعلاجي، منيكير وبديكير منزلي، وخدمات الجل في راحة بيتكِ. اطلبي موعدكِ ليؤكده فريقنا شخصياً.',
-    'J SPA — Women’s home spa in Al Madinah Al Munawwarah. At-home massage rituals, manicure, pedicure, and gel care with personal appointment confirmation.',
+    'J SPA — سبا نسائي منزلي في المدينة المنورة. مساج استرخائي وعلاجي، منيكير وبديكير منزلي، أتيليه الأظافر التفاعلي، وخدمات الجل في راحة بيتكِ.',
+    'J SPA — Women’s home spa in Al Madinah Al Munawwarah. At-home massage rituals, manicure, pedicure, J Nail Atelier, and gel care with personal confirmation.',
   ],
   services: [
     'تصفحي 13 خدمة منزلية للسيدات في المدينة المنورة: مساج استرخائي، مساج الأحجار الساخنة، منيكير وبديكير كلاسيك، وخدمات الجل المنزلية.',
     'Browse 13 women-only home spa services in Madinah: relaxation & hot stone massage, classic manicure & pedicure, and glossy gel services.',
   ],
   packages: [
-    'باقات سبا منزلي مصممة بتناغم في المدينة المنورة: باقة إشراقة J، لحظة هدوء، طقوس الورد، وباقة J المميزة بأسعار تقديرية.',
+    'باقات سبا منزلي مصممة بتناغم في المدينة المنورة: باقة إشراقة J، لحظة هدوء، طقوس الورد، وباقة J المميزة.',
     'Curated home spa packages in Madinah: J Nail Glow, J Serenity, J Rose Ritual, and J Signature.',
+  ],
+  studio: [
+    'أجيبي عن 4 أسئلة بسيطة في استوديو J للوصول إلى الطقوس أو الباقة الأنسب لوقتكِ وميزانيتكِ.',
+    'Answer 4 quick questions in J Ritual Studio to find catalog-verified rituals aligned with your time and budget.',
+  ],
+  atelier: [
+    'صممي شكل الأظافر والطول واللون والفرنش في أتيليه J التفاعلي قبل حجز موعدكِ المنزلي في المدينة المنورة.',
+    'Explore nail shapes, lengths, shades, and French tip styles in J Nail Atelier before requesting your home visit in Madinah.',
+  ],
+  lookbook: [
+    'استلهمي إطلالات أظافر وجلسات سبا منزلية منتقاة بعناية من J SPA.',
+    'Browse curated home spa and nail inspiration in the J SPA Beauty Lookbook.',
+  ],
+  'group-booking': [
+    'اطلبي جلسة سبا منزلية جماعية للصديقات أو العائلة في المدينة المنورة مع تنسيق السعة وتأكيد الفريق.',
+    'Request a coordinated women’s group home spa appointment in Madinah with manual staff scheduling.',
+  ],
+  gifts: [
+    'اختاري خدمة أو باقة لإهدائها لمن تحبين مع تنسيق يدوي متكامل من فريق J SPA.',
+    'Prepare a personal digital spa gift request for a loved one with transparent manual staff confirmation.',
   ],
   petals: [
     'نادي بتلات J: اجمعي البتلات بعد زياراتكِ المكتملة والمدفوعة واستبدليها بمكافآت خصم على مواعيدكِ القادمة.',
@@ -116,6 +123,14 @@ export function publicRoutes(services = []) {
   ];
 }
 
+export function isKnownAppRoute(pathname, services = []) {
+  if (pathname === '/') return true;
+  if (!/^\/(ar|en)(\/|$)/.test(pathname)) return false;
+  const route = pathname.split('/').slice(2).join('/').replace(/\/$/, '');
+  if (Object.hasOwn(TITLES, route) || APP_ONLY_ROUTES.has(route)) return true;
+  return services.some((item) => item.active && route === `services/${item.id}`);
+}
+
 function buildSsrBody(lang, route, services, packages) {
   const isAr = lang === 'ar';
   const service = services.find((s) => s.active && route === `services/${s.id}`);
@@ -155,7 +170,7 @@ function buildSsrBody(lang, route, services, packages) {
 
   if (Object.hasOwn(TITLES, route)) {
     const h1 =
-      route === ''
+      route === '' || route === 'home'
         ? isAr
           ? 'لحظتكِ الخاصة… في راحة بيتكِ'
           : 'Your Moment of Beauty, At Home.'
@@ -231,17 +246,23 @@ function buildStructuredData(base, lang, route, services, service) {
 
 export function pageMetadata(html, pathname, services = [], packages = []) {
   const lang = pathname.split('/')[1] === 'en' ? 'en' : 'ar';
-  const route = pathname.split('/').slice(2).join('/').replace(/\/$/, '');
+  const rawRoute = pathname.split('/').slice(2).join('/').replace(/\/$/, '');
+  const route = rawRoute === 'home' ? '' : rawRoute;
   const service = services.find((item) => item.active && route === `services/${item.id}`);
+  const known = isKnownAppRoute(pathname, services);
 
-  const title =
-    service?.[`name_${lang}`] ??
-    (Object.hasOwn(TITLES, route) ? TITLES[route][lang === 'ar' ? 0 : 1] : TITLES[''][lang === 'ar' ? 0 : 1]);
+  const title = known
+    ? service?.[`name_${lang}`] ??
+      (Object.hasOwn(TITLES, route) ? TITLES[route][lang === 'ar' ? 0 : 1] : TITLES[''][lang === 'ar' ? 0 : 1])
+    : lang === 'ar'
+      ? 'الصفحة غير موجودة'
+      : 'Page not found';
 
-  const description =
-    service?.[`description_${lang}`] ??
-    DESCRIPTIONS[route]?.[lang === 'ar' ? 0 : 1] ??
-    DESCRIPTIONS[''][lang === 'ar' ? 0 : 1];
+  const description = known
+    ? service?.[`description_${lang}`] ??
+      DESCRIPTIONS[route]?.[lang === 'ar' ? 0 : 1] ??
+      DESCRIPTIONS[''][lang === 'ar' ? 0 : 1]
+    : DESCRIPTIONS[''][lang === 'ar' ? 0 : 1];
 
   const base = publicOrigin();
   const indexable = Boolean(Object.hasOwn(TITLES, route) || service);
@@ -251,8 +272,18 @@ export function pageMetadata(html, pathname, services = [], packages = []) {
       ? `<link rel="canonical" href="${escape(`${base}/${lang}/${routeSuffix}`)}"><link rel="alternate" hreflang="ar-SA" href="${escape(`${base}/ar/${routeSuffix}`)}"><link rel="alternate" hreflang="en-SA" href="${escape(`${base}/en/${routeSuffix}`)}"><link rel="alternate" hreflang="x-default" href="${escape(`${base}/ar/${routeSuffix}`)}">`
       : '';
 
-  const structured = buildStructuredData(base, lang, route, services, service);
-  const ssrShell = buildSsrBody(lang, route, services, packages);
+  const ogImage = service?.image || '/assets/images/hero-sanctuary.webp';
+  const ogTags =
+    `<meta property="og:type" content="website">` +
+    `<meta property="og:site_name" content="J SPA">` +
+    `<meta property="og:locale" content="${lang === 'ar' ? 'ar_SA' : 'en_SA'}">` +
+    `<meta property="og:title" content="J SPA | ${escape(title)}">` +
+    `<meta property="og:description" content="${escape(description)}">` +
+    `<meta property="og:image" content="${escape((base || '') + ogImage)}">` +
+    `<meta name="twitter:card" content="summary_large_image">`;
+
+  const structured = indexable ? buildStructuredData(base, lang, route, services, service) : '';
+  const ssrShell = known ? buildSsrBody(lang, route, services, packages) : '';
 
   let out = html
     .replace('<html lang="ar" dir="rtl">', `<html lang="${lang}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">`)
@@ -261,7 +292,10 @@ export function pageMetadata(html, pathname, services = [], packages = []) {
       /<meta name="description" content="[^"]*">/,
       () => `<meta name="description" content="${escape(description)}">`,
     )
-    .replace('</head>', () => `${links}${structured}${indexable ? '' : '<meta name="robots" content="noindex">'}</head>`);
+    .replace(
+      '</head>',
+      () => `${links}${ogTags}${structured}${indexable ? '' : '<meta name="robots" content="noindex">'}</head>`,
+    );
 
   if (ssrShell) {
     out = out.replace('<div id="app"></div>', () => `<div id="app">${ssrShell}</div>`);

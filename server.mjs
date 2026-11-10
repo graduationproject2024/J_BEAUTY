@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { pageMetadata, publicOrigin, publicRoutes } from './seo.mjs';
+import { isKnownAppRoute, pageMetadata, publicOrigin, publicRoutes } from './seo.mjs';
 import { createHelpers, now, openDatabase, uid } from './server/db.mjs';
 import {
   checkRateLimit,
@@ -18,6 +18,17 @@ import { fail, optionalText, phone, text, whatsappUrl } from './server/validatio
 import { createBooking } from './server/booking.mjs';
 import { requestReward } from './server/loyalty.mjs';
 import { handleAdminRoute } from './server/admin.mjs';
+import {
+  createGiftRequest,
+  createGroupRequest,
+  getPassportData,
+  getSharedNailStyle,
+  recommendRituals,
+  recordFunnelEvent,
+  saveNailStyle,
+  savePassportPreferences,
+  togglePassportFavorite,
+} from './server/experiences.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.resolve(ROOT, 'public');
@@ -89,6 +100,7 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
       const url = new URL(req.url, 'http://localhost');
       const route = url.pathname;
       const method = req.method;
+      const query = Object.fromEntries(url.searchParams.entries());
 
       if (route === '/robots.txt') {
         res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -109,13 +121,13 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
 
       if (['GET', 'HEAD'].includes(method) && (route === '/' || /^\/(ar|en)(\/|$)/.test(route))) {
         const entry = path.join(PUBLIC_DIR, 'index.html');
-        const html = pageMetadata(
-          readFileSync(entry, 'utf8'),
-          route,
-          helpers.services(),
-          helpers.packages(),
-        );
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+        const allSvcs = helpers.services();
+        const known = isKnownAppRoute(route, allSvcs);
+        const html = pageMetadata(readFileSync(entry, 'utf8'), route, allSvcs, helpers.packages());
+        res.writeHead(known ? 200 : 404, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache',
+        });
         return res.end(method === 'HEAD' ? '' : html);
       }
 
@@ -138,7 +150,10 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
             return res.end('Not found');
           }
         } else {
-          fileToServe = path.join(PUBLIC_DIR, 'index.html');
+          const entry = path.join(PUBLIC_DIR, 'index.html');
+          const html = pageMetadata(readFileSync(entry, 'utf8'), '/ar/404', helpers.services(), helpers.packages());
+          res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+          return res.end(method === 'HEAD' ? '' : html);
         }
 
         if (!existsSync(fileToServe)) return send({ error: 'Interface is being prepared' }, 503);
@@ -251,6 +266,42 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
         });
       }
 
+      if (method === 'POST' && route === '/api/telemetry/event') {
+        checkRate(`telemetry:${req.socket.remoteAddress}`, 120, 60000);
+        recordFunnelEvent(db, body.event);
+        return send({ ok: true });
+      }
+
+      if (method === 'POST' && route === '/api/studio/recommend') {
+        checkRate(`studio:${req.socket.remoteAddress}`, 60, 600000);
+        const recommendations = recommendRituals(helpers, body);
+        recordFunnelEvent(db, 'studio_complete');
+        return send({ recommendations });
+      }
+
+      if (method === 'GET' && /^\/api\/atelier\/styles\/[^/]+$/.test(route)) {
+        const code = route.split('/').pop();
+        return send({ style: getSharedNailStyle(db, code) });
+      }
+
+      if (method === 'POST' && route === '/api/atelier/styles') {
+        checkRate(`atelier:${req.socket.remoteAddress}`, 40, 600000);
+        if (!user && !body.share) {
+          fail('Please sign in to save styles to your Beauty Passport', 401);
+        }
+        return send({ style: saveNailStyle(db, user, body) }, 201);
+      }
+
+      if (method === 'POST' && /^\/api\/atelier\/styles\/[^/]+\/delete$/.test(route)) {
+        needUser();
+        const id = route.split('/')[4];
+        const row = db.get('SELECT user_id FROM nail_styles WHERE id=?', id);
+        if (!row) fail('Style not found', 404);
+        if (row.user_id !== user.id) fail('Forbidden', 403);
+        db.run('DELETE FROM nail_styles WHERE id=?', id);
+        return send({ ok: true });
+      }
+
       if (method === 'POST' && route === '/api/register') {
         checkRate(`register:${req.socket.remoteAddress}`, 15);
         if (body.terms !== true || body.password !== body.passwordConfirmation) {
@@ -331,7 +382,18 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
       if (method === 'POST' && route === '/api/bookings') {
         checkRate(`booking:${req.socket.remoteAddress}`, 30, 3600000);
         const { created, result } = createBooking(db, helpers, user, session.id, body);
+        if (created) recordFunnelEvent(db, 'booking_submitted');
         return send(result, created ? 201 : 200);
+      }
+
+      if (method === 'POST' && route === '/api/group-requests') {
+        checkRate(`group:${req.socket.remoteAddress}`, 15, 3600000);
+        return send(createGroupRequest(db, helpers, user, body), 201);
+      }
+
+      if (method === 'POST' && route === '/api/gift-requests') {
+        checkRate(`gift:${req.socket.remoteAddress}`, 15, 3600000);
+        return send(createGiftRequest(db, helpers, user, body), 201);
       }
 
       if (method === 'GET' && route === '/api/account') {
@@ -340,6 +402,7 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
         const hasPendingEntitlement =
           !user.verified &&
           myBookings.some((b) => b.status === 'completed' && b.payment_verified);
+        const passport = getPassportData(db, helpers, user);
         return send({
           user: publicUser(user),
           bookings: myBookings,
@@ -355,7 +418,18 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
           reviews: db
             .all('SELECT data,booking_id FROM reviews WHERE user_id=?', user.id)
             .map((r) => ({ ...JSON.parse(r.data), booking_id: r.booking_id })),
+          passport,
         });
+      }
+
+      if (method === 'POST' && route === '/api/passport/favorites') {
+        needUser();
+        return send({ favorites: togglePassportFavorite(db, helpers, user, body) });
+      }
+
+      if (method === 'POST' && route === '/api/passport/preferences') {
+        needUser();
+        return send({ preferences: savePassportPreferences(db, helpers, user, body) });
       }
 
       if (method === 'POST' && route === '/api/rewards/request') {
@@ -410,7 +484,7 @@ export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'dat
 
       if (route.startsWith('/api/admin')) {
         requireStaff();
-        return handleAdminRoute({ db, helpers, user, route, body, checkRate, send });
+        return handleAdminRoute({ db, helpers, user, route, query, body, checkRate, send });
       }
 
       fail('Not found', 404);

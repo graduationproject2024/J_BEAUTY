@@ -10,11 +10,14 @@ J SPA collects names, Saudi mobile numbers, Madinah neighborhoods, optional appo
 - **Rate Limiting:** Database-persisted sliding windows (`rate_limits`) throttle `/api/register`, `/api/login` (by IP and by phone), `/api/verification/request`, `/api/reset`, `/api/bookings`, and `/api/admin/recovery`.
 
 ### Authorization & Least Privilege
-- **Customer Isolation (IDOR Prevention):** Customers only access bookings, ledger entries, reward requests, and reviews tied directly to `session.user_id === user.id`. Historical guest bookings are **never** auto-merged by matching phone numbers.
+- **Customer Isolation (IDOR Prevention):** Customers only access bookings, ledger entries, reward requests, reviews, favorites (`passport_favorites`), saved Atelier styles (`nail_styles`), personal care preferences (`passport_prefs`), and own group/gift requests tied directly to `session.user_id === user.id`. Historical guest bookings are **never** auto-merged by matching phone numbers, and cross-customer style deletion returns `403 Forbidden`.
 - **Employee vs. Owner RBAC (`server/admin.mjs`):**
-  - `owner` has full access to catalog, packages, settings, staff, reviews, payments, ledger, analytics, and audit logs.
-  - `employee` is strictly restricted to operational duties (`bookings` active/unpaid/recent scope with masked phones/omitted notes on closed bookings, masked `customers.phone_masked`, pending `verifications`, pending `reward_requests`, and read-only catalog/schedule config). Employees receive empty `payments`, `ledger`, `reviews`, `settings`, `staff`, `audit`, and `analytics`, and receive `403 Forbidden` on any owner-only mutation or refund attempt.
+  - `owner` has full access to catalog, packages, settings, staff, reviews, payments, ledger, aggregate funnel analytics (`analytics.funnel`), group/gift requests, and paginated audit logs.
+  - `employee` is strictly restricted to operational duties (`bookings` active/unpaid/recent scope with masked phones/omitted notes on closed bookings, masked `customers.phone_masked`, masked `sender_phone` on `gift_requests`, pending `verifications`, pending `reward_requests`, and read-only catalog/schedule config). Employees receive empty `payments`, `ledger`, `reviews`, `settings`, `staff`, `audit`, and `analytics`, and receive `403 Forbidden` on any owner-only mutation or refund attempt.
   - Disabling an employee immediately deletes all of their active SQLite sessions.
+- **Privacy-Safe Funnel Telemetry:** `/api/telemetry/event` accepts an allowlisted event identifier (`home_view`, `booking_start`, `studio_complete`, `atelier_save`, `whatsapp_handoff_click`, etc.) and increments daily aggregate counts (`funnel_events`) in SQLite with **zero cookies, IPs, or personal identifiers** stored.
+- **Group & Gift Integrity:** Group requests default strictly to `pending_approval` and validate active services and schedule bounds; Gift requests default strictly to `pending_staff_payment` and reject transition to `redeemed` unless `payment_verified === true`.
+- **Irreversible Admin Action Safeguards:** UI confirmation dialogs (`confirmActionDialog`) guard owner refunds, staff account revocations, and loyalty reward commits/cancellations.
 
 ### Manual Phone Ownership & Recovery Integrity
 - Typing a mobile number never grants verification (`verified = 0`).

@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>J SPA — Three Design Explorations</title>
+  <title>J SPA — Four Visual Design Explorations</title>
   <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg">
   <link rel="stylesheet" href="/concepts.css">
 </head>
 <body>
   <aside class="studio">
-    <a href="/ar/" class="studio-logo">J SPA <span>DESIGN ATELIER · 3 DIRECTIONS</span></a>
+    <a href="/ar/" class="studio-logo">J SPA <span>DESIGN ATELIER · 4 CANDIDATES</span></a>
     <div class="choices" role="group" aria-label="Design direction">
-      <button data-theme="botanical" aria-pressed="true" type="button">A · Botanical Ritual <small>Selected</small></button>
+      <button data-theme="synthesis" aria-pressed="true" type="button">D · Botanical Editorial Luxury <small>Selected</small></button>
+      <button data-theme="botanical" aria-pressed="false" type="button">A · Botanical Ritual</button>
       <button data-theme="blush" aria-pressed="false" type="button">B · Modern Blush</button>
       <button data-theme="editorial" aria-pressed="false" type="button">C · Luxury Editorial</button>
     </div>
@@ -21,7 +22,7 @@
     </div>
   </aside>
 
-  <main data-theme="botanical" data-frame="desktop" id="canvas">
+  <main data-theme="synthesis" data-frame="desktop" id="canvas">
     <nav class="nav">
       <a class="wordmark" href="/ar/">
         <img src="/assets/brand/monogram.svg" alt="" width="34" height="34">
@@ -29,8 +30,8 @@
       </a>
       <div class="nav-links">
         <a href="#services">Rituals</a>
+        <a href="#atelier">Nail Atelier</a>
         <a href="#collection">Packages</a>
-        <a href="#booking">Booking</a>
         <a href="#petals">J Petals</a>
       </div>
       <a class="outline" href="/ar/booking">Book Your Moment</a>
@@ -39,9 +40,9 @@
     <section class="hero">
       <div class="hero-copy">
         <span class="eyebrow">WOMEN’S HOME SPA · AL MADINAH</span>
-        <h1 id="heroTitle">A quiet moment,<br><em>in the comfort of home.</em></h1>
+        <h1 id="heroTitle">Your Beauty.<br><em>Your Ritual. Your Moment.</em></h1>
         <p class="arabic" lang="ar" dir="rtl">لحظتكِ الخاصة… في راحة بيتكِ</p>
-        <p id="heroDescription">Thoughtful massage, nail care, and gel rituals brought to your home in Madinah, with personal confirmation by our team.</p>
+        <p id="heroDescription">Thoughtful massage, nail artistry, and botanical home spa care brought directly to your home in Madinah with personal team confirmation.</p>
         <div class="hero-cta-row">
           <a href="#booking" class="button">Explore your ritual <span>→</span></a>
           <span class="hero-caption">Exclusively for women · Manual team confirmation</span>
@@ -49,14 +50,14 @@
       </div>
       <div class="hero-art">
         <img src="/assets/images/hero-sanctuary.webp" alt="Quiet luxury home spa vignette on travertine tray">
-        <div class="art-tag">Botanical Home Sanctuary <span>PROVISIONAL BRAND VISUAL</span></div>
+        <div class="art-tag">Botanical Editorial Luxury <span>PROVISIONAL BRAND VISUAL</span></div>
       </div>
     </section>
 
     <div class="promise">
       <span>Women-only home sanctuary</span>
       <i>✦</i>
-      <span>Personally confirmed appointments</span>
+      <span>Interactive J Nail Atelier</span>
       <i>✦</i>
       <span>J Petals internal rewards</span>
     </div>
@@ -125,12 +126,13 @@
       <div>
         <span class="eyebrow">03 · BOOKING FLOW PREVIEW</span>
         <h2>Your moment<br>starts <em>here.</em></h2>
-        <p>Two clean modes (Services or Packages), preferred time in Asia/Riyadh, and manual WhatsApp handoff.</p>
+        <p>Category-first step selection, preferred time in Asia/Riyadh, and manual WhatsApp handoff.</p>
         <div class="steps">
-          <span class="current">1 · Ritual</span>
-          <span>2 · Preferred Time</span>
-          <span>3 · Details</span>
-          <span>4 · Review</span>
+          <span class="current">1 · Category</span>
+          <span>2 · Ritual</span>
+          <span>3 · Time</span>
+          <span>4 · Details</span>
+          <span>5 · Review</span>
         </div>
       </div>
       <form id="previewForm">
@@ -143,8 +145,8 @@
           <option value="469">J Signature — 469 SAR</option>
         </select>
         <div class="summary"><span>Estimated total</span><strong id="estimate">339 SAR</strong></div>
-        <button class="button" type="submit">Continue to preferred time <span>→</span></button>
-        <p id="previewNotice" role="status">Visual concept preview only — open the live app to submit requests.</p>
+        <button class="button" type="submit">Continue to rituals <span>→</span></button>
+        <p id="previewNotice" role="status">Visual concept preview only — open /ar/booking to submit requests.</p>
       </form>
     </section>
 

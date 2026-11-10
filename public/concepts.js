@@ -1,8 +1,13 @@
 const directions = {
+  synthesis: {
+    title: 'Your Beauty.<br><em>Your Ritual. Your Moment.</em>',
+    description:
+      'Thoughtful massage, nail artistry, and botanical home spa care brought directly to your home in Madinah with personal team confirmation.',
+  },
   botanical: {
     title: 'A quiet moment,<br><em>in the comfort of home.</em>',
     description:
-      'Thoughtful massage, nail care, and gel rituals brought to your home in Madinah, with personal confirmation by our team.',
+      'Soft botanical harmony, sage stillness, and calm rituals delivered at home with manual confirmation.',
   },
   blush: {
     title: 'Your soft glow.<br><em>Curated at home.</em>',

@@ -11,6 +11,7 @@ The source code and local tests cannot establish the following business facts. D
 - Provide the legal business/controller identity, privacy contact, retention schedule, rights request process and any guardian rules for minors. Obtain appropriate review of the privacy notice, terms and Saudi PDPL duties.
 - Choose a production domain and a persistent single-instance host. Configure HTTPS, environment variables, owner credentials, restricted database filesystem permissions, process supervision and monitoring.
 - Set up encrypted backups outside the host and perform a restore drill. An on-disk local backup alone does not protect against host loss.
+- Staff must verify capacity across multiple practitioners before approving **Beauty Together** (`/group-booking`) requests, and manually verify payment receipt in **Admin → Group & Gifts** before marking any **Gift a Ritual** voucher `approved_ready` or `redeemed`.
 - Train staff to verify the actual WhatsApp sender number, not the phone number written in a message, and to keep recovery tokens private.
 - Verify capacity, recovery, refunds and rewards with the owner using realistic operational scenarios before inviting customers.
 

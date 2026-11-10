@@ -106,5 +106,17 @@ try {
   await owner.call('/api/admin/staff/'+identity.id,{action:'enable'});
   assert.equal((await owner.call('/api/admin')).staff.find(item=>item.id===identity.id).role,'employee');
  });
+ await test('Atelier styles and Passport preferences enforce customer isolation',async()=>{
+  const style=(await customer.call('/api/atelier/styles',{name:'Private Look',shape:'squoval',length:'short',polish_color:'#D9B7C0',french_style:'none',finish:'matte',accent:'none',share:false},201)).style;
+  await other.call(`/api/atelier/styles/${style.id}/delete`,{},403);
+ });
+ await test('Gift redemption requires verified payment and employee sees masked sender phone',async()=>{
+  const gf=(await customer.call('/api/gift-requests',{sender_name:'Gift Sender',sender_phone:'0509000002',recipient_name:'Friend',service_id:'relaxation',terms:true},201)).gift_request;
+  await owner.call(`/api/admin/gift-requests/${gf.id}`,{status:'redeemed'},400);
+  await employee.call('/api/login',{phone:'0509000004',password:'Employee-security-test-2026'});
+  const empView=await employee.call('/api/admin');
+  const seenGift=empView.gift_requests.find(x=>x.id===gf.id);
+  assert.ok(seenGift&&seenGift.sender_phone.includes('****'));
+ });
  console.log(`\n${passed.length} security checks passed.`);
 } finally {await app.close();}

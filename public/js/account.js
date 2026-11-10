@@ -19,6 +19,7 @@ import {
   simpleTable,
   statusBadge,
 } from './components.js';
+import { renderNailPreviewSVG, recommendedServiceForStyle } from './atelier.js';
 
 export function auth(mode = 'login') {
   const tokenVal =
@@ -29,15 +30,15 @@ export function auth(mode = 'login') {
   return `
     <main id="main" class="wrap">
       <div class="auth">
-        <span class="eyebrow">J SPA · ${t('حسابكِ الخاص', 'YOUR SPACE')}</span>
-        <h1>${
+        <span class="eyebrow">J SPA · ${t('جواز جمالكِ الخاص', 'BEAUTY PASSPORT')}</span>
+        <h1 tabindex="-1">${
           mode === 'register'
             ? t('إنشاء حساب عميلة', 'Create your account')
             : mode === 'reset'
               ? t('تعيين كلمة مرور جديدة', 'Set a fresh password')
               : t('تسجيل الدخول', 'Welcome back')
         }</h1>
-        <p class="muted">${t('تابعي مواعيدكِ وبتلات نادي J من مكان واحد.', 'Follow your appointments and J Petals rewards in one calm place.')}</p>
+        <p class="muted">${t('تابعي مواعيدكِ، تصاميم الأظافر، وبتلات نادي J من مكان واحد.', 'Manage appointments, saved Nail Atelier looks, and J Petals rewards in one calm journal.')}</p>
         <form id="auth-form" data-mode="${mode}">
           <div id="form-error" role="alert"></div>
           ${mode === 'register' ? field(t('الاسم', 'Name'), 'name', 'text', '', 'required autocomplete="name"') : ''}
@@ -48,7 +49,7 @@ export function auth(mode = 'login') {
                   'phone',
                   'tel',
                   '',
-                  'required autocomplete="tel" placeholder="05xxxxxxxx"',
+                  'required inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx"',
                 )
               : field(
                   t('رمز الاستعادة من الفريق', 'Recovery token from staff'),
@@ -110,13 +111,16 @@ export function bookingCard(b) {
       <p style="margin-bottom:12px">${(b.items || []).map((i) => esc(nameOf(i) || i.name)).join(' · ')}</p>
       <div class="row">
         <strong>${money(b.total)}</strong>
-        ${
-          canReview
-            ? existingReview
-              ? `<button class="btn small light" data-review="${esc(b.id)}" data-edit-review="true" type="button">${t('تعديل تقييمكِ', 'Edit review')}</button>`
-              : `<button class="btn small light" data-review="${esc(b.id)}" type="button">${t('شاركي تجربتكِ', 'Share your experience')}</button>`
-            : ''
-        }
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small light" data-rebook="${esc(b.id)}" type="button">${t('كرري الحجز', 'Rebook')}</button>
+          ${
+            canReview
+              ? existingReview
+                ? `<button class="btn small light" data-review="${esc(b.id)}" data-edit-review="true" type="button">${t('تعديل تقييمكِ', 'Edit review')}</button>`
+                : `<button class="btn small light" data-review="${esc(b.id)}" type="button">${t('شاركي تجربتكِ', 'Share your experience')}</button>`
+              : ''
+          }
+        </div>
       </div>
     </article>
   `;
@@ -208,22 +212,138 @@ export function petalsPage() {
   `;
 }
 
+function passportJournalSection() {
+  const passport = state.account?.passport || {};
+  const favSvcs = state.catalog.services.filter((s) => (passport.favorites || []).includes(s.id));
+  const savedStyles = passport.saved_styles || [];
+  const prefs = passport.preferences || {};
+  const areas = state.catalog.settings?.areas || [];
+
+  return `
+    <section class="passport-grid">
+      <div class="card">
+        <div class="row" style="margin-bottom:12px">
+          <h3 style="margin:0">${t('خدماتكِ المفضلة', 'Favorite Rituals')}</h3>
+          <a class="text-link" href="${href('services')}">${t('تصفحي المزيد', 'Browse')}</a>
+        </div>
+        ${
+          favSvcs.length
+            ? `<div style="display:grid;gap:10px">
+                ${favSvcs
+                  .map(
+                    (s) => `
+                  <div class="row" style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm)">
+                    <div>
+                      <strong>${esc(nameOf(s))}</strong>
+                      <div class="muted" style="font-size:12px">${money(s.price)}</div>
+                    </div>
+                    <div style="display:flex;gap:6px">
+                      <a class="btn small" href="${href('booking')}?service=${esc(s.id)}">${t('حجز', 'Book')}</a>
+                      <button type="button" class="btn small light" data-passport-unfav="${esc(s.id)}">✕</button>
+                    </div>
+                  </div>
+                `,
+                  )
+                  .join('')}
+              </div>`
+            : `<p class="muted">${t('اضغطي على أيقونة القلب بجانب أي خدمة لحفظها هنا.', 'Tap the heart on any service to keep your favorites handy.')}</p>`
+        }
+      </div>
+
+      <div class="card">
+        <div class="row" style="margin-bottom:12px">
+          <h3 style="margin:0">${t('تصاميم أتيليه الأظافر المحفوظة', 'Saved Nail Atelier Styles')}</h3>
+          <a class="text-link" href="${href('atelier')}">${t('تصميم جديد', 'New look')}</a>
+        </div>
+        ${
+          savedStyles.length
+            ? `<div style="display:grid;gap:10px">
+                ${savedStyles
+                  .map(
+                    (st) => `
+                  <div class="row" style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm)">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <span class="swatch-mini" style="background:${esc(st.polish_color)}"></span>
+                      <div>
+                        <strong>${esc(st.name)}</strong>
+                        <div class="muted" style="font-size:12px">${esc(st.shape)} · ${esc(st.finish)}</div>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:6px">
+                      <button type="button" class="btn small" data-book-style="${esc(st.id)}">${t('احجزي', 'Book')}</button>
+                      <button type="button" class="btn small light" data-del-style="${esc(st.id)}">✕</button>
+                    </div>
+                  </div>
+                `,
+                  )
+                  .join('')}
+              </div>`
+            : `<p class="muted">${t('صمّمي شكل ولون أظافركِ في أتيليه J واحفظيه هنا.', 'Create your signature look in J Nail Atelier and save it here.')}</p>`
+        }
+      </div>
+
+      <form id="passport-prefs-form" class="card full">
+        <h3>${t('تفضيلات عنايتكِ الشخصية', 'Personal Care Preferences')}</h3>
+        <p class="muted">${t('محفوظة في حسابكِ الخاص فقط لتسهيل طلباتكِ القادمة.', 'Scoped privately to your account to tailor future bookings.')}</p>
+        <div class="form-grid">
+          <label class="field">
+            ${t('الحي المفضل بالمدينة', 'Preferred Madinah neighborhood')}
+            ${
+              areas.length
+                ? `<select name="preferred_neighborhood">
+                     <option value="">${t('بدون تحديد', 'Not set')}</option>
+                     ${areas.map((a) => `<option value="${esc(a)}" ${prefs.preferred_neighborhood === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}
+                   </select>`
+                : `<input name="preferred_neighborhood" value="${esc(prefs.preferred_neighborhood || '')}" maxlength="150">`
+            }
+          </label>
+          <label class="field">
+            ${t('ضغط المساج المفضل', 'Preferred massage pressure')}
+            <select name="pressure">
+              <option value="light" ${prefs.pressure === 'light' ? 'selected' : ''}>${t('لطيف', 'Light')}</option>
+              <option value="medium" ${prefs.pressure === 'medium' ? 'selected' : ''}>${t('متوسط', 'Medium')}</option>
+              <option value="firm" ${prefs.pressure === 'firm' ? 'selected' : ''}>${t('عميق / قوي', 'Firm')}</option>
+            </select>
+          </label>
+          <label class="field">
+            ${t('لمعة الأظافر المفضلة', 'Preferred nail finish')}
+            <select name="nail_finish">
+              <option value="gloss" ${prefs.nail_finish === 'gloss' ? 'selected' : ''}>${t('لمعة زجاجية', 'High Gloss')}</option>
+              <option value="pearl" ${prefs.nail_finish === 'pearl' ? 'selected' : ''}>${t('لؤلؤي ناعم', 'Pearl Sheen')}</option>
+              <option value="matte" ${prefs.nail_finish === 'matte' ? 'selected' : ''}>${t('مطفي مخملي', 'Velvet Matte')}</option>
+            </select>
+          </label>
+          ${field(t('تفضيل الروائح / الزيوت', 'Scent / Oil note'), 'scent_note', 'text', prefs.scent_note || '', 'maxlength="150" placeholder="Lavender, Chamomile..."')}
+        </div>
+        <label class="check">
+          <input type="checkbox" name="reminder_opt_in" ${prefs.reminder_opt_in ? 'checked' : ''}>
+          <span>${t('أرغب بتفعيل تذكيرات المواعيد مستقبلاً عبر واتساب عند موافقة الفريق (اختياري، ولا يعني إرسالاً آلياً حالياً).', 'Opt in to future manual appointment reminders (optional; no automated messaging active).')}</span>
+        </label>
+        <button type="submit" class="btn small">${t('حفظ تفضيلاتي', 'Save preferences')}</button>
+      </form>
+    </section>
+  `;
+}
+
 export async function accountPage(section) {
   if (!state.user) return auth('login');
   if (!state.account) {
     state.account = await api('/account');
+    state.favorites = state.account.passport?.favorites || [];
   }
   const cur = page();
+  const passport = state.account.passport || {};
+  const bookings = state.account.bookings || [];
 
   return `
     <main id="main" class="wrap">
-      ${head(t('أهلاً، ', 'Hello, ') + esc(state.user.name))}
+      ${head(t('جواز جمال ', 'Beauty Passport · ') + esc(state.user.name))}
       <div class="account-grid">
         <aside class="side-nav">
-          <h3 style="margin-bottom:2px">${t('حسابكِ', 'Your space')}</h3>
+          <h3 style="margin-bottom:2px">${t('حسابكِ', 'Your journal')}</h3>
           <span class="muted" style="margin-bottom:10px"><bdi>${esc(state.user.phone)}</bdi></span>
           ${[
-            ['account', 'نظرة عامة', 'Overview'],
+            ['account', 'جواز الجمال', 'Beauty Passport'],
             ['bookings', 'حجوزاتي', 'My bookings'],
             ['rewards', 'بتلاتي ومكافآتي', 'Petals & rewards'],
           ]
@@ -265,19 +385,30 @@ export async function accountPage(section) {
                  ${simpleTable(state.account.ledger || [], ['created_at', 'points', 'reason', 'booking_id'])}
                  <h3 style="margin-top:24px">${t('طلبات استبدال المكافآت', 'Reward requests')}</h3>
                  ${simpleTable(state.account.reward_requests || [], ['id', 'status', 'points', 'value'])}`
-              : `<h2>${t('حجوزاتكِ', 'Your bookings')}</h2>
-                 ${
-                   state.account.bookings?.length
-                     ? state.account.bookings.map(bookingCard).join('')
-                     : `<div class="empty">
-                          <h3>${t('لحظتكِ الأولى تبدأ هنا', 'Your first moment starts here')}</h3>
-                          <p class="muted">${t(
-                            'لا توجد حجوزات مرتبطة بهذا الحساب بعد. حجوزات الزائرات السابقة لا تُربط تلقائياً برقم الجوال حفاظاً على الخصوصية.',
-                            'No bookings are attached to your account yet. Guest bookings are never automatically merged by phone number.',
-                          )}</p>
-                          <a class="btn" href="${href('booking')}">${t('اطلبي موعدكِ الآن', 'Request an appointment')}</a>
-                        </div>`
-                 }`
+              : section === 'bookings'
+                ? `<h2>${t('حجوزاتكِ', 'Your bookings')}</h2>
+                   ${
+                     bookings.length
+                       ? bookings.map(bookingCard).join('')
+                       : `<div class="empty"><h3>${t('لحظتكِ الأولى تبدأ هنا', 'Your first moment starts here')}</h3><p class="muted">${t('لا توجد حجوزات مرتبطة بهذا الحساب بعد.', 'No bookings linked to this account yet.')}</p><a class="btn" href="${href('booking')}">${t('اطلبي موعدكِ الآن', 'Request an appointment')}</a></div>`
+                   }`
+                : `${passportJournalSection()}
+                   <h2 style="margin-top:28px">${t('حجوزاتكِ الأخيرة', 'Recent Visits')}</h2>
+                   ${
+                     bookings.length
+                       ? bookings.slice(0, 3).map(bookingCard).join('')
+                       : `<div class="empty muted">${t('لا توجد حجوزات مرتبطة بهذا الحساب بعد. حجوزات الزائرات لا تُربط تلقائياً برقم الجوال.', 'No bookings linked yet. Guest bookings are never merged automatically by phone number.')}</div>`
+                   }
+                   ${
+                     (passport.group_requests || []).length || (passport.gift_requests || []).length
+                       ? `<h3 style="margin-top:24px">${t('طلبات الجماعات والإهداء', 'Group & Gift Requests')}</h3>
+                          ${[...(passport.group_requests || []), ...(passport.gift_requests || [])]
+                            .map(
+                              (req) => `<div class="booking-card"><div class="row"><strong><bdi>${esc(req.reference)}</bdi></strong>${statusBadge(req.status)}</div><p class="muted">${esc(req.created_at?.slice(0, 10) || '')}</p></div>`,
+                            )
+                            .join('')}`
+                       : ''
+                   }`
           }
         </div>
       </div>
@@ -314,6 +445,7 @@ export function bindAccount(goFn, renderFn) {
     await api('/logout', {});
     state.account = null;
     state.admin = null;
+    state.favorites = [];
     await refreshSession();
     goFn('home');
   });
@@ -332,6 +464,87 @@ export function bindAccount(goFn, renderFn) {
           }
         </div>
       `;
+    } catch (err) {
+      toast(err.message);
+    }
+  });
+
+  document.querySelectorAll('[data-rebook]').forEach((btn) => {
+    btn.onclick = () => {
+      const b = state.account?.bookings?.find((x) => x.id === btn.dataset.rebook);
+      if (!b) return;
+      if (b.package_id) {
+        state.bookingCategory = 'packages';
+        state.bookingMode = 'packages';
+        state.draft.package_id = b.package_id;
+        state.draft.service_ids = [];
+      } else {
+        state.bookingMode = 'services';
+        state.draft.package_id = null;
+        state.draft.service_ids = (b.items || []).map((i) => i.id);
+        const svc = state.catalog.services.find((s) => s.id === state.draft.service_ids[0]);
+        state.bookingCategory = svc?.category || 'massage';
+      }
+      state.draft.neighborhood = b.neighborhood || '';
+      state.bookingStep = 3;
+      goFn('booking');
+    };
+  });
+
+  document.querySelectorAll('[data-passport-unfav]').forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        const res = await api('/passport/favorites', {
+          service_id: btn.dataset.passportUnfav,
+          action: 'remove',
+        });
+        state.favorites = res.favorites;
+        state.account = null;
+        renderFn();
+      } catch (err) {
+        toast(err.message);
+      }
+    };
+  });
+
+  document.querySelectorAll('[data-del-style]').forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        await api(`/atelier/styles/${btn.dataset.delStyle}/delete`, {});
+        state.account = null;
+        renderFn();
+      } catch (err) {
+        toast(err.message);
+      }
+    };
+  });
+
+  document.querySelectorAll('[data-book-style]').forEach((btn) => {
+    btn.onclick = () => {
+      const st = state.account?.passport?.saved_styles?.find((x) => x.id === btn.dataset.bookStyle);
+      if (!st) return;
+      state.atelier = { ...state.atelier, ...st };
+      const svcId = st.recommended_service_id || recommendedServiceForStyle(st);
+      state.bookingStep = 3;
+      state.bookingMode = 'services';
+      state.bookingCategory = 'gel';
+      state.draft.package_id = null;
+      state.draft.service_ids = [svcId];
+      state.draft.notes = `[Nail Atelier: ${st.name}] ${st.shape}, ${st.length}, ${st.polish_color}, ${st.finish}`;
+      goFn('booking');
+    };
+  });
+
+  $('#passport-prefs-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target;
+    const d = Object.fromEntries(new FormData(f));
+    d.reminder_opt_in = f.elements.reminder_opt_in.checked;
+    try {
+      await api('/passport/preferences', d);
+      state.account = null;
+      toast(t('تم حفظ تفضيلاتكِ الشخصية', 'Preferences saved'));
+      renderFn();
     } catch (err) {
       toast(err.message);
     }

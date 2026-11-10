@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-10T12:09:26.162Z",
+  "date": "2026-11-10T13:23:22.548Z",
   "passed": [
     "Seed catalog: 13 services and 4 computed packages",
     "Guest persists pending request and WhatsApp handoff",
@@ -17,6 +17,11 @@
     "Verified reviews require owned completed booking and moderation",
     "Reward commit deducts points once",
     "Unauthenticated admin request rejected",
-    "Cross-origin write rejected"
+    "Cross-origin write rejected",
+    "Unknown routes return HTTP 404 with noindex SSR HTML",
+    "Ritual Studio returns deterministic catalog-backed recommendations",
+    "Nail Atelier save, share code, Passport favorites & preferences work",
+    "Group & Gift requests persist pending review and update via admin",
+    "Telemetry funnel and admin pagination metadata work cleanly"
   ]
 }

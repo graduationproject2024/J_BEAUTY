@@ -8,22 +8,24 @@
 - **Personality:** Quiet Luxury × Botanical Beauty × Soft Editorial Design
 
 ## 2. Design Exploration (`/concepts.html`)
-Three refined design directions were implemented and evaluated in `public/concepts.html`, `public/concepts.css`, and `public/concepts.js` (with interactive Desktop and Mobile Hero viewport toggles):
+Four refined design directions were implemented and evaluated in `public/concepts.html`, `public/concepts.css`, and `public/concepts.js` (with interactive Desktop and Mobile Hero viewport toggles):
 
-1. **Direction A — Botanical Ritual (Selected Primary System)**
-   - **Aesthetic:** Warm ivory (`#FBF7F4`) and cream (`#F4EBE6`) architectural surfaces, sage green (`#A7B79F` / `#607257`) accents, rose-gold hairline details (`#D4AF7C`), deep plum-brown (`#503C45`) primary ink, arched travertine sanctuary photography, and soft organic radii.
-   - **Strengths:** High bilingual legibility in both Arabic RTL and English LTR; calm spa restraint across both marketing pages and dense operational/booking/admin screens; strong WCAG AA text contrast on ivory and white surfaces.
-2. **Direction B — Modern Blush**
+1. **Direction S — Luxury Botanical Synthesis (Selected Final System)**
+   - **Aesthetic:** Combines Botanical Ritual’s calming warm ivory (`#FBF7F4`), cream (`#F4EBE6`), and sage green (`#A7B79F` / `#607257`) palette with Luxury Editorial’s spacious typographic rhythm (`Newsreader` + `Noto Naskh Arabic`) and Modern Blush’s feminine arch/pearl geometry.
+   - **Strengths:** Highest bilingual RTL/LTR clarity across both quiet-luxury storytelling and dense interactive workflows (Atelier, Studio, Booking Wizard, Beauty Passport, Admin Operations), preserving crisp WCAG AA contrast and GPU-composited transitions (`cubic-bezier(0.23, 1, 0.32, 1)`).
+2. **Direction A — Botanical Ritual**
+   - **Aesthetic:** Organic soft curves, arched travertine sanctuary photography, sage botanical accents, warm ivory surfaces.
+3. **Direction B — Modern Blush**
    - **Aesthetic:** Blush-tinted surfaces (`#FAF1F2` / `#F2DFE3`), tilted hero arch, sans-serif geometric display headers, pill silhouettes.
-   - **Evaluation:** Engaging for nail and gel promotions, but extended pink backgrounds reduce visual breathing room on long massage descriptions, booking forms, and admin tables.
-3. **Direction C — Luxury Editorial**
+   - **Evaluation:** Engaging for nail and gel highlights, though extended pink backgrounds lower visual breathing room on long forms and dense operational screens.
+4. **Direction C — Luxury Editorial**
    - **Aesthetic:** Crisp zero-radius architectural grids, stark hairline dividers, magazine asymmetry, charcoal/ivory restraint.
-   - **Evaluation:** Strong editorial authority, though ultra-sharp corners feel slightly austere for warm in-home hospitality.
+   - **Evaluation:** Strong editorial authority, blended into Direction S rather than used wholesale with harsh corners.
 
-### Final Selection
-**Direction A (Botanical Ritual) refined with Direction C’s editorial hierarchy and generous whitespace** was selected.
+### Interactive 2.5D vs. 3D Rendering Evaluation (`J Nail Atelier`)
+Three.js / WebGL 3D hand-mesh rendering was explicitly evaluated against strict project constraints (`script-src 'self'` CSP, zero external CDNs, low mobile payload, 60fps scroll/touch performance, and zero synthetic skin/hand distortion). Because unbundled WebGL frameworks would inflate runtime payload without guaranteeing superior close-up French tip geometry or Arabic RTL UI overlays on mid-range mobile devices, **J Nail Atelier** (`public/js/atelier.js`) uses a bespoke **pointer-reactive 2.5D layered SVG lighting stage** (`<15 KB`, dynamic specular sheen tracked smoothly across polish, pearl, and matte finishes, plus 5 shapes, 3 lengths, 10 polish shades, 5 French styles, 5 tip shades, 4 accents, and 4 skin undertones).
 
-*(Note: 12ui hosted generation services were unavailable / excluded under the zero-paid-services rule; the exploration and final system were authored locally using self-hosted assets.)*
+*(Note: 12ui hosted generation services were unavailable / excluded under the zero-paid-services rule; all concepts, SVG components, and system refinements were engineered locally with self-hosted assets.)*
 
 ## 3. Official Color Tokens (`public/styles.css`)
 | Token | Hex | Role |
@@ -53,7 +55,8 @@ Zero external font requests (`fonts.googleapis.com` removed to satisfy strict CS
   - **Provisional Status:** All current imagery is provisional until the business approves or replaces each service’s `image` URL/path directly in **Admin → Services**.
 
 ## 6. Component & Page Architecture
-- **Responsive Mobile Navigation:** Prominent `Book` / `احجزي موعدكِ` button remains visible in the header across desktop, tablet, and mobile (`360px`–`1440px`), paired with an accessible slide-over menu drawer (`Escape` & `aria-expanded`) and a sticky mobile bottom CTA bar on public browsing routes.
-- **Booking Wizard (`public/js/booking.js`):** Step 1 isolates Individual Services and Curated Packages into mutually exclusive tabs with zero auto-selection on switch, service category pills, treatment thumbnails, and a collapsible mobile summary drawer.
-- **J Petals Club (`public/js/account.js`):** 8-petal SVG floral bloom arc meter showing live progress toward the next reward for verified customers (or illustrative preview for guests).
-- **Admin Dashboard (`public/js/admin.js`):** Role-aware navigation with a 7-day Calendar strip & slot timeline, capacity conflict indicators, status-filtered booking queue, clean payments ledger, and formatted audit logs.
+- **Homepage 8-Section Narrative:** Editorial Hero -> **Choose Your Mood** interactive selector ("إيه نوع العناية اللي محتاجاها النهارده؟") -> Featured Rituals (`4`-column catalog cards with heart Favorites toggles) -> **The J SPA Experience** 4-step journey -> Inline **J Nail Atelier** mini preview -> Animated 8-petal **J Petals Club** bloom (`renderSignatureBloomSVG`) -> Honest Care Standards (3 pillars shown before moderated reviews exist) -> Final Booking CTA.
+- **5-Step Mobile-First Booking Wizard (`public/js/booking.js`):** Step 1 Category cards (plus 1-tap **"كرري آخر حجز"** for returning guests) -> Step 2 Category-scoped rituals & packages (zero auto-select, zero checkbox/radio focus loss via incremental summary DOM updates) -> Step 3 Working-day/blocked-date aware Schedule (`Asia/Riyadh`) -> Step 4 Guest-friendly Details -> Step 5 Review & WhatsApp handoff (`pending_confirmation`).
+- **Interactive Discovery & Retention Extensions:** **J Ritual Studio** (`/studio` catalog-backed recommender), **J Nail Atelier** (`/atelier`), **Beauty Lookbook** (`/lookbook`), **Beauty Together** (`/group-booking`), **Gift a Ritual** (`/gifts`), and **My Beauty Passport** (`/account` / `/passport`).
+- **Motion & Reduced-Motion Support (`public/js/motion.js`):** GPU-composited scroll reveals (`IntersectionObserver`) and petal transitions honoring `@media (prefers-reduced-motion: reduce)`.
+- **Responsive Mobile Navigation & Data Views:** Persistent header CTA across desktop/mobile, slide-over drawer (`Escape`, `aria-expanded`, focus restoration on SPA navigation), sticky scrolled bottom bar on public pages, and automatic key-value card lists replacing wide admin/ledger tables below `780px`.

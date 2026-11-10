@@ -1,6 +1,16 @@
 import { $, api, esc, href, page, refreshSession, state, t } from './js/state.js';
 import { footer, head, header } from './js/components.js';
+import { initScrollReveals, trackFunnel } from './js/motion.js';
+import { atelierPage, bindAtelier } from './js/atelier.js';
 import {
+  bindExperiences,
+  giftsPage,
+  groupBookingPage,
+  lookbookPage,
+  studioPage,
+} from './js/experiences.js';
+import {
+  bindPublicInteractions,
   contact,
   contentPage,
   detail,
@@ -16,11 +26,23 @@ import { bindBooking, booking } from './js/booking.js';
 import { accountPage, auth, bindAccount, petalsPage } from './js/account.js';
 import { adminPage, bindAdmin } from './js/admin.js';
 
-function go(route) {
+let lastBeaconRoute = '';
+let loadedSharedCode = '';
+
+function focusRouteHeading() {
+  const h1 = document.querySelector('#main h1');
+  if (h1) {
+    h1.setAttribute('tabindex', '-1');
+    h1.focus({ preventScroll: true });
+  }
+}
+
+async function go(route) {
   history.pushState({}, '', href(route));
   state.filter = 'all';
-  render();
+  await render();
   window.scrollTo(0, 0);
+  focusRouteHeading();
 }
 
 function updateMobileBar(cur) {
@@ -28,7 +50,7 @@ function updateMobileBar(cur) {
   const btn = $('#mobile-bar #mobile-book-btn');
   if (!bar || !btn) return;
   const isMobile = window.innerWidth <= 780;
-  const hideOn = ['booking', 'admin', 'account', 'bookings', 'rewards', 'login', 'register', 'reset'];
+  const hideOn = ['booking', 'admin', 'account', 'bookings', 'rewards', 'login', 'register', 'reset', 'atelier', 'group-booking', 'gifts'];
   const scrolledEnough = window.scrollY > 240;
   const show = isMobile && !hideOn.includes(cur) && scrolledEnough;
   bar.hidden = !show;
@@ -37,6 +59,14 @@ function updateMobileBar(cur) {
     btn.href = href('booking');
     btn.textContent = t('احجزي موعدكِ الآن', 'Book your moment');
   }
+}
+
+function maybeTrackRoute(cur) {
+  if (lastBeaconRoute === cur) return;
+  lastBeaconRoute = cur;
+  if (cur === 'home') trackFunnel('home_view');
+  else if (cur.startsWith('services/')) trackFunnel('service_view');
+  else if (cur === 'booking' && !state.bookingResult) trackFunnel('booking_start');
 }
 
 export async function render() {
@@ -50,15 +80,38 @@ export async function render() {
     else if (cur === 'services') body = services();
     else if (cur.startsWith('services/')) body = detail(cur.split('/')[1]);
     else if (cur === 'packages') body = packagesPage();
-    else if (cur === 'booking') {
+    else if (cur === 'studio') body = studioPage();
+    else if (cur === 'lookbook') body = lookbookPage();
+    else if (cur === 'group-booking') body = groupBookingPage();
+    else if (cur === 'gifts') body = giftsPage();
+    else if (cur === 'atelier') {
+      const q = new URLSearchParams(location.search);
+      const code = q.get('style');
+      if (code && code !== loadedSharedCode) {
+        loadedSharedCode = code;
+        try {
+          const shared = await api(`/atelier/styles/${encodeURIComponent(code)}`);
+          if (shared?.style) {
+            state.atelier = { ...state.atelier, ...shared.style, lastShareUrl: location.href };
+          }
+        } catch {}
+      }
+      body = atelierPage();
+    } else if (cur === 'booking') {
       const q = new URLSearchParams(location.search);
       if (q.has('service') && state.bookingStep === 1) {
+        const svcId = q.get('service');
+        const svc = state.catalog.services.find((s) => s.id === svcId);
         state.bookingMode = 'services';
-        state.draft.service_ids = [q.get('service')];
+        state.bookingCategory = svc?.category || 'massage';
+        state.bookingStep = 2;
+        state.draft.service_ids = [svcId];
         state.draft.package_id = null;
       }
       if (q.has('package') && state.bookingStep === 1) {
         state.bookingMode = 'packages';
+        state.bookingCategory = 'packages';
+        state.bookingStep = 2;
         state.draft.package_id = q.get('package');
         state.draft.service_ids = [];
       }
@@ -78,26 +131,35 @@ export async function render() {
   }
 
   $('#app').innerHTML = header() + body + footer();
-  document.title =
-    'J SPA | ' +
-    (cur === 'home'
-      ? t('سبا منزلي المدينة المنورة', 'Home Spa Madinah')
-      : cur.replaceAll('-', ' '));
+  const titleMap = {
+    home: t('سبا منزلي المدينة المنورة', 'Home Spa Madinah'),
+    studio: t('استوديو الجمال J', 'J Ritual Studio'),
+    atelier: t('أتيليه الأظافر', 'J Nail Atelier'),
+    lookbook: t('معرض الإلهام', 'Beauty Lookbook'),
+    'group-booking': t('جلسة معاً', 'Beauty Together'),
+    gifts: t('أهدي لحظة عناية', 'Gift a Ritual'),
+    account: t('جواز الجمال وحسابي', 'Beauty Passport & Account'),
+  };
+  document.title = 'J SPA | ' + (titleMap[cur] || cur.replaceAll('-', ' '));
 
   updateMobileBar(cur);
+  initScrollReveals();
+  maybeTrackRoute(cur);
   bind(cur);
 }
 
 function bind(cur) {
   document.querySelectorAll(`a[href^="/${state.lang}/"]`).forEach((a) => {
-    a.addEventListener('click', (e) => {
+    a.addEventListener('click', async (e) => {
       if (a.target || e.ctrlKey || e.metaKey || e.shiftKey) return;
       e.preventDefault();
       const u = new URL(a.href);
       history.pushState({}, '', u.pathname + u.search);
       $('#nav')?.classList.remove('open');
-      render();
+      $('#menu')?.setAttribute('aria-expanded', 'false');
+      await render();
       window.scrollTo(0, 0);
+      focusRouteHeading();
     });
   });
 
@@ -134,12 +196,18 @@ function bind(cur) {
     };
   });
 
+  bindPublicInteractions(go);
+  bindAtelier(go, render);
+  bindExperiences(render);
   bindBooking(render);
   bindAccount(go, render);
   bindAdmin(render);
 }
 
-window.addEventListener('popstate', render);
+window.addEventListener('popstate', async () => {
+  await render();
+  focusRouteHeading();
+});
 window.addEventListener('resize', () => updateMobileBar(page()));
 window.addEventListener('scroll', () => updateMobileBar(page()), { passive: true });
 window.addEventListener('keydown', (e) => {
