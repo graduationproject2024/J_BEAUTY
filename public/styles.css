@@ -2341,3 +2341,13 @@ dialog::backdrop { background: rgba(53, 47, 50, 0.45); backdrop-filter: blur(4px
 @media (max-width:1024px) { .jb-rewards-dashboard { grid-template-columns:1fr; } .jb-loyalty-intro { grid-template-columns:1fr; } }
 @media (max-width:780px) { .jb-quick-paths { grid-template-columns:1fr; gap:12px; margin-bottom:24px; } .jb-path { padding:18px; } .jb-rewards-dashboard { gap:14px; } .jb-reward-card { padding:20px; } }
 @media (max-width:420px) { .jb-path { gap:11px; padding:15px 13px; } .jb-path-icon { width:42px; height:42px; flex-basis:42px; } .jb-path-copy small { font-size:13px; } .jb-path-arrow { font-size:19px; } .jb-rewards-main,.jb-rewards-aside { padding:20px; } }
+
+@media (min-width:781px) and (max-width:1250px) {
+ .nav { display:none; position:fixed; inset:0; background:var(--ivory); z-index:45; padding:92px 28px 32px; flex-direction:column; align-items:stretch; gap:6px; overflow-y:auto; }
+ .nav.open { display:flex; }
+ .nav a { font-size:20px; padding:12px 4px; border-bottom:1px solid var(--border); }
+ .nav a::after { display:none; }
+ .nav-mobile-cta { display:block; margin-top:16px; }
+ .menu { display:inline-flex; position:relative; z-index:50; }
+}
+@media(prefers-reduced-motion:reduce){.jb-path{transition:none;transform:none!important}}

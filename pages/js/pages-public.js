@@ -110,10 +110,24 @@ export function home() {
               <img src="/J_BEAUTY/public/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
             </div>
             <div class="hero-seal">
-              <strong>J SPA · ${t('المدينة المنورة', 'MADINAH')}</strong>
+              <strong>J Beauty · ${t('المدينة المنورة', 'MADINAH')}</strong>
               <span>${t('لحظتكِ الخاصة… في راحة بيتكِ', 'Your Moment of Beauty, At Home.')}</span>
             </div>
           </div>
+        </section>
+
+        <!-- High-visibility customer journeys: occasions and verified reviews -->
+        <section class='jb-quick-paths' aria-label="${t('تجارب J Beauty', 'J Beauty experiences')}">
+          <a class='jb-path jb-path-occasion' href="${href('occasions')}">
+            <span class='jb-path-icon' aria-hidden='true'>${icon('calendar')}</span>
+            <span class='jb-path-copy'><strong>${t('تنسيق جلسات المناسبات', 'Occasion Experiences')}</strong><small>${t('تنسيق جلسات العناية والتجميل للمناسبات الخاصة', 'Tailored beauty visits for your special occasion')}</small></span>
+            <span class='jb-path-arrow' aria-hidden='true'>←</span>
+          </a>
+          <a class='jb-path jb-path-reviews' href="${href('reviews')}">
+            <span class='jb-path-icon' aria-hidden='true'>${icon('star')}</span>
+            <span class='jb-path-copy'><strong>${t('تجارب العميلات والتقييمات', 'Customer Reviews & Ratings')}</strong><small>${t('اطّلعي على التجارب الموثقة أو شاركي رأيكِ بعد الزيارة', 'Read verified reviews or rate your completed visit')}</small></span>
+            <span class='jb-path-arrow' aria-hidden='true'>←</span>
+          </a>
         </section>
 
         <!-- 2. Choose Your Mood -->
@@ -142,7 +156,7 @@ export function home() {
         <section class="section">
           <div class="section-head">
             <div>
-              <span class="eyebrow">${t('مختارات J SPA', 'FEATURED RITUALS')}</span>
+              <span class="eyebrow">${t('مختارات J Beauty', 'FEATURED RITUALS')}</span>
               <h2>${t('جلسات مختارة لراحتكِ', 'Curated moments of care')}</h2>
             </div>
             <a class="text-link" href="${href('services')}">${t('استكشفي جميع الخدمات (13) ←', 'Browse all 13 services →')}</a>
@@ -153,11 +167,11 @@ export function home() {
           </div>
         </section>
 
-        <!-- 4. The J SPA Experience (Refined Compact Editorial Timeline) -->
+        <!-- 4. The J Beauty Experience (Refined Compact Editorial Timeline) -->
         <section class="section timeline-section" data-reveal>
           <div class="section-head">
             <div>
-              <span class="eyebrow">${t('مسار الزيارة المنزلية', 'THE J SPA EXPERIENCE')}</span>
+              <span class="eyebrow">${t('مسار الزيارة المنزلية', 'THE J Beauty EXPERIENCE')}</span>
               <h2>${t('من اختياركِ… حتى باب منزلكِ', 'From selection to calm home care')}</h2>
             </div>
             <a class="text-link" href="${href('occasions')}">${t('تنسيق جلسات المناسبات', 'Occasion Experiences')}</a>
@@ -192,45 +206,23 @@ export function home() {
           ${atelierMiniWidget()}
         </section>
 
-        <!-- 6. J Petals Club -->
-        <section class="loyalty-band" data-reveal style="margin-block:48px">
-          <div class="loyalty-copy-col">
-            <span class="eyebrow">${t('نادي بتلات J', 'J PETALS CLUB')}</span>
-            <h2>${t('نادي بتلات J… كل زيارة تزهر مكافأة', 'J Petals Club. Care that blooms.')}</h2>
-            <p>${t(
-              'تُمنح البتلات حصرياً وفق القواعد المعتمدة بعد اكتمال الخدمة والتحقق من الدفع وتوثيق ملكية حسابكِ. لا تُضاف نقاط قبل الدفع الفعلي.',
-              'Petals are issued exclusively after completed service, staff-verified payment receipt, and verified phone ownership.',
-            )}</p>
-            <div class="hero-actions" style="margin-top:24px">
-              <a class="btn rose" href="${href('petals')}">${t('استكشفي نادي بتلات J', 'Discover J Petals Club')}</a>
-              <a class="text-link" href="${href('gifts')}">${t('أهدي تجربة سبا', 'Gift a Ritual')}</a>
+        <!-- 6. J Beauty loyalty: clear rules, never fictional balances -->
+        <section class='loyalty-band jb-loyalty-intro' data-reveal>
+          <div class='loyalty-copy-col'>
+            <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
+            <h2>${t('بتلاتكِ… مكافآت واضحة لكل زيارة مستحقة', 'Real visits. Clear rewards.')}</h2>
+            <p>${t('تعرفي على طريقة اكتساب البتلات والمكافآت المتاحة. لا تُضاف بتلات إلى حسابكِ إلا بعد اكتمال الخدمة وتوثيق الدفع والتحقق من الحساب.', 'Explore how Petals are earned and redeemed. Points are credited only after completed services, verified payment, and account verification.')}</p>
+            <div class='hero-actions' style='margin-top:22px'>
+              <a class='btn rose' href="${href('petals')}">${t('اكتشفي نادي البتلات', 'Explore Petals Rewards')}</a>
+              <a class='btn jb-quiet-link' href="${href('reviews')}">${t('اطّلعي على تجارب العميلات', 'Customer reviews')}</a>
             </div>
           </div>
-          <div class="loyalty-card loyalty-gallery-card">
-            <div class="loyalty-showcase-meta">
-              <span class="eyebrow">${t('مثال توضيحي للبرنامج', 'PROGRAM PREVIEW')}</span>
-              <div class="loyalty-balance-num">${num(250)}</div>
-              <p class="loyalty-balance-sub">${t('بتلة مكتسبة ومعتمدة', 'earned & verified petals')}</p>
-              <p class="loyalty-next-copy">${t(`متبقي ${num(250)} بتلة للمكافأة الثانية (${money(30)})`, `${num(250)} petals away from ${money(30)} reward`)}</p>
-              <div class="petal-progress-wrap" aria-label="${t('مسار التقدم للمكافآت', 'Reward progress')}">
-                <div class="petal-progress-track">
-                  <div class="petal-progress-fill" style="width:50%"></div>
-                  <span class="petal-progress-tick" style="inset-inline-start:40%" aria-hidden="true"></span>
-                </div>
-                <div class="petal-milestone-row">
-                  <span>${num(0)}</span>
-                  <span>${num(200)} (${money(10)})</span>
-                  <span>${num(500)} (${money(30)})</span>
-                </div>
-              </div>
-              <p class="loyalty-rate-note">${t(`${num(1)} ر.س مدفوع وموثق = ${num(1)} بتلة حقيقية`, `${num(1)} verified paid SAR = ${num(1)} genuine Petal`)}</p>
-            </div>
-            <div class="loyalty-cameo-slot">
-              ${petalBloomSVG(5, 8, false)}
-            </div>
+          <div class='jb-loyalty-steps' aria-label="${t('كيف يعمل برنامج البتلات', 'How Petals works')}">
+            <div class='jb-loyalty-step'><span>01</span><div><strong>${t('احجزي واستمتعي بالخدمة', 'Book and enjoy')}</strong><p>${t('يؤكد فريقنا الموعد ثم تُقدّم الخدمة.', 'Your appointment is confirmed and completed.')}</p></div></div>
+            <div class='jb-loyalty-step'><span>02</span><div><strong>${t('تُوثّق الزيارة والدفع', 'Verify your visit and payment')}</strong><p>${t('تُحتسب البتلات المستحقة وفق القواعد المعتمدة.', 'Eligible Petals are calculated under the program rules.')}</p></div></div>
+            <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتكِ', 'Choose your reward')}</strong><p>${t('يمكن طلب مكافأة متاحة وتطبيقها بعد موافقة الفريق على حجز مؤهل.', 'Request an eligible reward for staff-approved use on a future booking.')}</p></div></div>
           </div>
         </section>
-
         <!-- 7. Genuine Beauty Stories / Verified Care Standards -->
         <section class="section">
           <div class="section-head">
@@ -238,7 +230,7 @@ export function home() {
               <span class="eyebrow">${t('الشفافية والثقة', 'GENUINE BEAUTY STORIES')}</span>
               <h2>${state.catalog.reviews?.length ? t('كلمات من تجارب حقيقية', 'Verified Customer Stories') : t('معايير عناية تُشعركِ بالطمأنينة', 'Standards built on honesty')}</h2>
             </div>
-            <a class="text-link" href="${href('reviews')}">${t('صفحة التقييمات', 'Reviews page')}</a>
+            <a class="btn small" href="${href('reviews')}">${t('اقرئي التقييمات أو قيّمي تجربتكِ', 'Read or Write a Review')}</a>
           </div>
           ${reviewsContent(state.catalog.reviews, true)}
         </section>
@@ -359,7 +351,7 @@ export function detail(id) {
             <a class="btn" href="${href('booking')}?service=${esc(s.id)}">${t('اطلبي هذه الخدمة', 'Request this ritual')}</a>
             <a class="btn light" href="${href('services')}">${t('عودة للخدمات', 'All rituals')}</a>
           </div>
-          <p class="muted" style="margin-top:14px">${t('الأسعار والمواعيد المفضلة تخضع للتأكيد اليدوي من فريق J SPA.', 'Prices and preferred times are subject to manual team confirmation.')}</p>
+          <p class="muted" style="margin-top:14px">${t('الأسعار والمواعيد المفضلة تخضع للتأكيد اليدوي من فريق J Beauty.', 'Prices and preferred times are subject to manual team confirmation.')}</p>
         </div>
       </div>
       <section class="section">
@@ -448,10 +440,10 @@ export function reviewsPage() {
 export function contentPage(p) {
   const pages = {
     about: [
-      t('عن J SPA — لحظتكِ في راحة بيتكِ', 'About J SPA — Care that feels like you'),
+      t('عن J Beauty — لحظتكِ في راحة بيتكِ', 'About J Beauty — Care that feels like you'),
       t(
-        'J SPA منصة سبا نسائي منزلي في المدينة المنورة، صُممت لتمنح كل سيدة مساحة من السكينة والعناية الراقية دون الحاجة للخروج من منزلها.',
-        'J SPA is a women’s home spa platform serving Al Madinah Al Munawwarah, designed to bring serene wellness and nail rituals into the privacy of your own home.',
+        'J Beauty منصة سبا نسائي منزلي في المدينة المنورة، صُممت لتمنح كل سيدة مساحة من السكينة والعناية الراقية دون الحاجة للخروج من منزلها.',
+        'J Beauty is a women’s home spa platform serving Al Madinah Al Munawwarah, designed to bring serene wellness and nail rituals into the privacy of your own home.',
       ),
       t(
         'نلتزم بالتواصل الشخصي والوضوح الكامل: كل حجز يتم تنسيقه ومراجعته يدوياً مع فريقنا لضمان توفر المختصة والالتزام بمستلزمات النظافة والاحتياطات المعتمدة.',
@@ -480,7 +472,7 @@ export function contentPage(p) {
         'Passwords are stored using strong one-way Argon2id derivation and cannot be read by staff. When you choose to open WhatsApp to send a request or verification reference, WhatsApp’s own terms apply.',
       ),
       t(
-        'ملاحظة إطلاق مهمة: هذه مسودة تتطلب اعتماد إدارة J SPA النهائي لتحديد هوية المتحكم بالبيانات، جهة تواصل الخصوصية، موقع الاستضافة، ومدد الاحتفاظ والحذف وفق نظام حماية البيانات الشخصية السعودي (PDPL).',
+        'ملاحظة إطلاق مهمة: هذه مسودة تتطلب اعتماد إدارة J Beauty النهائي لتحديد هوية المتحكم بالبيانات، جهة تواصل الخصوصية، موقع الاستضافة، ومدد الاحتفاظ والحذف وفق نظام حماية البيانات الشخصية السعودي (PDPL).',
         'Pre-launch legal notice: this draft requires business approval identifying the legal data controller, privacy contact, hosting jurisdiction, and retention schedule under Saudi PDPL.',
       ),
     ],
@@ -527,7 +519,7 @@ export function contact() {
   return `
     <main id="main" class="wrap">
       ${head(
-        t('تواصلي معنا', 'Contact J SPA'),
+        t('تواصلي معنا', 'Contact J Beauty'),
         t('نخدم عميلاتنا في منازلهن بالمدينة المنورة.', 'Serving women across approved neighborhoods in Al Madinah.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('تواصلي معنا', 'Contact'), '']],
       )}
@@ -535,8 +527,8 @@ export function contact() {
         <div class="card">
           <h3>${t('الخدمة المنزلية — المدينة المنورة', 'Home Service — Al Madinah')}</h3>
           <p class="muted">${t(
-            'J SPA خدمة منزلية متنقلة للسيدات فقط، ولا يوجد مقر استقبال مفتوح للزيارات.',
-            'J SPA operates exclusively via at-home appointments for women. There is no walk-in storefront.',
+            'J Beauty خدمة منزلية متنقلة للسيدات فقط، ولا يوجد مقر استقبال مفتوح للزيارات.',
+            'J Beauty operates exclusively via at-home appointments for women. There is no walk-in storefront.',
           )}</p>
           ${
             waDigits
@@ -621,8 +613,8 @@ export function recovery() {
       ${head(t('استعادة الحساب بمساعدة الفريق', 'Staff-Assisted Account Recovery'))}
       <div class="content card">
         <p>${t(
-          'للحفاظ على خصوصية حسابكِ بدون خدمات رسائل مدفوعة، تواصلي مع فريق J SPA من نفس محادثة واتساب المسجلة لدينا. بعد التحقق من رقمكِ ينشئ الفريق لكِ رابط استعادة قصير الصلاحية للاستخدام مرة واحدة.',
-          'To keep recovery secure without paid SMS services, contact J SPA from the WhatsApp number linked to your account. Once verified, staff can generate a short-lived single-use reset link.',
+          'للحفاظ على خصوصية حسابكِ بدون خدمات رسائل مدفوعة، تواصلي مع فريق J Beauty من نفس محادثة واتساب المسجلة لدينا. بعد التحقق من رقمكِ ينشئ الفريق لكِ رابط استعادة قصير الصلاحية للاستخدام مرة واحدة.',
+          'To keep recovery secure without paid SMS services, contact J Beauty from the WhatsApp number linked to your account. Once verified, staff can generate a short-lived single-use reset link.',
         )}</p>
         <p class="muted">${t('لا تشاركي كلمة مروركِ السابقة مع أي شخص أبداً.', 'Never share your current password with anyone.')}</p>
         <div class="hero-actions" style="margin-top:20px">
