@@ -81,9 +81,12 @@ writeFileSync(path.join(PAGES_DIR, 'app.js'), appCode);
 
 let compCode = rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'js', 'components.js'), 'utf8'));
 compCode = compCode.replace(
-  "t(\n        'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',\n        'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',\n      )",
-  "t(\n        'معاينة واجهة J SPA على GitHub Pages · سبا نسائي منزلي في المدينة المنورة (للحجوزات الفعلية يلزم خادم Node.js)',\n        'J SPA GITHUB PAGES PREVIEW · AL MADINAH WOMEN’S HOME SPA (LIVE BOOKINGS REQUIRE NODE.JS SERVER)',\n      )",
+  /t\(\s*'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',\s*'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',?\s*\)/,
+  "t(\n        'معاينة تجريبية لـ J Beauty على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',\n        'J Beauty static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',\n      )",
 );
+if (!compCode.includes('static preview on GitHub Pages')) {
+  throw new Error('Failed to inject GitHub Pages static preview disclosure into pages/js/components.js');
+}
 writeFileSync(path.join(PAGES_DIR, 'js', 'components.js'), compCode);
 
 for (const file of ['atelier.js', 'booking.js', 'experiences.js', 'motion.js', 'pages-public.js', 'account.js', 'admin.js']) {

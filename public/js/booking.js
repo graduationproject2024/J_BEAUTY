@@ -387,7 +387,7 @@ function stepFiveReviewHtml() {
         <a class="text-link" href="${href('policies')}" target="_blank">${t('سياسة الحجز والإلغاء', 'booking & cancellation policies')}</a>
         ${t('و', 'and')}
         <a class="text-link" href="${href('privacy')}" target="_blank">${t('الخصوصية', 'privacy notice')}</a>.
-        ${t('أفهم أن الطلب ينتظر تأكيد فريق J SPA يدوياً (بانتظار التأكيد).', 'I understand this request awaits manual staff confirmation (Pending Confirmation).')}
+        ${t('أفهم أن الطلب ينتظر تأكيد فريق J Beauty يدوياً (بانتظار التأكيد).', 'I understand this request awaits manual staff confirmation (Pending Confirmation).')}
       </span>
     </label>
     ${provisional()}
@@ -402,7 +402,7 @@ export function bookingSuccess() {
       <div class="content">
         <div class="success">
           <div class="row" style="margin-bottom:10px">
-            <h2 style="margin:0;font-size:24px">${t('تم تسجيل طلبكِ، وسيتم تأكيد الموعد بعد مراجعته مع فريق J Spa.', 'Your request is saved. J SPA will review and personally confirm your appointment.')}</h2>
+            <h2 style="margin:0;font-size:24px">${t('تم تسجيل طلبكِ، وسيتم تأكيد الموعد بعد مراجعته مع فريق J Beauty.', 'Your request is saved. J Beauty will review and personally confirm your appointment.')}</h2>
             <span class="badge pending">${t('بانتظار التأكيد', 'Pending confirmation')}</span>
           </div>
           <p style="margin-bottom:0">${t('رقم الطلب المرجعي:', 'Booking Reference:')} <strong><bdi>${esc(r.booking?.reference)}</bdi></strong></p>
@@ -451,7 +451,7 @@ export function booking() {
     <main id="main" class="wrap">
       ${head(
         t('طلب موعد منزلي', 'Request Your Moment'),
-        t('خمس خطوات ميسرة، ثم مراجعة وتأكيد شخصي من فريق J SPA.', 'Five calm steps, followed by personal confirmation from our team.'),
+        t('خمس خطوات ميسرة، ثم مراجعة وتأكيد شخصي من فريق J Beauty.', 'Five calm steps, followed by personal confirmation from our team.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('طلب حجز', 'Booking'), '']],
       )}
       <div class="booking-layout">

@@ -34,7 +34,7 @@ export function auth(mode = 'login') {
     <main id="main" class="wrap">
       <div class="auth-shell">
         <div class="auth">
-          <span class="eyebrow">J SPA · ${t('جواز جمالكِ الخاص', 'BEAUTY PASSPORT')}</span>
+          <span class="eyebrow">J Beauty · ${t('جواز جمالكِ الخاص', 'BEAUTY PASSPORT')}</span>
           <h1 tabindex="-1">${
             mode === 'register'
               ? t('إنشاء حساب عميلة', 'Create your account')
@@ -151,115 +151,88 @@ export function bookingCard(b) {
 }
 
 export function petalsContent() {
-  const rewards =
-    state.account?.rewards ||
-    state.catalog.settings?.rewards || [
-      { id: 'petal-200', points: 200, value: 10 },
-      { id: 'petal-500', points: 500, value: 30 },
-    ];
-  const verified = !!state.user?.verified;
-  const hasLive = Boolean(state.account && verified);
-  const balance = hasLive ? Number(state.account.balance || 0) : 0;
-  const displayPts = hasLive ? balance : state.user ? 0 : 250;
-  const nextReward = rewards.find((r) => r.points > displayPts) || rewards[rewards.length - 1] || { points: 500, value: 30 };
-  const maxTier = Math.max(500, Number(rewards[rewards.length - 1]?.points || 500));
-  const fillPct = Math.max(4, Math.min(100, Math.round((displayPts / maxTier) * 100)));
-  const filledPetals = Math.round((displayPts / maxTier) * 8);
-  const firstRewardPts = Number(rewards[0]?.points || 200);
-  const firstRewardVal = Number(rewards[0]?.value || 10);
-  const firstTickPct = Math.round((firstRewardPts / maxTier) * 100);
-  const tierName =
-    displayPts >= maxTier
-      ? t('إزهار مكتمل متألق', 'Full Luminous Bloom')
-      : displayPts >= firstRewardPts
-        ? t('إزهار الورد الجوري', 'Damask Rose Bloom')
-        : t('بداية تفتح البراعم', 'Opening Rosebud');
-  const tierLatin =
-    displayPts >= firstRewardPts
-      ? `Rosa damascena · ${t('المستوى الثاني', 'Tier II')}`
-      : `Rosa centifolia · ${t('المستوى الأول', 'Tier I')}`;
+  const sourceRewards = state.account?.rewards || state.catalog.settings?.rewards || [];
+  const rewards = (Array.isArray(sourceRewards) ? sourceRewards : [])
+    .filter((r) => r && Number.isFinite(Number(r.points)) && Number(r.points) > 0 && Number.isFinite(Number(r.value)) && Number(r.value) > 0)
+    .map((r) => ({ ...r, points: Number(r.points), value: Number(r.value) }))
+    .sort((a, b) => a.points - b.points);
+  const verified = Boolean(state.user?.verified);
+  const hasLive = Boolean(verified && state.account);
+  const balance = hasLive ? Math.max(0, Number(state.account.balance || 0)) : 0;
+  const nextReward = rewards.find((r) => r.points > balance) || null;
+  const topReward = rewards[rewards.length - 1] || null;
+  const target = nextReward || topReward;
+  const targetValue = target?.points || 1;
+  const progressValue = Math.min(balance, targetValue);
+  const rewardsList = Array.isArray(state.account?.reward_requests) ? state.account.reward_requests : [];
+  const pendingReq = rewardsList.find((q) => q.status === 'pending') || null;
+  const availableCount = hasLive ? rewards.filter((r) => balance >= r.points).length : 0;
+  const statusCopy = !state.user
+    ? t('سجّلي الدخول لمشاهدة رصيدكِ الحقيقي من الزيارات المكتملة والمدفوعة.', 'Sign in to view your real balance earned from completed, verified visits.')
+    : !verified
+      ? t('وثّقي رقم جوالكِ لعرض رصيدكِ ومكافآتكِ.', 'Verify your phone number to view your balance and rewards.')
+      : !rewards.length
+        ? t('لم تُعتمد المكافآت بعد. ستظهر هنا فور إضافتها.', 'Rewards will appear when the program is configured.')
+        : pendingReq
+          ? t('لديكِ طلب مكافأة قيد المراجعة الإدارية حالياً ولا يمكن إرسال طلب جديد حتى حسمه.', 'A reward request is pending team approval; duplicate requests are disabled until resolved.')
+          : nextReward
+            ? t(`متبقٍ ${num(nextReward.points - balance)} بتلة للمكافأة التالية.`, `${num(nextReward.points - balance)} Petals until your next reward.`)
+            : t('يمكنكِ طلب المكافآت المتاحة لرصيدكِ.', 'You may request rewards available for your balance.');
 
   return `
-    <div class="loyalty-band is-petals-hero" style="margin-bottom:28px">
-      <div class="loyalty-copy-col">
-        <span class="eyebrow">${t('نادي بتلات J', 'J PETALS CLUB')}</span>
-        <h2>${t('نادي بتلات J', 'J Petals Club')}</h2>
-        <p>${t(
-          'نكافئ لحظات عنايتكِ. تُحتسب 1 بتلة افتراضياً لكل 1 ر.س مدفوعة فعلياً بعد خصوماتكِ وتُضاف تلقائياً بمجرد اكتمال الزيارة وتأكيد الدفع من الموظفة لحسابكِ الموثق.',
-          'Points are awarded automatically only after a service is completed, staff verifies payment, and account ownership is verified.',
-        )}</p>
-        ${
-          state.account?.has_pending_entitlement && !verified
-            ? `<div class="notice" style="margin-top:14px;color:var(--charcoal)">${t(
-                'لديكِ نقاط مستحقة معلّقة من زيارات مكتملة ومدفوعة بانتظار إكمال توثيق رقم جوالكِ لإظهارها وتفعيلها.',
-                'You have pending entitlements from completed verified-paid visits held safely until phone verification is completed.',
-              )}</div>`
-            : ''
-        }
-        ${!state.user ? `<div style="margin-top:18px"><a class="btn rose" href="${href('register')}">${t('انضمي للنادي الآن', 'Join J Petals Club')}</a></div>` : ''}
-      </div>
-      <div class="loyalty-gallery-card is-ivory-card">
-        <div class="loyalty-showcase-meta">
-          <span class="eyebrow">${t('الورد المديني الأرشيفي · المستوى الحالي', 'ARCHIVE BOTANICAL · CURRENT TIER')}</span>
-          <div class="loyalty-balance-num">${num(displayPts)}</div>
-          <p class="loyalty-balance-sub">${tierName}</p>
-          <p class="loyalty-latin-sub" dir="ltr">${esc(tierLatin)}</p>
-          <p class="loyalty-next-copy">
-            ${
-              hasLive
-                ? balance >= nextReward.points
-                  ? t('مؤهلة لطلب المكافأة المتاحة الآن!', 'Eligible for an available reward right now!')
-                  : t(`متبقٍ ${num(nextReward.points - balance)} بتلة للمكافأة التالية`, `${num(nextReward.points - balance)} petals until next reward`)
-                : state.user
-                  ? t('وثّقي رقم جوالكِ لعرض رصيدكِ الفعلي.', 'Verify your phone number to view your live balance.')
-                  : t('عرض توضيحي (250 بتلة) — كل 1 ر.س مدفوع وموثق = 1 بتلة حقيقية', 'Illustrative preview (250 Petals) — 1 verified paid SAR = 1 Petal')
-            }
-          </p>
-          <div class="petal-progress-wrap" aria-label="${t('مسار التقدم للمكافآت', 'Reward progress')}">
-            <div class="petal-progress-track">
-              <div class="petal-progress-fill" style="width:${fillPct}%"></div>
-              <span class="petal-progress-tick" style="inset-inline-start:${firstTickPct}%" aria-hidden="true"></span>
-            </div>
-            <div class="petal-milestone-row">
-              <span>${num(0)}</span>
-              <span>${num(firstRewardPts)} (${money(firstRewardVal)})</span>
-              <span>${num(maxTier)} (${money(rewards[rewards.length - 1]?.value || 30)})</span>
-            </div>
+    <section class='jb-rewards-dashboard' aria-labelledby='jb-rewards-heading'>
+      <div class='jb-rewards-main'>
+        <div class='jb-rewards-heading'>
+          <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
+          <h2 id='jb-rewards-heading'>${t('نادي البتلات', 'Petals Rewards')}</h2>
+          <p>${t('مكافآت واضحة من زيارات حقيقية ومكتملة ومدفوعة. يحتسب الفريق البتلات وفق قواعد البرنامج بعد التحقق من استحقاقها.', 'Transparent rewards earned from genuine, completed and verified-paid visits, subject to the program rules.')}</p>
+        </div>
+        <div class='jb-points-display jb-points-hero' aria-live='polite'>
+          <div>
+            <span class='jb-points-label'>${t('رصيد البتلات', 'Your Petals balance')}</span>
+            <strong class='jb-points-total'>${hasLive ? num(balance) : '—'}</strong>
+            <span class='jb-points-unit'>${t('بتلة', 'Petals')}</span>
+            <p class='jb-points-note'>${statusCopy}</p>
+            ${hasLive && target ? `
+              <div class='jb-progress-box'>
+                <div class='jb-progress-label'><span>${t('التقدم للمكافأة التالية', 'Reward progress')}</span><strong dir='ltr'>${num(progressValue)} / ${num(targetValue)}</strong></div>
+                <progress max='${targetValue}' value='${progressValue}' aria-label="${t('التقدم نحو المكافأة', 'Progress toward reward')}"></progress>
+              </div>` : ''}
+            ${availableCount && !pendingReq ? `<span class='jb-rewards-available'>${availableCount === 1 ? t('مكافأة واحدة متاحة وفق رصيدكِ', '1 reward option within your balance') : t(`${num(availableCount)} مكافآت متاحة وفق رصيدكِ`, `${num(availableCount)} reward options within your balance`)}</span>` : ''}
+            ${!state.user ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('register')}">${t('أنشئي حسابكِ', 'Create your account')}</a></div>` : !verified ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('account')}">${t('خطوات توثيق الحساب', 'Verify your account')}</a></div>` : ''}
           </div>
+          <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(4, 8, true)}</div>
         </div>
-        <div class="loyalty-cameo-slot">
-          ${petalBloomSVG(filledPetals, 8, true)}
-        </div>
+        ${state.account?.has_pending_entitlement && !verified ? `<div class='notice'>${t('قد توجد بتلات مستحقة معلّقة حتى اكتمال توثيق حسابكِ. تواصلي مع الفريق لإتمام التوثيق.', 'Eligible Petals may be pending until your account is verified. Contact the team to complete verification.')}</div>` : ''}
       </div>
-    </div>
-
-    <div class="grid two section-tight" style="padding-top:0">
-      ${rewards
-        .map(
-          (r) => `
-        <article class="card">
-          <span class="eyebrow">${num(r.points)} ${t('بتلة', 'PETALS')}</span>
-          <h3>${t('مكافأة خصم بقيمة', 'Reward discount of')} ${money(r.value)}</h3>
-          <p class="muted">${t('تُراجع من الفريق وتُطبق على حجزكِ المؤهل غير المدفوع.', 'Reviewed by staff and applied to an eligible unpaid booking.')}</p>
-          ${
-            hasLive
-              ? `<button class="btn small light" data-reward="${esc(r.id)}" ${balance < r.points ? 'disabled' : ''} type="button">${t('طلب استبدال المكافأة', 'Request reward')}</button>`
-              : ''
-          }
-        </article>
-      `,
-        )
-        .join('')}
-    </div>
+      <div class='jb-rewards-aside'>
+        <span class='eyebrow'>${t('طريقة عمل البرنامج', 'HOW IT WORKS')}</span>
+        <ol>
+          <li><strong>${t('خدمة مكتملة', 'Completed service')}</strong><span>${t('تُسجل الزيارة بعد تنفيذها فعليًا.', 'Your visit is marked complete.')}</span></li>
+          <li><strong>${t('دفع موثّق', 'Verified payment')}</strong><span>${t('تُحتسب البتلات من المبلغ المؤهل المدفوع.', 'Petals are based on eligible verified spending.')}</span></li>
+          <li><strong>${t('مكافأة معتمدة', 'Approved reward')}</strong><span>${t('يُراجع طلب الاستبدال ويُطبق على حجز مؤهل غير مدفوع.', 'Redemption is reviewed for an eligible unpaid booking.')}</span></li>
+        </ol>
+        <p class='jb-rewards-disclaimer'>${t('قد تُعدّل البتلات عند استرداد المدفوعات، ولا تُستبدل نقدًا.', 'Petals may be adjusted after refunds and cannot be exchanged for cash.')}</p>
+      </div>
+    </section>
+    <section class='jb-rewards-catalog' aria-labelledby='jb-rewards-catalog-title'>
+      <div class='section-head'><div><span class='eyebrow'>${t('المكافآت', 'REWARDS')}</span><h2 id='jb-rewards-catalog-title'>${t('مكافآت متاحة للطلب', 'Rewards you can request')}</h2></div></div>
+      ${rewards.length ? `<div class='jb-reward-grid'>${rewards.map((r) => `
+        <article class='jb-reward-card'>
+          <div class='jb-reward-top'><span>${num(r.points)} ${t('بتلة', 'Petals')}</span><strong>${money(r.value)}</strong></div>
+          <h3>${t('خصم على حجز مؤهل', 'Discount on an eligible booking')}</h3>
+          <p>${t('بعد موافقة الفريق، تُطبق هذه المكافأة على حجز مستحق قبل الدفع.', 'After team approval, this reward is applied to an eligible booking before payment.')}</p>
+          ${hasLive ? `<button type='button' class='btn small' data-reward='${esc(r.id)}' ${balance < r.points || pendingReq ? 'disabled' : ''}>${pendingReq ? t('يوجد طلب قيد المراجعة', 'Pending request active') : balance >= r.points ? t('اطلبي المكافأة', 'Request reward') : t('الرصيد غير كافٍ', 'Not enough Petals')}</button>` : ''}
+        </article>`).join('')}</div>` : `<div class='empty'>${t('لم تُضف مكافآت إلى البرنامج بعد.', 'No rewards are configured yet.')}</div>`}
+    </section>
   `;
 }
-
 export function petalsPage() {
   return `
     <main id="main" class="wrap">
       ${head(
         t('نادي بتلات J', 'J Petals Club'),
-        t('برنامج الولاء الداخلي لعميلات J SPA في المدينة المنورة.', 'J SPA’s internal loyalty club for verified customers in Madinah.'),
+        t('برنامج الولاء الداخلي لعميلات J Beauty في المدينة المنورة.', 'J Beauty’s internal loyalty club for verified customers in Madinah.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('نادي بتلات J', 'J Petals Club'), '']],
       )}
       ${petalsContent()}
@@ -392,7 +365,7 @@ export async function accountPage(section) {
 
   return `
     <main id="main" class="wrap">
-      ${head(t('جواز الجمال · ', 'Beauty Passport · ') + esc(state.user.name))}
+      ${head(t('جواز الجمال', 'Beauty Passport'), `${t('أهلاً بكِ، ', 'Welcome, ')}<bdi>${esc(state.user.name)}</bdi>`)}
       <div class="account-grid">
         <aside class="side-nav">
           <h3 style="margin-bottom:2px">${t('حسابكِ', 'Your journal')}</h3>
@@ -435,11 +408,39 @@ export async function accountPage(section) {
 
           ${
             section === 'rewards'
-              ? `${petalsContent()}
-                 <h3>${t('سجل البتلات', 'Petal history')}</h3>
-                 ${simpleTable(state.account.ledger || [], ['created_at', 'points', 'reason', 'booking_id'])}
-                 <h3 style="margin-top:24px">${t('طلبات استبدال المكافآت', 'Reward requests')}</h3>
-                 ${simpleTable(state.account.reward_requests || [], ['id', 'status', 'points', 'value'])}`
+              ? (() => {
+                  const bookingRef = (id) => bookings.find((b) => b.id === id)?.reference || '—';
+                  const reasonLabel = (reason) =>
+                    ({
+                      visit: t('توثيق زيارة مكتملة', 'Completed verified visit'),
+                      'visit adjustment': t('تعديل بعد استرداد مبلغ', 'Refund adjustment'),
+                      reward: t('استبدال مكافأة', 'Reward redemption'),
+                      'reward cancellation': t('رد بتلات مكافأة ملغاة', 'Cancelled reward restored'),
+                    })[reason] || reason;
+                  const reqStatusLabel = (status) =>
+                    ({
+                      pending: t('قيد المراجعة الإدارية', 'Pending review'),
+                      committed: t('معتمدة ومطبقة', 'Approved & applied'),
+                      cancelled: t('ملغاة', 'Cancelled'),
+                    })[status] || status;
+                  const ledgerRows = (state.account.ledger || []).map((row) => ({
+                    created_at: String(row.created_at || '').slice(0, 10),
+                    points: `${Number(row.points) > 0 ? '+' : ''}${num(row.points)}`,
+                    reason: reasonLabel(row.reason),
+                    booking_id: row.booking_id ? bookingRef(row.booking_id) : '—',
+                  }));
+                  const reqRows = (state.account.reward_requests || []).map((r) => ({
+                    id: String(r.id || '').slice(0, 8).toUpperCase(),
+                    status: reqStatusLabel(r.status),
+                    points: `${num(r.points)} ${t('بتلة', 'petals')}`,
+                    value: money(r.value),
+                  }));
+                  return `${petalsContent()}
+                    <h3>${t('سجل البتلات', 'Petal history')}</h3>
+                    ${simpleTable(ledgerRows, ['created_at', 'points', 'reason', 'booking_id'])}
+                    <h3 style="margin-top:24px">${t('طلبات استبدال المكافآت', 'Reward requests')}</h3>
+                    ${simpleTable(reqRows, ['id', 'status', 'points', 'value'])}`;
+                })()
               : section === 'bookings'
                 ? `<h2>${t('حجوزاتكِ', 'Your bookings')}</h2>
                    ${

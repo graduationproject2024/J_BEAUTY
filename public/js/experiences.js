@@ -134,7 +134,7 @@ export function studioPage() {
                     .join('')}
                 </div>`
               : `<div class="card empty-compact muted">
-                   <p style="margin-bottom:10px">${t('جاري مطابقة خياراتكِ من كتالوج J SPA المعتمد…', 'Matching your preferences against verified J SPA services…')}</p>
+                   <p style="margin-bottom:10px">${t('جاري مطابقة خياراتكِ من كتالوج J Beauty المعتمد…', 'Matching your preferences against verified J Beauty services…')}</p>
                    <div class="hero-actions" style="gap:8px">
                      <a class="btn small light" href="${href('services')}">${t('تصفحي الخدمات (13)', 'Browse all services')}</a>
                      <a class="btn small light" href="${href('packages')}">${t('استعرضي الباقات', 'View packages')}</a>
@@ -406,7 +406,7 @@ export function giftsPage() {
     <main id="main" class="wrap">
       ${head(
         t('أهدي لحظة عناية', 'Gift a Ritual'),
-        t('أعدّي بطاقة إهداء إلكترونية أنيقة يتم تنسيقها واعتمادها يدوياً مع فريق J SPA.', 'Prepare a thoughtful digital gift voucher request coordinated manually with our team.'),
+        t('أعدّي بطاقة إهداء إلكترونية أنيقة يتم تنسيقها واعتمادها يدوياً مع فريق J Beauty.', 'Prepare a thoughtful digital gift voucher request coordinated manually with our team.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('الإهداء', 'Gift a Ritual'), '']],
       )}
       <div class="notice">${t(

@@ -411,7 +411,7 @@ export function createGroupRequest(db, helpers, user, body) {
   });
 
   const message =
-    `مرحباً J SPA،\n` +
+    `مرحباً J Beauty،\n` +
     `طلب تنسيق جلسات المناسبات\n` +
     `رقم الطلب: ${reference}\n` +
     `منسّقة المناسبة: ${organizerName}\n` +
@@ -467,8 +467,8 @@ export function createGiftRequest(db, helpers, user, body) {
   });
 
   const message =
-    `مرحباً J SPA،\n` +
-    `أرغب في طلب بطاقة إهداء من J SPA\n` +
+    `مرحباً J Beauty،\n` +
+    `أرغب في طلب بطاقة إهداء من J Beauty\n` +
     `مرجع الطلب: ${reference}\n` +
     `من: ${senderName}\n` +
     `إلى: ${recipientName}\n` +

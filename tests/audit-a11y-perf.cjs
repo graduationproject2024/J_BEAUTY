@@ -223,7 +223,7 @@ const ROUTES = [
 
     await page.goto(base + '/ar/petals', { waitUntil: 'networkidle' });
     await page.waitForTimeout(350);
-    const bloomEl = page.locator('.loyalty-gallery-card, .petal-cameo, .signature-bloom').first();
+    const bloomEl = page.locator('.jb-rewards-main, .loyalty-gallery-card, .petal-cameo, .signature-bloom').first();
     if (await bloomEl.count()) {
       await bloomEl.screenshot({ path: join(shotDir, 'crop-petals-flower.png') });
       summary.screenshots.push('crop-petals-flower.png');
