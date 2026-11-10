@@ -229,7 +229,7 @@ p { color: var(--plum); }
   font-family: var(--font-en-display);
   font-weight: 500;
   font-size: 24px;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.075em;
   color: var(--charcoal);
 }
 .brand-wordmark small {
@@ -2152,7 +2152,7 @@ dialog::backdrop { background: rgba(53, 47, 50, 0.45); backdrop-filter: blur(4px
   .announcement { font-size: 13px; padding: 8px 12px; }
   .header { min-height: 68px; gap: 8px; }
   .brand-mark { width: 34px; height: 34px; }
-  .brand-wordmark strong { font-size: 20px; letter-spacing: 0.16em; }
+  .brand-wordmark strong { font-size: 20px; letter-spacing: 0.02em; }
   .brand-wordmark small { display: none; }
 
   .nav {
@@ -2273,7 +2273,7 @@ dialog::backdrop { background: rgba(53, 47, 50, 0.45); backdrop-filter: blur(4px
   .header { gap: 4px; min-height: 64px; }
   .brand { gap: 6px; }
   .brand-mark { width: 30px; height: 30px; }
-  .brand-wordmark strong { font-size: 16.5px; letter-spacing: 0.08em; }
+  .brand-wordmark strong { font-size: 16px; letter-spacing: 0; }
   .header-tools { gap: 4px; }
   .header-tools .header-book-btn { padding: 4px 9px; font-size: 13px; min-height: 44px; }
   .lang { padding: 0 8px; min-height: 44px; font-size: 13px; }
@@ -2286,3 +2286,58 @@ dialog::backdrop { background: rgba(53, 47, 50, 0.45); backdrop-filter: blur(4px
   [data-reveal] { opacity: 1 !important; transform: none !important; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+
+/* J Beauty — visible navigation paths, verified-rewards dashboard */
+.jb-quick-paths { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:0 0 42px; }
+.jb-path { display:flex; align-items:center; gap:18px; padding:22px 24px; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--white); box-shadow:var(--shadow-soft); min-width:0; color:var(--charcoal); text-decoration:none; transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease; }
+.jb-path:hover, .jb-path:focus-visible { transform:translateY(-2px); border-color:var(--rose-gold-deep); box-shadow:0 12px 35px rgba(53,47,50,.11); }
+.jb-path-occasion { background:linear-gradient(118deg,var(--cream),var(--white)); border-color:rgba(154,114,62,.5); }
+.jb-path-reviews { background:linear-gradient(118deg,var(--blush-tint),var(--white)); }
+.jb-path-icon { width:48px; height:48px; display:grid; place-items:center; flex:0 0 48px; border-radius:50%; color:var(--plum); background:rgba(212,175,124,.18); }
+.jb-path-icon svg { width:22px; height:22px; }
+.jb-path-copy { display:flex; flex-direction:column; gap:6px; flex:1; min-width:0; }
+.jb-path-copy strong { font-size:clamp(17px,1.7vw,22px); line-height:1.35; }
+.jb-path-copy small { font-size:14px; line-height:1.65; color:var(--ink-muted); }
+.jb-path-arrow { font-size:24px; color:var(--rose-gold-deep); flex-shrink:0; }
+[lang='en'] .jb-path-arrow { transform:rotate(180deg); }
+.jb-loyalty-intro { grid-template-columns:1fr 1fr; }
+.jb-loyalty-intro .jb-quiet-link { background:transparent; color:var(--ivory); border:1px solid rgba(251,247,244,.65); }
+.jb-loyalty-steps { padding:22px; border:1px solid rgba(251,247,244,.24); border-radius:var(--r-lg); background:rgba(251,247,244,.07); display:grid; gap:13px; }
+.jb-loyalty-step { display:flex; align-items:start; gap:16px; border-bottom:1px solid rgba(251,247,244,.16); padding-bottom:13px; }
+.jb-loyalty-step:last-child { border-bottom:none; padding-bottom:0; }
+.jb-loyalty-step > span { font-family:var(--font-en-display); font-size:29px; color:var(--rose-gold); line-height:1; }
+.jb-loyalty-step strong { display:block; font-size:17px; color:var(--ivory); margin-bottom:5px; }
+.jb-loyalty-step p { margin:0; font-size:14px; line-height:1.6; }
+.jb-rewards-dashboard { display:grid; grid-template-columns:1.2fr .8fr; gap:24px; margin-block:24px 42px; }
+.jb-rewards-main { background:var(--plum); color:var(--ivory); padding:clamp(24px,4vw,48px); border-radius:var(--r-xl); min-width:0; }
+.jb-rewards-heading h2 { color:var(--ivory); margin:8px 0; }
+.jb-rewards-heading .eyebrow { color:#F0D9AD; }
+.jb-rewards-heading p { color:#F5EAF0; max-width:520px; line-height:1.8; }
+.jb-points-display { margin-top:24px; background:rgba(255,255,255,.095); padding:22px; border:1px solid rgba(255,255,255,.18); border-radius:var(--r-lg); }
+.jb-points-label, .jb-points-unit { display:block; color:#F7EEF2; font-size:15px; }
+.jb-points-total { display:block; font-family:var(--font-en-display); font-size:clamp(62px,8vw,94px); line-height:1.1; font-variant-numeric:tabular-nums; }
+.jb-points-note { color:#F3E7EC; font-size:15px; line-height:1.7; margin:12px 0 0; }
+.jb-progress-box { margin-top:22px; }
+.jb-progress-label { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; font-size:14px; margin-bottom:8px; }
+.jb-progress-box progress { width:100%; height:13px; border:0; border-radius:99px; overflow:hidden; accent-color:var(--rose-gold); }
+.jb-progress-box progress::-webkit-progress-bar { background:rgba(255,255,255,.2); border-radius:99px; }
+.jb-progress-box progress::-webkit-progress-value { background:var(--rose-gold); border-radius:99px; }
+.jb-rewards-available { display:inline-flex; margin-top:15px; font-size:14px; font-weight:600; color:#F9DFA3; }
+.jb-rewards-main > .btn { margin-top:18px; }
+.jb-rewards-aside { border:1px solid var(--border); border-radius:var(--r-xl); padding:clamp(24px,3vw,36px); background:var(--white); min-width:0; }
+.jb-rewards-aside ol { padding-inline-start:24px; margin:18px 0; display:grid; gap:24px; }
+.jb-rewards-aside li { padding-inline-start:8px; }
+.jb-rewards-aside li strong { display:block; font-size:17px; margin-bottom:5px; }
+.jb-rewards-aside li span { display:block; font-size:14px; line-height:1.8; color:var(--ink-muted); }
+.jb-rewards-disclaimer { font-size:13.5px; line-height:1.8; border-top:1px solid var(--border); padding-top:16px; margin-top:14px; color:var(--ink-muted); }
+.jb-reward-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:18px; margin:20px 0 54px; }
+.jb-reward-card { background:var(--white); border:1px solid var(--border); border-radius:var(--r-lg); padding:24px; display:flex; flex-direction:column; align-items:start; gap:14px; }
+.jb-reward-top { display:flex; align-items:center; justify-content:space-between; gap:18px; width:100%; font-size:14px; color:var(--sage-deep); }
+.jb-reward-top strong { color:var(--plum); font-size:24px; white-space:nowrap; }
+.jb-reward-card h3 { font-size:20px; margin:0; }
+.jb-reward-card p { color:var(--ink-muted); font-size:14px; line-height:1.8; flex:1; margin:0; }
+.jb-reward-card .btn { margin-top:8px; }
+@media (max-width:1024px) { .jb-rewards-dashboard { grid-template-columns:1fr; } .jb-loyalty-intro { grid-template-columns:1fr; } }
+@media (max-width:780px) { .jb-quick-paths { grid-template-columns:1fr; gap:12px; margin-bottom:24px; } .jb-path { padding:18px; } .jb-rewards-dashboard { gap:14px; } .jb-reward-card { padding:20px; } }
+@media (max-width:420px) { .jb-path { gap:11px; padding:15px 13px; } .jb-path-icon { width:42px; height:42px; flex-basis:42px; } .jb-path-copy small { font-size:13px; } .jb-path-arrow { font-size:19px; } .jb-rewards-main,.jb-rewards-aside { padding:20px; } }

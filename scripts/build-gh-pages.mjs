@@ -82,7 +82,7 @@ writeFileSync(path.join(PAGES_DIR, 'app.js'), appCode);
 let compCode = rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'js', 'components.js'), 'utf8'));
 compCode = compCode.replace(
   "t(\n        'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',\n        'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',\n      )",
-  "t(\n        'معاينة واجهة J SPA على GitHub Pages · سبا نسائي منزلي في المدينة المنورة (للحجوزات الفعلية يلزم خادم Node.js)',\n        'J SPA GITHUB PAGES PREVIEW · AL MADINAH WOMEN’S HOME SPA (LIVE BOOKINGS REQUIRE NODE.JS SERVER)',\n      )",
+  "t(\n        'معاينة واجهة J Beauty على GitHub Pages · سبا نسائي منزلي في المدينة المنورة (للحجوزات الفعلية يلزم خادم Node.js)',\n        'J Beauty GITHUB PAGES PREVIEW · AL MADINAH WOMEN’S HOME SPA (LIVE BOOKINGS REQUIRE NODE.JS SERVER)',\n      )",
 );
 writeFileSync(path.join(PAGES_DIR, 'js', 'components.js'), compCode);
 

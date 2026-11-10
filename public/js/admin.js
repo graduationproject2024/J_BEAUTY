@@ -155,8 +155,8 @@ function adminBookings(rows) {
       const cleanPhone = String(b.phone || '').replace(/\D/g, '').replace(/^0/, '966');
       const canWhatsapp = /^9665\d{8}$/.test(cleanPhone);
       const waMsg = t(
-        `مرحباً ${b.name}، بخصوص طلبكِ ${b.reference} لدى J SPA، نود تنسيق تفاصيل موعدكِ.`,
-        `Hello ${b.name}, regarding your J SPA request ${b.reference}, we would like to coordinate your appointment.`,
+        `مرحباً ${b.name}، بخصوص طلبكِ ${b.reference} لدى J Beauty، نود تنسيق تفاصيل موعدكِ.`,
+        `Hello ${b.name}, regarding your J Beauty request ${b.reference}, we would like to coordinate your appointment.`,
       );
 
       return `
@@ -462,7 +462,7 @@ function settingsForm(s) {
         <details class="details">
           <summary>${
             {
-              about: t('عن J SPA', 'About'),
+              about: t('عن J Beauty', 'About'),
               faq: t('الأسئلة الشائعة', 'FAQ'),
               policies: t('سياسة الحجز', 'Booking policies'),
               privacy: t('الخصوصية', 'Privacy'),

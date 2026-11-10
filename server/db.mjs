@@ -418,7 +418,7 @@ export const SEED_PACKAGES = [
     name_en: 'J Signature',
     service_ids: ['therapeutic', 'classic', 'gel-polish'],
     price: 469,
-    tagline_ar: 'تجربة J SPA المتكاملة من العناية العميقة إلى اللمسة النهائية.',
+    tagline_ar: 'تجربة J Beauty المتكاملة من العناية العميقة إلى اللمسة النهائية.',
     tagline_en: 'Our complete signature home experience from targeted relief to glossy gel.',
   },
 ];

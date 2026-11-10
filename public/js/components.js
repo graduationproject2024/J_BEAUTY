@@ -34,7 +34,8 @@ export function header() {
     ['services', 'الخدمات', 'Services'],
     ['packages', 'الباقات', 'Packages'],
     ['atelier', 'أتيليه الأظافر', 'Nail Atelier'],
-    ['studio', 'استوديو الاختيار', 'Ritual Studio'],
+    ['occasions', 'المناسبات', 'Occasions'],
+    ['reviews', 'التقييمات', 'Reviews'],
     ['petals', 'بتلات J', 'J Petals'],
   ];
   const accountRoute = state.user
@@ -55,7 +56,7 @@ export function header() {
         <a class="brand" href="${href('home')}">
           ${monogramSvg()}
           <span class="brand-wordmark">
-            <strong>J SPA</strong>
+            <strong>J Beauty</strong>
             <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
           </span>
         </a>
@@ -107,7 +108,7 @@ export function footer() {
             <a class="brand" href="${href('home')}">
               ${monogramSvg()}
               <span class="brand-wordmark">
-                <strong>J SPA</strong>
+                <strong>J Beauty</strong>
                 <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
               </span>
             </a>
@@ -147,7 +148,7 @@ export function footer() {
           </div>
         </div>
         <div class="footer-bottom">
-          <span>© ${new Date().getFullYear()} J SPA · ${t('المدينة المنورة، المملكة العربية السعودية', 'Al Madinah, Saudi Arabia')}</span>
+          <span>© ${new Date().getFullYear()} J Beauty · ${t('المدينة المنورة، المملكة العربية السعودية', 'Al Madinah, Saudi Arabia')}</span>
           <span>${t('للسيدات فقط · التأكيد يتم يدوياً عبر الفريق', 'Women only · Manual staff confirmation')}</span>
         </div>
       </div>
@@ -166,7 +167,7 @@ export const head = (title, sub = '', crumbs = []) => `
                 : `<span>${esc(label)}</span>`,
             )
             .join(' ')}</nav>`
-        : `<span class="eyebrow">J SPA · ${t('المدينة المنورة', 'MADINAH')}</span>`
+        : `<span class="eyebrow">J Beauty · ${t('المدينة المنورة', 'MADINAH')}</span>`
     }
     <h1 tabindex="-1">${title}</h1>
     ${sub ? `<p class="muted">${sub}</p>` : ''}
@@ -177,7 +178,7 @@ export const provisional = () =>
   state.catalog.settings?.business_approved
     ? ''
     : `<div class="notice">${t(
-        'الأسعار والباقات والوصف الحالي تقديرية وقابلة للتعديل لحين اعتمادها النهائي من إدارة J SPA. إرسال الطلب لا يعني تأكيد الموعد.',
+        'الأسعار والباقات والوصف الحالي تقديرية وقابلة للتعديل لحين اعتمادها النهائي من إدارة J Beauty. إرسال الطلب لا يعني تأكيد الموعد.',
         'Current prices, packages, and service details are provisional pending business approval. Submitting a request does not confirm an appointment.',
       )}</div>`;
 
@@ -258,14 +259,14 @@ export function packageCard(p, i) {
 
 export function reviewAuthorName(r) {
   const raw = String(r?.display_name || '').trim();
-  return !raw || raw === 'عميلة J SPA' || raw === 'عميلة موثقة'
-    ? t('عميلة J SPA', 'J SPA Client')
+  return !raw || raw === 'عميلة J Beauty' || raw === 'عميلة J SPA' || raw === 'عميلة موثقة'
+    ? t('عميلة J Beauty', 'J Beauty Client')
     : raw;
 }
 
 function editableDisplayName(existing) {
   const raw = String(existing?.display_name || '').trim();
-  return !raw || raw === 'عميلة J SPA' || raw === 'عميلة موثقة' ? '' : raw;
+  return !raw || raw === 'عميلة J Beauty' || raw === 'عميلة J SPA' || raw === 'عميلة موثقة' ? '' : raw;
 }
 
 export function reviewsContent(reviews = [], fallbackAsTrust = false) {
