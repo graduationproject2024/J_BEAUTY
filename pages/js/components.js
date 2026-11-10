@@ -47,8 +47,8 @@ export function header() {
   return `
     <div class="announcement">
       ${t(
-        'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',
-        'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',
+        'معاينة تجريبية لـ J Beauty على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',
+        'J Beauty static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',
       )}
     </div>
     <div class="header-shell">
