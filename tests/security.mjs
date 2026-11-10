@@ -31,7 +31,20 @@ try {
  await test('Valid CSRF token cannot bypass foreign Origin rejection',async()=>{await owner.call('/api/admin/settings',{settings:{capacity:9}},403,{Origin:'https://attacker.invalid'});});
  await test('Employees cannot change owner settings, catalog, staff or ledger',async()=>{
   for(const [path,data]of [['settings',{settings:{capacity:9}}],['services',{}],['packages',{}],['staff',{}],['adjustment',{user_id:user.id,points:999,reason:'Forbidden'}]])await employee.call('/api/admin/'+path,data,403);
-  const view=await employee.call('/api/admin');assert.deepEqual(view.settings,{});assert.deepEqual(view.staff,[]);assert.deepEqual(view.audit,[]);assert.deepEqual(view.analytics,{});
+  const view=await employee.call('/api/admin');assert.deepEqual(view.settings,{});assert.deepEqual(view.staff,[]);assert.deepEqual(view.audit,[]);assert.deepEqual(view.analytics,{});assert.deepEqual(view.payments,[]);assert.deepEqual(view.ledger,[]);
+  assert.ok(view.customers.length>=1);
+  assert.equal(view.customers[0].phone,undefined);
+  assert.ok(view.customers[0].phone_masked.includes('****'));
+ });
+ await test('Newly registered users use Argon2id password hashing',async()=>{
+  const row=app.db.prepare('SELECT password FROM users WHERE id=?').get(user.id);
+  assert.ok(row.password.startsWith('argon2id:'));
+ });
+ await test('Hidden paths and missing assets never leak index.html',async()=>{
+  for(const bad of ['/.git/HEAD','/../server.mjs','/assets/images/does-not-exist.webp']){
+   const r=await fetch(base+bad);
+   assert.ok(r.status===403||r.status===404,`${bad} returned ${r.status}`);
+  }
  });
  await test('Unverified account cannot request rewards',async()=>{await customer.call('/api/rewards/request',{reward_id:'petal-200'},403);});
  await test('Expired verification reference cannot establish ownership',async()=>{

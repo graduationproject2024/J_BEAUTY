@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-09T19:19:14.058Z",
+  "date": "2026-11-10T12:09:26.162Z",
   "passed": [
     "Seed catalog: 13 services and 4 computed packages",
     "Guest persists pending request and WhatsApp handoff",
@@ -12,6 +12,7 @@
     "Staff capacity prevents overlapping confirmations",
     "Completed unpaid booking earns zero points",
     "Verified payment awards actual spend and repeated save is idempotent",
+    "Public service route includes SSR semantic heading and description",
     "Customer cannot change payment or admin settings",
     "Verified reviews require owned completed booking and moderation",
     "Reward commit deducts points once",

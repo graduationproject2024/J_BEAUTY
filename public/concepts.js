@@ -1,22 +1,50 @@
 const directions = {
-  botanical: {title:'A little stillness.<br><em>Entirely yours.</em>',description:'Thoughtful beauty rituals, brought to the place you feel most yourself. Make room for a softer kind of day.'},
-  blush: {title:'Your glow.<br><em>Your own kind<br>of beautiful.</em>',description:'A fresh shade. A softer mood. Personal beauty rituals that make everyday feel a little more like you.'},
-  editorial: {title:'The art of<br><em>taking time.</em>',description:'An invitation to slow down. Considered rituals, beautiful details, and the luxury of being at home.'}
+  botanical: {
+    title: 'A quiet moment,<br><em>in the comfort of home.</em>',
+    description:
+      'Thoughtful massage, nail care, and gel rituals brought to your home in Madinah, with personal confirmation by our team.',
+  },
+  blush: {
+    title: 'Your soft glow.<br><em>Curated at home.</em>',
+    description:
+      'A feminine beauty sanctuary with rose-tinted warmth, tailored nail artistry, and calm personal care in Madinah.',
+  },
+  editorial: {
+    title: 'The quiet art<br><em>of slowing down.</em>',
+    description:
+      'Architectural restraint, refined serif typography, and deliberate pacing for home wellness in Al Madinah.',
+  },
 };
-document.querySelectorAll('[data-theme]').forEach(button => {
-  if(button.tagName !== 'BUTTON') return;
-  button.addEventListener('click', () => {
-    const name = button.dataset.theme;
-    document.getElementById('canvas').dataset.theme = name;
-    document.getElementById('heroTitle').innerHTML = directions[name].title;
-    document.getElementById('heroDescription').textContent = directions[name].description;
-    document.querySelectorAll('.choices button').forEach(item => item.setAttribute('aria-pressed',String(item === button)));
+
+document.querySelectorAll('[data-theme]').forEach((btn) => {
+  if (btn.tagName !== 'BUTTON') return;
+  btn.addEventListener('click', () => {
+    const theme = btn.dataset.theme;
+    document.getElementById('canvas').dataset.theme = theme;
+    document.getElementById('heroTitle').innerHTML = directions[theme].title;
+    document.getElementById('heroDescription').textContent = directions[theme].description;
+    document.querySelectorAll('.choices button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b === btn));
+    });
   });
 });
-document.getElementById('ritual').addEventListener('change', event => {
+
+document.querySelectorAll('[data-frame]').forEach((btn) => {
+  if (btn.tagName !== 'BUTTON') return;
+  btn.addEventListener('click', () => {
+    document.getElementById('canvas').dataset.frame = btn.dataset.frame;
+    document.querySelectorAll('.viewport-switch button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b === btn));
+    });
+  });
+});
+
+document.getElementById('ritual').addEventListener('change', (event) => {
   document.getElementById('estimate').textContent = event.target.value + ' SAR';
 });
-document.getElementById('previewForm').addEventListener('submit', event => {
+
+document.getElementById('previewForm').addEventListener('submit', (event) => {
   event.preventDefault();
-  document.getElementById('previewNotice').textContent = 'This is a visual design preview. No booking has been submitted. Open the main J SPA website to request an appointment.';
+  document.getElementById('previewNotice').textContent =
+    'This is a design concept preview only. No appointment has been created. Visit /ar/booking to request an appointment.';
 });

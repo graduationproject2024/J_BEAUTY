@@ -1,11 +1,12 @@
 {
-  "date": "2026-11-09T19:21:37.330Z",
+  "date": "2026-11-10T12:09:44.292Z",
   "passed": [
-    "Guest package booking with validation and WhatsApp message",
-    "Customer registration and verification reference",
+    "Guest package booking with clean Packages tab (no auto-select), validation and WhatsApp message",
+    "Customer registration and WhatsApp manual verification reference",
     "Registered service booking",
-    "Staff confirmation, progress, completion and payment through UI",
-    "Customer loyalty balance after payment"
+    "Staff confirmation, progress, completion and verified cash payment through UI",
+    "Customer J Petals Club balance (250) displayed after verified payment",
+    "Admin calendar timeline, payments field alignment, and audit log rendering verified"
   ],
   "errors": []
 }

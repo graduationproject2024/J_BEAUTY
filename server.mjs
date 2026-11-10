@@ -1,111 +1,461 @@
 import http from 'node:http';
-import {DatabaseSync} from 'node:sqlite';
-import {randomBytes,randomUUID,scryptSync,timingSafeEqual,createHash} from 'node:crypto';
-import {readFileSync,existsSync,mkdirSync} from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
-import {pageMetadata, publicOrigin, publicRoutes} from './seo.mjs';
-const ROOT=path.dirname(fileURLToPath(import.meta.url)),uid=()=>randomUUID(),token=()=>randomBytes(32).toString('hex'),hash=s=>createHash('sha256').update(s).digest('hex'),now=()=>new Date().toISOString();
-function fail(message,status=400){throw Object.assign(new Error(message),{status});}
-const text=(v,max=300)=>{if(typeof v!=='string'||!v.trim()||v.trim().length>max)fail('Invalid text');return v.trim();};
-function phone(v){const p=String(v||'').replace(/[\s+-]/g,'').replace(/^00/,''),n=p.startsWith('05')?'966'+p.slice(1):p;if(!/^9665\d{8}$/.test(n))fail('Enter a valid Saudi mobile number');return n;}
-function password(v){if(typeof v!=='string'||v.length<12||v.length>128)fail('Password must contain 12–128 characters');const salt=token();return salt+':'+scryptSync(v,salt,64).toString('hex');}
-function checkPassword(v,stored){try{const [s,h]=stored.split(':');return typeof v==='string'&&v.length<=128&&timingSafeEqual(Buffer.from(h,'hex'),scryptSync(v,s,64));}catch{return false;}}
-function money(v){if(typeof v!=='number'||!Number.isFinite(v)||v<0||v>100000)fail('Invalid amount');return Math.round(v*100);}
-const publicUser=u=>u?{id:u.id,name:u.name,phone:u.phone,role:u.role,verified:!!u.verified}:null;
-const defaults={business_phone:'',instagram:'',tiktok:'',areas:[],capacity:0,working_days:[0,1,2,3,4,5,6],opening_time:'09:00',closing_time:'22:00',blocked_dates:[],travel_buffer:30,lead_hours:12,points_per_sar:1,rewards:[{id:'petal-200',points:200,value:10},{id:'petal-500',points:500,value:30}],business_approved:false,about_ar:'',about_en:'',policies_ar:'',policies_en:'',privacy_ar:'',privacy_en:'',terms_ar:'',terms_en:'',faq_ar:'',faq_en:''};
-export function createApp({dbPath=process.env.DB_PATH||path.join(ROOT,'data','jspa.sqlite')}={}){
-if(dbPath!==':memory:')mkdirSync(path.dirname(path.resolve(dbPath)),{recursive:true});
-const db=new DatabaseSync(dbPath);db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
-db.exec(`CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY,name TEXT NOT NULL,phone TEXT UNIQUE NOT NULL,password TEXT NOT NULL,role TEXT NOT NULL DEFAULT 'customer',verified INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,user_id TEXT,csrf TEXT NOT NULL,expires INTEGER NOT NULL);
-CREATE TABLE IF NOT EXISTS config(id INTEGER PRIMARY KEY CHECK(id=1),data TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS services(id TEXT PRIMARY KEY,data TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS packages(id TEXT PRIMARY KEY,data TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS bookings(id TEXT PRIMARY KEY,reference TEXT UNIQUE NOT NULL,user_id TEXT,scope TEXT NOT NULL,idempotency TEXT NOT NULL,data TEXT NOT NULL,UNIQUE(scope,idempotency));
-CREATE TABLE IF NOT EXISTS verification(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,reference_hash TEXT NOT NULL,expires INTEGER NOT NULL,used INTEGER DEFAULT 0);
-CREATE TABLE IF NOT EXISTS recovery(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,token_hash TEXT UNIQUE NOT NULL,expires INTEGER NOT NULL,used INTEGER DEFAULT 0);
-CREATE TABLE IF NOT EXISTS ledger(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,booking_id TEXT,points INTEGER NOT NULL,event_key TEXT UNIQUE NOT NULL,reason TEXT NOT NULL,created_at TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS reward_requests(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,data TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS reviews(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,booking_id TEXT UNIQUE NOT NULL,data TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY AUTOINCREMENT,actor TEXT,action TEXT NOT NULL,target TEXT,detail TEXT,created_at TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS rate_limits(key TEXT PRIMARY KEY,count INTEGER NOT NULL,until INTEGER NOT NULL);`);
-const all=(q,...a)=>db.prepare(q).all(...a),get=(q,...a)=>db.prepare(q).get(...a),run=(q,...a)=>db.prepare(q).run(...a);
-const tx=fn=>{db.exec('BEGIN IMMEDIATE');try{const result=fn();db.exec('COMMIT');return result;}catch(e){db.exec('ROLLBACK');throw e;}};
-if(!get('SELECT id FROM config'))run('INSERT INTO config VALUES(1,?)',JSON.stringify(defaults));
-const seeds=[['relaxation','مساج استرخائي','Relaxation Massage',60,195,'massage'],['therapeutic','مساج علاجي','Therapeutic Massage',60,225,'massage'],['hot-stone','مساج الأحجار الساخنة','Hot Stone Massage',60,265,'massage'],['lymphatic','مساج التصريف اللمفاوي','Lymphatic Drainage Massage',60,255,'massage'],['classic','منيكير وبديكير كلاسيك','Classic Manicure & Pedicure',75,185,'nails'],['pedicure','بديكير','Pedicure',45,125,'nails'],['french-tip','منيكير فرنش تيب','French Tip Manicure',60,155,'nails'],['french-polish','طلاء أظافر فرنسي','French Polish',25,70,'nails'],['gel-polish','طلاء جل','Gel Polish',45,115,'gel'],['french-gel','جل فرنسي','French Gel',55,145,'gel'],['colored-french','جل فرنسي بأطراف ملونة','Colored French Gel',60,155,'gel'],['gel-removal','إزالة الجل','Gel Removal',25,50,'gel'],['gel-reapplication','إعادة تطبيق الجل','Gel Reapplication',75,150,'gel']];
-if(!get('SELECT id FROM services LIMIT 1'))for(const [id,name_ar,name_en,duration,price,category] of seeds)run('INSERT INTO services VALUES(?,?)',id,JSON.stringify({id,name_ar,name_en,duration,price_cents:price*100,category,active:true,description_ar:'لحظة عناية هادئة في راحة منزلكِ. يناقش الفريق التفاصيل والاحتياطات معكِ قبل تأكيد الموعد.',description_en:'A considered moment of care in the comfort of your home. Our team discusses details and precautions before confirming your appointment.',image:'',credentials_required:['therapeutic','lymphatic'].includes(id),credentials_approved:false}));
-if(!get('SELECT id FROM packages LIMIT 1'))for(const [id,name_ar,name_en,service_ids,price] of [['nail-glow','باقة إشراقة J','J Nail Glow',['pedicure','french-gel'],239],['serenity','باقة لحظة هدوء','J Serenity',['relaxation','classic'],339],['rose-ritual','باقة طقوس الورد','J Rose Ritual',['hot-stone','french-tip'],379],['signature','باقة J المميزة','J Signature',['therapeutic','classic','gel-polish'],469]])run('INSERT INTO packages VALUES(?,?)',id,JSON.stringify({id,name_ar,name_en,service_ids,price_cents:price*100,active:true}));
-const settings=()=>({...defaults,...JSON.parse(get('SELECT data FROM config WHERE id=1').data)});
-const services=()=>all('SELECT data FROM services').map(r=>{const s=JSON.parse(r.data);return {...s,price:s.price_cents/100};});
-const packages=()=>all('SELECT data FROM packages').map(r=>{const p=JSON.parse(r.data),ss=services().filter(s=>p.service_ids.includes(s.id));return {...p,price:p.price_cents/100,original_total:ss.reduce((a,s)=>a+s.price,0),duration:ss.reduce((a,s)=>a+s.duration,0)};});
-const bookings=()=>all('SELECT * FROM bookings').map(r=>({...JSON.parse(r.data),id:r.id,reference:r.reference,user_id:r.user_id}));
-const booking=id=>bookings().find(b=>b.id===id)||fail('Booking not found',404),saveBooking=b=>run('UPDATE bookings SET data=? WHERE id=?',JSON.stringify(b),b.id),balance=id=>get('SELECT COALESCE(SUM(points),0) n FROM ledger WHERE user_id=?',id).n;
-const audit=(u,action,target,detail='')=>run('INSERT INTO audit(actor,action,target,detail,created_at) VALUES(?,?,?,?,?)',u?.id||null,action,target,detail,now());
-const record=(user_id,booking_id,points,event_key,reason)=>run('INSERT INTO ledger VALUES(?,?,?,?,?,?,?)',uid(),user_id,booking_id,points,event_key,reason,now());
-const whats=(s,message)=>s.business_phone?`https://wa.me/${phone(s.business_phone)}?text=${encodeURIComponent(message)}`:null;
-function reconcile(b){if(!b.user_id)return;const u=get('SELECT * FROM users WHERE id=?',b.user_id);if(!u?.verified)return;const prior=get("SELECT COALESCE(SUM(points),0) n FROM ledger WHERE booking_id=? AND reason IN ('visit','visit adjustment')",b.id).n;const eligible=b.status==='completed'&&b.payment_verified,target=eligible?Math.floor(Math.max(0,b.paid_cents-(b.refund_cents||0))*b.points_rate/100):0,delta=target-prior;if(delta){if(balance(b.user_id)+delta<0)fail('Refund requires owner resolution: points were already redeemed. Reverse the related reward first.',409);record(b.user_id,b.id,delta,'visit:'+b.id+':'+uid(),prior?'visit adjustment':'visit');}}
-function schedule(b,confirmed=false,enforceLead=true){const s=settings();if(!/^\d{4}-\d{2}-\d{2}$/.test(b.date)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(b.time))fail('Invalid date or time');const d=new Date(`${b.date}T${b.time}:00+03:00`);if(!Number.isFinite(+d)||new Date(+d+10800000).toISOString().slice(0,10)!==b.date)fail('Invalid date');if(enforceLead&&+d<Date.now()+s.lead_hours*3600000)fail('Appointment is too soon');const minutes=t=>Number(t.slice(0,2))*60+Number(t.slice(3));if(!s.working_days.includes(new Date(b.date+'T12:00:00+03:00').getUTCDay())||s.blocked_dates.includes(b.date))fail('Date is unavailable');if(minutes(b.time)<minutes(s.opening_time)||minutes(b.time)+b.duration>minutes(s.closing_time))fail('Outside working hours');if(s.areas.length&&!s.areas.includes(b.neighborhood))fail('Neighborhood is outside configured service areas');if(confirmed){if(b.items.some(i=>{const service=services().find(x=>x.id===i.id);return service?.credentials_required&&!service.credentials_approved;}))fail('Professional credential approval is required before confirmation');if(!s.capacity||!s.areas.length)fail('Owner must configure staff capacity and service areas before confirmation');const start=+d,end=start+(b.duration+s.travel_buffer)*60000,events=[];for(const x of bookings().filter(x=>x.id!==b.id&&['confirmed','in_progress'].includes(x.status))){const a=+new Date(`${x.date}T${x.time}:00+03:00`),z=a+(x.duration+s.travel_buffer)*60000;if(a<end&&z>start)events.push([Math.max(a,start),1],[Math.min(z,end),-1]);}let concurrent=0;for(const [,change]of events.sort((a,b)=>a[0]-b[0]||a[1]-b[1])){concurrent+=change;if(concurrent>=s.capacity)fail('Appointment exceeds staff capacity',409);}}}
-function rate(key,max,window=900000){const t=Date.now(),r=get('SELECT * FROM rate_limits WHERE key=?',key);if(!r||r.until<t)run('INSERT OR REPLACE INTO rate_limits VALUES(?,?,?)',key,1,t+window);else{if(r.count>=max)fail('Too many attempts. Try again later.',429);run('UPDATE rate_limits SET count=count+1 WHERE key=?',key);}}
-function ownerBootstrap({name,phone:ph,password:pw}){if(get("SELECT id FROM users WHERE role='owner'"))fail('Owner already exists');const u={id:uid(),name:text(name),phone:phone(ph),password:password(pw)};run('INSERT INTO users VALUES(?,?,?,?,?,?,?)',u.id,u.name,u.phone,u.password,'owner',1,now());return publicUser({...u,role:'owner',verified:true});}
-async function handler(req,res){const secure=process.env.NODE_ENV==='production';res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');res.setHeader('X-Frame-Options','DENY');res.setHeader('Content-Security-Policy',"default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");if(secure)res.setHeader('Strict-Transport-Security','max-age=31536000');const send=(data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
-try{const url=new URL(req.url,'http://localhost'),route=url.pathname,method=req.method;
-if(route==='/robots.txt'){res.writeHead(200,{'Content-Type':'text/plain'});return res.end(`User-agent: *\nDisallow: /api/\nDisallow: /ar/admin\nDisallow: /en/admin\n${process.env.PUBLIC_ORIGIN?'Sitemap: '+process.env.PUBLIC_ORIGIN+'/sitemap.xml':''}`);}
-if(route==='/sitemap.xml'){const base=publicOrigin();if(!base)return send({error:'Configure PUBLIC_ORIGIN to enable the production sitemap'},503);const urls=publicRoutes(services());res.writeHead(200,{'Content-Type':'application/xml'});return res.end('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+['ar','en'].flatMap(l=>urls.map(p=>`<url><loc>${base}/${l}/${p}</loc></url>`)).join('')+'</urlset>');}
-if(['GET','HEAD'].includes(method)&&(route==='/'||/^\/(ar|en)(\/|$)/.test(route))){
-  const entry=path.join(ROOT,'public','index.html');
-  const html=pageMetadata(readFileSync(entry,'utf8'),route,services());
-  res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});
-  return res.end(method==='HEAD'?'':html);
+import { fileURLToPath } from 'node:url';
+import { pageMetadata, publicOrigin, publicRoutes } from './seo.mjs';
+import { createHelpers, now, openDatabase, uid } from './server/db.mjs';
+import {
+  checkRateLimit,
+  hash,
+  hashPassword,
+  publicUser,
+  setSessionCookie,
+  token,
+  verifyPassword,
+} from './server/auth.mjs';
+import { fail, optionalText, phone, text, whatsappUrl } from './server/validation.mjs';
+import { createBooking } from './server/booking.mjs';
+import { requestReward } from './server/loyalty.mjs';
+import { handleAdminRoute } from './server/admin.mjs';
+
+const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const PUBLIC_DIR = path.resolve(ROOT, 'public');
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.avif': 'image/avif',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.xml': 'application/xml; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+};
+
+const IMMUTABLE_EXTS = new Set(['.woff2', '.woff', '.webp', '.avif', '.png', '.jpg', '.jpeg']);
+
+function setSecurityHeaders(res, secure) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+  );
+  if (secure) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+  }
 }
-if(!route.startsWith('/api/')){if(!['GET','HEAD'].includes(method))fail('Method not allowed',405);let f=path.join(ROOT,'public',decodeURIComponent(route));if(!f.startsWith(path.join(ROOT,'public')+path.sep)&&f!==path.join(ROOT,'public'))fail('Forbidden',403);if(!path.extname(f)||!existsSync(f))f=path.join(ROOT,'public','index.html');if(!existsSync(f))return send({error:'Interface is being prepared'},503);res.writeHead(200,{'Content-Type':({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.xml':'application/xml','.txt':'text/plain'})[path.extname(f)]||'application/octet-stream'});return res.end(method==='HEAD'?'':readFileSync(f));}
-let sid=String(req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith('jspa_session='))?.slice(13),session=sid&&get('SELECT * FROM sessions WHERE id=? AND expires>?',hash(sid),Date.now());if(!session){sid=token();session={id:hash(sid),user_id:null,csrf:token(),expires:Date.now()+12*3600000};run('INSERT INTO sessions VALUES(?,?,?,?)',session.id,null,session.csrf,session.expires);res.setHeader('Set-Cookie',`jspa_session=${sid}; Path=/; HttpOnly; SameSite=Strict; Max-Age=43200${secure?'; Secure':''}`);}let user=session.user_id?get('SELECT * FROM users WHERE id=?',session.user_id):null;
-const needUser=()=>{if(!user)fail('Please sign in',401);return user;},staff=()=>{needUser();if(!['owner','employee'].includes(user.role))fail('Staff access required',403);},owner=()=>{staff();if(user.role!=='owner')fail('Owner access required',403);};
-let body={};if(!['GET','HEAD'].includes(method)){const origin=req.headers.origin;if(origin&&origin!==`${secure?'https':'http'}://${req.headers.host}`&&origin!==process.env.PUBLIC_ORIGIN)fail('Cross-origin request rejected',403);if(req.headers['sec-fetch-site']==='cross-site')fail('Cross-site request rejected',403);if(req.headers['x-csrf-token']!==session.csrf)fail('Invalid CSRF token',403);if(!String(req.headers['content-type']).startsWith('application/json'))fail('JSON content required',415);let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>50000)fail('Request too large',413);}try{body=JSON.parse(raw||'{}');}catch{fail('Invalid JSON');}if(!body||Array.isArray(body)||typeof body!=='object')fail('Invalid request');}
-const auth=u=>{run('DELETE FROM sessions WHERE id=?',session.id);sid=token();session={id:hash(sid),user_id:u.id,csrf:token(),expires:Date.now()+12*3600000};run('INSERT INTO sessions VALUES(?,?,?,?)',session.id,u.id,session.csrf,session.expires);res.setHeader('Set-Cookie',`jspa_session=${sid}; Path=/; HttpOnly; SameSite=Strict; Max-Age=43200${secure?'; Secure':''}`);return {user:publicUser(u),csrfToken:session.csrf};};
-if(method==='GET'&&route==='/api/session')return send({user:publicUser(user),csrfToken:session.csrf});
-if(method==='GET'&&route==='/api/catalog')return send({services:services().filter(s=>s.active),packages:packages().filter(p=>p.active),settings:settings(),reviews:all('SELECT data FROM reviews').map(r=>JSON.parse(r.data)).filter(r=>r.approved).map(({rating,body,display_name,created_at})=>({rating,body,display_name,created_at}))});
-if(method==='POST'&&route==='/api/register'){rate('register:'+req.socket.remoteAddress,15);if(body.terms!==true||body.password!==body.passwordConfirmation)fail('Accept the terms and confirm your password');const p=phone(body.phone);if(get('SELECT id FROM users WHERE phone=?',p))fail('Unable to register this number. Sign in or contact staff for recovery.',409);const u={id:uid(),name:text(body.name,100),phone:p,password:password(body.password),role:'customer',verified:0};run('INSERT INTO users VALUES(?,?,?,?,?,?,?)',u.id,u.name,u.phone,u.password,u.role,0,now());audit(u,'account.register',u.id);return send(auth(u),201);}
-if(method==='POST'&&route==='/api/login'){rate('login-ip:'+req.socket.remoteAddress,40);const p=phone(body.phone);rate('login:'+p,10);const u=get('SELECT * FROM users WHERE phone=?',p);if(!u||u.role==='disabled_employee'||!checkPassword(body.password,u.password))fail('Invalid phone or password',401);return send(auth(u));}
-if(method==='POST'&&route==='/api/logout'){run('DELETE FROM sessions WHERE id=?',session.id);res.setHeader('Set-Cookie',`jspa_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure?'; Secure':''}`);return send({ok:true});}
-if(method==='POST'&&route==='/api/verification/request'){needUser();if(user.verified)fail('Already verified');rate('verification:'+user.id,5);const reference=randomBytes(5).toString('hex').toUpperCase(),expires=Date.now()+30*60000;tx(()=>{run('UPDATE verification SET used=1 WHERE user_id=?',user.id);run('INSERT INTO verification VALUES(?,?,?,?,0)',uid(),user.id,hash(reference),expires);});return send({reference,expires_at:new Date(expires).toISOString(),whatsapp_url:whats(settings(),`مرحباً J SPA، أرجو تأكيد ملكية رقم جوالي ${user.phone}. رمز التحقق: ${reference}`)});}
-if(method==='POST'&&route==='/api/reset'){rate('reset:'+req.socket.remoteAddress,15);const ph=password(body.password);tx(()=>{const r=get('SELECT * FROM recovery WHERE token_hash=? AND used=0 AND expires>?',hash(String(body.token||'')),Date.now());if(!r)fail('Invalid or expired reset token');run('UPDATE users SET password=? WHERE id=?',ph,r.user_id);run('UPDATE recovery SET used=1 WHERE user_id=?',r.user_id);run('DELETE FROM sessions WHERE user_id=?',r.user_id);audit(null,'account.password_reset',r.user_id);});return send({ok:true});}
-function bookingResult(b){const message=`مرحباً J Spa\nأرغب في طلب حجز منزلي.\nرقم الطلب: ${b.reference}\nالاسم: ${b.name}\nالخدمة: ${b.items.map(i=>i.name_ar).join('، ')}\nالتاريخ المفضل: ${b.date}\nالوقت المفضل: ${b.time}\nالحي: ${b.neighborhood}\nالإجمالي التقديري: ${b.total} ر.س\nملاحظات: ${b.notes}\nأرجو تأكيد توفر الموعد.`;return {booking:b,message,whatsapp_url:whats(settings(),message)};}
-if(method==='POST'&&route==='/api/bookings'){rate('booking:'+req.socket.remoteAddress,30,3600000);if(body.terms!==true)fail('Accept booking terms');const key=text(body.idempotency_key,100),scope=user?.id||session.id,existing=get('SELECT id FROM bookings WHERE scope=? AND idempotency=?',scope,key);if(existing)return send(bookingResult(booking(existing.id)));const selected=body.package_id?packages().find(p=>p.id===body.package_id&&p.active):null;if(body.package_id&&!selected)fail('Package unavailable');const ids=selected?selected.service_ids:body.service_ids;if(!Array.isArray(ids)||!ids.length||ids.length>13||new Set(ids).size!==ids.length)fail('Choose services');const items=ids.map(id=>services().find(s=>s.id===id&&s.active)||fail('Service unavailable')),s=settings();if(s.business_approved&&items.some(x=>x.credentials_required&&!x.credentials_approved))fail('This service requires business credential approval before booking');const b={id:uid(),reference:'J-'+randomBytes(6).toString('hex').toUpperCase(),user_id:user?.role==='customer'?user.id:null,name:text(body.name,100),phone:phone(body.phone),neighborhood:text(body.neighborhood,150),notes:typeof body.notes==='string'?body.notes.slice(0,2000):'',date:body.date,time:body.time,items:items.map(({id,name_ar,name_en,price,duration})=>({id,name_ar,name_en,price,duration})),package_id:selected?.id||null,total:selected?selected.price:items.reduce((a,v)=>a+v.price,0),duration:items.reduce((a,v)=>a+v.duration,0),status:'pending_confirmation',paid_amount:0,paid_cents:0,payment_verified:false,payment_method:null,refund_cents:0,points_rate:s.points_per_sar,created_at:now()};if(user?.role==='customer'&&b.phone!==user.phone)fail('Use your registered phone number');schedule(b);tx(()=>{run('INSERT INTO bookings VALUES(?,?,?,?,?,?)',b.id,b.reference,b.user_id,scope,key,JSON.stringify(b));audit(user,'booking.request',b.id);});return send(bookingResult(b),201);}
-if(method==='GET'&&route==='/api/account'){needUser();return send({user:publicUser(user),bookings:bookings().filter(b=>b.user_id===user.id),ledger:user.verified?all('SELECT * FROM ledger WHERE user_id=? ORDER BY created_at DESC',user.id):[],balance:user.verified?balance(user.id):0,rewards:settings().rewards,reward_requests:all('SELECT data FROM reward_requests WHERE user_id=?',user.id).map(r=>JSON.parse(r.data)),reviews:all('SELECT data FROM reviews WHERE user_id=?',user.id).map(r=>JSON.parse(r.data))});}
-if(method==='POST'&&route==='/api/rewards/request'){needUser();if(!user.verified)fail('Phone verification required',403);const reward=settings().rewards.find(r=>r.id===body.reward_id)||fail('Reward unavailable');const r=tx(()=>{if(balance(user.id)<reward.points)fail('Not enough points');if(all('SELECT data FROM reward_requests WHERE user_id=?',user.id).some(x=>JSON.parse(x.data).status==='pending'))fail('A reward request is already pending',409);const r={id:uid(),user_id:user.id,reward_id:reward.id,points:reward.points,value:reward.value,status:'pending',created_at:now()};run('INSERT INTO reward_requests VALUES(?,?,?)',r.id,user.id,JSON.stringify(r));audit(user,'reward.request',r.id);return r;});return send({reward_request:r},201);}
-if(method==='POST'&&route==='/api/reviews'){needUser();if(!user.verified)fail('Phone verification required',403);const b=booking(body.booking_id);if(b.user_id!==user.id||b.status!=='completed')fail('Completed owned booking required',403);if(!Number.isInteger(body.rating)||body.rating<1||body.rating>5)fail('Invalid rating');if(get('SELECT id FROM reviews WHERE booking_id=?',b.id))fail('A review already exists',409);const r={id:uid(),rating:body.rating,body:text(body.body,2000),display_name:body.display_name?text(body.display_name,60):'عميلة J SPA',approved:false,created_at:now()};if(/(?:\+?966|05)\d{8,9}/.test(r.body+' '+r.display_name))fail('Please remove phone numbers from your review');run('INSERT INTO reviews VALUES(?,?,?,?)',r.id,user.id,b.id,JSON.stringify(r));return send({review:r},201);}
-if(route.startsWith('/api/admin')){staff();
-if(method==='GET'&&route==='/api/admin'){const bs=bookings(),isOwner=user.role==='owner';return send({bookings:bs,customers:all("SELECT * FROM users WHERE role='customer'").map(publicUser),verifications:all('SELECT id,user_id,expires,used FROM verification WHERE used=0 AND expires>?',Date.now()),payments:bs.filter(b=>b.payment_verified),ledger:all('SELECT * FROM ledger ORDER BY created_at DESC LIMIT 500'),reward_requests:all('SELECT data FROM reward_requests').map(r=>JSON.parse(r.data)),services:services(),packages:packages(),reviews:isOwner?all('SELECT * FROM reviews').map(r=>({...JSON.parse(r.data),booking_id:r.booking_id})):[],settings:isOwner?settings():{},staff:isOwner?all("SELECT * FROM users WHERE role!='customer'").map(publicUser):[],audit:isOwner?all('SELECT * FROM audit ORDER BY id DESC LIMIT 500'):[],analytics:isOwner?{total:bs.length,pending:bs.filter(b=>b.status==='pending_confirmation').length,confirmed:bs.filter(b=>b.status==='confirmed').length,completed:bs.filter(b=>b.status==='completed').length,revenue:bs.filter(b=>b.payment_verified).reduce((a,b)=>a+(b.paid_cents-b.refund_cents)/100,0),unpaid:bs.filter(b=>b.status==='completed'&&!b.payment_verified).length,returning_customers:Object.values(bs.filter(b=>b.user_id&&b.status==='completed').reduce((a,b)=>(a[b.user_id]=(a[b.user_id]||0)+1,a),{})).filter(n=>n>1).length,points_issued:get('SELECT COALESCE(SUM(points),0) n FROM ledger WHERE points>0').n,points_redeemed:-get("SELECT COALESCE(SUM(points),0) n FROM ledger WHERE reason='reward'").n,most_booked:services().map(s=>({name:s.name_en,count:bs.filter(b=>b.items.some(i=>i.id===s.id)).length})).sort((a,b)=>b.count-a.count)}:{}});}
-if(method==='POST'&&/^\/api\/admin\/bookings\/[^/]+$/.test(route)){const b=tx(()=>{const b=booking(route.split('/').pop()),old={...b},transitions={pending_confirmation:['confirmed','cancelled'],confirmed:['in_progress','completed','cancelled','no_show'],in_progress:['completed','cancelled'],completed:[],cancelled:[],no_show:[]};if(body.status&&body.status!==b.status){if(!transitions[b.status]?.includes(body.status))fail('Invalid booking status transition');b.status=body.status;}if(body.date!==undefined)b.date=body.date;if(body.time!==undefined)b.time=body.time;if((body.date||body.time)&&!['pending_confirmation','confirmed'].includes(b.status))fail('Cannot reschedule this booking');if(['confirmed','in_progress'].includes(b.status)&&(b.status!==old.status||body.date||body.time))schedule(b,true,b.status!=='in_progress');else if(body.date||body.time)schedule(b);if(body.paid_amount!==undefined){const n=money(body.paid_amount);if(b.payment_verified&&n!==b.paid_cents)fail('Verified payments are immutable. Record a refund instead.');b.paid_cents=n;b.paid_amount=n/100;}if(body.payment_method!==undefined){if(!['cash','card','bank_transfer','other'].includes(body.payment_method))fail('Invalid payment method');b.payment_method=body.payment_method;}if(body.payment_verified!==undefined){if(typeof body.payment_verified!=='boolean')fail('Invalid verification flag');if(b.payment_verified&&!body.payment_verified)fail('Use a refund to reverse verified payment');if(body.payment_verified&&(!b.payment_method||b.paid_cents<=0))fail('Enter payment amount and method');b.payment_verified=body.payment_verified;}if(body.refund_amount!==undefined){owner();text(body.reason,500);const refund=money(body.refund_amount);if(!b.payment_verified||refund>b.paid_cents||refund<b.refund_cents)fail('Invalid cumulative refund amount');b.refund_cents=refund;}if(b.status==='cancelled'&&b.payment_verified&&b.paid_cents>b.refund_cents)fail('Record full refund before cancellation');reconcile(b);saveBooking(b);audit(user,'booking.update',b.id,JSON.stringify({status:b.status,paid_amount:b.paid_amount,refund_amount:b.refund_cents/100,reason:body.reason||''}));return b;});return send({booking:b});}
-if(method==='POST'&&route==='/api/admin/verify'){tx(()=>{if(body.checked!==true)fail('Confirm that you checked the actual WhatsApp sender');const u=get('SELECT * FROM users WHERE id=?',body.user_id);if(!u||u.role!=='customer'||phone(body.observed_phone)!==u.phone)fail('Sender number does not match');const v=get('SELECT * FROM verification WHERE user_id=? AND reference_hash=? AND used=0 AND expires>?',u.id,hash(String(body.reference||'').trim().toUpperCase()),Date.now());if(!v)fail('Invalid or expired verification reference');run('UPDATE verification SET used=1 WHERE user_id=?',u.id);run('UPDATE users SET verified=1 WHERE id=?',u.id);for(const b of bookings().filter(b=>b.user_id===u.id))reconcile(b);audit(user,'account.verify',u.id,'Actual sender and one-time reference checked');});return send({ok:true});}
-if(method==='POST'&&route==='/api/admin/recovery'){const u=get('SELECT * FROM users WHERE id=?',body.user_id);if(!u||u.role!=='customer'||body.checked!==true||phone(body.observed_phone)!==u.phone)fail('Verified customer and actual sender check required');rate('recovery:'+u.id,5,3600000);const t=token();tx(()=>{if(!u.verified){for(const b of bookings().filter(b=>b.user_id===u.id)){b.user_id=null;saveBooking(b);}run('UPDATE bookings SET user_id=NULL WHERE user_id=?',u.id);run('UPDATE verification SET used=1 WHERE user_id=?',u.id);run('UPDATE users SET verified=1,password=? WHERE id=?',password(token()),u.id);run('DELETE FROM sessions WHERE user_id=?',u.id);audit(user,'account.unverified_phone_reclaim',u.id,'Actual sender checked; previous self-created records detached before reset');}run('UPDATE recovery SET used=1 WHERE user_id=?',u.id);run('INSERT INTO recovery VALUES(?,?,?,?,0)',uid(),u.id,hash(t),Date.now()+15*60000);audit(user,'account.recovery_created',u.id);});return send({token:t,reset_url:`/ar/reset#${t}`,expires_at:new Date(Date.now()+15*60000).toISOString()});}
-if(method==='POST'&&/^\/api\/admin\/rewards\/[^/]+$/.test(route)){const result=tx(()=>{const row=get('SELECT * FROM reward_requests WHERE id=?',route.split('/').pop());if(!row)fail('Reward not found',404);const r=JSON.parse(row.data);if(body.action==='cancel'){if(r.status==='cancelled')fail('Already cancelled',409);if(r.status==='committed'){const b=booking(r.booking_id);if(b.payment_verified||b.status==='completed')fail('Cannot cancel an applied reward after payment');record(r.user_id,b.id,r.points,'reward-cancel:'+r.id,'reward cancellation');b.total+=r.value;delete b.reward_id;saveBooking(b);}r.status='cancelled';}else if(body.action==='commit'){if(r.status!=='pending')fail('Reward is no longer pending',409);const b=booking(body.booking_id),u=get('SELECT * FROM users WHERE id=?',r.user_id);if(!u?.verified||b.user_id!==r.user_id||!['pending_confirmation','confirmed'].includes(b.status)||b.reward_id||b.payment_verified)fail('Reward requires an eligible owned unpaid booking');if(balance(r.user_id)<r.points||b.total<r.value)fail('Insufficient points or booking value');record(r.user_id,b.id,-r.points,'reward:'+r.id,'reward');b.total=Math.round((b.total-r.value)*100)/100;b.reward_id=r.id;saveBooking(b);r.status='committed';r.booking_id=b.id;}else fail('Invalid action');run('UPDATE reward_requests SET data=? WHERE id=?',JSON.stringify(r),r.id);audit(user,'reward.'+body.action,r.id);return r;});return send({reward_request:result});}
-owner();
-if(method==='POST'&&route==='/api/admin/services'){const old=body.id?services().find(s=>s.id===body.id):null;if(body.id&&!old)fail('Service not found');const s={...old,...body,id:old?.id||uid()};s.name_ar=text(s.name_ar,150);s.name_en=text(s.name_en,150);s.description_ar=text(s.description_ar,2000);s.description_en=text(s.description_en,2000);s.price_cents=money(s.price);if(!Number.isInteger(s.duration)||s.duration<5||s.duration>480)fail('Invalid duration');if(!['massage','nails','gel'].includes(s.category))fail('Invalid category');s.active=s.active!==false;s.credentials_required=old?.credentials_required||!!s.credentials_required;s.credentials_approved=!!s.credentials_approved;if(s.image&&!/^(\/[^/]|https:\/\/)/.test(s.image))fail('Invalid image URL');run('INSERT OR REPLACE INTO services VALUES(?,?)',s.id,JSON.stringify(s));audit(user,'service.save',s.id);return send({service:{...s,price:s.price_cents/100}});}
-if(method==='POST'&&route==='/api/admin/packages'){const old=body.id?packages().find(p=>p.id===body.id):null;if(body.id&&!old)fail('Package not found');if(body.remove){run('DELETE FROM packages WHERE id=?',body.id);audit(user,'package.remove',body.id);return send({ok:true});}const p={...old,...body,id:old?.id||uid()};p.name_ar=text(p.name_ar,150);p.name_en=text(p.name_en,150);p.price_cents=money(p.price);if(!Array.isArray(p.service_ids)||!p.service_ids.length||new Set(p.service_ids).size!==p.service_ids.length||p.service_ids.some(id=>!services().find(s=>s.id===id)))fail('Invalid package services');p.active=p.active!==false;run('INSERT OR REPLACE INTO packages VALUES(?,?)',p.id,JSON.stringify(p));audit(user,'package.save',p.id);return send({package:p});}
-if(method==='POST'&&route==='/api/admin/settings'){const s={...settings(),...body.settings};for(const k of Object.keys(s))if(!(k in defaults))delete s[k];if(s.business_phone)s.business_phone=phone(s.business_phone);for(const k of ['instagram','tiktok'])if(s[k]){try{const u=new URL(s[k]);if(u.protocol!=='https:'||!((k==='instagram'?['instagram.com','www.instagram.com']:['tiktok.com','www.tiktok.com']).includes(u.hostname)))fail('Use the official social profile URL');}catch{fail('Invalid social URL');}}for(const k of ['capacity','travel_buffer','lead_hours'])if(!Number.isInteger(s[k])||s[k]<0||s[k]>1000)fail('Invalid schedule setting');if(!Number.isFinite(s.points_per_sar)||s.points_per_sar<0||s.points_per_sar>100)fail('Invalid points rate');if(!Array.isArray(s.areas)||s.areas.length>100||s.areas.some(v=>typeof v!=='string'||!v.trim()||v.length>150))fail('Invalid areas');if(!Array.isArray(s.working_days)||s.working_days.some(v=>!Number.isInteger(v)||v<0||v>6))fail('Invalid working days');for(const k of ['opening_time','closing_time'])if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(s[k]))fail('Invalid working time');if(s.opening_time>=s.closing_time)fail('Closing must follow opening');if(!Array.isArray(s.blocked_dates)||s.blocked_dates.some(v=>!/^\d{4}-\d{2}-\d{2}$/.test(v)))fail('Invalid blocked dates');if(!Array.isArray(s.rewards)||s.rewards.length>20||new Set(s.rewards.map(r=>r.id)).size!==s.rewards.length)fail('Invalid rewards');for(const r of s.rewards){text(r.id,50);if(!Number.isInteger(r.points)||r.points<1||r.points>1000000)fail('Invalid reward points');money(r.value);}for(const k of Object.keys(s).filter(k=>/_(ar|en)$/.test(k)))if(typeof s[k]!=='string'||s[k].length>15000)fail('Invalid content');s.business_approved=!!s.business_approved;run('UPDATE config SET data=? WHERE id=1',JSON.stringify(s));audit(user,'settings.update','1');return send({settings:s});}
-if(method==='POST'&&/^\/api\/admin\/reviews\/[^/]+$/.test(route)){const row=get('SELECT * FROM reviews WHERE id=?',route.split('/').pop());if(!row)fail('Review not found',404);if(typeof body.approved!=='boolean')fail('Invalid approval');const r=JSON.parse(row.data);r.approved=body.approved;run('UPDATE reviews SET data=? WHERE id=?',JSON.stringify(r),row.id);audit(user,'review.moderate',row.id);return send({review:r});}
-if(method==='POST'&&route==='/api/admin/staff'){const id=uid();if(body.role!=='employee')fail('Only employee accounts can be created here');const p=phone(body.phone);if(get('SELECT id FROM users WHERE phone=?',p))fail('Phone already in use',409);run('INSERT INTO users VALUES(?,?,?,?,?,?,?)',id,text(body.name,100),p,password(body.password),'employee',1,now());audit(user,'staff.create',id);return send({ok:true},201);}
-if(method==='POST'&&/^\/api\/admin\/staff\/[^/]+$/.test(route)){
-  owner();
-  const id=route.split('/').pop();
-  const employee=get("SELECT id FROM users WHERE id=? AND role IN ('employee','disabled_employee')",id);
-  if(!employee)fail('Employee not found',404);
-  if(body.action!=='disable'&&body.action!=='enable')fail('Invalid staff action');
-  const role=body.action==='enable'?'employee':'disabled_employee';
-  tx(()=>{
-    run('UPDATE users SET role=? WHERE id=?',role,id);
-    run('DELETE FROM sessions WHERE user_id=?',id);
-    audit(user,`staff.${body.action}`,id);
-  });
-  return send({ok:true});
+
+export function createApp({ dbPath = process.env.DB_PATH || path.join(ROOT, 'data', 'jspa.sqlite') } = {}) {
+  const db = openDatabase(dbPath);
+  const helpers = createHelpers(db);
+
+  function ownerBootstrap({ name, phone: ph, password: pw }) {
+    if (db.get("SELECT id FROM users WHERE role='owner'")) {
+      fail('Owner already exists');
+    }
+    const u = {
+      id: uid(),
+      name: text(name),
+      phone: phone(ph),
+      password: hashPassword(pw),
+    };
+    db.run('INSERT INTO users VALUES(?,?,?,?,?,?,?)', u.id, u.name, u.phone, u.password, 'owner', 1, now());
+    return publicUser({ ...u, role: 'owner', verified: true });
+  }
+
+  async function handler(req, res) {
+    const secure = process.env.NODE_ENV === 'production';
+    setSecurityHeaders(res, secure);
+
+    const send = (data, status = 200) => {
+      res.writeHead(status, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-store',
+      });
+      res.end(JSON.stringify(data));
+    };
+
+    try {
+      const url = new URL(req.url, 'http://localhost');
+      const route = url.pathname;
+      const method = req.method;
+
+      if (route === '/robots.txt') {
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+        const sitemap = process.env.PUBLIC_ORIGIN ? `Sitemap: ${process.env.PUBLIC_ORIGIN}/sitemap.xml` : '';
+        return res.end(`User-agent: *\nDisallow: /api/\nDisallow: /ar/admin\nDisallow: /en/admin\n${sitemap}`);
+      }
+
+      if (route === '/sitemap.xml') {
+        const base = publicOrigin();
+        if (!base) return send({ error: 'Configure PUBLIC_ORIGIN to enable the production sitemap' }, 503);
+        const urls = publicRoutes(helpers.services());
+        res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
+        const body = ['ar', 'en']
+          .flatMap((l) => urls.map((p) => `<url><loc>${base}/${l}/${p}</loc></url>`))
+          .join('');
+        return res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}</urlset>`);
+      }
+
+      if (['GET', 'HEAD'].includes(method) && (route === '/' || /^\/(ar|en)(\/|$)/.test(route))) {
+        const entry = path.join(PUBLIC_DIR, 'index.html');
+        const html = pageMetadata(
+          readFileSync(entry, 'utf8'),
+          route,
+          helpers.services(),
+          helpers.packages(),
+        );
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+        return res.end(method === 'HEAD' ? '' : html);
+      }
+
+      if (!route.startsWith('/api/')) {
+        if (!['GET', 'HEAD'].includes(method)) fail('Method not allowed', 405);
+        const decoded = decodeURIComponent(route);
+        if (decoded.split('/').some((seg) => seg.startsWith('.'))) {
+          fail('Forbidden', 403);
+        }
+        const resolved = path.resolve(PUBLIC_DIR, `.${decoded}`);
+        if (resolved !== PUBLIC_DIR && !resolved.startsWith(PUBLIC_DIR + path.sep)) {
+          fail('Forbidden', 403);
+        }
+
+        const ext = path.extname(resolved);
+        let fileToServe = resolved;
+        if (ext) {
+          if (!existsSync(fileToServe)) {
+            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+            return res.end('Not found');
+          }
+        } else {
+          fileToServe = path.join(PUBLIC_DIR, 'index.html');
+        }
+
+        if (!existsSync(fileToServe)) return send({ error: 'Interface is being prepared' }, 503);
+        const servedExt = path.extname(fileToServe);
+        const cacheHeader = IMMUTABLE_EXTS.has(servedExt) ? 'public, max-age=86400' : 'no-cache';
+        res.writeHead(200, {
+          'Content-Type': MIME_TYPES[servedExt] || 'application/octet-stream',
+          'Cache-Control': cacheHeader,
+        });
+        return res.end(method === 'HEAD' ? '' : readFileSync(fileToServe));
+      }
+
+      // Session initialization / validation
+      let sid = String(req.headers.cookie || '')
+        .split(';')
+        .map((v) => v.trim())
+        .find((v) => v.startsWith('jspa_session='))
+        ?.slice(13);
+
+      let session = sid && db.get('SELECT * FROM sessions WHERE id=? AND expires>?', hash(sid), Date.now());
+      if (!session) {
+        sid = token();
+        session = {
+          id: hash(sid),
+          user_id: null,
+          csrf: token(),
+          expires: Date.now() + 12 * 3600000,
+        };
+        db.run('INSERT INTO sessions VALUES(?,?,?,?)', session.id, null, session.csrf, session.expires);
+        setSessionCookie(res, sid, 43200, secure);
+      }
+
+      const user = session.user_id ? db.get('SELECT * FROM users WHERE id=?', session.user_id) : null;
+      const needUser = () => {
+        if (!user) fail('Please sign in', 401);
+        return user;
+      };
+      const requireStaff = () => {
+        needUser();
+        if (!['owner', 'employee'].includes(user.role)) fail('Staff access required', 403);
+      };
+
+      // Parse & verify mutation requests
+      let body;
+      if (!['GET', 'HEAD'].includes(method)) {
+        const origin = req.headers.origin;
+        const expectedOrigin = `${secure ? 'https' : 'http'}://${req.headers.host}`;
+        if (origin && origin !== expectedOrigin && origin !== process.env.PUBLIC_ORIGIN) {
+          fail('Cross-origin request rejected', 403);
+        }
+        if (req.headers['sec-fetch-site'] === 'cross-site') {
+          fail('Cross-site request rejected', 403);
+        }
+        if (req.headers['x-csrf-token'] !== session.csrf) {
+          fail('Invalid CSRF token', 403);
+        }
+        if (!String(req.headers['content-type']).startsWith('application/json')) {
+          fail('JSON content required', 415);
+        }
+        let raw = '';
+        for await (const chunk of req) {
+          raw += chunk;
+          if (Buffer.byteLength(raw) > 50000) fail('Request too large', 413);
+        }
+        try {
+          body = JSON.parse(raw || '{}');
+        } catch {
+          fail('Invalid JSON');
+        }
+        if (!body || Array.isArray(body) || typeof body !== 'object') {
+          fail('Invalid request');
+        }
+      }
+
+      const rotateAuthSession = (u) => {
+        db.run('DELETE FROM sessions WHERE id=?', session.id);
+        sid = token();
+        session = {
+          id: hash(sid),
+          user_id: u.id,
+          csrf: token(),
+          expires: Date.now() + 12 * 3600000,
+        };
+        db.run('INSERT INTO sessions VALUES(?,?,?,?)', session.id, u.id, session.csrf, session.expires);
+        setSessionCookie(res, sid, 43200, secure);
+        return { user: publicUser(u), csrfToken: session.csrf };
+      };
+
+      const checkRate = (key, max, windowMs) => checkRateLimit(db, key, max, windowMs);
+
+      if (method === 'GET' && route === '/api/session') {
+        return send({ user: publicUser(user), csrfToken: session.csrf });
+      }
+
+      if (method === 'GET' && route === '/api/catalog') {
+        return send({
+          services: helpers.services().filter((s) => s.active),
+          packages: helpers.packages().filter((p) => p.active),
+          settings: helpers.settings(),
+          reviews: db
+            .all('SELECT data FROM reviews')
+            .map((r) => JSON.parse(r.data))
+            .filter((r) => r.approved)
+            .map(({ rating, body: textBody, display_name, created_at }) => ({
+              rating,
+              body: textBody,
+              display_name,
+              created_at,
+            })),
+        });
+      }
+
+      if (method === 'POST' && route === '/api/register') {
+        checkRate(`register:${req.socket.remoteAddress}`, 15);
+        if (body.terms !== true || body.password !== body.passwordConfirmation) {
+          fail('Accept the terms and confirm your password');
+        }
+        const p = phone(body.phone);
+        if (db.get('SELECT id FROM users WHERE phone=?', p)) {
+          fail('Unable to register this number. Sign in or contact staff for recovery.', 409);
+        }
+        const u = {
+          id: uid(),
+          name: text(body.name, 100),
+          phone: p,
+          password: hashPassword(body.password),
+          role: 'customer',
+          verified: 0,
+        };
+        db.run('INSERT INTO users VALUES(?,?,?,?,?,?,?)', u.id, u.name, u.phone, u.password, u.role, 0, now());
+        helpers.audit(u, 'account.register', u.id);
+        return send(rotateAuthSession(u), 201);
+      }
+
+      if (method === 'POST' && route === '/api/login') {
+        checkRate(`login-ip:${req.socket.remoteAddress}`, 40);
+        const p = phone(body.phone);
+        checkRate(`login:${p}`, 10);
+        const u = db.get('SELECT * FROM users WHERE phone=?', p);
+        if (!u || u.role === 'disabled_employee' || !verifyPassword(body.password, u.password)) {
+          fail('Invalid phone or password', 401);
+        }
+        return send(rotateAuthSession(u));
+      }
+
+      if (method === 'POST' && route === '/api/logout') {
+        db.run('DELETE FROM sessions WHERE id=?', session.id);
+        setSessionCookie(res, '', 0, secure);
+        return send({ ok: true });
+      }
+
+      if (method === 'POST' && route === '/api/verification/request') {
+        needUser();
+        if (user.verified) fail('Already verified');
+        checkRate(`verification:${user.id}`, 5);
+        const reference = randomBytes(5).toString('hex').toUpperCase();
+        const expires = Date.now() + 30 * 60000;
+        db.tx(() => {
+          db.run('UPDATE verification SET used=1 WHERE user_id=?', user.id);
+          db.run('INSERT INTO verification VALUES(?,?,?,?,0)', uid(), user.id, hash(reference), expires);
+        });
+        return send({
+          reference,
+          expires_at: new Date(expires).toISOString(),
+          whatsapp_url: whatsappUrl(
+            helpers.settings(),
+            `مرحباً J SPA، أرجو تأكيد ملكية رقم جوالي ${user.phone}. رمز التحقق: ${reference}`,
+          ),
+        });
+      }
+
+      if (method === 'POST' && route === '/api/reset') {
+        checkRate(`reset:${req.socket.remoteAddress}`, 15);
+        const hashedPw = hashPassword(body.password);
+        db.tx(() => {
+          const rec = db.get(
+            'SELECT * FROM recovery WHERE token_hash=? AND used=0 AND expires>?',
+            hash(String(body.token || '')),
+            Date.now(),
+          );
+          if (!rec) fail('Invalid or expired reset token');
+          db.run('UPDATE users SET password=? WHERE id=?', hashedPw, rec.user_id);
+          db.run('UPDATE recovery SET used=1 WHERE user_id=?', rec.user_id);
+          db.run('DELETE FROM sessions WHERE user_id=?', rec.user_id);
+          helpers.audit(null, 'account.password_reset', rec.user_id);
+        });
+        return send({ ok: true });
+      }
+
+      if (method === 'POST' && route === '/api/bookings') {
+        checkRate(`booking:${req.socket.remoteAddress}`, 30, 3600000);
+        const { created, result } = createBooking(db, helpers, user, session.id, body);
+        return send(result, created ? 201 : 200);
+      }
+
+      if (method === 'GET' && route === '/api/account') {
+        needUser();
+        const myBookings = helpers.bookings().filter((b) => b.user_id === user.id);
+        const hasPendingEntitlement =
+          !user.verified &&
+          myBookings.some((b) => b.status === 'completed' && b.payment_verified);
+        return send({
+          user: publicUser(user),
+          bookings: myBookings,
+          ledger: user.verified
+            ? db.all('SELECT * FROM ledger WHERE user_id=? ORDER BY created_at DESC', user.id)
+            : [],
+          balance: user.verified ? helpers.balance(user.id) : 0,
+          has_pending_entitlement: hasPendingEntitlement,
+          rewards: helpers.settings().rewards,
+          reward_requests: db
+            .all('SELECT data FROM reward_requests WHERE user_id=?', user.id)
+            .map((r) => JSON.parse(r.data)),
+          reviews: db
+            .all('SELECT data,booking_id FROM reviews WHERE user_id=?', user.id)
+            .map((r) => ({ ...JSON.parse(r.data), booking_id: r.booking_id })),
+        });
+      }
+
+      if (method === 'POST' && route === '/api/rewards/request') {
+        needUser();
+        return send({ reward_request: requestReward(db, helpers, user, body.reward_id) }, 201);
+      }
+
+      if (method === 'POST' && route === '/api/reviews') {
+        needUser();
+        if (!user.verified) fail('Phone verification required', 403);
+        const b = helpers.bookings().find((x) => x.id === body.booking_id);
+        if (!b || b.user_id !== user.id || b.status !== 'completed') {
+          fail('Completed owned booking required', 403);
+        }
+        if (!Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5) {
+          fail('Invalid rating');
+        }
+        const reviewBody = text(body.body, 2000);
+        const displayName = optionalText(body.display_name, 60) || 'عميلة J SPA';
+        if (/(?:\+?966|05)\d{8,9}/.test(`${reviewBody} ${displayName}`)) {
+          fail('Please remove phone numbers from your review');
+        }
+
+        const existingRow = db.get('SELECT * FROM reviews WHERE booking_id=?', b.id);
+        if (existingRow) {
+          if (body.edit !== true) fail('A review already exists', 409);
+          if (existingRow.user_id !== user.id) fail('Forbidden', 403);
+          const prev = JSON.parse(existingRow.data);
+          const updated = {
+            ...prev,
+            rating: body.rating,
+            body: reviewBody,
+            display_name: displayName,
+            approved: false,
+            updated_at: now(),
+          };
+          db.run('UPDATE reviews SET data=? WHERE id=?', JSON.stringify(updated), existingRow.id);
+          return send({ review: { ...updated, booking_id: b.id } });
+        }
+
+        const review = {
+          id: uid(),
+          rating: body.rating,
+          body: reviewBody,
+          display_name: displayName,
+          approved: false,
+          created_at: now(),
+        };
+        db.run('INSERT INTO reviews VALUES(?,?,?,?)', review.id, user.id, b.id, JSON.stringify(review));
+        return send({ review: { ...review, booking_id: b.id } }, 201);
+      }
+
+      if (route.startsWith('/api/admin')) {
+        requireStaff();
+        return handleAdminRoute({ db, helpers, user, route, body, checkRate, send });
+      }
+
+      fail('Not found', 404);
+    } catch (error) {
+      if (!error.status) console.error(error);
+      send({ error: error.status ? error.message : 'Internal server error' }, error.status || 500);
+    }
+  }
+
+  const server = http.createServer(handler);
+  server.requestTimeout = 15000;
+  server.headersTimeout = 10000;
+
+  return {
+    server,
+    db: db.raw,
+    ownerBootstrap,
+    close: () =>
+      new Promise((resolve) =>
+        server.close(() => {
+          db.close();
+          resolve();
+        }),
+      ),
+  };
 }
-if(method==='POST'&&route==='/api/admin/adjustment'){const n=body.points,reason=text(body.reason,500);if(!Number.isInteger(n)||!n||Math.abs(n)>100000)fail('Invalid points');tx(()=>{const u=get('SELECT * FROM users WHERE id=?',body.user_id);if(!u?.verified||u.role!=='customer')fail('Verified customer required');if(balance(u.id)+n<0)fail('Balance cannot be negative');record(u.id,null,n,'manual:'+uid(),'manual: '+reason);audit(user,'loyalty.adjust',u.id,JSON.stringify({points:n,reason}));});return send({ok:true});}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const app = createApp();
+  if (process.argv.includes('--create-owner')) {
+    try {
+      console.log(
+        app.ownerBootstrap({
+          name: process.env.OWNER_NAME,
+          phone: process.env.OWNER_PHONE,
+          password: process.env.OWNER_PASSWORD,
+        }),
+      );
+    } finally {
+      app.db.close();
+    }
+  } else {
+    const port = Number(process.env.PORT || 3000);
+    app.server.listen(port, process.env.HOST || '127.0.0.1', () => {
+      console.log(`J SPA running at http://${process.env.HOST || '127.0.0.1'}:${port}`);
+    });
+  }
 }
-fail('Not found',404);
-}catch(e){if(!e.status)console.error(e);send({error:e.status?e.message:'Internal server error'},e.status||500);}}
-const server=http.createServer(handler);server.requestTimeout=15000;server.headersTimeout=10000;
-return {server,db,ownerBootstrap,close:()=>new Promise(resolve=>server.close(()=>{db.close();resolve();}))};
-}
-if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){const app=createApp();if(process.argv.includes('--create-owner')){try{console.log(app.ownerBootstrap({name:process.env.OWNER_NAME,phone:process.env.OWNER_PHONE,password:process.env.OWNER_PASSWORD}));}finally{app.db.close();}}else{const port=Number(process.env.PORT||3000);app.server.listen(port,process.env.HOST||'127.0.0.1',()=>console.log(`J SPA running at http://${process.env.HOST||'127.0.0.1'}:${port}`));}}

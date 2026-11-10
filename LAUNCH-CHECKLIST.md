@@ -5,7 +5,8 @@ The source code and local tests cannot establish the following business facts. D
 - Supply the actual J SPA WhatsApp telephone number, Instagram and TikTok URLs.
 - Approve all 13 service prices, descriptions, durations, precautions and package contents. Approve the two proposed loyalty rewards and rounding rules.
 - Confirm practitioner qualifications and the permitted scope of therapeutic and lymphatic services. The catalog must not make treatment promises.
-- Supply legally usable service photography if photographic presentation is required. Current original botanical illustrations are decorative, not evidence of staff, premises or services performed.
+- Supply final brand-approved service photography if required. Current service visuals (`public/assets/images/services/*.webp`) and hero sanctuary (`hero-sanctuary.webp`) are provisional generated/crafted assets for demonstration, not evidence of real staff, premises, or clinical services performed.
+- Update any remaining provisional service descriptions, inclusions, and precautions in **Admin → Services**, especially for Therapeutic Massage and Lymphatic Drainage Massage, and review all Arabic/English legal copy.
 - Approve service neighborhoods, workdays, hours, travel buffers, capacity, lead time, cancellation terms and actual payment methods.
 - Provide the legal business/controller identity, privacy contact, retention schedule, rights request process and any guardian rules for minors. Obtain appropriate review of the privacy notice, terms and Saudi PDPL duties.
 - Choose a production domain and a persistent single-instance host. Configure HTTPS, environment variables, owner credentials, restricted database filesystem permissions, process supervision and monitoring.
