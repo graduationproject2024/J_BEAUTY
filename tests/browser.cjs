@@ -119,10 +119,9 @@ mkdirSync(out, { recursive: true });
           );
           const brokenImgs = imgs.filter((i) => !i.complete || i.naturalWidth === 0).map((i) => i.src);
           const h1 = document.querySelector('h1')?.innerText?.trim() || '';
-          const unrevealed = [...document.querySelectorAll('[data-reveal]')].filter((el) => {
-            const rect = el.getBoundingClientRect();
-            return rect.top < window.innerHeight && getComputedStyle(el).opacity === '0';
-          }).length;
+          const unrevealed = [...document.querySelectorAll('[data-reveal]')].filter(
+            (el) => parseFloat(getComputedStyle(el).opacity) < 0.99,
+          ).length;
           return {
             scroll: document.documentElement.scrollWidth,
             client: document.documentElement.clientWidth,

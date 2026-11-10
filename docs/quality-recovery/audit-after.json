@@ -1,0 +1,407 @@
+{
+  "phase": "after",
+  "timestamp": "2026-11-10T17:38:45.943Z",
+  "a11y": [
+    {
+      "route": "/ar/",
+      "violations": []
+    },
+    {
+      "route": "/en/",
+      "violations": []
+    },
+    {
+      "route": "/ar/services",
+      "violations": []
+    },
+    {
+      "route": "/ar/services/gel-removal",
+      "violations": []
+    },
+    {
+      "route": "/ar/packages",
+      "violations": []
+    },
+    {
+      "route": "/ar/studio",
+      "violations": []
+    },
+    {
+      "route": "/ar/atelier",
+      "violations": []
+    },
+    {
+      "route": "/ar/lookbook",
+      "violations": []
+    },
+    {
+      "route": "/ar/occasions",
+      "violations": []
+    },
+    {
+      "route": "/ar/gifts",
+      "violations": []
+    },
+    {
+      "route": "/ar/booking",
+      "violations": []
+    },
+    {
+      "route": "/ar/account",
+      "violations": []
+    },
+    {
+      "route": "/ar/petals",
+      "violations": []
+    },
+    {
+      "route": "/ar/reviews",
+      "violations": []
+    },
+    {
+      "route": "/ar/policies",
+      "violations": []
+    },
+    {
+      "route": "/ar/privacy",
+      "violations": []
+    },
+    {
+      "route": "/ar/terms",
+      "violations": []
+    },
+    {
+      "route": "/ar/contact",
+      "violations": []
+    }
+  ],
+  "performance": [
+    {
+      "route": "/ar/",
+      "dcl": 53,
+      "load": 297,
+      "fcp": 112,
+      "lcp": 292,
+      "cls": 0.0004
+    },
+    {
+      "route": "/en/",
+      "dcl": 43,
+      "load": 47,
+      "fcp": 56,
+      "lcp": 120,
+      "cls": 0
+    },
+    {
+      "route": "/ar/services",
+      "dcl": 47,
+      "load": 47,
+      "fcp": 64,
+      "lcp": 96,
+      "cls": 0
+    },
+    {
+      "route": "/ar/services/gel-removal",
+      "dcl": 46,
+      "load": 46,
+      "fcp": 44,
+      "lcp": 92,
+      "cls": 0
+    },
+    {
+      "route": "/ar/packages",
+      "dcl": 43,
+      "load": 43,
+      "fcp": 40,
+      "lcp": 40,
+      "cls": 0
+    },
+    {
+      "route": "/ar/studio",
+      "dcl": 45,
+      "load": 46,
+      "fcp": 36,
+      "lcp": 36,
+      "cls": 0
+    },
+    {
+      "route": "/ar/atelier",
+      "dcl": 35,
+      "load": 35,
+      "fcp": 36,
+      "lcp": 68,
+      "cls": 0
+    },
+    {
+      "route": "/ar/lookbook",
+      "dcl": 37,
+      "load": 37,
+      "fcp": 36,
+      "lcp": 80,
+      "cls": 0
+    },
+    {
+      "route": "/ar/occasions",
+      "dcl": 43,
+      "load": 43,
+      "fcp": 48,
+      "lcp": 84,
+      "cls": 0
+    },
+    {
+      "route": "/ar/gifts",
+      "dcl": 45,
+      "load": 45,
+      "fcp": 40,
+      "lcp": 40,
+      "cls": 0
+    },
+    {
+      "route": "/ar/booking",
+      "dcl": 57,
+      "load": 57,
+      "fcp": 84,
+      "lcp": 84,
+      "cls": 0
+    },
+    {
+      "route": "/ar/account",
+      "dcl": 37,
+      "load": 37,
+      "fcp": 68,
+      "lcp": 68,
+      "cls": 0
+    },
+    {
+      "route": "/ar/petals",
+      "dcl": 32,
+      "load": 32,
+      "fcp": 40,
+      "lcp": 84,
+      "cls": 0
+    },
+    {
+      "route": "/ar/reviews",
+      "dcl": 43,
+      "load": 43,
+      "fcp": 44,
+      "lcp": 68,
+      "cls": 0
+    },
+    {
+      "route": "/ar/policies",
+      "dcl": 38,
+      "load": 38,
+      "fcp": 32,
+      "lcp": 32,
+      "cls": 0
+    },
+    {
+      "route": "/ar/privacy",
+      "dcl": 72,
+      "load": 72,
+      "fcp": 72,
+      "lcp": 72,
+      "cls": 0
+    },
+    {
+      "route": "/ar/terms",
+      "dcl": 37,
+      "load": 37,
+      "fcp": 36,
+      "lcp": 68,
+      "cls": 0
+    },
+    {
+      "route": "/ar/contact",
+      "dcl": 48,
+      "load": 48,
+      "fcp": 36,
+      "lcp": 36,
+      "cls": 0
+    }
+  ],
+  "typography": [
+    {
+      "route": "/ar/",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/en/",
+      "dir": "ltr",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 26.35,
+      "h1FontSize": 62,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/services",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/services/gel-removal",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/packages",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/studio",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/atelier",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/lookbook",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/occasions",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/gifts",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/booking",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/account",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 34,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/petals",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/reviews",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/policies",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/privacy",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/terms",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    },
+    {
+      "route": "/ar/contact",
+      "dir": "rtl",
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "sub13pxCount": 0
+    }
+  ],
+  "screenshots": [
+    "ar-desktop.png",
+    "ar-mobile.png",
+    "en-desktop.png",
+    "en-mobile.png",
+    "ar-services-desktop.png",
+    "ar-services-mobile.png",
+    "ar-services-gel-removal-desktop.png",
+    "ar-services-gel-removal-mobile.png",
+    "ar-packages-desktop.png",
+    "ar-studio-desktop.png",
+    "ar-studio-mobile.png",
+    "ar-atelier-desktop.png",
+    "ar-atelier-mobile.png",
+    "ar-lookbook-desktop.png",
+    "ar-occasions-desktop.png",
+    "ar-occasions-mobile.png",
+    "ar-gifts-desktop.png",
+    "ar-booking-desktop.png",
+    "ar-booking-mobile.png",
+    "ar-account-desktop.png",
+    "ar-account-mobile.png",
+    "ar-petals-desktop.png",
+    "ar-petals-mobile.png",
+    "ar-reviews-desktop.png",
+    "ar-reviews-mobile.png",
+    "ar-policies-desktop.png",
+    "ar-privacy-desktop.png",
+    "ar-terms-desktop.png",
+    "ar-contact-desktop.png",
+    "crop-atelier-hand.png",
+    "crop-atelier-coffin-deep.png",
+    "crop-atelier-matte-sage.png",
+    "crop-petals-flower.png",
+    "crop-gel-removal-photo.png",
+    "admin-overview-desktop.png"
+  ]
+}

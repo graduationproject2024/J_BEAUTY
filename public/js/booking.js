@@ -460,7 +460,7 @@ export function booking() {
             ${steps
               .map(
                 (label, idx) =>
-                  `<span class="${idx + 1 <= state.bookingStep ? 'current' : ''}">${idx + 1} · ${label}</span>`,
+                  `<span class="${idx + 1 <= state.bookingStep ? 'current' : ''} ${idx + 1 === state.bookingStep ? 'active-step' : ''}"><b>${idx + 1}</b><em>${label}</em></span>`,
               )
               .join('')}
           </div>
@@ -477,19 +477,21 @@ export function booking() {
                       ? stepFourDetailsHtml()
                       : stepFiveReviewHtml()
             }
-            <div class="form-actions">
+            <div class="form-actions ${state.bookingStep === 1 ? 'single-action' : ''}">
               ${
                 state.bookingStep > 1
                   ? `<button type="button" class="btn light" id="back-step">${t('السابق', 'Back')}</button>`
-                  : '<span></span>'
+                  : ''
               }
-              ${
-                state.bookingStep > 1
-                  ? `<button class="btn" type="submit">
-                       ${state.bookingStep === 5 ? t('تسجيل طلب الحجز', 'Submit appointment request') : t('متابعة', 'Continue')}
-                     </button>`
-                  : `<button class="btn" type="submit">${t('متابعة لاختيار الخدمة', 'Continue to rituals')}</button>`
-              }
+              <button class="btn form-next-btn" type="submit">
+                ${
+                  state.bookingStep === 5
+                    ? t('تسجيل طلب الحجز', 'Submit appointment request')
+                    : state.bookingStep > 1
+                      ? t('متابعة', 'Continue')
+                      : t('متابعة لاختيار الخدمة', 'Continue to rituals')
+                }
+              </button>
             </div>
           </form>
         </div>

@@ -1,13 +1,13 @@
-import { $, api, descOf, esc, href, minutes, money, nameOf, page, safeURL, state, t, toast } from './state.js';
+import { $, api, descOf, esc, href, minutes, money, nameOf, num, page, safeURL, state, t, toast } from './state.js';
 import { renderSignatureBloomSVG } from './motion.js';
 
 export function monogramSvg(cls = 'brand-mark') {
   return `<svg class="${cls}" viewBox="0 0 96 96" fill="none" aria-hidden="true">
-    <circle cx="48" cy="48" r="44" stroke="#D4AF7C" stroke-width="1.4"/>
-    <path d="M48 12C54 22 54 32 48 40C42 32 42 22 48 12Z" fill="#D9B7C0" fill-opacity="0.45" stroke="#503C45" stroke-width="1.2"/>
-    <path d="M18 36C27 34 36 39 40 46C31 48 22 44 18 36Z" fill="#A7B79F" fill-opacity="0.45" stroke="#503C45" stroke-width="1.2"/>
-    <path d="M78 36C69 34 60 39 56 46C65 48 74 44 78 36Z" fill="#A7B79F" fill-opacity="0.45" stroke="#503C45" stroke-width="1.2"/>
-    <path d="M53 34V61C53 70.5 46.5 76 38.5 76C32.5 76 28.5 72.5 28.5 68C28.5 64.5 31 62 34 62C36.8 62 38.5 64 38.5 66.2" stroke="#503C45" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="48" cy="48" r="44" stroke="#D4AF7C" stroke-width="1.6"/>
+    <path d="M48 12C54 22 54 32 48 40C42 32 42 22 48 12Z" fill="#D9B7C0" fill-opacity="0.45" stroke="currentColor" stroke-width="1.2"/>
+    <path d="M18 36C27 34 36 39 40 46C31 48 22 44 18 36Z" fill="#A7B79F" fill-opacity="0.45" stroke="currentColor" stroke-width="1.2"/>
+    <path d="M78 36C69 34 60 39 56 46C65 48 74 44 78 36Z" fill="#A7B79F" fill-opacity="0.45" stroke="currentColor" stroke-width="1.2"/>
+    <path d="M53 34V61C53 70.5 46.5 76 38.5 76C32.5 76 28.5 72.5 28.5 68C28.5 64.5 31 62 34 62C36.8 62 38.5 64 38.5 66.2" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
     <circle cx="53" cy="25" r="2.6" fill="#D4AF7C"/>
   </svg>`;
 }
@@ -56,7 +56,7 @@ export function header() {
           ${monogramSvg()}
           <span class="brand-wordmark">
             <strong>J SPA</strong>
-            <small>${t('سبا نسائي منزلي · المدينة', 'THE ART OF SLOW BEAUTY')}</small>
+            <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
           </span>
         </a>
         <nav class="nav" id="nav" aria-label="${t('التنقل الرئيسي', 'Main navigation')}">
@@ -108,7 +108,7 @@ export function footer() {
               ${monogramSvg()}
               <span class="brand-wordmark">
                 <strong>J SPA</strong>
-                <small>${t('سبا نسائي منزلي', 'HOME SPA · MADINAH')}</small>
+                <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
               </span>
             </a>
             <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلكِ.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
@@ -195,7 +195,7 @@ export function serviceArt(s, cls = '') {
 
   return `
     <div class="art ${cls}">
-      <img src="${esc(src)}" alt="${esc(nameOf(s))}" loading="lazy">
+      <img src="${esc(src)}" alt="${esc(nameOf(s))}" loading="eager" decoding="async">
       <span class="service-badge">${catLabel}</span>
     </div>
   `;
@@ -319,8 +319,8 @@ export function reviewsContent(reviews = [], fallbackAsTrust = false) {
   `;
 }
 
-export const petalBloomSVG = (filledCount = 4, totalPetals = 8) =>
-  renderSignatureBloomSVG(filledCount, totalPetals, false);
+export const petalBloomSVG = (filledCount = 4, totalPetals = 8, lightMode = false) =>
+  renderSignatureBloomSVG(filledCount, totalPetals, lightMode);
 
 export function statusBadge(s) {
   const map = {
@@ -507,7 +507,7 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
         ${t('تفاصيل تجربتكِ *', 'Your experience *')}
         <textarea name="body" id="review-body-input" required maxlength="2000" placeholder="${t('شاركينا رأيكِ في جودة الخدمة، اللباقة، وترتيب الزيارة...', 'Share your honest impression of service care and attention...')}">${esc(existing?.body || '')}</textarea>
       </label>
-      <p class="muted" style="font-size:12px">${t(
+      <p class="muted" style="font-size:13px">${t(
         'حفاظاً على خصوصيتكِ، يُرجى عدم إدراج رقم الجوال أو العنوان التفصيلي.',
         'For your privacy, please do not include phone numbers or home addresses.',
       )}</p>
@@ -655,5 +655,11 @@ export function confirmActionDialog(message, onConfirm) {
   };
 }
 
-export const field = (label, key, type = 'text', value = '', extra = '') =>
-  `<label class="field">${label}<input name="${key}" type="${type}" value="${esc(value)}" ${extra}></label>`;
+export const field = (label, key, type = 'text', value = '', extra = '') => {
+  const dirAttr = ['date', 'time'].includes(type)
+    ? 'dir="ltr" lang="en-GB"'
+    : ['tel', 'email'].includes(type) && !extra.includes('dir=')
+      ? 'dir="ltr"'
+      : '';
+  return `<label class="field">${label}<input name="${key}" type="${type}" value="${esc(value)}" ${dirAttr} ${extra}></label>`;
+};

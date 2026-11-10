@@ -1,4 +1,4 @@
-import { $, api, esc, href, minutes, money, nameOf, riyadhToday, state, t, toast } from './state.js';
+import { $, api, esc, href, minutes, money, nameOf, num, riyadhToday, state, t, toast } from './state.js';
 import { field, head, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
 
@@ -14,6 +14,20 @@ export function studioPage() {
     return rec.item?.image || `/assets/images/services/${rec.item?.id}.webp`;
   };
 
+  const moodOpts = [
+    ['unwind', t('استرخاء وتهدئة', 'Unwind & Massage')],
+    ['pamper', t('عناية متكاملة', 'Personal Pampering')],
+    ['nails', t('تجديد الأظافر', 'Nails & Gel')],
+    ['occasion', t('مناسبة خاصة', 'Special Occasion')],
+  ];
+  const timeOpts = [45, 75, 120, 180];
+  const budgetOpts = [150, 260, 380, 550];
+  const formatOpts = [
+    ['either', t('الأنسب لي', 'Show both')],
+    ['single', t('خدمة مفردة', 'Single ritual')],
+    ['package', t('باقة متكاملة', 'Curated package')],
+  ];
+
   return `
     <main id="main" class="wrap">
       ${head(
@@ -24,50 +38,66 @@ export function studioPage() {
       <div class="studio-layout split">
         <form id="studio-form" class="card studio-form-card">
           <span class="eyebrow">${t('تفضيلات الجلسة', 'PREFERENCES')}</span>
-          <label class="field">
-            ${t('١. ما نوع العناية التي ترغبين بها؟', '1. What kind of care would you like?')}
-            <select name="mood">
-              <option value="unwind" ${s.mood === 'unwind' ? 'selected' : ''}>${t('أرغب في الاسترخاء (مساج)', 'Unwind & Release (Massage)')}</option>
-              <option value="pamper" ${s.mood === 'pamper' ? 'selected' : ''}>${t('أبحث عن لحظة عناية خاصة (مساج + أظافر)', 'Personal Pampering (Massage + Nails)')}</option>
-              <option value="nails" ${s.mood === 'nails' ? 'selected' : ''}>${t('أرغب في تجديد إطلالة أظافري', 'Refresh My Nails (Nails & Gel)')}</option>
-              <option value="occasion" ${s.mood === 'occasion' ? 'selected' : ''}>${t('أستعد لمناسبة خاصة', 'Special Occasion Prep')}</option>
-            </select>
-          </label>
-          <div class="form-grid studio-compact-grid">
-            <label class="field">
-              ${t('٢. الوقت المتاح', '2. Available time')}
-              <select name="minutes_available">
-                <option value="45" ${s.minutes_available == 45 ? 'selected' : ''}>${t('حتى 45 دقيقة', 'Up to 45 min')}</option>
-                <option value="75" ${s.minutes_available == 75 ? 'selected' : ''}>${t('حتى 75 دقيقة', 'Up to 75 min')}</option>
-                <option value="120" ${s.minutes_available == 120 ? 'selected' : ''}>${t('حتى 120 دقيقة', 'Up to 120 min')}</option>
-                <option value="180" ${s.minutes_available == 180 ? 'selected' : ''}>${t('حتى 180 دقيقة', 'Up to 180 min')}</option>
-              </select>
-            </label>
-            <label class="field">
-              ${t('٣. الميزانية التقديرية', '3. Budget (SAR)')}
-              <select name="budget">
-                <option value="150" ${s.budget == 150 ? 'selected' : ''}>${t('حتى 150 ر.س', 'Up to 150 SAR')}</option>
-                <option value="260" ${s.budget == 260 ? 'selected' : ''}>${t('حتى 260 ر.س', 'Up to 260 SAR')}</option>
-                <option value="380" ${s.budget == 380 ? 'selected' : ''}>${t('حتى 380 ر.س', 'Up to 380 SAR')}</option>
-                <option value="550" ${s.budget == 550 ? 'selected' : ''}>${t('حتى 550 ر.س', 'Up to 550 SAR')}</option>
-              </select>
-            </label>
+          <input type="hidden" name="mood" value="${esc(s.mood)}">
+          <input type="hidden" name="minutes_available" value="${esc(s.minutes_available)}">
+          <input type="hidden" name="budget" value="${esc(s.budget)}">
+          <input type="hidden" name="format" value="${esc(s.format)}">
+
+          <div class="control-group">
+            <span class="control-label">${t('١. ما نوع العناية التي ترغبين بها؟', '1. What kind of care would you like?')}</span>
+            <div class="chip-row studio-chip-grid">
+              ${moodOpts
+                .map(
+                  ([val, label]) =>
+                    `<button type="button" class="mini-chip ${s.mood === val ? 'active' : ''}" data-studio-opt="mood" data-val="${val}">${label}</button>`,
+                )
+                .join('')}
+            </div>
           </div>
-          <label class="field">
-            ${t('٤. هل تفضلين خدمة مفردة أم باقة؟', '4. Single service or package?')}
-            <select name="format">
-              <option value="either" ${s.format === 'either' ? 'selected' : ''}>${t('اعرضي الأنسب لي', 'Show both options')}</option>
-              <option value="single" ${s.format === 'single' ? 'selected' : ''}>${t('خدمة مفردة', 'Single service')}</option>
-              <option value="package" ${s.format === 'package' ? 'selected' : ''}>${t('باقة متكاملة', 'Curated package')}</option>
-            </select>
-          </label>
-          <button class="btn" type="submit" style="width:100%">${t('اكتشفي الخدمات المناسبة لكِ', 'Discover suitable services')}</button>
+
+          <div class="control-group">
+            <span class="control-label">${t('٢. الوقت المتاح', '2. Available time')}</span>
+            <div class="chip-row">
+              ${timeOpts
+                .map(
+                  (m) =>
+                    `<button type="button" class="mini-chip ${Number(s.minutes_available) === m ? 'active' : ''}" data-studio-opt="minutes_available" data-val="${m}">${t(`حتى ${num(m)} دقيقة`, `Up to ${num(m)} min`)}</button>`,
+                )
+                .join('')}
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">${t('٣. الميزانية التقديرية', '3. Budget (SAR)')}</span>
+            <div class="chip-row">
+              ${budgetOpts
+                .map(
+                  (b) =>
+                    `<button type="button" class="mini-chip ${Number(s.budget) === b ? 'active' : ''}" data-studio-opt="budget" data-val="${b}">${t(`حتى ${money(b)}`, `Up to ${money(b)}`)}</button>`,
+                )
+                .join('')}
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">${t('٤. هل تفضلين خدمة مفردة أم باقة؟', '4. Single service or package?')}</span>
+            <div class="chip-row">
+              ${formatOpts
+                .map(
+                  ([val, label]) =>
+                    `<button type="button" class="mini-chip ${s.format === val ? 'active' : ''}" data-studio-opt="format" data-val="${val}">${label}</button>`,
+                )
+                .join('')}
+            </div>
+          </div>
+
+          <button class="btn" type="submit" style="width:100%">${t('تحديث الاقتراحات', 'Update tailored suggestions')}</button>
         </form>
 
         <div class="studio-results-col">
           <div class="row" style="margin-bottom:14px">
             <h2 style="margin:0;font-size:22px">${t('الاقتراحات المطابقة لقائمتنا', 'Catalog-Matched Suggestions')}</h2>
-            ${results.length ? `<span class="badge">${results.length} ${t('خيارات', 'matches')}</span>` : ''}
+            ${results.length ? `<span class="badge">${num(results.length)} ${t('خيارات', 'matches')}</span>` : ''}
           </div>
           ${
             results.length
@@ -104,7 +134,7 @@ export function studioPage() {
                     .join('')}
                 </div>`
               : `<div class="card empty-compact muted">
-                   <p style="margin-bottom:10px">${t('حدّدي اختياراتكِ ثم اضغطي على زر الاقتراح لمشاهدة الخيارات المطابقة بوضوح.', 'Select your preferences to preview matched services and packages with transparent timings and prices.')}</p>
+                   <p style="margin-bottom:10px">${t('جاري مطابقة خياراتكِ من كتالوج J SPA المعتمد…', 'Matching your preferences against verified J SPA services…')}</p>
                    <div class="hero-actions" style="gap:8px">
                      <a class="btn small light" href="${href('services')}">${t('تصفحي الخدمات (13)', 'Browse all services')}</a>
                      <a class="btn small light" href="${href('packages')}">${t('استعرضي الباقات', 'View packages')}</a>
@@ -262,66 +292,91 @@ export function groupBookingPage() {
         'Occasion coordination requests strictly require administrative approval and staff capacity review before confirmation.',
       )}</div>
       ${provisional()}
-      <form id="group-form" class="card content">
-        <div id="form-error" role="alert"></div>
-        <div class="form-grid">
-          ${field(t('اسم منسّقة المناسبة', 'Coordinator name'), 'organizer_name', 'text', g.organizer_name || state.user?.name || '', 'required')}
-          ${field(t('رقم الجوال السعودي', 'Saudi mobile'), 'organizer_phone', 'tel', g.organizer_phone || state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
-          ${field(t('التاريخ المفضل', 'Preferred date'), 'date', 'date', g.date, `required min="${riyadhToday()}"`)}
-          ${field(t('الوقت المفضل', 'Preferred time'), 'time', 'time', g.time, 'required')}
-        </div>
-        <label class="field">
-          ${t('الحي في المدينة المنورة', 'Madinah neighborhood')}
-          ${
-            s.areas?.length
-              ? `<select name="neighborhood" required><option value="">${t('اختاري الحي', 'Select')}</option>${s.areas.map((a) => `<option value="${esc(a)}" ${g.neighborhood === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>`
-              : `<input name="neighborhood" value="${esc(g.neighborhood)}" required>`
-          }
-        </label>
+      <form id="group-form" class="occasion-layout booking-layout">
+        <div class="card booking-main">
+          <div id="form-error" role="alert"></div>
+          <div class="form-grid">
+            ${field(t('اسم منسّقة المناسبة', 'Coordinator name'), 'organizer_name', 'text', g.organizer_name || state.user?.name || '', 'required')}
+            ${field(t('رقم الجوال السعودي', 'Saudi mobile'), 'organizer_phone', 'tel', g.organizer_phone || state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
+            ${field(t('التاريخ المفضل', 'Preferred date'), 'date', 'date', g.date || new Date(Date.parse(riyadhToday() + 'T12:00:00Z') + 86400000).toISOString().slice(0, 10), `required min="${riyadhToday()}"`)}
+            ${field(t('الوقت المفضل', 'Preferred time'), 'time', 'time', g.time, 'required')}
+          </div>
+          <label class="field">
+            ${t('الحي في المدينة المنورة', 'Madinah neighborhood')}
+            ${
+              s.areas?.length
+                ? `<select name="neighborhood" required><option value="">${t('اختاري الحي', 'Select')}</option>${s.areas.map((a) => `<option value="${esc(a)}" ${g.neighborhood === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>`
+                : `<input name="neighborhood" value="${esc(g.neighborhood)}" required>`
+            }
+          </label>
 
-        <h3>${t('المستفيدات والخدمات المطلوبة', 'Participants & Selected Services')}</h3>
-        ${g.participants
-          .map(
-            (p, idx) => `
-          <div class="card" style="background:var(--ivory);margin-bottom:14px">
-            <div class="row" style="margin-bottom:10px">
-              <strong>${t(`المستفيدة ${idx + 1}`, `Participant ${idx + 1}`)}</strong>
-              ${g.participants.length > 2 ? `<button type="button" class="btn small light" data-remove-guest="${idx}">${t('إزالة', 'Remove')}</button>` : ''}
+          <h3 style="margin-top:8px">${t('المستفيدات والخدمات المطلوبة', 'Participants & Selected Services')}</h3>
+          ${g.participants
+            .map(
+              (p, idx) => `
+            <div class="card occasion-guest-card">
+              <div class="row" style="margin-bottom:10px">
+                <strong>${t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`)}</strong>
+                ${g.participants.length > 2 ? `<button type="button" class="btn small light" data-remove-guest="${idx}">${t('إزالة', 'Remove')}</button>` : ''}
+              </div>
+              <label class="field">
+                ${t('الاسم أو الوصف', 'Name / Label')}
+                <input type="text" data-guest-label="${idx}" value="${esc(p.label)}" maxlength="60" required>
+              </label>
+              <div class="control-group" style="margin-bottom:0">
+                <span class="control-label">${t('اختاري خدمة أو أكثر', 'Choose services')}</span>
+                <div class="occasion-svc-grid" data-guest-services="${idx}">
+                  ${svcs
+                    .map((sv) => {
+                      const active = p.service_ids.includes(sv.id);
+                      return `
+                        <label class="occasion-svc-chip ${active ? 'is-selected' : ''}">
+                          <input type="checkbox" data-guest-svc="${idx}" value="${esc(sv.id)}" ${active ? 'checked' : ''}>
+                          <span>${esc(nameOf(sv))}</span>
+                          <small><bdi>${money(sv.price)}</bdi> · <bdi>${minutes(sv.duration)}</bdi></small>
+                        </label>
+                      `;
+                    })
+                    .join('')}
+                </div>
+              </div>
             </div>
-            <label class="field">
-              ${t('الاسم أو الوصف', 'Name / Label')}
-              <input type="text" data-guest-label="${idx}" value="${esc(p.label)}" maxlength="60" required>
-            </label>
-            <label class="field">
-              ${t('اختاري خدمة أو أكثر', 'Choose services')}
-              <select multiple size="4" data-guest-services="${idx}" required>
-                ${svcs
-                  .map(
-                    (sv) =>
-                      `<option value="${esc(sv.id)}" ${p.service_ids.includes(sv.id) ? 'selected' : ''}>${esc(nameOf(sv))} · <bdi>${money(sv.price)}</bdi> · <bdi>${minutes(sv.duration)}</bdi></option>`,
-                  )
-                  .join('')}
-              </select>
-            </label>
-          </div>
-        `,
-          )
-          .join('')}
+          `,
+            )
+            .join('')}
 
-        ${g.participants.length < 5 ? `<button type="button" class="btn small light" id="add-guest" style="margin-bottom:16px">+ ${t('إضافة مستفيدة', 'Add participant')}</button>` : ''}
+          ${g.participants.length < 5 ? `<button type="button" class="btn small light" id="add-guest" style="margin-bottom:16px">+ ${t('إضافة مستفيدة', 'Add participant')}</button>` : ''}
 
-        <div class="card" style="background:var(--sage-tint);margin-bottom:16px">
-          <div class="row">
-            <span>${t('المدة الإجمالية التقديرية:', 'Estimated total duration:')} <strong><bdi>${minutes(totalMin)}</bdi></strong></span>
-            <span>${t('الإجمالي التقديري:', 'Estimated total:')} <strong><bdi>${money(totalEst)}</bdi></strong></span>
-          </div>
+          <label class="check">
+            <input type="checkbox" name="terms" required>
+            <span>${t('أوافق على السياسات وأفهم أن طلب المناسبة ينتظر موافقة الإدارة وتوفر المختصات.', 'I accept the terms and understand occasion bookings require admin approval.')}</span>
+          </label>
+          <button type="submit" class="btn" style="width:100%">${t('إرسال طلب تنسيق المناسبة', 'Submit Occasion Request')}</button>
         </div>
 
-        <label class="check">
-          <input type="checkbox" name="terms" required>
-          <span>${t('أوافق على السياسات وأفهم أن طلب المناسبة ينتظر موافقة الإدارة وتوفر المختصات.', 'I accept the terms and understand occasion bookings require admin approval.')}</span>
-        </label>
-        <button type="submit" class="btn">${t('إرسال طلب تنسيق المناسبة', 'Submit Occasion Request')}</button>
+        <aside class="summary occasion-summary">
+          <span class="eyebrow" style="margin-bottom:8px">${t('ملخص المناسبة التقديري', 'ESTIMATED OCCASION SUMMARY')}</span>
+          <h3>${num(g.participants.length)} ${t('مستفيدات', 'Participants')}</h3>
+          ${g.participants
+            .map((p, idx) => {
+              const pSvcs = p.service_ids.map((id) => svcs.find((x) => x.id === id)).filter(Boolean);
+              const subTotal = pSvcs.reduce((a, b) => a + Number(b.price || 0), 0);
+              return `<div class="summary-line"><span>${esc(p.label || t(`المستفيدة ${num(idx + 1)}`, `Guest ${num(idx + 1)}`))}</span><span>${money(subTotal)}</span></div>`;
+            })
+            .join('')}
+          <div class="summary-line">
+            <span>${t('المدة الإجمالية التقديرية', 'Estimated duration')}</span>
+            <strong><bdi>${minutes(totalMin)}</bdi></strong>
+          </div>
+          <div class="summary-line summary-total">
+            <span>${t('الإجمالي التقديري', 'Estimated total')}</span>
+            <span><bdi>${money(totalEst)}</bdi></span>
+          </div>
+          <p class="muted" style="margin-top:12px;margin-bottom:0">${t(
+            'يتطلب تأكيد طلبات المناسبات مراجعة السعة وعدد المختصات يدوياً عبر واتساب.',
+            'Team capacity and specialist allocation are confirmed manually via WhatsApp.',
+          )}</p>
+        </aside>
       </form>
     </main>
   `;
@@ -391,6 +446,36 @@ export function giftsPage() {
 }
 
 export function bindExperiences(renderFn) {
+  async function runStudioRecommend(submitBtn) {
+    try {
+      const r = await api('/studio/recommend', state.studio);
+      state.studio.results = r.recommendations || [];
+      state.studio._autoLoaded = true;
+      renderFn();
+    } catch (err) {
+      toast(err.message);
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  }
+
+  // Populate initial recommendations automatically upon visiting /studio so no empty box appears
+  if ($('#studio-form') && !state.studio._autoLoaded && !state.studio.results.length) {
+    state.studio._autoLoaded = true;
+    runStudioRecommend();
+  }
+
+  document.querySelectorAll('[data-studio-opt]').forEach((btn) => {
+    btn.onclick = () => {
+      const key = btn.dataset.studioOpt;
+      const val = btn.dataset.val;
+      state.studio[key] = ['minutes_available', 'budget'].includes(key) ? Number(val) : val;
+      const hidden = document.querySelector(`#studio-form [name="${key}"]`);
+      if (hidden) hidden.value = val;
+      document.querySelectorAll(`[data-studio-opt="${key}"]`).forEach((x) => x.classList.toggle('active', x === btn));
+      runStudioRecommend();
+    };
+  });
+
   $('#studio-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));
@@ -401,15 +486,8 @@ export function bindExperiences(renderFn) {
       budget: Number(d.budget),
       format: d.format,
     };
-    e.submitter.disabled = true;
-    try {
-      const r = await api('/studio/recommend', state.studio);
-      state.studio.results = r.recommendations;
-      renderFn();
-    } catch (err) {
-      toast(err.message);
-      e.submitter.disabled = false;
-    }
+    if (e.submitter) e.submitter.disabled = true;
+    await runStudioRecommend(e.submitter);
   });
 
   document.querySelectorAll('[data-lookbook-filter]').forEach((b) => {
@@ -427,9 +505,9 @@ export function bindExperiences(renderFn) {
     }
     state.groupDraft.participants.forEach((p, idx) => {
       const lbl = f.querySelector(`[data-guest-label="${idx}"]`);
-      const sel = f.querySelector(`[data-guest-services="${idx}"]`);
+      const boxes = [...f.querySelectorAll(`[data-guest-svc="${idx}"]`)];
       if (lbl) p.label = lbl.value;
-      if (sel) p.service_ids = [...sel.selectedOptions].map((o) => o.value);
+      if (boxes.length) p.service_ids = boxes.filter((b) => b.checked).map((b) => b.value);
     });
   };
 
@@ -455,8 +533,8 @@ export function bindExperiences(renderFn) {
     };
   });
 
-  document.querySelectorAll('[data-guest-services]').forEach((sel) => {
-    sel.onchange = () => {
+  document.querySelectorAll('[data-guest-svc]').forEach((chk) => {
+    chk.onchange = () => {
       syncGroupDraft();
       renderFn();
     };

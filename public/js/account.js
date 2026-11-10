@@ -5,6 +5,7 @@ import {
   href,
   money,
   nameOf,
+  num,
   page,
   refreshSession,
   state,
@@ -31,70 +32,90 @@ export function auth(mode = 'login') {
 
   return `
     <main id="main" class="wrap">
-      <div class="auth">
-        <span class="eyebrow">J SPA · ${t('جواز جمالكِ الخاص', 'BEAUTY PASSPORT')}</span>
-        <h1 tabindex="-1">${
-          mode === 'register'
-            ? t('إنشاء حساب عميلة', 'Create your account')
-            : mode === 'reset'
-              ? t('تعيين كلمة مرور جديدة', 'Set a fresh password')
-              : t('تسجيل الدخول', 'Welcome back')
-        }</h1>
-        <p class="muted">${t('تابعي مواعيدكِ، تصاميم الأظافر، وبتلات نادي J من مكان واحد.', 'Manage appointments, saved Nail Atelier looks, and J Petals rewards in one calm journal.')}</p>
-        <form id="auth-form" data-mode="${mode}">
-          <div id="form-error" role="alert"></div>
-          ${mode === 'register' ? field(t('الاسم', 'Name'), 'name', 'text', '', 'required autocomplete="name"') : ''}
-          ${
-            mode !== 'reset'
-              ? field(
-                  t('رقم الجوال السعودي', 'Saudi mobile number'),
-                  'phone',
-                  'tel',
-                  '',
-                  'required inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx"',
-                )
-              : field(
-                  t('رمز الاستعادة من الفريق', 'Recovery token from staff'),
-                  'token',
-                  'text',
-                  tokenVal,
-                  'required',
-                )
-          }
-          ${field(
-            t('كلمة المرور (12 حرفاً على الأقل)', 'Password (min 12 characters)'),
-            'password',
-            'password',
-            '',
-            `required minlength="12" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}"`,
-          )}
-          ${
+      <div class="auth-shell">
+        <div class="auth">
+          <span class="eyebrow">J SPA · ${t('جواز جمالكِ الخاص', 'BEAUTY PASSPORT')}</span>
+          <h1 tabindex="-1">${
             mode === 'register'
-              ? `${field(t('تأكيد كلمة المرور', 'Confirm password'), 'passwordConfirmation', 'password', '', 'required minlength="12" autocomplete="new-password"')}
-                 <label class="check">
-                   <input type="checkbox" name="terms" required>
-                   <span>${t('أوافق على الشروط وسياسة الخصوصية.', 'I agree to the terms and privacy notice.')} <a class="text-link" href="${href('terms')}">${t('اقرئي الشروط', 'Read terms')}</a></span>
-                 </label>`
-              : ''
-          }
-          <button class="btn" type="submit" style="width:100%">
+              ? t('إنشاء حساب عميلة', 'Create your account')
+              : mode === 'reset'
+                ? t('تعيين كلمة مرور جديدة', 'Set a fresh password')
+                : t('تسجيل الدخول', 'Welcome back')
+          }</h1>
+          <p class="muted">${t('تابعي مواعيدكِ، تصاميم الأظافر، وبتلات نادي J من مكان واحد.', 'Manage appointments, saved Nail Atelier looks, and J Petals rewards in one calm journal.')}</p>
+          <form id="auth-form" data-mode="${mode}">
+            <div id="form-error" role="alert"></div>
+            ${mode === 'register' ? field(t('الاسم', 'Name'), 'name', 'text', '', 'required autocomplete="name"') : ''}
+            ${
+              mode !== 'reset'
+                ? field(
+                    t('رقم الجوال السعودي', 'Saudi mobile number'),
+                    'phone',
+                    'tel',
+                    '',
+                    'required inputmode="tel" autocomplete="tel" placeholder="05xxxxxxxx"',
+                  )
+                : field(
+                    t('رمز الاستعادة من الفريق', 'Recovery token from staff'),
+                    'token',
+                    'text',
+                    tokenVal,
+                    'required',
+                  )
+            }
+            ${field(
+              t('كلمة المرور (12 حرفاً على الأقل)', 'Password (min 12 characters)'),
+              'password',
+              'password',
+              '',
+              `required minlength="12" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}"`,
+            )}
             ${
               mode === 'register'
-                ? t('إنشاء الحساب', 'Create account')
-                : mode === 'reset'
-                  ? t('حفظ كلمة المرور', 'Save password')
-                  : t('تسجيل الدخول', 'Sign in')
+                ? `${field(t('تأكيد كلمة المرور', 'Confirm password'), 'passwordConfirmation', 'password', '', 'required minlength="12" autocomplete="new-password"')}
+                   <label class="check">
+                     <input type="checkbox" name="terms" required>
+                     <span>${t('أوافق على الشروط وسياسة الخصوصية.', 'I agree to the terms and privacy notice.')} <a class="text-link" href="${href('terms')}">${t('اقرئي الشروط', 'Read terms')}</a></span>
+                   </label>`
+                : ''
             }
-          </button>
-        </form>
-        <div class="muted" style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
-          ${
-            mode === 'login'
-              ? `<a class="text-link" style="width:fit-content" href="${href('register')}">${t('جديدة هنا؟ أنشئي حساباً', 'New here? Create an account')}</a>
-                 <a href="${href('recovery')}">${t('نسيتِ كلمة المرور؟', 'Forgot your password?')}</a>`
-              : `<a class="text-link" style="width:fit-content" href="${href('login')}">${t('لديكِ حساب؟ سجلي الدخول', 'Already registered? Sign in')}</a>`
-          }
+            <button class="btn" type="submit" style="width:100%">
+              ${
+                mode === 'register'
+                  ? t('إنشاء الحساب', 'Create account')
+                  : mode === 'reset'
+                    ? t('حفظ كلمة المرور', 'Save password')
+                    : t('تسجيل الدخول', 'Sign in')
+              }
+            </button>
+          </form>
+          <div class="auth-links muted">
+            ${
+              mode === 'login'
+                ? `<a class="text-link" href="${href('register')}">${t('جديدة هنا؟ أنشئي حساباً', 'New here? Create an account')}</a>
+                   <a class="text-link auth-secondary-link" href="${href('recovery')}">${t('نسيتِ كلمة المرور؟', 'Forgot your password?')}</a>`
+                : `<a class="text-link" href="${href('login')}">${t('لديكِ حساب؟ سجلي الدخول', 'Already registered? Sign in')}</a>`
+            }
+          </div>
         </div>
+
+        <aside class="auth-aside card">
+          <span class="eyebrow">${t('مزايا جواز الجمال', 'PASSPORT PRIVILEGES')}</span>
+          <h2>${t('ملف عناية شخصي في راحة بيتكِ', 'Your private home ritual journal')}</h2>
+          <p class="muted">${t(
+            'صُمم جواز الجمال ليحفظ ذوقكِ في العناية وتصاميم الأظافر ويمنحكِ متابعة شفافة لزياراتكِ دون رسائل تسويقية مزعجة.',
+            'Your Beauty Passport keeps your nail looks, preferred care rituals, and verified J Petals balance in one discreet space.',
+          )}</p>
+          <ul class="inclusion-list">
+            <li>${t('حفظ تصاميم أتيليه J للأظافر وإعادة طلبها بنقرة', 'Save custom J Nail Atelier designs for effortless rebooking')}</li>
+            <li>${t('متابعة رصيد بتلات J بعد اكتمال الخدمة والدفع', 'Track genuine J Petals earned after staff-verified completed visits')}</li>
+            <li>${t('توثيق شخصي لملكية الجوال عبر واتساب بدون رسائل OTP مدفوعة', 'Personal WhatsApp number confirmation without third-party SMS fees')}</li>
+            <li>${t('إدارة مفضلة الخدمات وتفضيلات الزيارة المنزلية بالمدينة المنورة', 'Bookmark preferred rituals and Madinah neighborhood notes')}</li>
+          </ul>
+          <div class="hero-actions" style="margin-top:20px">
+            <a class="btn small light" href="${href('booking')}">${t('أو المتابعة كزائرة لطلب موعد', 'Or continue as a guest')}</a>
+          </div>
+        </aside>
       </div>
     </main>
   `;
@@ -137,15 +158,31 @@ export function petalsContent() {
       { id: 'petal-500', points: 500, value: 30 },
     ];
   const verified = !!state.user?.verified;
-  const balance = verified && state.account ? Number(state.account.balance || 0) : 0;
-  const nextReward = rewards.find((r) => r.points > balance) || rewards[rewards.length - 1] || { points: 500 };
-  const progressRatio = verified && state.account ? Math.min(1, balance / Math.max(1, nextReward.points)) : 0.45;
-  const filledPetals = verified && state.account ? Math.round(progressRatio * 8) : 4;
+  const hasLive = Boolean(state.account && verified);
+  const balance = hasLive ? Number(state.account.balance || 0) : 0;
+  const displayPts = hasLive ? balance : state.user ? 0 : 250;
+  const nextReward = rewards.find((r) => r.points > displayPts) || rewards[rewards.length - 1] || { points: 500, value: 30 };
+  const maxTier = Math.max(500, Number(rewards[rewards.length - 1]?.points || 500));
+  const fillPct = Math.max(4, Math.min(100, Math.round((displayPts / maxTier) * 100)));
+  const filledPetals = Math.round((displayPts / maxTier) * 8);
+  const firstRewardPts = Number(rewards[0]?.points || 200);
+  const firstRewardVal = Number(rewards[0]?.value || 10);
+  const firstTickPct = Math.round((firstRewardPts / maxTier) * 100);
+  const tierName =
+    displayPts >= maxTier
+      ? t('إزهار مكتمل متألق', 'Full Luminous Bloom')
+      : displayPts >= firstRewardPts
+        ? t('إزهار الورد الجوري', 'Damask Rose Bloom')
+        : t('بداية تفتح البراعم', 'Opening Rosebud');
+  const tierLatin =
+    displayPts >= firstRewardPts
+      ? `Rosa damascena · ${t('المستوى الثاني', 'Tier II')}`
+      : `Rosa centifolia · ${t('المستوى الأول', 'Tier I')}`;
 
   return `
-    <div class="loyalty-band" style="margin-bottom:28px">
-      <div>
-        <span class="eyebrow">J PETALS CLUB</span>
+    <div class="loyalty-band is-petals-hero" style="margin-bottom:28px">
+      <div class="loyalty-copy-col">
+        <span class="eyebrow">${t('نادي بتلات J', 'J PETALS CLUB')}</span>
         <h2>${t('نادي بتلات J', 'J Petals Club')}</h2>
         <p>${t(
           'نكافئ لحظات عنايتكِ. تُحتسب 1 بتلة افتراضياً لكل 1 ر.س مدفوعة فعلياً بعد خصوماتكِ وتُضاف تلقائياً بمجرد اكتمال الزيارة وتأكيد الدفع من الموظفة لحسابكِ الموثق.',
@@ -159,25 +196,40 @@ export function petalsContent() {
               )}</div>`
             : ''
         }
+        ${!state.user ? `<div style="margin-top:18px"><a class="btn rose" href="${href('register')}">${t('انضمي للنادي الآن', 'Join J Petals Club')}</a></div>` : ''}
       </div>
-      <div class="loyalty-card">
-        <span class="eyebrow" style="margin-bottom:4px">${t('رصيد البتلات الحالي', 'YOUR PETAL BALANCE')}</span>
-        <div class="petal-arc-wrap">
-          ${petalBloomSVG(filledPetals, 8)}
-          <div class="loyalty-balance-num">${state.account && verified ? balance.toLocaleString() : '—'}</div>
-          <p class="muted" style="color:#E0D3D8">
+      <div class="loyalty-gallery-card is-ivory-card">
+        <div class="loyalty-showcase-meta">
+          <span class="eyebrow">${t('الورد المديني الأرشيفي · المستوى الحالي', 'ARCHIVE BOTANICAL · CURRENT TIER')}</span>
+          <div class="loyalty-balance-num">${num(displayPts)}</div>
+          <p class="loyalty-balance-sub">${tierName}</p>
+          <p class="loyalty-latin-sub" dir="ltr">${esc(tierLatin)}</p>
+          <p class="loyalty-next-copy">
             ${
-              state.account && verified
+              hasLive
                 ? balance >= nextReward.points
-                  ? t('مؤهلة لطلب المكافأة المتاحة الآن!', 'Eligible for an available reward!')
-                  : t(`متبقٍ ${nextReward.points - balance} بتلة للمكافأة التالية`, `${nextReward.points - balance} petals until next reward`)
+                  ? t('مؤهلة لطلب المكافأة المتاحة الآن!', 'Eligible for an available reward right now!')
+                  : t(`متبقٍ ${num(nextReward.points - balance)} بتلة للمكافأة التالية`, `${num(nextReward.points - balance)} petals until next reward`)
                 : state.user
                   ? t('وثّقي رقم جوالكِ لعرض رصيدكِ الفعلي.', 'Verify your phone number to view your live balance.')
-                  : t('عرض توضيحي — سجلي الدخول لمشاهدة رصيدكِ الفعلي.', 'Illustrative preview — sign in to see your live balance.')
+                  : t('عرض توضيحي (250 بتلة) — كل 1 ر.س مدفوع وموثق = 1 بتلة حقيقية', 'Illustrative preview (250 Petals) — 1 verified paid SAR = 1 Petal')
             }
           </p>
+          <div class="petal-progress-wrap" aria-label="${t('مسار التقدم للمكافآت', 'Reward progress')}">
+            <div class="petal-progress-track">
+              <div class="petal-progress-fill" style="width:${fillPct}%"></div>
+              <span class="petal-progress-tick" style="inset-inline-start:${firstTickPct}%" aria-hidden="true"></span>
+            </div>
+            <div class="petal-milestone-row">
+              <span>${num(0)}</span>
+              <span>${num(firstRewardPts)} (${money(firstRewardVal)})</span>
+              <span>${num(maxTier)} (${money(rewards[rewards.length - 1]?.value || 30)})</span>
+            </div>
+          </div>
         </div>
-        ${!state.user ? `<a class="btn rose" style="width:100%" href="${href('register')}">${t('انضمي للنادي الآن', 'Join J Petals Club')}</a>` : ''}
+        <div class="loyalty-cameo-slot">
+          ${petalBloomSVG(filledPetals, 8, true)}
+        </div>
       </div>
     </div>
 
@@ -186,11 +238,11 @@ export function petalsContent() {
         .map(
           (r) => `
         <article class="card">
-          <span class="eyebrow">${r.points} ${t('بتلة', 'PETALS')}</span>
+          <span class="eyebrow">${num(r.points)} ${t('بتلة', 'PETALS')}</span>
           <h3>${t('مكافأة خصم بقيمة', 'Reward discount of')} ${money(r.value)}</h3>
           <p class="muted">${t('تُراجع من الفريق وتُطبق على حجزكِ المؤهل غير المدفوع.', 'Reviewed by staff and applied to an eligible unpaid booking.')}</p>
           ${
-            state.account && verified
+            hasLive
               ? `<button class="btn small light" data-reward="${esc(r.id)}" ${balance < r.points ? 'disabled' : ''} type="button">${t('طلب استبدال المكافأة', 'Request reward')}</button>`
               : ''
           }
@@ -238,7 +290,7 @@ function passportJournalSection() {
                   <div class="row" style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm)">
                     <div>
                       <strong>${esc(nameOf(s))}</strong>
-                      <div class="muted" style="font-size:12px">${money(s.price)}</div>
+                      <div class="muted" style="font-size:13px">${money(s.price)}</div>
                     </div>
                     <div style="display:flex;gap:6px">
                       <a class="btn small" href="${href('booking')}?service=${esc(s.id)}">${t('حجز', 'Book')}</a>
@@ -269,7 +321,7 @@ function passportJournalSection() {
                       <span class="swatch-mini" style="background:${esc(st.polish_color)}"></span>
                       <div>
                         <strong>${esc(st.name)}</strong>
-                        <div class="muted" style="font-size:12px">${esc(st.shape)} · ${esc(st.finish)}</div>
+                        <div class="muted" style="font-size:13px">${esc(st.shape)} · ${esc(st.finish)}</div>
                       </div>
                     </div>
                     <div style="display:flex;gap:6px">

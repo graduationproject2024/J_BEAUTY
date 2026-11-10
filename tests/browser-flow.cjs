@@ -152,10 +152,11 @@ let browser;
   await guest.screenshot({ path: join(out, 'reviews-unauthenticated-mobile.png'), fullPage: true });
   await guest.locator('#close-dialog').click();
 
-  // Mobile Nail Atelier close-up inspection
+  // Mobile Nail Atelier close-up inspection (photographic canvas studio compositor)
   await guest.goto(base + '/ar/atelier');
   await guest.locator('[data-at-shape="oval"]').click();
   await guest.locator('[data-at-finish="gloss"]').click();
+  await guest.waitForTimeout(250);
   await guest.screenshot({ path: join(out, 'nail-atelier-mobile.png'), fullPage: false });
 
   await customer.goto(base + '/en/register');
@@ -184,28 +185,39 @@ let browser;
   await customer.getByText('No Completed Visit Available Yet').waitFor();
   await customer.locator('#close-dialog').click();
 
-  // Customer tests J Nail Atelier oval customization, Save to Passport & Studio recommendations
+  // Customer tests J Nail Atelier oval + coffin + deep tone customization, Save to Passport & live Studio recommendations
   await customer.goto(base + '/en/atelier');
   await customer.locator('#at-name').fill('Oval Blush Pearls');
-  await customer.locator('[data-at-shape="oval"]').click();
+  await customer.locator('[data-at-skin="deep"]').click();
+  await customer.locator('[data-at-shape="coffin"]').click();
+  await customer.locator('[data-at-len="long"]').click();
   await customer.locator('[data-at-finish="pearl"]').click();
   await customer.locator('[data-at-accent="gold_foil"]').click();
+  await customer.waitForTimeout(250);
+  const atelierDrawn = await customer.evaluate(() => {
+    const c = document.querySelector('.atelier-hand-canvas');
+    if (!c) return false;
+    const p = c.getContext('2d').getImageData(360, 360, 1, 1).data;
+    return p[3] > 200;
+  });
+  assert.ok(atelierDrawn, 'Photographic Atelier canvas must paint real hand pixels');
   await customer.locator('#at-save-look').click();
   await customer.getByText('Style saved to your Beauty Passport').waitFor();
   await customer.screenshot({ path: join(out, 'nail-atelier-desktop.png'), fullPage: true });
 
   await customer.goto(base + '/en/studio');
-  await customer.locator('#studio-form [name="mood"]').selectOption('pamper');
-  await customer.locator('#studio-form button[type=submit]').click();
+  await customer.getByText('Book this option').first().waitFor();
+  await customer.locator('[data-studio-opt="mood"][data-val="pamper"]').click();
   await customer.getByText('Book this option').first().waitFor();
   await customer.screenshot({ path: join(out, 'ritual-studio-desktop.png'), fullPage: true });
 
-  // Verify legacy /en/group-booking redirects cleanly to /en/occasions
+  // Verify legacy /en/group-booking redirects cleanly to /en/occasions + checkbox pills update summary
   await customer.goto(base + '/en/group-booking');
   await customer.waitForURL('**/en/occasions');
   await customer.locator('#group-form [name=date]').fill(new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10));
   await customer.locator('#group-form [name=time]').fill('16:00');
   await customer.locator('#group-form [name=neighborhood]').selectOption({ label: 'Test district' });
+  await customer.locator('[data-guest-svc="0"][value="french-gel"]').check();
   await customer.locator('#group-form [name=terms]').check();
   await customer.locator('#group-form button[type=submit]').click();
   await customer.getByText('Awaiting Admin Approval & Capacity Review').waitFor();
@@ -307,6 +319,18 @@ let browser;
 
   await customer.goto(base + '/en/rewards');
   await customer.locator('.loyalty-balance-num', { hasText: '250' }).waitFor();
+  await customer.evaluate(() =>
+    Promise.all(
+      [...document.images].map((img) =>
+        img.complete
+          ? img.decode().catch(() => {})
+          : new Promise((resolve) => {
+              img.addEventListener('load', () => img.decode().catch(() => {}).then(resolve), { once: true });
+              img.addEventListener('error', resolve, { once: true });
+            }),
+      ),
+    ),
+  );
   await customer.screenshot({ path: join(out, 'customer-loyalty-desktop.png'), fullPage: true });
 
   await owner.locator('[data-admin-tab="bookings"]').click();

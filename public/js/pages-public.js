@@ -1,4 +1,4 @@
-import { $, api, descOf, esc, href, minutes, money, nameOf, state, t, toast } from './state.js';
+import { $, api, descOf, esc, href, minutes, money, nameOf, num, state, t, toast } from './state.js';
 import {
   head,
   icon,
@@ -194,8 +194,8 @@ export function home() {
 
         <!-- 6. J Petals Club -->
         <section class="loyalty-band" data-reveal style="margin-block:48px">
-          <div>
-            <span class="eyebrow">J PETALS CLUB</span>
+          <div class="loyalty-copy-col">
+            <span class="eyebrow">${t('نادي بتلات J', 'J PETALS CLUB')}</span>
             <h2>${t('نادي بتلات J… كل زيارة تزهر مكافأة', 'J Petals Club. Care that blooms.')}</h2>
             <p>${t(
               'تُمنح البتلات حصرياً وفق القواعد المعتمدة بعد اكتمال الخدمة والتحقق من الدفع وتوثيق ملكية حسابكِ. لا تُضاف نقاط قبل الدفع الفعلي.',
@@ -206,12 +206,27 @@ export function home() {
               <a class="text-link" href="${href('gifts')}">${t('أهدي تجربة سبا', 'Gift a Ritual')}</a>
             </div>
           </div>
-          <div class="loyalty-card">
-            <span class="eyebrow" style="margin-bottom:4px">${t('مثال توضيحي للبرنامج', 'PROGRAM PREVIEW')}</span>
-            <div class="petal-arc-wrap">
-              ${petalBloomSVG(5, 8)}
-              <div class="loyalty-balance-num">${t('١ ر.س = ١ بتلة', '1 SAR = 1 Petal')}</div>
-              <p class="muted" style="color:#D8C8CE">${t('200 بتلة = خصم 10 ر.س · 500 بتلة = خصم 30 ر.س', '200 petals = 10 SAR · 500 petals = 30 SAR')}</p>
+          <div class="loyalty-card loyalty-gallery-card">
+            <div class="loyalty-showcase-meta">
+              <span class="eyebrow">${t('مثال توضيحي للبرنامج', 'PROGRAM PREVIEW')}</span>
+              <div class="loyalty-balance-num">${num(250)}</div>
+              <p class="loyalty-balance-sub">${t('بتلة مكتسبة ومعتمدة', 'earned & verified petals')}</p>
+              <p class="loyalty-next-copy">${t(`متبقي ${num(250)} بتلة للمكافأة الثانية (${money(30)})`, `${num(250)} petals away from ${money(30)} reward`)}</p>
+              <div class="petal-progress-wrap" aria-label="${t('مسار التقدم للمكافآت', 'Reward progress')}">
+                <div class="petal-progress-track">
+                  <div class="petal-progress-fill" style="width:50%"></div>
+                  <span class="petal-progress-tick" style="inset-inline-start:40%" aria-hidden="true"></span>
+                </div>
+                <div class="petal-milestone-row">
+                  <span>${num(0)}</span>
+                  <span>${num(200)} (${money(10)})</span>
+                  <span>${num(500)} (${money(30)})</span>
+                </div>
+              </div>
+              <p class="loyalty-rate-note">${t(`${num(1)} ر.س مدفوع وموثق = ${num(1)} بتلة حقيقية`, `${num(1)} verified paid SAR = ${num(1)} genuine Petal`)}</p>
+            </div>
+            <div class="loyalty-cameo-slot">
+              ${petalBloomSVG(5, 8, false)}
             </div>
           </div>
         </section>
@@ -266,7 +281,7 @@ export function services() {
         [[t('الرئيسية', 'Home'), 'home'], [t('الخدمات', 'Services'), '']],
       )}
       ${provisional()}
-      <div class="filter" role="tablist" aria-label="${t('تصنيف الخدمات', 'Service categories')}">
+      <div class="filter" role="group" aria-label="${t('تصنيف الخدمات', 'Service categories')}">
         ${[
           ['all', 'جميع الخدمات', 'All rituals'],
           ['massage', 'المساج', 'Massage'],
@@ -275,7 +290,7 @@ export function services() {
         ]
           .map(
             ([id, ar, en]) =>
-              `<button type="button" class="${state.filter === id ? 'active' : ''}" data-filter="${id}">${t(ar, en)} (${counts[id]})</button>`,
+              `<button type="button" class="${state.filter === id ? 'active' : ''}" aria-pressed="${state.filter === id ? 'true' : 'false'}" data-filter="${id}">${t(ar, en)} (${num(counts[id])})</button>`,
           )
           .join('')}
       </div>

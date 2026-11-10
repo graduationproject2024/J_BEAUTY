@@ -102,3 +102,19 @@ Branches:
 - **Implemented Fixes:** Complete Saudi MSA overhaul (`docs/localization/SAUDI-AR-COPY-AUDIT.md`), canonical **Occasion Experiences (`تنسيق جلسات المناسبات`)** at `/occasions` with `301` redirect from `/group-booking`, Wikimedia `CC BY 2.0` real photography for `gel-removal.webp` (`28.5 KB`), continuous dorsum anatomical Atelier hand (+ `Oval` shape & sticky mobile preview), asymmetric botanical Damascus Peony emblem, interactive `"قيّمي تجربتكِ معنا"` 5-star `radiogroup` workflow with `pending / approved / needs_edit` moderation & admin live tab reload, compact `01–04` Home Visit Timeline without unverified claims, and sticky Ritual Studio visual layout.
 - **Status:** Fixed & Verified Across Test Suites & Visual Screenshots.
 
+
+### 14. Complete Visual & Engineering Quality Recovery (`P0` / `P1` — `recover/j-spa-complete-quality`)
+- **Base Commit:** `6e9b29a`
+- **Root Causes Eliminated:**
+  1. Cartoon/synthetic SVG hand geometry in **J Nail Atelier** (`DEF-01`).
+  2. Generic boxy SVG flower cutout in **J Petals Club** (`DEF-02`).
+  3. Off-brand barcode skincare bottle on `gel-removal.webp` and copper-mirror obstruction on `colored-french.webp` (`DEF-03`).
+  4. Scroll-reveal `opacity: 0` visibility traps hiding below-fold homepage sections and 10 `/services` cards (`DEF-04`, `DEF-05`).
+  5. Critical `aria-required-children` failure on `/services` (`role="tablist"` without `role="tab"`), sub-`13px` helper labels (`27` elements on `/ar/services`, `11` on `/ar/` and `/en/`), and low-contrast `.loyalty-band .eyebrow` (`DEF-07`, `DEF-10`).
+  6. Unbalanced single-column `/occasions` with `<select multiple>` & empty Chromium garbled RTL date masks, isolated `/account` login island, hollow `<select>` `/studio` panel, broken 2+2+1 mobile booking stepper, left-pinned RTL Step 1 CTA, and `360px` header tightness (`DEF-06`–`DEF-10`).
+- **Implemented Remediation:**
+  - Replaced Atelier SVG hand with a `720×720` HTML5 `<canvas>` Photographic 2.5D Studio Compositor over `/assets/images/atelier-hand-base.webp` featuring cached melanin skin buffers (`fair`, `warm`, `olive`, `deep`), 5 shapes, 3 lengths, 10 shades, 5 French/ombré styles, split Steps 5 & 6 finishes/accents with pointer-reactive specular highlight, and C2 smooth tapers (`public/js/atelier.js`).
+  - Framed CC0 Pierre-Joseph Redouté archival botanical plates (`rose-bloom.webp`, Acc. `1943.138`; `rose-damascena.webp`, Acc. `1965.291`) inside `.petal-cameo` double oval mats across Dark Plum and Ivory panels with `0 · 200 · 500` progress bar and `40%` tick (`public/js/motion.js`, `public/js/components.js`, `public/js/pages-public.js`, `public/js/account.js`, `public/styles.css`).
+  - Regenerated cohesive sunlit travertine photography (`720×720` WebP) for `gel-removal.webp` (`97.2 KB`) and `colored-french.webp` (`61.5 KB`) (`docs/audits/IMAGE-QUALITY-AUDIT.md`).
+  - Eliminated `[data-reveal]` hidden traps, changed `/services` filter container to `role="group"` + `aria-pressed`, standardized `num(v)` Western Latin digits (`public/js/state.js`), rebuilt `/occasions` with 2-column `.occasion-layout` + `[data-guest-svc]` pills + editable default date, upgraded `/studio` to `[data-studio-opt]` pills + immediate suggestions, balanced `.auth-shell` on `/account`, fixed `.progress.five` + `.form-actions.single-action` on `/booking`, raised `.loyalty-band .eyebrow` to `#EED8B8`, and eliminated all `< 13px` public font sizes.
+- **Evidence & Independent Sign-Off:** See `docs/quality-recovery/{DESIGN-DECISIONS.md,VISUAL-QA.md,TEST-RESULTS.md,RELEASE-GATE.md}` (`integration.mjs` 22/22, `financial.mjs` 8/8, `security.mjs` 20/20, `browser-flow.cjs` PASS, `browser.cjs` 108/108, `@axe-core/playwright` 0 violations across 18 routes, `sub13pxCount: 0`, and Independent Visual Auditor `FINAL VERDICT: PASS`).

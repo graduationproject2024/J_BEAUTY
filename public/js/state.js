@@ -37,7 +37,7 @@ export const state = {
     length: 'medium',
     polish_color: '#F3DCE1',
     french_style: 'classic',
-    tip_color: '#FBF7F4',
+    tip_color: '#F5EFE8',
     finish: 'gloss',
     accent: 'none',
     skin: 'warm',
@@ -81,9 +81,10 @@ export const state = {
 export const t = (ar, en) => (state.lang === 'ar' ? ar : en);
 export const nameOf = (o) => o?.[`name_${state.lang}`] || o?.name || '';
 export const descOf = (o) => o?.[`description_${state.lang}`] || '';
-export const money = (v) =>
-  `${Number(v || 0).toLocaleString(state.lang === 'ar' ? 'ar-SA' : 'en-US')} ${t('ر.س', 'SAR')}`;
-export const minutes = (v) => `${v || 0} ${t('دقيقة', 'min')}`;
+export const num = (v) =>
+  Number(v || 0).toLocaleString(state.lang === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US');
+export const money = (v) => `${num(v)} ${t('ر.س', 'SAR')}`;
+export const minutes = (v) => `${num(v)} ${t('دقيقة', 'min')}`;
 export const href = (r = '') => `/${state.lang}/${r}`;
 
 export function page() {

@@ -7,27 +7,27 @@ export const NAIL_SHADES = [
   { id: 'warm-ivory', hex: '#F7EFE7', ar: 'عاجي حليبي', en: 'Milky Ivory' },
   { id: 'dusty-rose', hex: '#D9B7C0', ar: 'وردي ناعم', en: 'Dusty Rose' },
   { id: 'mauve-silk', hex: '#C49AA6', ar: 'موف حريري', en: 'Mauve Silk' },
-  { id: 'sage-mist', hex: '#A7B79F', ar: 'أخضر مريمية', en: 'Sage Mist' },
+  { id: 'burgundy-silk', hex: '#612136', ar: 'عنابي حريري', en: 'Burgundy Silk' },
+  { id: 'sage-mist', hex: '#89A17F', ar: 'أخضر مريمية', en: 'Sage Mist' },
   { id: 'caramel-nude', hex: '#D7B9A5', ar: 'نيود دافئ', en: 'Caramel Nude' },
   { id: 'rose-quartz', hex: '#E6BCC4', ar: 'كوارتز وردي', en: 'Rose Quartz' },
-  { id: 'deep-plum', hex: '#5E3B49', ar: 'برقوقي عميق', en: 'Deep Plum' },
-  { id: 'mocha-velvet', hex: '#7A5754', ar: 'موكا مخملي', en: 'Mocha Velvet' },
+  { id: 'deep-plum', hex: '#503C45', ar: 'برقوقي عميق', en: 'Deep Plum' },
   { id: 'champagne-gold', hex: '#DFC5A2', ar: 'شامبين ذهبي', en: 'Champagne Gold' },
 ];
 
 export const TIP_SHADES = [
-  { hex: '#FBF7F4', ar: 'عاجي كلاسيك', en: 'Classic Ivory' },
+  { hex: '#F5EFE8', ar: 'عاجي كلاسيك', en: 'Classic Ivory' },
   { hex: '#D9B7C0', ar: 'وردي ناعم', en: 'Dusty Pink' },
   { hex: '#607257', ar: 'مريمية داكن', en: 'Deep Sage' },
   { hex: '#D4AF7C', ar: 'ذهبي وردي', en: 'Rose Gold' },
-  { hex: '#503C45', ar: 'برقوقي', en: 'Deep Plum' },
+  { hex: '#612136', ar: 'عنابي عميق', en: 'Deep Burgundy' },
 ];
 
 export const SKIN_TONES = [
-  { id: 'fair', base: '#F4D7C8', mid: '#EAC4B1', shadow: '#D5A996', pocket: 'rgba(130, 82, 70, 0.20)', ar: 'فاتحة', en: 'Fair' },
-  { id: 'warm', base: '#E6BFA5', mid: '#D9AE91', shadow: '#C09172', pocket: 'rgba(115, 68, 52, 0.24)', ar: 'حنطية دافئة', en: 'Warm Sand' },
-  { id: 'olive', base: '#CFA180', mid: '#C1906D', shadow: '#A47555', pocket: 'rgba(92, 54, 40, 0.25)', ar: 'قمحية زيتونية', en: 'Olive' },
-  { id: 'deep', base: '#9B694E', mid: '#8C5B41', shadow: '#71442D', pocket: 'rgba(54, 28, 18, 0.30)', ar: 'سمراء غنية', en: 'Deep Rich' },
+  { id: 'fair', base: '#F4D7C8', ar: 'فاتحة', en: 'Fair' },
+  { id: 'warm', base: '#E4BD9F', ar: 'حنطية دافئة', en: 'Warm Sand' },
+  { id: 'olive', base: '#C79672', ar: 'قمحية زيتونية', en: 'Olive' },
+  { id: 'deep', base: '#7B513A', ar: 'سمراء غنية', en: 'Deep Rich' },
 ];
 
 const SHAPES = [
@@ -61,9 +61,167 @@ const FINISHES = [
 const ACCENTS = [
   ['none', 'طلاء صافٍ', 'Clean'],
   ['gold_foil', 'رقائق ذهب وردي', 'Rose Gold Foil'],
-  ['pearl_dot', 'نقطة لؤلؤ', 'Pearl Dot'],
-  ['floral_dot', 'لمسة زهرية ناعمة', 'Botanical Dot'],
+  ['pearl_dot', 'حبة لؤلؤ ناعمة', 'Pearl Cabochon'],
+  ['floral_dot', 'لمسة زهرية ناعمة', 'Botanical Blossom'],
 ];
+
+// Calibrated 5-digit anatomical nail bed anchors on `/assets/images/atelier-hand-base.webp` (720x720)
+const HAND_NAILS = [
+  { id: 'thumb', cx: 242, cy: 396, w: 34, h: 58, a: 2.48, skewX: 0.08, blur: 0 },
+  { id: 'index', cx: 414, cy: 464, w: 35, h: 61, a: 2.49, skewX: -0.04, blur: 0 },
+  { id: 'middle', cx: 484, cy: 462, w: 35.5, h: 62, a: 2.49, skewX: -0.03, blur: 0 },
+  { id: 'ring', cx: 513, cy: 404, w: 32.5, h: 58, a: 2.52, skewX: -0.04, blur: 0 },
+  { id: 'pinky', cx: 514, cy: 316, w: 26.5, h: 46, a: 2.45, skewX: -0.05, blur: 0.15 },
+];
+
+let handBasePromise = null;
+const skinCanvasCache = new Map();
+
+function loadStudioHandResources() {
+  if (!handBasePromise) {
+    handBasePromise = new Promise((resolve, reject) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = 720;
+        c.height = 720;
+        const g = c.getContext('2d');
+        g.drawImage(img, 0, 0, 720, 720);
+        const baseRaw = g.getImageData(0, 0, 720, 720).data;
+
+        // Feathered anatomical hand/wrist/forearm silhouette extending seamlessly to top-left frame corner
+        const mC = document.createElement('canvas');
+        mC.width = 720;
+        mC.height = 720;
+        const mg = mC.getContext('2d');
+        mg.fillStyle = '#000';
+        mg.fillRect(0, 0, 720, 720);
+        mg.filter = 'blur(10px)';
+        mg.fillStyle = '#fff';
+        mg.beginPath();
+        mg.moveTo(-12, -12);
+        mg.lineTo(58, -12);
+        mg.lineTo(124, 68);
+        mg.lineTo(188, 136);
+        mg.lineTo(285, 175);
+        mg.lineTo(415, 222);
+        mg.lineTo(522, 305);
+        mg.lineTo(542, 342);
+        mg.lineTo(516, 368);
+        mg.lineTo(540, 422);
+        mg.lineTo(514, 495);
+        mg.lineTo(445, 502);
+        mg.lineTo(395, 468);
+        mg.lineTo(340, 405);
+        mg.lineTo(272, 434);
+        mg.lineTo(212, 412);
+        mg.lineTo(112, 336);
+        mg.lineTo(48, 228);
+        mg.lineTo(-12, 195);
+        mg.closePath();
+        mg.fill();
+        mg.filter = 'none';
+        const maskData = mg.getImageData(0, 0, 720, 720).data;
+
+        skinCanvasCache.set('warm', c);
+        resolve({ baseCanvas: c, baseRaw, maskData });
+      };
+      img.onerror = reject;
+      img.src = '/assets/images/atelier-hand-base.webp';
+    }).catch(() => null);
+  }
+  return handBasePromise;
+}
+
+function applyMelaninCurve(r, g, b, toneId) {
+  if (toneId === 'fair') {
+    return [Math.min(255, r * 1.06 + 8), Math.min(255, g * 1.05 + 5), Math.min(255, b * 1.06 + 7)];
+  }
+  if (toneId === 'olive') {
+    return [
+      Math.min(255, Math.pow(r / 255, 1.18) * 246),
+      Math.min(255, Math.pow(g / 255, 1.22) * 238),
+      Math.min(255, Math.pow(b / 255, 1.28) * 222),
+    ];
+  }
+  // Natural espresso cocoa umber for 'deep'
+  const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  const darkCurve = Math.pow(luma, 1.72);
+  const nr = darkCurve * 240 * 0.94 + (r - luma * 255) * 0.42;
+  const ng = darkCurve * 222 * 0.90 + (g - luma * 255) * 0.42;
+  const nb = darkCurve * 204 * 0.86 + (b - luma * 255) * 0.42;
+  return [Math.max(0, Math.min(255, nr)), Math.max(0, Math.min(255, ng)), Math.max(0, Math.min(255, nb))];
+}
+
+function getSkinHandCanvas(resources, toneId) {
+  const tone = ['fair', 'warm', 'olive', 'deep'].includes(toneId) ? toneId : 'warm';
+  if (skinCanvasCache.has(tone)) return skinCanvasCache.get(tone);
+
+  const c = document.createElement('canvas');
+  c.width = 720;
+  c.height = 720;
+  const g = c.getContext('2d');
+  const imgData = new ImageData(new Uint8ClampedArray(resources.baseRaw), 720, 720);
+  const d = imgData.data;
+  const maskData = resources.maskData;
+
+  for (let i = 0; i < d.length; i += 4) {
+    const m = maskData[i] / 255;
+    if (m > 0.03) {
+      const r = d[i];
+      const gr = d[i + 1];
+      const bl = d[i + 2];
+      const neutralPaper = r - bl < 9 && r > 205;
+      const alpha = neutralPaper ? m * 0.15 : m;
+      const [nr, ng, nb] = applyMelaninCurve(r, gr, bl, tone);
+      d[i] = r + (nr - r) * alpha;
+      d[i + 1] = gr + (ng - gr) * alpha;
+      d[i + 2] = bl + (nb - bl) * alpha;
+    }
+  }
+  g.putImageData(imgData, 0, 0);
+  skinCanvasCache.set(tone, c);
+  return c;
+}
+
+function nailPath(ctx, w, bedH, ext, shape) {
+  const hw = w / 2;
+  const baseD = bedH * 0.44;
+  const shoulder = -bedH * 0.16;
+  const tipY = -bedH * 0.50 - ext;
+  ctx.beginPath();
+  ctx.moveTo(-hw, 0);
+  ctx.bezierCurveTo(-hw, baseD * 0.80, -hw * 0.62, baseD, 0, baseD);
+  ctx.bezierCurveTo(hw * 0.62, baseD, hw, baseD * 0.80, hw, 0);
+  ctx.lineTo(hw * 0.99, shoulder);
+
+  if (shape === 'almond') {
+    ctx.bezierCurveTo(hw * 0.96, tipY * 0.42, hw * 0.52, tipY * 0.94, 0, tipY * 1.05);
+    ctx.bezierCurveTo(-hw * 0.52, tipY * 0.94, -hw * 0.96, tipY * 0.42, -hw * 0.99, shoulder);
+  } else if (shape === 'coffin') {
+    const tw = hw * 0.56;
+    ctx.bezierCurveTo(hw * 0.90, shoulder + (tipY - shoulder) * 0.34, tw * 1.10, tipY * 0.85, tw * 1.02, tipY * 1.01);
+    ctx.quadraticCurveTo(tw, tipY * 1.05, tw * 0.80, tipY * 1.05);
+    ctx.lineTo(-tw * 0.80, tipY * 1.05);
+    ctx.quadraticCurveTo(-tw, tipY * 1.05, -tw * 1.02, tipY * 1.01);
+    ctx.bezierCurveTo(-tw * 1.10, tipY * 0.85, -hw * 0.90, shoulder + (tipY - shoulder) * 0.34, -hw * 0.99, shoulder);
+  } else if (shape === 'square') {
+    ctx.lineTo(hw * 0.96, tipY * 0.96);
+    ctx.quadraticCurveTo(0, tipY * 0.99, -hw * 0.96, tipY * 0.96);
+    ctx.lineTo(-hw * 0.99, shoulder);
+  } else if (shape === 'squoval' || shape === 'soft_square') {
+    ctx.lineTo(hw * 0.96, tipY * 0.78);
+    ctx.quadraticCurveTo(hw * 0.95, tipY * 1.01, hw * 0.48, tipY * 1.01);
+    ctx.lineTo(-hw * 0.48, tipY * 1.01);
+    ctx.quadraticCurveTo(-hw * 0.95, tipY * 1.01, -hw * 0.96, tipY * 0.78);
+    ctx.lineTo(-hw * 0.99, shoulder);
+  } else {
+    ctx.bezierCurveTo(hw * 0.98, tipY * 0.56, hw * 0.62, tipY * 1.00, 0, tipY * 1.04);
+    ctx.bezierCurveTo(-hw * 0.62, tipY * 1.00, -hw * 0.98, tipY * 0.56, -hw * 0.99, shoulder);
+  }
+  ctx.closePath();
+}
 
 export function recommendedServiceForStyle(cfg) {
   if (cfg.french_style === 'colored') return 'colored-french';
@@ -71,227 +229,261 @@ export function recommendedServiceForStyle(cfg) {
   return 'gel-polish';
 }
 
-function nailContour(cx, baseY, nailW, bedH, extH, shape) {
-  const half = nailW / 2;
-  const sideY = baseY - bedH * 0.62;
-  const freeY = baseY - bedH;
-  const topY = freeY - extH;
-  const s = shape === 'natural' ? 'oval' : shape || 'almond';
+function drawTipOverlay(sg, n, ext, topReach, cfg) {
+  const tipColor = cfg.tip_color || '#F5EFE8';
+  if (cfg.french_style === 'ombre') {
+    const om = sg.createLinearGradient(0, -topReach, 0, n.h * 0.16);
+    om.addColorStop(0, tipColor);
+    om.addColorStop(0.55, tipColor);
+    om.addColorStop(1, 'rgba(255,255,255,0)');
+    sg.globalAlpha = 0.92;
+    sg.fillStyle = om;
+    sg.fillRect(-n.w, -topReach - 10, n.w * 2, topReach + n.h * 0.25);
+    return;
+  }
 
-  // Proximal cuticle pocket arc stays tucked smoothly inside the finger apex
-  const baseArc = `M ${cx - half * 0.88} ${sideY} C ${cx - half * 0.88} ${baseY - 1}, ${cx + half * 0.88} ${baseY - 1}, ${cx + half * 0.88} ${sideY}`;
-
-  if (s === 'square') {
-    return `${baseArc} L ${cx + half * 0.90} ${topY + 3.5} Q ${cx + half * 0.90} ${topY}, ${cx + half * 0.58} ${topY} L ${cx - half * 0.58} ${topY} Q ${cx - half * 0.90} ${topY}, ${cx - half * 0.90} ${topY + 3.5} Z`;
-  }
-  if (s === 'squoval') {
-    return `${baseArc} C ${cx + half * 0.92} ${freeY}, ${cx + half * 0.88} ${topY + 5}, ${cx + half * 0.66} ${topY + 1} C ${cx + half * 0.34} ${topY - 1}, ${cx - half * 0.34} ${topY - 1}, ${cx - half * 0.66} ${topY + 1} C ${cx - half * 0.88} ${topY + 5}, ${cx - half * 0.92} ${freeY}, ${cx - half * 0.88} ${sideY} Z`;
-  }
-  if (s === 'coffin') {
-    return `${baseArc} L ${cx + half * 0.85} ${freeY + 2} L ${cx + half * 0.44} ${topY + 1.5} Q ${cx} ${topY}, ${cx - half * 0.44} ${topY + 1.5} L ${cx - half * 0.85} ${freeY + 2} Z`;
-  }
-  if (s === 'oval') {
-    return `${baseArc} C ${cx + half * 0.92} ${freeY}, ${cx + half * 0.86} ${topY + 7}, ${cx + half * 0.50} ${topY + 1.5} C ${cx + half * 0.22} ${topY - 1.5}, ${cx - half * 0.22} ${topY - 1.5}, ${cx - half * 0.50} ${topY + 1.5} C ${cx - half * 0.86} ${topY + 7}, ${cx - half * 0.92} ${freeY}, ${cx - half * 0.88} ${sideY} Z`;
-  }
-  // Almond (default): graceful inward taper to an elliptical parabolic apex
-  return `${baseArc} C ${cx + half * 0.90} ${freeY}, ${cx + half * 0.72} ${topY + extH * 0.58 + 7}, ${cx + half * 0.24} ${topY + 1.2} C ${cx + half * 0.08} ${topY - 0.8}, ${cx - half * 0.08} ${topY - 0.8}, ${cx - half * 0.24} ${topY + 1.2} C ${cx - half * 0.72} ${topY + extH * 0.58 + 7}, ${cx - half * 0.90} ${freeY}, ${cx - half * 0.88} ${sideY} Z`;
+  sg.globalAlpha = 0.97;
+  sg.fillStyle = tipColor;
+  const isMicro = cfg.french_style === 'micro';
+  const smileApex = isMicro ? -topReach * 0.84 : -n.h * 0.20 - ext * 0.55;
+  const smileSpanX = cfg.shape === 'coffin' ? n.w * 0.42 : n.w * 0.48;
+  const wingRiseY = isMicro ? n.h * 0.08 : n.h * 0.16;
+  sg.beginPath();
+  sg.moveTo(-smileSpanX * 1.15, smileApex + wingRiseY);
+  sg.quadraticCurveTo(0, smileApex - (isMicro ? 2.0 : 3.5), smileSpanX * 1.15, smileApex + wingRiseY);
+  sg.lineTo(n.w, -topReach - 12);
+  sg.lineTo(-n.w, -topReach - 12);
+  sg.closePath();
+  sg.fill();
 }
 
-export function renderNailPreviewSVG(cfg, lightX = 42) {
-  const skin = SKIN_TONES.find((s) => s.id === (cfg.skin || 'warm')) || SKIN_TONES[1];
-  const extMap = { short: 5.5, medium: 12.5, long: 19.5 };
-  const extBase = extMap[cfg.length] || 12.5;
-  const tipColor = cfg.tip_color || '#FBF7F4';
+function drawAccentDetail(sg, n, cfg) {
+  if (cfg.accent === 'gold_foil' && n.id !== 'thumb') {
+    const flakes = [
+      [[-4.8, -n.h * 0.06], [-1.2, -n.h * 0.12], [-0.4, -n.h * 0.03], [-3.8, n.h * 0.02]],
+      [[2.2, 2], [6.0, 0.4], [5.4, 4.8], [1.6, 4.0]],
+      [[-2.5, 9], [1.2, 7.2], [2.4, 11.2], [-1.8, 12.2]],
+      [[0.8, -n.h * 0.20], [4.2, -n.h * 0.24], [3.6, -n.h * 0.16]],
+    ];
+    flakes.forEach((pts, fi) => {
+      sg.save();
+      const fg = sg.createLinearGradient(-6, -n.h * 0.2, 6, 12);
+      fg.addColorStop(0, '#FFF8DC');
+      fg.addColorStop(0.35, fi % 2 === 0 ? '#F2D28B' : '#DFB66A');
+      fg.addColorStop(1, '#A47536');
+      sg.fillStyle = fg;
+      sg.beginPath();
+      pts.forEach(([px, py], pi) => (pi === 0 ? sg.moveTo(px, py) : sg.lineTo(px, py)));
+      sg.closePath();
+      sg.fill();
+      sg.strokeStyle = 'rgba(255, 250, 225, 0.65)';
+      sg.lineWidth = 0.5;
+      sg.stroke();
+      sg.restore();
+    });
+  } else if (cfg.accent === 'pearl_dot') {
+    const py = n.h * 0.25;
+    sg.save();
+    const pg = sg.createRadialGradient(-0.8, py - 0.8, 0.3, 0, py, 2.3);
+    pg.addColorStop(0, '#FFFFFF');
+    pg.addColorStop(0.65, '#EFE5DD');
+    pg.addColorStop(1, '#CBB39B');
+    sg.fillStyle = pg;
+    sg.beginPath();
+    sg.arc(0, py, 2.3, 0, Math.PI * 2);
+    sg.fill();
+    sg.restore();
+  } else if (cfg.accent === 'floral_dot' && n.id === 'ring') {
+    const py = n.h * 0.08;
+    sg.save();
+    sg.fillStyle = 'rgba(255, 252, 249, 0.94)';
+    for (const [dx, dy] of [
+      [0, -3.2],
+      [3.1, -0.8],
+      [2.0, 2.8],
+      [-2.0, 2.8],
+      [-3.1, -0.8],
+    ]) {
+      sg.beginPath();
+      sg.arc(dx, py + dy, 1.75, 0, Math.PI * 2);
+      sg.fill();
+    }
+    sg.fillStyle = '#D4AF7C';
+    sg.beginPath();
+    sg.arc(0, py, 1.45, 0, Math.PI * 2);
+    sg.fill();
+    sg.restore();
+  }
+}
+
+export async function paintAtelierCanvas(canvas, cfg, lightX = 45) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const resources = await loadStudioHandResources();
+  if (!resources) return;
+
+  const skinCanvas = getSkinHandCanvas(resources, cfg.skin || 'warm');
+  ctx.clearRect(0, 0, 720, 720);
+  ctx.drawImage(skinCanvas, 0, 0, 720, 720);
+
+  const extBaseMap = { short: 1.5, medium: 5.8, long: 11.2 };
+  const extVal = extBaseMap[cfg.length] ?? 5.8;
   const polish = cfg.polish_color || '#F3DCE1';
-  const glossOffset = ((lightX - 50) / 50) * 3.8;
+  const hasFrench = cfg.french_style && cfg.french_style !== 'none';
+  const lightShift = ((lightX - 45) / 45) * 4.5;
 
-  // Anatomical 5-digit geometry matching a unified dorsum hand path (Pinky -> Ring -> Middle -> Index -> Thumb)
-  const digits = [
-    { id: 'pinky', cx: 82, baseY: 192, w: 16.5, bedH: 19, scale: 0.76, rot: -9.5, tx: 82, ty: 192 },
-    { id: 'ring', cx: 132, baseY: 130, w: 19.5, bedH: 23, scale: 0.94, rot: -3.2, tx: 132, ty: 130 },
-    { id: 'middle', cx: 186, baseY: 109, w: 20.5, bedH: 24.5, scale: 1.0, rot: 0, tx: 186, ty: 109 },
-    { id: 'index', cx: 240, baseY: 133, w: 19.8, bedH: 23, scale: 0.95, rot: 4.5, tx: 240, ty: 133 },
-    { id: 'thumb', cx: 315, baseY: 256, w: 22.5, bedH: 23.5, scale: 0.90, rot: 31, tx: 315, ty: 256 },
-  ];
+  for (const n of HAND_NAILS) {
+    const spr = document.createElement('canvas');
+    spr.width = 160;
+    spr.height = 180;
+    const sg = spr.getContext('2d');
+    sg.translate(80, 90);
+    sg.transform(1, 0, n.skewX || 0, 1, 0, 0);
 
-  const renderDigitNail = (d) => {
-    const ext = extBase * d.scale;
-    const totalH = d.bedH + ext;
-    const topY = d.baseY - totalH;
-    const freeEdgeY = d.baseY - d.bedH;
-    const path = nailContour(d.cx, d.baseY, d.w, d.bedH, ext, cfg.shape);
-    const clipId = `nclip-${d.id}`;
+    const ext = extVal * (n.h / 52);
+    const topReach = n.h * 0.56 + ext;
 
-    let frenchOverlay = '';
-    if (cfg.french_style === 'classic' || cfg.french_style === 'colored') {
-      const smileDepth = Math.max(5.5, ext * 0.72 + 2.8);
-      const smileY = freeEdgeY - ext * 0.25;
-      frenchOverlay = `<path d="M ${d.cx - d.w} ${topY - 4} H ${d.cx + d.w} V ${smileY + 3} Q ${d.cx} ${smileY + smileDepth} ${d.cx - d.w} ${smileY + 3} Z" fill="${tipColor}" fill-opacity="0.96"/>`;
-    } else if (cfg.french_style === 'micro') {
-      const lineDepth = Math.max(3.6, ext * 0.34 + 1.8);
-      frenchOverlay = `<path d="M ${d.cx - d.w} ${topY - 3} H ${d.cx + d.w} V ${topY + lineDepth + 1.5} Q ${d.cx} ${topY + lineDepth + 4.5} ${d.cx - d.w} ${topY + lineDepth + 1.5} Z" fill="${tipColor}" fill-opacity="0.98"/>`;
-    } else if (cfg.french_style === 'ombre') {
-      frenchOverlay = `<rect x="${d.cx - d.w}" y="${topY - 2}" width="${d.w * 2}" height="${totalH * 0.72}" fill="url(#ombre-${d.id})"/>`;
+    // Compact ambient shadow beneath distal tip
+    sg.save();
+    sg.translate(0.6, -1.6);
+    nailPath(sg, n.w, n.h, ext, cfg.shape);
+    sg.filter = 'blur(1.3px)';
+    sg.fillStyle = 'rgba(42, 24, 18, 0.22)';
+    sg.fill();
+    sg.restore();
+
+    // Clipped nail plate compositing
+    sg.save();
+    nailPath(sg, n.w, n.h, ext, cfg.shape);
+    sg.clip();
+
+    if (hasFrench) {
+      sg.fillStyle = '#EED4D8';
+      sg.globalAlpha = 0.78;
+      sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
+    }
+    sg.globalAlpha = hasFrench ? 0.90 : 0.98;
+    sg.fillStyle = polish;
+    sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
+
+    if (hasFrench) {
+      const bedG = sg.createLinearGradient(0, n.h * 0.44, 0, -topReach * 0.2);
+      bedG.addColorStop(0, 'rgba(235, 182, 188, 0.42)');
+      bedG.addColorStop(0.55, 'rgba(244, 210, 216, 0.24)');
+      bedG.addColorStop(1, 'rgba(252, 238, 242, 0.04)');
+      sg.globalAlpha = 1;
+      sg.fillStyle = bedG;
+      sg.fillRect(-n.w, -topReach, n.w * 2, topReach + n.h);
+      drawTipOverlay(sg, n, ext, topReach, cfg);
     }
 
-    let accentOverlay = '';
-    if (cfg.accent === 'gold_foil' && (d.id === 'ring' || d.id === 'middle')) {
-      accentOverlay = `
-        <path d="M ${d.cx - 3} ${d.baseY - 12} L ${d.cx + 1} ${d.baseY - 15} L ${d.cx + 4} ${d.baseY - 10} Z" fill="#D4AF7C" opacity="0.88"/>
-        <path d="M ${d.cx - 5.5} ${d.baseY - 19} L ${d.cx - 2} ${d.baseY - 21.5} L ${d.cx - 0.5} ${d.baseY - 17} Z" fill="#E6C697" opacity="0.78"/>
-      `;
-    } else if (cfg.accent === 'pearl_dot') {
-      accentOverlay = `<circle cx="${d.cx}" cy="${d.baseY - 6.5}" r="2.1" fill="#FBF7F4" stroke="#D4AF7C" stroke-width="0.65"/>`;
-    } else if (cfg.accent === 'floral_dot' && d.id === 'ring') {
-      const py = d.baseY - 10;
-      accentOverlay = `
-        <circle cx="${d.cx}" cy="${py - 3.2}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
-        <circle cx="${d.cx + 3}" cy="${py}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
-        <circle cx="${d.cx}" cy="${py + 3.2}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
-        <circle cx="${d.cx - 3}" cy="${py}" r="1.7" fill="#FBF7F4" opacity="0.9"/>
-        <circle cx="${d.cx}" cy="${py}" r="1.4" fill="#D4AF7C"/>
-      `;
+    // Subtle cylindrical C-curve depth
+    sg.globalAlpha = 1;
+    const cyl = sg.createLinearGradient(-n.w / 2, 0, n.w / 2, 0);
+    cyl.addColorStop(0, 'rgba(42, 22, 26, 0.22)');
+    cyl.addColorStop(0.20, 'rgba(42, 22, 26, 0.03)');
+    cyl.addColorStop(0.50, 'rgba(255, 255, 255, 0.08)');
+    cyl.addColorStop(0.84, 'rgba(42, 22, 26, 0.04)');
+    cyl.addColorStop(1, 'rgba(42, 22, 26, 0.24)');
+    sg.fillStyle = cyl;
+    sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
+
+    drawAccentDetail(sg, n, cfg);
+
+    // Top coat finish studio lighting
+    if (cfg.finish === 'gloss' || cfg.finish === 'pearl') {
+      if (cfg.finish === 'pearl') {
+        const pr = sg.createRadialGradient(-n.w * 0.10 + lightShift * 0.4, -n.h * 0.14, 2, 0, -n.h * 0.05, n.w * 0.72);
+        pr.addColorStop(0, 'rgba(255,250,255,0.62)');
+        pr.addColorStop(0.42, 'rgba(252,226,238,0.28)');
+        pr.addColorStop(0.80, 'rgba(232,238,246,0.14)');
+        pr.addColorStop(1, 'rgba(255,255,255,0)');
+        sg.fillStyle = pr;
+        sg.fillRect(-n.w, -topReach, n.w * 2, topReach + n.h);
+      }
+      const hx = Math.max(-n.w * 0.34, Math.min(n.w * 0.30, -n.w * 0.16 + lightShift));
+      const ribHalf = cfg.finish === 'gloss' ? 6.5 : 8.0;
+      const peakA = cfg.finish === 'gloss' ? 0.56 : 0.36;
+      const rib = sg.createLinearGradient(hx - ribHalf, 0, hx + ribHalf, 0);
+      rib.addColorStop(0, 'rgba(255,255,255,0)');
+      rib.addColorStop(0.32, `rgba(255,255,255,${(peakA * 0.38).toFixed(2)})`);
+      rib.addColorStop(0.50, `rgba(255,255,255,${peakA.toFixed(2)})`);
+      rib.addColorStop(0.68, `rgba(255,255,255,${(peakA * 0.34).toFixed(2)})`);
+      rib.addColorStop(1, 'rgba(255,255,255,0)');
+      sg.fillStyle = rib;
+      sg.fillRect(hx - ribHalf, -topReach * 0.94, ribHalf * 2, topReach * 0.94 + n.h * 0.38);
+
+      const rimR = sg.createLinearGradient(n.w * 0.22, 0, n.w * 0.46, 0);
+      rimR.addColorStop(0, 'rgba(255,250,246,0)');
+      rimR.addColorStop(0.55, 'rgba(255,250,246,0.15)');
+      rimR.addColorStop(1, 'rgba(255,250,246,0)');
+      sg.fillStyle = rimR;
+      sg.fillRect(n.w * 0.22, -topReach * 0.85, n.w * 0.26, topReach + n.h * 0.4);
+    } else {
+      const mt = sg.createLinearGradient(-n.w * 0.35, 0, n.w * 0.35, 0);
+      mt.addColorStop(0, 'rgba(255,255,255,0)');
+      mt.addColorStop(0.38, 'rgba(255,255,255,0.09)');
+      mt.addColorStop(1, 'rgba(255,255,255,0)');
+      sg.fillStyle = mt;
+      sg.fillRect(-n.w, -topReach, n.w * 2, topReach + n.h);
     }
 
-    const highlightOpacity = cfg.finish === 'matte' ? 0.08 : cfg.finish === 'pearl' ? 0.34 : 0.54;
-    const lunulaOpacity = cfg.finish === 'matte' ? 0.14 : 0.26;
+    // Tight proximal cuticle shadow pocket
+    const pocketAlpha = cfg.skin === 'deep' ? 0.44 : 0.32;
+    const cut = sg.createLinearGradient(0, n.h * 0.46, 0, n.h * 0.14);
+    cut.addColorStop(0, `rgba(40, 18, 14, ${pocketAlpha})`);
+    cut.addColorStop(0.45, 'rgba(40, 18, 14, 0.10)');
+    cut.addColorStop(1, 'rgba(40, 18, 14, 0)');
+    sg.fillStyle = cut;
+    sg.fillRect(-n.w, n.h * 0.10, n.w * 2, n.h * 0.45);
+    sg.restore();
 
-    return `
-      <g transform="rotate(${d.rot} ${d.tx} ${d.ty})">
-        <defs>
-          <clipPath id="${clipId}"><path d="${path}"/></clipPath>
-        </defs>
-        <!-- Subtle lateral shadow framing proximal nail pocket -->
-        <path d="${path}" transform="translate(0, 1.3)" fill="${skin.pocket}"/>
-        <!-- Base sculpted nail polish plate -->
-        <path d="${path}" fill="${polish}"/>
-        <g clip-path="url(#${clipId})">
-          <!-- Soft natural lunula moon near proximal nail fold -->
-          <ellipse cx="${d.cx}" cy="${d.baseY - 1}" rx="${d.w * 0.42}" ry="5.5" fill="#FBF7F4" fill-opacity="${lunulaOpacity}"/>
-          <!-- Lateral nail bed edge depth for realistic dome curvature -->
-          <path d="${path}" fill="none" stroke="rgba(68, 42, 46, 0.22)" stroke-width="2.4"/>
-          ${frenchOverlay}
-          ${cfg.finish === 'pearl' ? `<rect x="${d.cx - d.w}" y="${topY - 3}" width="${d.w * 2}" height="${totalH + 6}" fill="url(#pearlSheen)"/>` : ''}
-          ${accentOverlay}
-          <!-- Directional dome gloss highlight tracking pointer -->
-          <path d="M ${d.cx - d.w * 0.34 + glossOffset} ${topY + 4} Q ${d.cx - d.w * 0.40 + glossOffset} ${d.baseY - d.bedH * 0.45}, ${d.cx - d.w * 0.28 + glossOffset} ${d.baseY - 4}"
-            stroke="white" stroke-width="${d.w * 0.16}" stroke-linecap="round" opacity="${highlightOpacity}" fill="none"/>
-          ${
-            cfg.finish === 'gloss'
-              ? `<path d="M ${d.cx + d.w * 0.25 + glossOffset * 0.5} ${topY + 6} Q ${d.cx + d.w * 0.30 + glossOffset * 0.5} ${topY + totalH * 0.34}, ${d.cx + d.w * 0.22 + glossOffset * 0.5} ${topY + totalH * 0.52}" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.34" fill="none"/>`
-              : ''
-          }
-        </g>
-        <!-- Proximal cuticle fold (eponychium) gentle lip seam -->
-        <path d="M ${d.cx - d.w * 0.44} ${d.baseY - d.bedH * 0.42} C ${d.cx - d.w * 0.40} ${d.baseY + 0.5}, ${d.cx + d.w * 0.40} ${d.baseY + 0.5}, ${d.cx + d.w * 0.44} ${d.baseY - d.bedH * 0.42}"
-          fill="none" stroke="${skin.shadow}" stroke-width="1.4" stroke-linecap="round" opacity="0.72"/>
-      </g>
-    `;
-  };
+    // Tight 0.6px anti-aliased cuticle blend
+    sg.save();
+    sg.globalCompositeOperation = 'destination-out';
+    const cFade = sg.createLinearGradient(0, n.h * 0.455, 0, n.h * 0.43);
+    cFade.addColorStop(0, 'rgba(0,0,0,0.65)');
+    cFade.addColorStop(1, 'rgba(0,0,0,0)');
+    sg.fillStyle = cFade;
+    sg.fillRect(-n.w, n.h * 0.42, n.w * 2, n.h * 0.06);
+    sg.restore();
 
-  // Continuous organic dorsum hand outline (natural finger taper, angled palm, smooth web valleys, natural abducted thumb)
-  const handSilhouette = `
-    M 122 460
-    C 118 424, 114 394, 102 362
-    C 90 330, 86 300, 82 272
-    L 62 198
-    C 59 182, 65 166, 77 164
-    C 89 162, 97 175, 100 192
-    L 111 247
-    C 113 255, 117 256, 118 246
-    L 114 134
-    C 113 116, 121 103, 132 103
-    C 143 103, 151 116, 152 134
-    L 158 228
-    C 159 236, 165 236, 166 227
-    L 166 112
-    C 166 93, 175 81, 186 81
-    C 197 81, 206 93, 206 112
-    L 208 229
-    C 209 237, 214 237, 216 228
-    L 223 135
-    C 225 117, 234 106, 245 107
-    C 256 108, 263 121, 261 139
-    L 246 278
-    C 245 289, 250 293, 257 284
-    L 298 232
-    C 309 218, 325 218, 333 227
-    C 341 236, 338 253, 326 268
-    L 286 322
-    C 271 344, 258 370, 250 400
-    C 245 422, 243 442, 242 460
-    Z
-  `;
+    ctx.save();
+    ctx.translate(n.cx, n.cy);
+    ctx.rotate(n.a);
+    if (n.blur > 0) ctx.filter = `blur(${n.blur}px)`;
+    ctx.drawImage(spr, -80, -90);
+    ctx.filter = 'none';
+    ctx.restore();
+  }
+}
 
+let drawQueued = false;
+function syncAtelierCanvases() {
+  if (drawQueued) return;
+  drawQueued = true;
+  requestAnimationFrame(() => {
+    drawQueued = false;
+    document.querySelectorAll('.atelier-hand-canvas').forEach((canvas) => {
+      paintAtelierCanvas(canvas, state.atelier, state.atelier.lightX || 45);
+    });
+  });
+}
+
+export function renderNailPreviewSVG(cfg, lightX = 45) {
+  syncAtelierCanvases();
   return `
-    <svg class="atelier-hand-svg" viewBox="0 0 380 460" fill="none" role="img" aria-label="${t('معاينة تفاعلية لتصميم الأظافر على اليد', 'Interactive manicure design hand preview')}">
-      <defs>
-        <linearGradient id="bg-atelier" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#FBF7F4"/>
-          <stop offset="60%" stop-color="#F4EBE6"/>
-          <stop offset="100%" stop-color="#ECE0DA"/>
-        </linearGradient>
-        <radialGradient id="skin-subsurface" cx="${Math.round(lightX)}%" cy="42%" r="65%">
-          <stop offset="0%" stop-color="${skin.base}"/>
-          <stop offset="62%" stop-color="${skin.mid}"/>
-          <stop offset="100%" stop-color="${skin.shadow}"/>
-        </radialGradient>
-        <linearGradient id="pearlSheen" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.46"/>
-          <stop offset="48%" stop-color="#F7DCE5" stop-opacity="0.22"/>
-          <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.06"/>
-        </linearGradient>
-        ${digits
-          .map(
-            (d) => `
-          <linearGradient id="ombre-${d.id}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${tipColor}" stop-opacity="0.98"/>
-            <stop offset="60%" stop-color="${tipColor}" stop-opacity="0.35"/>
-            <stop offset="100%" stop-color="${tipColor}" stop-opacity="0"/>
-          </linearGradient>`,
-          )
-          .join('')}
-        <filter id="handSoftShadow" x="-15%" y="-10%" width="135%" height="125%">
-          <feDropShadow dx="4" dy="14" stdDeviation="12" flood-color="#503C45" flood-opacity="0.16"/>
-        </filter>
-      </defs>
-
-      <!-- Quiet-luxury linen background + subtle eucalyptus botanical shadow -->
-      <rect width="380" height="460" rx="22" fill="url(#bg-atelier)"/>
-      <circle cx="310" cy="76" r="78" fill="#D9B7C0" fill-opacity="0.14"/>
-      <path d="M22 418 C52 365 62 318 46 250" stroke="#A7B79F" stroke-width="1.4" opacity="0.45" fill="none"/>
-      <ellipse cx="44" cy="272" rx="13" ry="6" transform="rotate(-32 44 272)" fill="#A7B79F" opacity="0.28"/>
-      <ellipse cx="62" cy="304" rx="14" ry="6.5" transform="rotate(24 62 304)" fill="#A7B79F" opacity="0.24"/>
-
-      <!-- Anatomical Continuous Hand -->
-      <g filter="url(#handSoftShadow)">
-        <path d="${handSilhouette}" fill="url(#skin-subsurface)"/>
-        <!-- Subtle inner palm contour shadow & interdigital valley soft shading -->
-        <path d="M 118 250 C 145 232 195 232 238 250 C 216 266 144 266 118 250 Z" fill="${skin.shadow}" opacity="0.14"/>
-        <path d="M 244 292 C 258 318 242 356 218 378" stroke="${skin.shadow}" stroke-width="2" stroke-linecap="round" opacity="0.18" fill="none"/>
-
-        <!-- Fine anatomical phalanx knuckle creases -->
-        <g stroke="${skin.shadow}" stroke-width="1.1" stroke-linecap="round" fill="none" opacity="0.32">
-          <!-- Pinky PIP / DIP -->
-          <path d="M 73 216 Q 82 213 91 217"/>
-          <path d="M 78 240 Q 87 237 97 241"/>
-          <!-- Ring PIP / DIP -->
-          <path d="M 122 178 Q 134 174 146 178"/>
-          <path d="M 125 212 Q 137 209 149 213"/>
-          <!-- Middle PIP / DIP -->
-          <path d="M 174 162 Q 186 158 198 162"/>
-          <path d="M 176 198 Q 187 195 200 199"/>
-          <!-- Index PIP / DIP -->
-          <path d="M 229 180 Q 241 177 251 182"/>
-          <path d="M 225 214 Q 237 211 248 216"/>
-          <!-- Thumb IP joint -->
-          <path d="M 284 266 Q 294 269 301 278"/>
-        </g>
-
-        <!-- Sculpted Parametric Nails on All 5 Digits -->
-        ${digits.map(renderDigitNail).join('')}
-      </g>
-    </svg>
+    <div class="atelier-canvas-frame">
+      <canvas
+        class="atelier-hand-canvas atelier-hand-svg"
+        width="720"
+        height="720"
+        role="img"
+        data-light-x="${Math.round(lightX)}"
+        aria-label="${t('معاينة واقعية لتصميم الأظافر على اليد', 'Photographic studio nail design preview on hand')}">
+      </canvas>
+    </div>
   `;
 }
 
@@ -304,11 +496,11 @@ export function atelierMiniWidget() {
           ${renderNailPreviewSVG(cfg)}
         </div>
         <div>
-          <span class="eyebrow">J NAIL ATELIER · ${t('تجربة تفاعلية', 'INTERACTIVE STUDIO')}</span>
+          <span class="eyebrow">${t('أتيليه J للأظافر · معاينة واقعية', 'J NAIL ATELIER · INTERACTIVE STUDIO')}</span>
           <h3>${t('صمّمي إطلالة أظافركِ قبل الحجز', 'Preview your manicure look before booking')}</h3>
           <p class="muted">${t(
-            'اختاري شكل الظفر ودرجات الجل أو الفرنش مع معاينة فورية متكاملة، واحفظي التصميم أو ابدئي حجزه مباشرة.',
-            'Explore nail shapes, polish shades, and French tips in real time, then save or book your signature look.',
+            'اختاري شكل الظفر ودرجات الجل أو الفرنش على معاينة واقعية، واحفظي التصميم أو ابدئي حجزه مباشرة.',
+            'Explore nail shapes, polish shades, and French tips in real time on a live studio preview, then save or book your look.',
           )}</p>
           <div class="swatch-row" style="margin:14px 0">
             ${NAIL_SHADES.slice(0, 6)
@@ -342,7 +534,7 @@ export function atelierPage() {
     <main id="main" class="wrap">
       ${head(
         t('أتيليه J للأظافر', 'J Nail Atelier'),
-        t('اختاري الشكل والطول واللون والفرنش واللمعة النهائية مع معاينة فورية دقيقة قبل طلب موعدكِ.', 'Customize nail shape, length, polish shade, French tip, and finish with live anatomical preview.'),
+        t('اختاري الشكل والطول واللون والفرنش واللمعة النهائية على معاينة استوديو واقعية قبل طلب موعدكِ.', 'Customize nail shape, length, polish shade, French tip, and finish with live studio photographic rendering.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('أتيليه الأظافر', 'J Nail Atelier'), '']],
       )}
 
@@ -364,7 +556,7 @@ export function atelierPage() {
             cfg.lastShareUrl
               ? `<div class="success" style="margin-top:14px;text-align:start">
                    <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بكِ:', 'Your share link is ready:')}</strong></p>
-                   <pre style="margin:0;padding:8px 10px;font-size:11.5px">${esc(cfg.lastShareUrl)}</pre>
+                   <pre style="margin:0;padding:8px 10px" dir="ltr">${esc(cfg.lastShareUrl)}</pre>
                    <button type="button" class="btn small light" id="copy-style-url" style="margin-top:8px">${t('نسخ الرابط', 'Copy URL')}</button>
                  </div>`
               : ''
@@ -432,13 +624,17 @@ export function atelierPage() {
           }
 
           <div class="control-group">
-            <span class="control-label">5. ${t('اللمسة النهائية والزخرفة', 'Finish & Detail')}</span>
-            <div class="chip-row" style="margin-bottom:10px">
+            <span class="control-label">5. ${t('اللمسة النهائية (التغطية)', 'Top Coat Finish')}</span>
+            <div class="chip-row">
               ${FINISHES.map(
                 ([id, ar, en]) =>
                   `<button type="button" class="mini-chip ${cfg.finish === id ? 'active' : ''}" data-at-finish="${id}">${t(ar, en)}</button>`,
               ).join('')}
             </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">6. ${t('الزخرفة والإضافة الدقيقة', 'Botanical Detail')}</span>
             <div class="chip-row">
               ${ACCENTS.map(
                 ([id, ar, en]) =>
@@ -453,7 +649,7 @@ export function atelierPage() {
                 ? `<p class="muted" style="margin-bottom:12px">${t('الخدمة المقترحة لهذا التصميم:', 'Suggested matching service:')} <strong>${esc(nameOf(svc))}</strong> (<bdi>${money(svc.price)}</bdi>)</p>`
                 : ''
             }
-            <div class="hero-actions" style="gap:10px">
+            <div class="hero-actions atelier-cta-row">
               <button type="button" class="btn" id="at-book-look">${t('اطلبي الخدمة بهذا التصميم', 'Book This Look')}</button>
               <button type="button" class="btn light" id="at-save-look">${t('حفظ في جواز الجمال', 'Save to Passport')}</button>
               <button type="button" class="btn light" id="at-share-look">${t('إنشاء رابط مشاركة', 'Share Look')}</button>
@@ -467,14 +663,13 @@ export function atelierPage() {
 
 export function bindAtelier(goFn, renderFn) {
   function refreshPreview() {
-    const stage = $('#atelier-canvas-wrap');
-    if (stage) {
-      const existingSvg = stage.querySelector('.atelier-hand-svg');
-      if (existingSvg) existingSvg.outerHTML = renderNailPreviewSVG(state.atelier, state.atelier.lightX || 45);
-    }
-    const mini = $('#mini-atelier-stage');
-    if (mini) mini.innerHTML = renderNailPreviewSVG(state.atelier, 45);
+    document.querySelectorAll('.atelier-hand-canvas').forEach((canvas) => {
+      paintAtelierCanvas(canvas, state.atelier, state.atelier.lightX || 45);
+    });
   }
+
+  // Trigger initial studio draw immediately upon route mount
+  syncAtelierCanvases();
 
   document.querySelectorAll('[data-mini-shade]').forEach((b) => {
     b.onclick = () => {
@@ -524,8 +719,8 @@ export function bindAtelier(goFn, renderFn) {
     stage.addEventListener('pointermove', (e) => {
       const rect = stage.getBoundingClientRect();
       state.atelier.lightX = Math.max(15, Math.min(85, ((e.clientX - rect.left) / rect.width) * 100));
-      const svg = stage.querySelector('.atelier-hand-svg');
-      if (svg) svg.outerHTML = renderNailPreviewSVG(state.atelier, state.atelier.lightX);
+      const canvas = stage.querySelector('.atelier-hand-canvas');
+      if (canvas) paintAtelierCanvas(canvas, state.atelier, state.atelier.lightX);
     });
   }
 

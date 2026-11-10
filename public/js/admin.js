@@ -7,6 +7,7 @@ import {
   minutes,
   money,
   nameOf,
+  num,
   riyadhToday,
   state,
   t,
@@ -301,7 +302,7 @@ function calendarView(a) {
             <div class="cal-slot ${conflicts.has(b.id) ? 'conflict' : ''}">
               <div>
                 <strong><bdi>${esc(b.time)}</bdi></strong>
-                <div class="muted" style="font-size:11px">${minutes(b.duration)} (+${buffer}m)</div>
+                <div class="muted" style="font-size:13px">${minutes(b.duration)} (+${buffer}m)</div>
               </div>
               <div class="row">
                 <div>
@@ -502,32 +503,32 @@ function adminContent() {
     return `
       <h2>${t('ملخص العمليات', 'Operations Overview')}</h2>
       <div class="stats">
-        <div class="stat">${t('طلبات الحجز', 'Booking requests')}<b>${bookings.length}</b></div>
-        <div class="stat">${t('بانتظار التأكيد', 'Pending')}<b>${pendingList.length}</b></div>
-        <div class="stat">${t('مؤكدة', 'Confirmed')}<b>${bookings.filter((x) => x.status === 'confirmed').length}</b></div>
-        <div class="stat">${t('مكتملة', 'Completed')}<b>${bookings.filter((x) => x.status === 'completed').length}</b></div>
+        <div class="stat">${t('طلبات الحجز', 'Booking requests')}<b>${num(bookings.length)}</b></div>
+        <div class="stat">${t('بانتظار التأكيد', 'Pending')}<b>${num(pendingList.length)}</b></div>
+        <div class="stat">${t('مؤكدة', 'Confirmed')}<b>${num(bookings.filter((x) => x.status === 'confirmed').length)}</b></div>
+        <div class="stat">${t('مكتملة', 'Completed')}<b>${num(bookings.filter((x) => x.status === 'completed').length)}</b></div>
       </div>
       ${
         isOwner()
-          ? `<div class="stats" style="margin-top:-10px">
+          ? `<div class="stats" style="margin-top:14px">
                <div class="stat">${t('الإيراد المتحقق', 'Verified revenue')}<b>${money(analytics.revenue || 0)}</b></div>
-               <div class="stat">${t('مكتملة غير مدفوعة', 'Unpaid completed')}<b>${analytics.unpaid || 0}</b></div>
-               <div class="stat">${t('عميلات عائدات', 'Returning guests')}<b>${analytics.returning_customers || 0}</b></div>
-               <div class="stat">${t('بتلات صادرة / مستبدلة', 'Petals issued / redeemed')}<b>${analytics.points_issued || 0} / ${analytics.points_redeemed || 0}</b></div>
+               <div class="stat">${t('مكتملة غير مدفوعة', 'Unpaid completed')}<b>${num(analytics.unpaid || 0)}</b></div>
+               <div class="stat">${t('عميلات عائدات', 'Returning guests')}<b>${num(analytics.returning_customers || 0)}</b></div>
+               <div class="stat">${t('بتلات صادرة / مستبدلة', 'Petals issued / redeemed')}<b>${num(analytics.points_issued || 0)} / ${num(analytics.points_redeemed || 0)}</b></div>
              </div>
-             <div class="card" style="margin-bottom:20px">
+             <div class="card" style="margin-block:20px">
                <h3 style="margin-top:0">${t('مسار التحويل الرقمي (تقديري مقابل المؤكد)', 'Digital Funnel Metrics')}</h3>
                <p class="muted" style="margin-bottom:14px">${t(
                  'نُفرّق بوضوح بين فتح واتساب أو الاستوديو كنية اهتمام، وبين الحجوزات المؤكدة والمكتملة فعلياً.',
                  'Distinguishes anonymous navigation intent (Studio, Atelier, WhatsApp click) from staff-confirmed and completed appointments.',
                )}</p>
-               <div class="stats" style="margin-bottom:0">
-                 <div class="stat">${t('زيارات الرئيسية', 'Home views')}<b>${funnel.home_view || 0}</b></div>
-                 <div class="stat">${t('توصيات استوديو J', 'Ritual Studio')}<b>${funnel.studio_complete || 0}</b></div>
-                 <div class="stat">${t('حفظ تصاميم الأظافر', 'Atelier saves')}<b>${funnel.atelier_save || 0}</b></div>
-                 <div class="stat">${t('بدء الحجز / إرسال الطلب', 'Start / Submitted')}<b>${funnel.booking_start || 0} / ${funnel.booking_submitted || 0}</b></div>
-                 <div class="stat">${t('نقرات واتساب (نية فقط)', 'WhatsApp clicks')}<b>${funnel.whatsapp_handoff_click || 0}</b></div>
-                 <div class="stat">${t('مناسبات / إهداء', 'Occasion / Gift reqs')}<b>${(a.group_requests || []).length} / ${(a.gift_requests || []).length}</b></div>
+               <div class="stats funnel-stats" style="margin-bottom:0">
+                 <div class="stat">${t('زيارات الرئيسية', 'Home views')}<b>${num(funnel.home_view || 0)}</b></div>
+                 <div class="stat">${t('توصيات استوديو J', 'Ritual Studio')}<b>${num(funnel.studio_complete || 0)}</b></div>
+                 <div class="stat">${t('حفظ تصاميم الأظافر', 'Atelier saves')}<b>${num(funnel.atelier_save || 0)}</b></div>
+                 <div class="stat">${t('بدء الحجز / إرسال الطلب', 'Start / Submitted')}<b>${num(funnel.booking_start || 0)} / ${num(funnel.booking_submitted || 0)}</b></div>
+                 <div class="stat">${t('نقرات واتساب (نية فقط)', 'WhatsApp clicks')}<b>${num(funnel.whatsapp_handoff_click || 0)}</b></div>
+                 <div class="stat">${t('مناسبات / إهداء', 'Occasion / Gift reqs')}<b>${num((a.group_requests || []).length)} / ${num((a.gift_requests || []).length)}</b></div>
                </div>
              </div>`
           : ''
