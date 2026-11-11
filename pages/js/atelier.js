@@ -65,13 +65,13 @@ const ACCENTS = [
   ['floral_dot', 'لمسة زهرية ناعمة', 'Botanical Blossom'],
 ];
 
-// Calibrated 5-digit anatomical nail bed anchors on `/J_BEAUTY/public/assets/images/atelier-hand-base.webp` (720x720)
+// Calibrated 5-digit anatomical nail bed anchors on `/J_BEAUTY/apps/customer/assets/images/atelier-hand-base.webp` (720x720)
 const HAND_NAILS = [
-  { id: 'thumb', cx: 241, cy: 397, w: 34, h: 57, a: 2.48, skewX: 0.08, blur: 0 },
-  { id: 'index', cx: 413, cy: 465, w: 35, h: 60, a: 2.49, skewX: -0.04, blur: 0 },
-  { id: 'middle', cx: 483, cy: 463, w: 35.5, h: 61, a: 2.49, skewX: -0.03, blur: 0 },
-  { id: 'ring', cx: 512, cy: 405, w: 32.5, h: 57, a: 2.52, skewX: -0.04, blur: 0 },
-  { id: 'pinky', cx: 513, cy: 317, w: 26, h: 45, a: 2.45, skewX: -0.05, blur: 0.12 },
+  { id: 'thumb', cx: 240, cy: 395, w: 31.5, h: 54, a: 2.44, skewX: 0.06, blur: 0.25 },
+  { id: 'index', cx: 413, cy: 465, w: 34.5, h: 60, a: 2.49, skewX: -0.04, blur: 0.22 },
+  { id: 'middle', cx: 483, cy: 463, w: 35, h: 61, a: 2.49, skewX: -0.03, blur: 0.22 },
+  { id: 'ring', cx: 511.5, cy: 404.5, w: 31.5, h: 55, a: 2.52, skewX: -0.04, blur: 0.24 },
+  { id: 'pinky', cx: 512, cy: 318, w: 24.5, h: 43, a: 2.49, skewX: -0.02, blur: 0.30 },
 ];
 
 let handBasePromise = null;
@@ -128,7 +128,7 @@ function loadStudioHandResources() {
         resolve({ baseCanvas: c, baseRaw, maskData });
       };
       img.onerror = reject;
-      img.src = '/J_BEAUTY/public/assets/images/atelier-hand-base.webp';
+      img.src = '/J_BEAUTY/apps/customer/assets/images/atelier-hand-base.webp';
     }).catch(() => null);
   }
   return handBasePromise;
@@ -239,24 +239,28 @@ export function recommendedServiceForStyle(cfg) {
 }
 
 function drawTipOverlay(sg, n, ext, topReach, cfg) {
-  const tipColor = cfg.tip_color || '#F5EFE8';
+  const rawTip = cfg.tip_color || '#F5EFE8';
+  const tipColor = rawTip.toUpperCase() === '#FFFFFF' || rawTip.toUpperCase() === '#FBF7F4' ? '#F6EFE7' : rawTip;
   if (cfg.french_style === 'ombre') {
     const om = sg.createLinearGradient(0, -topReach, 0, n.h * 0.16);
     om.addColorStop(0, tipColor);
     om.addColorStop(0.50, tipColor);
     om.addColorStop(1, 'rgba(255,255,255,0)');
-    sg.globalAlpha = 0.76;
+    sg.globalAlpha = 0.74;
     sg.fillStyle = om;
     sg.fillRect(-n.w, -topReach - 10, n.w * 2, topReach + n.h * 0.25);
     return;
   }
 
-  sg.globalAlpha = 0.96;
+  sg.save();
+  sg.globalAlpha = 0.88;
   sg.fillStyle = tipColor;
+  sg.shadowColor = tipColor;
+  sg.shadowBlur = 1.6;
   const isMicro = cfg.french_style === 'micro';
   const tipY = -n.h * 0.50 - ext;
   const flatTip = cfg.shape === 'square' || cfg.shape === 'squoval' || cfg.shape === 'coffin';
-  const bandDepth = isMicro ? n.h * 0.048 : n.h * 0.16 + ext * 0.45;
+  const bandDepth = isMicro ? n.h * 0.048 : n.h * 0.155 + ext * 0.42;
   const smileApex = tipY + bandDepth;
   const smileSpanX = n.w * 0.62;
   const wingRise = isMicro ? (flatTip ? n.h * 0.01 : n.h * 0.055) : flatTip ? n.h * 0.05 : n.h * 0.14;
@@ -267,6 +271,7 @@ function drawTipOverlay(sg, n, ext, topReach, cfg) {
   sg.lineTo(-n.w, -topReach - 16);
   sg.closePath();
   sg.fill();
+  sg.restore();
 }
 
 function drawAccentDetail(sg, n, cfg) {
@@ -381,6 +386,20 @@ export async function paintAtelierCanvas(canvas, cfg, lightX = 45) {
       ctx.restore();
     }
 
+    // Recessed anatomical nail-fold contact shadow onto surrounding skin before placing plate
+    ctx.save();
+    ctx.translate(n.cx, n.cy);
+    ctx.rotate(n.a);
+    ctx.transform(1, 0, n.skewX || 0, 1, 0, 0);
+    ctx.scale(1.03, 1.015);
+    nailPath(ctx, n.w, n.h, 0, cfg.shape);
+    ctx.filter = 'blur(1.8px)';
+    ctx.strokeStyle = cfg.skin === 'deep' ? 'rgba(26, 14, 10, 0.34)' : 'rgba(92, 56, 46, 0.22)';
+    ctx.lineWidth = 2.0;
+    ctx.stroke();
+    ctx.filter = 'none';
+    ctx.restore();
+
     const spr = document.createElement('canvas');
     spr.width = 160;
     spr.height = 180;
@@ -394,43 +413,51 @@ export async function paintAtelierCanvas(canvas, cfg, lightX = 45) {
     sg.clip();
 
     if (hasFrench) {
-      sg.fillStyle = '#EED4D8';
-      sg.globalAlpha = 0.85;
+      sg.fillStyle = '#E8C5CA';
+      sg.globalAlpha = 0.72;
       sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
     }
-    sg.globalAlpha = hasFrench ? 0.92 : 0.99;
+    sg.globalAlpha = hasFrench ? 0.86 : 0.96;
     sg.fillStyle = polish;
     sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
 
+    // Subtle natural lunula half-moon & longitudinal gel depth gradient
+    sg.globalAlpha = 1;
+    const lunula = sg.createRadialGradient(0, n.h * 0.44, 1, 0, n.h * 0.44, n.w * 0.40);
+    lunula.addColorStop(0, 'rgba(255, 248, 246, 0.30)');
+    lunula.addColorStop(0.55, 'rgba(255, 245, 243, 0.12)');
+    lunula.addColorStop(1, 'rgba(255, 245, 243, 0)');
+    sg.fillStyle = lunula;
+    sg.fillRect(-n.w, 0, n.w * 2, n.h * 0.56);
+
     if (hasFrench) {
       const bedG = sg.createLinearGradient(0, n.h * 0.48, 0, -topReach * 0.2);
-      bedG.addColorStop(0, 'rgba(235, 182, 188, 0.38)');
-      bedG.addColorStop(0.55, 'rgba(244, 210, 216, 0.20)');
-      bedG.addColorStop(1, 'rgba(252, 238, 242, 0.04)');
-      sg.globalAlpha = 1;
+      bedG.addColorStop(0, 'rgba(222, 164, 172, 0.36)');
+      bedG.addColorStop(0.55, 'rgba(238, 198, 206, 0.18)');
+      bedG.addColorStop(1, 'rgba(252, 238, 242, 0.03)');
       sg.fillStyle = bedG;
       sg.fillRect(-n.w, -topReach, n.w * 2, topReach + n.h);
     }
 
-    // 3D cylindrical C-curve sidewall shading & dome luminescence on base plate
+    // 3D cylindrical C-curve sidewall shading & dome curvature matching warm top-left daylight
     sg.globalAlpha = 1;
     const baseCyl = sg.createLinearGradient(-n.w * 0.54, 0, n.w * 0.54, 0);
-    baseCyl.addColorStop(0, 'rgba(34, 18, 20, 0.17)');
-    baseCyl.addColorStop(0.18, 'rgba(34, 18, 20, 0.04)');
-    baseCyl.addColorStop(0.46, 'rgba(255, 255, 255, 0.09)');
-    baseCyl.addColorStop(0.82, 'rgba(34, 18, 20, 0.04)');
-    baseCyl.addColorStop(1, 'rgba(34, 18, 20, 0.17)');
+    baseCyl.addColorStop(0, 'rgba(38, 18, 22, 0.28)');
+    baseCyl.addColorStop(0.16, 'rgba(38, 18, 22, 0.08)');
+    baseCyl.addColorStop(0.45, 'rgba(255, 250, 248, 0.06)');
+    baseCyl.addColorStop(0.84, 'rgba(38, 18, 22, 0.09)');
+    baseCyl.addColorStop(1, 'rgba(38, 18, 22, 0.30)');
     sg.fillStyle = baseCyl;
-    sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
+    sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h + 8);
 
     if (hasFrench) {
       drawTipOverlay(sg, n, ext, topReach, cfg);
       const tipWrap = sg.createLinearGradient(-n.w * 0.52, 0, n.w * 0.52, 0);
-      tipWrap.addColorStop(0, 'rgba(36, 20, 22, 0.05)');
-      tipWrap.addColorStop(0.20, 'rgba(255, 255, 255, 0.04)');
+      tipWrap.addColorStop(0, 'rgba(42, 22, 24, 0.16)');
+      tipWrap.addColorStop(0.22, 'rgba(255, 255, 255, 0.02)');
       tipWrap.addColorStop(0.50, 'rgba(255, 255, 255, 0.06)');
-      tipWrap.addColorStop(0.80, 'rgba(255, 255, 255, 0.02)');
-      tipWrap.addColorStop(1, 'rgba(36, 20, 22, 0.05)');
+      tipWrap.addColorStop(0.78, 'rgba(255, 255, 255, 0.02)');
+      tipWrap.addColorStop(1, 'rgba(42, 22, 24, 0.18)');
       sg.globalAlpha = 1;
       sg.fillStyle = tipWrap;
       sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach * 0.72);
@@ -443,39 +470,61 @@ export async function paintAtelierCanvas(canvas, cfg, lightX = 45) {
     if (cfg.finish === 'gloss' || cfg.finish === 'pearl') {
       if (cfg.finish === 'pearl') {
         const pr = sg.createRadialGradient(-n.w * 0.10 + lightShift * 0.4, -n.h * 0.14, 2, 0, -n.h * 0.05, n.w * 0.72);
-        pr.addColorStop(0, 'rgba(255,250,255,0.55)');
-        pr.addColorStop(0.45, 'rgba(252,226,238,0.24)');
-        pr.addColorStop(0.82, 'rgba(232,238,246,0.12)');
+        pr.addColorStop(0, 'rgba(255,250,255,0.58)');
+        pr.addColorStop(0.45, 'rgba(252,226,238,0.26)');
+        pr.addColorStop(0.82, 'rgba(232,238,246,0.14)');
         pr.addColorStop(1, 'rgba(255,255,255,0)');
         sg.fillStyle = pr;
         sg.fillRect(-n.w, -topReach - 6, n.w * 2, topReach + n.h + 6);
       }
-      const hx = Math.max(-n.w * 0.30, Math.min(n.w * 0.28, -n.w * 0.14 + lightShift));
-      const ribHalf = cfg.finish === 'gloss' ? 6.8 : 8.2;
-      const peakA = cfg.finish === 'gloss' ? 0.52 : 0.36;
+      // Curved subtle midtone contrast dip adjacent to specular rib so high-key pinks hold crisp gloss definition
+      const depthBand = sg.createLinearGradient(0, -topReach, 0, n.h * 0.45);
+      depthBand.addColorStop(0, 'rgba(58, 30, 38, 0.04)');
+      depthBand.addColorStop(0.50, 'rgba(58, 30, 38, 0.09)');
+      depthBand.addColorStop(1, 'rgba(58, 30, 38, 0.14)');
+      sg.fillStyle = depthBand;
+      sg.fillRect(-n.w, -topReach - 4, n.w * 2, topReach + n.h);
+
+      const hx = Math.max(-n.w * 0.28, Math.min(n.w * 0.26, -n.w * 0.16 + lightShift * 0.85));
+      const ribHalf = cfg.finish === 'gloss' ? 5.6 : 7.6;
+      const peakA = cfg.finish === 'gloss' ? 0.86 : 0.48;
       const rib = sg.createLinearGradient(hx - ribHalf, 0, hx + ribHalf, 0);
       rib.addColorStop(0, 'rgba(255,255,255,0)');
-      rib.addColorStop(0.32, `rgba(255,255,255,${(peakA * 0.38).toFixed(2)})`);
+      rib.addColorStop(0.28, `rgba(255,255,255,${(peakA * 0.36).toFixed(2)})`);
       rib.addColorStop(0.50, `rgba(255,255,255,${peakA.toFixed(2)})`);
-      rib.addColorStop(0.68, `rgba(255,255,255,${(peakA * 0.34).toFixed(2)})`);
+      rib.addColorStop(0.72, `rgba(255,255,255,${(peakA * 0.32).toFixed(2)})`);
       rib.addColorStop(1, 'rgba(255,255,255,0)');
       sg.fillStyle = rib;
-      sg.fillRect(hx - ribHalf, -topReach - 4, ribHalf * 2, topReach + 4 + n.h * 0.40);
+      sg.beginPath();
+      sg.ellipse(hx, -topReach * 0.14, ribHalf, (topReach + n.h * 0.36) * 0.46, 0.05, 0, Math.PI * 2);
+      sg.fill();
+
+      // Secondary crisp studio window catchlight bead along the apex
+      if (cfg.finish === 'gloss') {
+        const apexCatch = sg.createRadialGradient(hx + 0.6, -n.h * 0.18, 0.2, hx + 0.6, -n.h * 0.18, ribHalf * 1.45);
+        apexCatch.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
+        apexCatch.addColorStop(0.45, 'rgba(255, 253, 250, 0.45)');
+        apexCatch.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        sg.fillStyle = apexCatch;
+        sg.beginPath();
+        sg.ellipse(hx + 0.6, -n.h * 0.18, ribHalf * 0.95, n.h * 0.22, 0.04, 0, Math.PI * 2);
+        sg.fill();
+      }
 
       const rimR = sg.createLinearGradient(n.w * 0.20, 0, n.w * 0.44, 0);
       rimR.addColorStop(0, 'rgba(255,250,246,0)');
-      rimR.addColorStop(0.55, 'rgba(255,250,246,0.14)');
+      rimR.addColorStop(0.55, 'rgba(255,250,246,0.18)');
       rimR.addColorStop(1, 'rgba(255,250,246,0)');
       sg.fillStyle = rimR;
       sg.fillRect(n.w * 0.20, -topReach - 2, n.w * 0.26, topReach + n.h * 0.4);
     } else {
       // Velvet satin matte with distinct 3D cylindrical dome curvature & recessed sidewalls
       const mt = sg.createLinearGradient(-n.w * 0.54, 0, n.w * 0.54, 0);
-      mt.addColorStop(0, 'rgba(30, 18, 16, 0.14)');
+      mt.addColorStop(0, 'rgba(30, 18, 16, 0.18)');
       mt.addColorStop(0.22, 'rgba(255, 255, 255, 0.04)');
       mt.addColorStop(0.45, 'rgba(255, 255, 255, 0.16)');
       mt.addColorStop(0.72, 'rgba(255, 255, 255, 0.03)');
-      mt.addColorStop(1, 'rgba(30, 18, 16, 0.15)');
+      mt.addColorStop(1, 'rgba(30, 18, 16, 0.18)');
       sg.fillStyle = mt;
       sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h + 8);
     }

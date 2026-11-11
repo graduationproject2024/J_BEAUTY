@@ -1,6 +1,6 @@
 {
-  "date": "2026-11-10T20:06:48.009Z",
-  "count": 108,
+  "date": "2026-11-11T14:27:14.626Z",
+  "count": 114,
   "passed": [
     "360px /ar/: OK (جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ.)",
     "360px /en/: OK (Your Beauty.\nYour Ritual. Your Moment.)",
@@ -20,6 +20,7 @@
     "360px /ar/about: OK (عن J Beauty — لحظتكِ في راحة بيتكِ)",
     "360px /ar/contact: OK (تواصلي معنا)",
     "360px /ar/faq: OK (الأسئلة الشائعة)",
+    "360px ops-login: OK",
     "390px /ar/: OK (جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ.)",
     "390px /en/: OK (Your Beauty.\nYour Ritual. Your Moment.)",
     "390px /ar/services: OK (خدماتنا المنزلية)",
@@ -38,6 +39,7 @@
     "390px /ar/about: OK (عن J Beauty — لحظتكِ في راحة بيتكِ)",
     "390px /ar/contact: OK (تواصلي معنا)",
     "390px /ar/faq: OK (الأسئلة الشائعة)",
+    "390px ops-login: OK",
     "430px /ar/: OK (جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ.)",
     "430px /en/: OK (Your Beauty.\nYour Ritual. Your Moment.)",
     "430px /ar/services: OK (خدماتنا المنزلية)",
@@ -56,6 +58,7 @@
     "430px /ar/about: OK (عن J Beauty — لحظتكِ في راحة بيتكِ)",
     "430px /ar/contact: OK (تواصلي معنا)",
     "430px /ar/faq: OK (الأسئلة الشائعة)",
+    "430px ops-login: OK",
     "768px /ar/: OK (جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ.)",
     "768px /en/: OK (Your Beauty.\nYour Ritual. Your Moment.)",
     "768px /ar/services: OK (خدماتنا المنزلية)",
@@ -74,6 +77,7 @@
     "768px /ar/about: OK (عن J Beauty — لحظتكِ في راحة بيتكِ)",
     "768px /ar/contact: OK (تواصلي معنا)",
     "768px /ar/faq: OK (الأسئلة الشائعة)",
+    "768px ops-login: OK",
     "1024px /ar/: OK (جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ.)",
     "1024px /en/: OK (Your Beauty.\nYour Ritual. Your Moment.)",
     "1024px /ar/services: OK (خدماتنا المنزلية)",
@@ -92,6 +96,7 @@
     "1024px /ar/about: OK (عن J Beauty — لحظتكِ في راحة بيتكِ)",
     "1024px /ar/contact: OK (تواصلي معنا)",
     "1024px /ar/faq: OK (الأسئلة الشائعة)",
+    "1024px ops-login: OK",
     "1440px /ar/: OK (جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ.)",
     "1440px /en/: OK (Your Beauty.\nYour Ritual. Your Moment.)",
     "1440px /ar/services: OK (خدماتنا المنزلية)",
@@ -109,7 +114,8 @@
     "1440px /ar/reviews: OK (تجارب وآراء العميلات)",
     "1440px /ar/about: OK (عن J Beauty — لحظتكِ في راحة بيتكِ)",
     "1440px /ar/contact: OK (تواصلي معنا)",
-    "1440px /ar/faq: OK (الأسئلة الشائعة)"
+    "1440px /ar/faq: OK (الأسئلة الشائعة)",
+    "1440px ops-login: OK"
   ],
   "errors": []
 }

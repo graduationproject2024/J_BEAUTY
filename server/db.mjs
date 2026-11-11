@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
+import { applyMigrations } from './database/migrations.mjs';
 
 export const uid = () => randomUUID();
 export const now = () => new Date().toISOString();
@@ -457,6 +458,8 @@ export function openDatabase(dbPath) {
     CREATE INDEX IF NOT EXISTS idx_gift_requests_user ON gift_requests(user_id);
   `);
 
+  applyMigrations(db);
+
   const all = (q, ...args) => db.prepare(q).all(...args);
   const get = (q, ...args) => db.prepare(q).get(...args);
   const run = (q, ...args) => db.prepare(q).run(...args);
@@ -595,15 +598,24 @@ export function createHelpers(db) {
   };
 
   const bookings = () =>
-    db.all('SELECT * FROM bookings').map((row) => ({
-      ...JSON.parse(row.data),
-      id: row.id,
-      reference: row.reference,
-      user_id: row.user_id,
-    }));
+    db.all('SELECT * FROM bookings').map((row) => {
+      const parsed = JSON.parse(row.data);
+      return {
+        ...parsed,
+        id: row.id,
+        reference: row.reference,
+        user_id: row.user_id,
+        assigned_staff_id: row.assigned_staff_id ?? parsed.assigned_staff_id ?? null,
+      };
+    });
 
   const saveBooking = (b) => {
-    db.run('UPDATE bookings SET data=? WHERE id=?', JSON.stringify(b), b.id);
+    db.run(
+      'UPDATE bookings SET data=?, assigned_staff_id=? WHERE id=?',
+      JSON.stringify(b),
+      b.assigned_staff_id || null,
+      b.id,
+    );
   };
 
   const balance = (userId) =>

@@ -484,12 +484,11 @@ export function bindAccount(goFn, renderFn) {
       await api('/' + mode, data);
       await refreshSession();
       state.account = null;
-      state.admin = null;
       if (mode === 'reset') {
         toast(t('تم تحديث كلمة المرور. يرجى تسجيل الدخول.', 'Password updated. Please sign in.'));
         goFn('login');
       } else {
-        goFn(state.user?.role === 'owner' || state.user?.role === 'employee' ? 'admin' : 'account');
+        goFn('account');
       }
     } catch (err) {
       $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
@@ -500,7 +499,6 @@ export function bindAccount(goFn, renderFn) {
   $('#logout')?.addEventListener('click', async () => {
     await api('/logout', {});
     state.account = null;
-    state.admin = null;
     state.favorites = [];
     await refreshSession();
     goFn('home');

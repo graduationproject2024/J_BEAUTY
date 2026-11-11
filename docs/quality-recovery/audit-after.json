@@ -1,6 +1,6 @@
 {
   "phase": "after",
-  "timestamp": "2026-11-10T20:02:29.054Z",
+  "timestamp": "2026-11-11T14:24:49.889Z",
   "a11y": [
     {
       "route": "/ar/",
@@ -75,150 +75,248 @@
       "violations": []
     }
   ],
+  "opsA11y": [
+    {
+      "route": "ops-login",
+      "violations": []
+    },
+    {
+      "route": "ops-overview",
+      "violations": []
+    },
+    {
+      "route": "ops-bookings",
+      "violations": []
+    },
+    {
+      "route": "ops-calendar",
+      "violations": []
+    },
+    {
+      "route": "ops-staff",
+      "violations": []
+    },
+    {
+      "route": "ops-payments",
+      "violations": []
+    }
+  ],
   "performance": [
     {
       "route": "/ar/",
-      "dcl": 102,
-      "load": 290,
-      "fcp": 112,
-      "lcp": 288,
-      "cls": 0
+      "dcl": 126,
+      "load": 142,
+      "fcp": 140,
+      "lcp": 368,
+      "cls": 0.0007,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/en/",
-      "dcl": 50,
-      "load": 59,
-      "fcp": 64,
-      "lcp": 148,
-      "cls": 0
+      "dcl": 53,
+      "load": 61,
+      "fcp": 68,
+      "lcp": 156,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 26.35,
+      "h1FontSize": 62,
+      "dir": "ltr"
     },
     {
       "route": "/ar/services",
-      "dcl": 41,
-      "load": 41,
-      "fcp": 56,
-      "lcp": 80,
-      "cls": 0
+      "dcl": 58,
+      "load": 59,
+      "fcp": 80,
+      "lcp": 124,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/services/gel-removal",
-      "dcl": 40,
-      "load": 40,
-      "fcp": 44,
-      "lcp": 84,
-      "cls": 0
+      "dcl": 50,
+      "load": 51,
+      "fcp": 48,
+      "lcp": 108,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/packages",
-      "dcl": 42,
-      "load": 42,
-      "fcp": 44,
-      "lcp": 44,
-      "cls": 0
+      "dcl": 47,
+      "load": 47,
+      "fcp": 48,
+      "lcp": 48,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/studio",
-      "dcl": 51,
-      "load": 52,
-      "fcp": 44,
-      "lcp": 44,
-      "cls": 0
+      "dcl": 28,
+      "load": 28,
+      "fcp": 36,
+      "lcp": 76,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/atelier",
-      "dcl": 38,
-      "load": 38,
-      "fcp": 36,
-      "lcp": 36,
-      "cls": 0
+      "dcl": 41,
+      "load": 41,
+      "fcp": 44,
+      "lcp": 44,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/lookbook",
-      "dcl": 33,
-      "load": 33,
-      "fcp": 40,
-      "lcp": 84,
-      "cls": 0
+      "dcl": 46,
+      "load": 46,
+      "fcp": 44,
+      "lcp": 132,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/occasions",
-      "dcl": 35,
-      "load": 35,
-      "fcp": 36,
-      "lcp": 36,
-      "cls": 0
+      "dcl": 40,
+      "load": 40,
+      "fcp": 40,
+      "lcp": 40,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/gifts",
-      "dcl": 37,
-      "load": 37,
-      "fcp": 32,
-      "lcp": 32,
-      "cls": 0
+      "dcl": 32,
+      "load": 32,
+      "fcp": 36,
+      "lcp": 64,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/booking",
-      "dcl": 42,
-      "load": 42,
-      "fcp": 92,
-      "lcp": 92,
-      "cls": 0
+      "dcl": 43,
+      "load": 45,
+      "fcp": 80,
+      "lcp": 80,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/account",
-      "dcl": 27,
-      "load": 28,
-      "fcp": 56,
-      "lcp": 56,
-      "cls": 0
+      "dcl": 38,
+      "load": 38,
+      "fcp": 72,
+      "lcp": 72,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 34,
+      "dir": "rtl"
     },
     {
       "route": "/ar/petals",
-      "dcl": 31,
-      "load": 31,
-      "fcp": 28,
-      "lcp": 28,
-      "cls": 0
+      "dcl": 57,
+      "load": 57,
+      "fcp": 40,
+      "lcp": 40,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/reviews",
+      "dcl": 40,
+      "load": 40,
+      "fcp": 40,
+      "lcp": 72,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/policies",
+      "dcl": 28,
+      "load": 28,
+      "fcp": 28,
+      "lcp": 28,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/privacy",
       "dcl": 34,
       "load": 34,
       "fcp": 32,
       "lcp": 32,
-      "cls": 0
-    },
-    {
-      "route": "/ar/policies",
-      "dcl": 40,
-      "load": 40,
-      "fcp": 36,
-      "lcp": 36,
-      "cls": 0
-    },
-    {
-      "route": "/ar/privacy",
-      "dcl": 30,
-      "load": 30,
-      "fcp": 28,
-      "lcp": 28,
-      "cls": 0
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/terms",
-      "dcl": 29,
-      "load": 29,
-      "fcp": 24,
+      "dcl": 31,
+      "load": 31,
+      "fcp": 28,
       "lcp": 60,
-      "cls": 0
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     },
     {
       "route": "/ar/contact",
-      "dcl": 31,
-      "load": 31,
-      "fcp": 36,
-      "lcp": 52,
-      "cls": 0
+      "dcl": 37,
+      "load": 37,
+      "fcp": 28,
+      "lcp": 28,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
     }
   ],
   "typography": [
@@ -227,181 +325,167 @@
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/en/",
       "dir": "ltr",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 26.35,
-      "h1FontSize": 62,
-      "sub13pxCount": 0
+      "h1FontSize": 62
     },
     {
       "route": "/ar/services",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/services/gel-removal",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/packages",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/studio",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/atelier",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/lookbook",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/occasions",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/gifts",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/booking",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/account",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 34,
-      "sub13pxCount": 0
+      "h1FontSize": 34
     },
     {
       "route": "/ar/petals",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/reviews",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/policies",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/privacy",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/terms",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     },
     {
       "route": "/ar/contact",
       "dir": "rtl",
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "sub13pxCount": 0
+      "h1FontSize": 54
     }
   ],
   "screenshots": [
-    "ar-desktop.png",
-    "ar-mobile.png",
-    "en-desktop.png",
-    "en-mobile.png",
-    "ar-services-desktop.png",
-    "ar-services-mobile.png",
-    "ar-services-gel-removal-desktop.png",
-    "ar-services-gel-removal-mobile.png",
-    "ar-packages-desktop.png",
-    "ar-studio-desktop.png",
-    "ar-studio-mobile.png",
-    "ar-atelier-desktop.png",
-    "ar-atelier-mobile.png",
-    "ar-lookbook-desktop.png",
-    "ar-occasions-desktop.png",
-    "ar-occasions-mobile.png",
-    "ar-gifts-desktop.png",
-    "ar-booking-desktop.png",
-    "ar-booking-mobile.png",
-    "ar-account-desktop.png",
-    "ar-account-mobile.png",
-    "ar-petals-desktop.png",
-    "ar-petals-mobile.png",
-    "ar-reviews-desktop.png",
-    "ar-reviews-mobile.png",
-    "ar-policies-desktop.png",
-    "ar-privacy-desktop.png",
-    "ar-terms-desktop.png",
-    "ar-contact-desktop.png",
+    "ar-home-1440.png",
+    "ar-home-390.png",
+    "en-home-1440.png",
+    "en-home-390.png",
+    "ar-services-1440.png",
+    "ar-services-gel-removal-1440.png",
+    "ar-services-gel-removal-390.png",
+    "ar-packages-1440.png",
+    "ar-studio-1440.png",
+    "ar-atelier-1440.png",
+    "ar-atelier-390.png",
+    "ar-lookbook-1440.png",
+    "ar-occasions-1440.png",
+    "ar-occasions-390.png",
+    "ar-gifts-1440.png",
+    "ar-booking-1440.png",
+    "ar-booking-390.png",
+    "ar-account-1440.png",
+    "ar-petals-1440.png",
+    "ar-petals-390.png",
+    "ar-reviews-1440.png",
+    "ar-reviews-390.png",
+    "ar-policies-1440.png",
+    "ar-privacy-1440.png",
+    "ar-terms-1440.png",
+    "ar-contact-1440.png",
     "crop-atelier-hand.png",
-    "crop-atelier-coffin-deep.png",
-    "crop-atelier-matte-sage.png",
-    "crop-petals-flower.png",
-    "crop-gel-removal-photo.png",
-    "admin-overview-desktop.png"
+    "crop-petals-flower.png"
+  ],
+  "opsScreenshots": [
+    "ops-login-1440.png",
+    "ops-mfa-1440.png",
+    "ops-overview-1440.png",
+    "ops-bookings-1440.png",
+    "ops-calendar-1440.png",
+    "ops-staff-1440.png",
+    "ops-payments-1440.png",
+    "ops-overview-390.png",
+    "ops-bookings-390.png"
   ]
 }

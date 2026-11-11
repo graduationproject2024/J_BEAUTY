@@ -122,18 +122,13 @@ export const state = {
   catalog: { services: [], packages: [], settings: {}, reviews: [] },
   account: null,
   favorites: [],
-  admin: null,
-  adminTab: 'overview',
-  adminBookingFilter: 'pending_confirmation',
-  adminCalendarDate: '',
-  adminBookingsPage: 1,
-  adminAuditPage: 1,
-  adminLedgerPage: 1,
   bookingStep: 1,
   bookingMode: 'services',
   bookingCategory: '',
   summaryExpanded: false,
   bookingResult: null,
+  occasionStep: 1,
+  occasionGuestTab: 0,
   filter: 'all',
   homeMood: 'unwind',
   lookbookFilter: 'all',
@@ -158,16 +153,19 @@ export const state = {
     results: [],
   },
   groupDraft: {
+    occasion_type: 'bridal',
     organizer_name: '',
     organizer_phone: '',
     date: '',
     time: '',
     neighborhood: '',
+    notes: '',
     participants: [
       { label: 'المستفيدة 1', service_ids: ['relaxation'] },
       { label: 'المستفيدة 2', service_ids: ['classic'] },
     ],
   },
+  occasionCatFilter: 'all',
   groupResult: null,
   giftResult: null,
   draft: {
@@ -294,7 +292,7 @@ export async function api(path, body) {
   }
   throw new Error(t(
     'هذه الصفحة تحتاج إلى تشغيل خادم Node.js 24 وقاعدة بيانات SQLite (المعاينة الحالية تعمل بشكل ثابت على GitHub Pages).',
-    'Live customer accounts, loyalty persistence, and Admin require the Node.js 24 + SQLite backend (GitHub Pages is static preview only).',
+    'Live customer accounts, persisted bookings, and J Petals rewards require the Node.js 24 + SQLite backend (GitHub Pages is static preview only).',
   ));
 }
 
@@ -319,12 +317,4 @@ export function riyadhToday() {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date());
-}
-
-export function isStaff() {
-  return state.user?.role === 'owner' || state.user?.role === 'employee';
-}
-
-export function isOwner() {
-  return state.user?.role === 'owner';
 }

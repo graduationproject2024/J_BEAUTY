@@ -1,0 +1,51 @@
+/* J Beauty Shared Design Tokens — Zero-privilege visual foundation shared between Customer Website and Operations Portal */
+:root {
+  /* Core Brand Palette */
+  --dusty-pink: #D9B7C0;
+  --mauve-pink: #C9AEB6;
+  --sage: #A7B79F;
+  --sage-deep: #607257;
+  --rose-gold: #D4AF7C;
+  --rose-gold-deep: #9A723E;
+
+  /* Supporting Surfaces & Ink */
+  --ivory: #FBF7F4;
+  --cream: #F4EBE6;
+  --plum: #503C45;
+  --plum-hover: #694F5B;
+  --charcoal: #352F32;
+  --white: #FFFFFF;
+  --ink-muted: #6C5D62;
+  --border: #E5D9D3;
+  --border-strong: #CEBDBA;
+
+  /* Semantic Status */
+  --sage-tint: #EAEFE5;
+  --sage-ink: #384933;
+  --blush-tint: #F7ECEE;
+  --warning-bg: #F6ECDF;
+  --warning-border: #D4AF7C;
+  --error-bg: #FCE6E7;
+  --error-text: #852834;
+  --pending-bg: #F5E7CE;
+  --pending-text: #6D5028;
+
+  /* Typography */
+  --font-ar: 'IBM Plex Sans Arabic', 'Tahoma', sans-serif;
+  --font-ar-display: 'Noto Naskh Arabic', 'IBM Plex Sans Arabic', serif;
+  --font-en: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-en-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+
+  /* Radii & Shadows */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --shadow-soft: 0 10px 30px rgba(80, 60, 69, 0.06);
+  --shadow-elevated: 0 18px 44px rgba(53, 47, 50, 0.1);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur: 220ms;
+}
+
