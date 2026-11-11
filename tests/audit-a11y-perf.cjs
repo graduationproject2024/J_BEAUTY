@@ -105,7 +105,7 @@ const ROUTES = [
             if (e.name === 'first-contentful-paint') window.__jspaPerf.fcp = Math.round(e.startTime);
           }
         }).observe({ type: 'paint', buffered: true });
-      } catch {}
+      } catch { }
     });
 
     for (const route of ROUTES) {
@@ -122,12 +122,12 @@ const ROUTES = [
         await Promise.all(
           [...document.images].map((img) =>
             img.complete
-              ? img.decode().catch(() => {})
+              ? img.decode().catch(() => { })
               : new Promise((resolve) => {
-                  img.addEventListener('load', () => img.decode().catch(() => {}).then(resolve), { once: true });
-                  img.addEventListener('error', resolve, { once: true });
-                  setTimeout(resolve, 2500);
-                }),
+                img.addEventListener('load', () => img.decode().catch(() => { }).then(resolve), { once: true });
+                img.addEventListener('error', resolve, { once: true });
+                setTimeout(resolve, 2500);
+              }),
           ),
         );
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -280,7 +280,7 @@ const ROUTES = [
     server.kill('SIGTERM');
     try {
       rmSync(dir, { recursive: true, force: true });
-    } catch {}
+    } catch { }
   }
 
   mkdirSync(join(root, 'docs', 'quality-recovery'), { recursive: true });
