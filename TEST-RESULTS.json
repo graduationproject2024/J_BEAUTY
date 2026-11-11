@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-10T20:03:50.179Z",
+  "date": "2026-11-11T14:24:29.222Z",
   "passed": [
     "Seed catalog: 13 services and 4 computed packages",
     "Guest persists pending request and WhatsApp handoff",
@@ -12,16 +12,16 @@
     "Staff capacity prevents overlapping confirmations",
     "Completed unpaid booking earns zero points",
     "Verified payment awards actual spend and repeated save is idempotent",
-    "Public service route includes SSR semantic heading and description",
-    "Customer cannot change payment or admin settings",
+    "Public service route includes SSR semantic heading and zero /ar/admin route",
+    "Customer cannot change payment or hit removed /api/admin endpoints",
     "Verified reviews require owned completed booking and moderation",
     "Reward commit deducts points once",
-    "Unauthenticated admin request rejected",
+    "Unauthenticated ops dashboard request rejected",
     "Cross-origin write rejected",
     "Unknown routes return HTTP 404 and legacy group-booking redirects 301 to occasions",
     "Ritual Studio returns deterministic catalog-backed recommendations",
     "Nail Atelier supports oval shape, save, share code, Passport favorites & preferences",
-    "Group & Gift requests persist pending review and update via admin",
-    "Telemetry funnel and admin pagination metadata work cleanly"
+    "Group & Gift requests persist pending review and update via ops",
+    "Telemetry funnel and ops pagination metadata work cleanly"
   ]
 }

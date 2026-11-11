@@ -1,17 +1,14 @@
 {
-  "date": "2026-11-10T20:04:32.753Z",
+  "date": "2026-11-11T14:24:51.807Z",
   "passed": [
-    "Guest 5-step package booking with clean Packages tab, validation, and WhatsApp handoff",
-    "Reviews unauthenticated CTA guard and verified customer zero-booking eligibility pathway",
-    "Customer registration and WhatsApp manual verification reference",
-    "J Nail Atelier anatomical hand with Oval shape customization, Save to Passport, and mobile sticky preview",
-    "J Ritual Studio refined visual recommendation flow",
-    "Legacy /group-booking redirect to /occasions and Occasion Experiences + Gift request workflows",
-    "Registered 5-step service booking preserving DOM checkbox focus",
-    "Staff confirmation, completion, verified cash payment, and Admin Funnel / Occasions & Gifts UI",
-    "Interactive 5-star review validation, click & keyboard selection, moderation statuses (Pending, Needs revision, Published), and re-moderation on edit",
-    "Customer Beauty Passport preferences, saved nail look, and J Petals Club balance (250) verified",
-    "Admin calendar timeline, payments field alignment, and audit log rendering verified"
+    "Customer origin returns 404 for /admin and removes all staff links/scripts",
+    "Operations Portal login & mandatory RFC 6238 TOTP MFA enrollment in Chromium",
+    "Guest 5-step package booking, Reviews guard, and Mobile Nail Atelier",
+    "Customer registration, Ops identity verification, saved Nail Look & Studio recommendations",
+    "5-Step Progressive Occasions Wizard (mobile tabs <=13 checkboxes, no 65-box wall) + Gift workflow",
+    "Practitioner creation, assignment, lifecycle updates, verified cash payment, and 250 Petals reconciliation",
+    "Customer 5-star review + Ops moderation + public visibility + Petals cancellation reversal",
+    "Operations mobile drawer & responsive cards verified at 390px"
   ],
   "errors": []
 }

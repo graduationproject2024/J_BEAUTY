@@ -9,9 +9,9 @@ export function studioPage() {
   const imgFor = (rec) => {
     if (rec.kind === 'package') {
       const first = allSvcs.find((sv) => sv.id === rec.item.service_ids?.[0]);
-      return first?.image || '/J_BEAUTY/public/assets/images/hero-sanctuary.webp';
+      return first?.image || '/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp';
     }
-    return rec.item?.image || `/J_BEAUTY/public/assets/images/services/${rec.item?.id}.webp`;
+    return rec.item?.image || `/J_BEAUTY/apps/customer/assets/images/services/${rec.item?.id}.webp`;
   };
 
   const moodOpts = [
@@ -152,7 +152,7 @@ export function lookbookPage() {
   const entries = [
     {
       cat: 'massage',
-      img: '/J_BEAUTY/public/assets/images/services/hot-stone.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/hot-stone.webp',
       ar: 'سكينة الأحجار الدافئة',
       en: 'Warm Basalt Sanctuary',
       sub_ar: 'مساج الأحجار الساخنة · 60 دقيقة · 265 ر.س',
@@ -161,7 +161,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/J_BEAUTY/public/assets/images/services/french-tip.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/french-tip.webp',
       ar: 'فرنش كلاسيكي ناعم',
       en: 'Timeless Ivory French Tip',
       sub_ar: 'منيكير فرنش تيب · قاعدة وردية شفافة',
@@ -170,7 +170,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/J_BEAUTY/public/assets/images/services/colored-french.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/colored-french.webp',
       ar: 'أطراف مريمية عصرية',
       en: 'Sage Micro-French Gel',
       sub_ar: 'جل فرنسي بأطراف ملونة · 60 دقيقة',
@@ -179,7 +179,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/J_BEAUTY/public/assets/images/services/pedicure.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/pedicure.webp',
       ar: 'طقوس العناية بالقدمين',
       en: 'Rose-Petal Foot Sanctuary',
       sub_ar: 'بديكير دافئ ببتلات الورد · 45 دقيقة',
@@ -188,7 +188,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/J_BEAUTY/public/assets/images/services/french-gel.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/french-gel.webp',
       ar: 'لمعان الفرنش الزجاجي',
       en: 'Glass-Shine French Gel',
       sub_ar: 'جل فرنسي ثابت · مثالي للمناسبات',
@@ -197,7 +197,7 @@ export function lookbookPage() {
     },
     {
       cat: 'massage',
-      img: '/J_BEAUTY/public/assets/images/services/lymphatic.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/lymphatic.webp',
       ar: 'جلسة الخفة والانتعاش',
       en: 'Rose Quartz & Calm Flow',
       sub_ar: 'التصريف اللمفاوي · يتطلب اعتماد المؤهلات',
@@ -244,10 +244,38 @@ export function lookbookPage() {
   `;
 }
 
+const OCCASION_TYPES = [
+  ['bridal', 'تجهيز عروس وصديقاتها', 'Bridal Preparation', 'تنسيق جلسات العروس وقريباتها في المنزل'],
+  ['family', 'لقاء عائلي مريح', 'Family Gathering', 'جلسات استرخاء وأظافر للأمهات والأخوات'],
+  ['gathering', 'جمعة صديقات وقهوة', 'Friends Ritual', 'تجربة سبا نسائية مشتركة في راحة البيت'],
+  ['eid', 'تهيئة عيد ومناسبة خاصة', 'Celebration & Eid Prep', 'تجهيز جماعي أنيق قبل العيد أو الحفل'],
+];
+
+const displayGuestLabel = (p, idx) => {
+  const raw = String(p?.label || '').trim();
+  if (!raw || /^(المستفيدة|Guest|Participant)\s*\d+$/i.test(raw)) {
+    return t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`);
+  }
+  return raw;
+};
+
 export function groupBookingPage() {
   const g = state.groupDraft;
   const s = state.catalog.settings || {};
   const svcs = state.catalog.services || [];
+  const step = Math.min(5, Math.max(1, Number(state.occasionStep || 1)));
+  state.occasionStep = step;
+  const guestIdx = Math.min(Math.max(0, Number(state.occasionGuestTab || 0)), g.participants.length - 1);
+  state.occasionGuestTab = guestIdx;
+
+  const defaultDate = new Date(Date.parse(riyadhToday() + 'T12:00:00Z') + 86400000).toISOString().slice(0, 10);
+  if (!g.organizer_name && state.user?.name) g.organizer_name = state.user.name;
+  if (!g.organizer_phone && state.user?.phone) g.organizer_phone = state.user.phone;
+  if (!g.date) g.date = defaultDate;
+  if (!g.time) g.time = '17:00';
+  if (!g.neighborhood && state.account?.passport?.preferences?.preferred_neighborhood) {
+    g.neighborhood = state.account.passport.preferences.preferred_neighborhood;
+  }
 
   let totalEst = 0;
   let totalMin = 0;
@@ -268,7 +296,7 @@ export function groupBookingPage() {
         ${head(t('تم تسجيل طلب تنسيق المناسبة', 'Occasion Request Saved'))}
         <div class="content card">
           <div class="success">
-            <h3>${t('بانتظار موافقة الإدارة ومراجعة السعة', 'Awaiting Admin Approval & Capacity Review')}</h3>
+            <h3>${t('بانتظار موافقة الإدارة ومراجعة السعة', 'Awaiting Operations Approval & Capacity Review')}</h3>
             <p>${t('رقم الطلب:', 'Reference:')} <strong><bdi>${esc(r.group_request.reference)}</bdi></strong></p>
           </div>
           <p class="muted">${t('لا يتم تأكيد طلبات المناسبات آلياً. أرسلي التفاصيل عبر واتساب لمراجعة توفر الفريق.', 'Occasion requests are never auto-confirmed. Send via WhatsApp for team capacity coordination.')}</p>
@@ -280,78 +308,242 @@ export function groupBookingPage() {
     `;
   }
 
+  const wizardSteps = [
+    [1, 'المناسبة والمنسّقة', 'Occasion & Host'],
+    [2, 'المستفيدات', 'Participants'],
+    [3, 'الخدمات', 'Services'],
+    [4, 'الموعد والحي', 'Date & Area'],
+    [5, 'المراجعة', 'Review'],
+  ];
+
+  const renderStepBody = () => {
+    if (step === 1) {
+      return `
+        <h3>${t('١. نوع المناسبة وبيانات المنسّقة', '1. Occasion Type & Coordinator')}</h3>
+        <span class="control-label">${t('اختاري طابع المناسبة', 'Select occasion style')}</span>
+        <div class="occasion-type-grid">
+          ${OCCASION_TYPES.map(
+            ([id, ar, en, sub]) => `
+              <button type="button" class="occasion-type-card ${g.occasion_type === id ? 'is-selected' : ''}" data-occ-type="${id}">
+                <strong>${t(ar, en)}</strong>
+                <small>${t(sub, en)}</small>
+              </button>
+            `,
+          ).join('')}
+        </div>
+        <div class="form-grid">
+          ${field(t('اسم منسّقة المناسبة', 'Coordinator name'), 'organizer_name', 'text', g.organizer_name, 'required')}
+          ${field(t('رقم الجوال السعودي', 'Saudi mobile'), 'organizer_phone', 'tel', g.organizer_phone, 'required placeholder="05xxxxxxxx"')}
+        </div>
+      `;
+    }
+
+    if (step === 2) {
+      return `
+        <h3>${t('٢. عدد المستفيدات وأسماؤهن (من ٢ إلى ٥)', '2. Participants (2 to 5 guests)')}</h3>
+        <div class="occasion-count-bar">
+          <div>
+            <strong>${t('عدد المستفيدات في الجلسة', 'Number of participants')}</strong>
+            <div class="muted">${t('الحد الأدنى مستفيدتان والحد الأقصى خمس مستفيدات.', 'Minimum 2 and maximum 5 guests per home request.')}</div>
+          </div>
+          <div class="occasion-count-stepper">
+            <button type="button" id="occ-dec-guest" ${g.participants.length <= 2 ? 'disabled' : ''} aria-label="${t('إنقاص العدد', 'Decrease guests')}">−</button>
+            <span>${num(g.participants.length)} ${t('مستفيدات', 'guests')}</span>
+            <button type="button" id="occ-inc-guest" ${g.participants.length >= 5 ? 'disabled' : ''} aria-label="${t('زيادة العدد', 'Increase guests')}">+</button>
+          </div>
+        </div>
+        ${g.participants
+          .map(
+            (p, idx) => `
+              <div class="card occasion-guest-card">
+                <div class="row" style="margin-bottom:8px">
+                  <strong>${t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`)}</strong>
+                  ${g.participants.length > 2 ? `<button type="button" class="btn small light" data-remove-guest="${idx}">${t('إزالة', 'Remove')}</button>` : ''}
+                </div>
+                <label class="field" style="margin-bottom:0">
+                  ${t('الاسم أو الصفة (مثلاً: العروس، أختي، والدتي)', 'Name or role (e.g. Bride, Sister, Mom)')}
+                  <input type="text" data-guest-label="${idx}" value="${esc(displayGuestLabel(p, idx))}" maxlength="60" required>
+                </label>
+              </div>
+            `,
+          )
+          .join('')}
+      `;
+    }
+
+    if (step === 3) {
+      const activeGuest = g.participants[guestIdx];
+      const catFilter = state.occasionCatFilter || 'all';
+      const visibleSvcs = catFilter === 'all' ? svcs : svcs.filter((sv) => sv.category === catFilter);
+      return `
+        <div class="row" style="margin-bottom:10px">
+          <h3 style="margin:0">${t('٣. اختاري خدمات كل مستفيدة', '3. Services per Participant')}</h3>
+          <div class="chip-row">
+            ${[
+              ['all', 'الكل', 'All'],
+              ['massage', 'المساج', 'Massage'],
+              ['nails', 'الأظافر', 'Nails'],
+              ['gel', 'الجل', 'Gel'],
+            ]
+              .map(
+                ([id, ar, en]) =>
+                  `<button type="button" class="mini-chip ${catFilter === id ? 'active' : ''}" data-occ-cat="${id}">${t(ar, en)}</button>`,
+              )
+              .join('')}
+          </div>
+        </div>
+        <div class="occasion-tabs" role="tablist" aria-label="${t('تبويبات المستفيدات', 'Participant service tabs')}">
+          ${g.participants
+            .map((p, idx) => {
+              const label = displayGuestLabel(p, idx);
+              return `
+                <button type="button" role="tab" aria-selected="${guestIdx === idx}" class="occasion-tab ${guestIdx === idx ? 'active' : ''}" data-occ-tab="${idx}">
+                  <span>${num(idx + 1)}. ${esc(label)}</span>
+                  <span class="badge">${num(p.service_ids.length)}</span>
+                </button>
+              `;
+            })
+            .join('')}
+        </div>
+        <div class="card occasion-guest-card" style="margin-bottom:0">
+          <div class="row" style="margin-bottom:10px">
+            <strong>${esc(displayGuestLabel(activeGuest, guestIdx))}</strong>
+            <span class="muted">${num(activeGuest.service_ids.length)} ${t('خدمات مختارة (1 إلى 6)', 'selected (1 to 6)')}</span>
+          </div>
+          <div class="occasion-svc-grid" data-guest-services="${guestIdx}">
+            ${visibleSvcs
+              .map((sv) => {
+                const active = activeGuest.service_ids.includes(sv.id);
+                return `
+                  <label class="occasion-svc-chip ${active ? 'is-selected' : ''}">
+                    <input type="checkbox" data-guest-svc="${guestIdx}" value="${esc(sv.id)}" ${active ? 'checked' : ''}>
+                    <span>${esc(nameOf(sv))}</span>
+                    <small><bdi>${money(sv.price)}</bdi> · <bdi>${minutes(sv.duration)}</bdi></small>
+                  </label>
+                `;
+              })
+              .join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (step === 4) {
+      const openTime = s.opening_time || '09:00';
+      const closeTime = s.closing_time || '22:00';
+      const workingDays = s.working_days || [0, 1, 2, 3, 4, 5, 6];
+      const blocked = new Set(s.blocked_dates || []);
+      const nextDays = Array.from({ length: 7 }, (_, i) => {
+        const dt = new Date(Date.parse(riyadhToday() + 'T12:00:00+03:00') + (i + 1) * 86400000);
+        const iso = dt.toISOString().slice(0, 10);
+        const weekday = dt.getUTCDay();
+        return { iso, label: iso.slice(5), disabled: blocked.has(iso) || !workingDays.includes(weekday) };
+      });
+      const suggestedTimes = ['10:00', '13:00', '16:00', '18:30', '20:00'].filter(
+        (slot) => slot >= openTime && slot <= closeTime,
+      );
+      return `
+        <h3>${t('٤. التاريخ والوقت والحي في المدينة', '4. Date, Time & Neighborhood')}</h3>
+        <div class="time-chips">
+          ${nextDays
+            .map(
+              (d) =>
+                `<button type="button" class="time-chip ${g.date === d.iso ? 'active' : ''}" ${d.disabled ? 'disabled' : ''} data-occ-date="${d.iso}">${d.label}</button>`,
+            )
+            .join('')}
+        </div>
+        <div class="form-grid">
+          ${field(t('التاريخ المفضل', 'Preferred date'), 'date', 'date', g.date, `required min="${riyadhToday()}"`)}
+          ${field(t('الوقت المفضل', 'Preferred time'), 'time', 'time', g.time, 'required')}
+        </div>
+        ${
+          suggestedTimes.length
+            ? `<div class="time-chips">${suggestedTimes
+                .map((slot) => `<button type="button" class="time-chip ${g.time === slot ? 'active' : ''}" data-occ-time="${slot}">${slot}</button>`)
+                .join('')}</div>`
+            : ''
+        }
+        <label class="field">
+          ${t('الحي في المدينة المنورة', 'Madinah neighborhood')}
+          ${
+            s.areas?.length
+              ? `<select name="neighborhood" required><option value="">${t('اختاري الحي', 'Select')}</option>${s.areas.map((a) => `<option value="${esc(a)}" ${g.neighborhood === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>`
+              : `<input name="neighborhood" value="${esc(g.neighborhood)}" required>`
+          }
+        </label>
+        <label class="field">
+          ${t('ملاحظات تنسيقية إضافية (اختياري)', 'Additional notes (optional)')}
+          <textarea name="notes" maxlength="800" placeholder="${t('مثال: نرغب بمختصتين متزامنتين أو ملاحظات تجهيز خاصة...', 'Optional notes for team coordination...')}">${esc(g.notes || '')}</textarea>
+        </label>
+      `;
+    }
+
+    const occMeta = OCCASION_TYPES.find((x) => x[0] === g.occasion_type) || OCCASION_TYPES[0];
+    return `
+      <h3>${t('٥. مراجعة طلب المناسبة والإرسال', '5. Review & Submit Request')}</h3>
+      <div class="occasion-review-card">
+        <div class="row"><strong>${t(occMeta[1], occMeta[2])}</strong><button type="button" class="btn small light" data-occ-jump="1">${t('تعديل', 'Edit')}</button></div>
+        <div class="muted">${esc(g.organizer_name)} · <bdi>${esc(g.organizer_phone)}</bdi></div>
+        <div class="muted"><bdi>${esc(g.date)}</bdi> · <bdi>${esc(g.time)}</bdi> · ${esc(g.neighborhood)}</div>
+      </div>
+      ${g.participants
+        .map((p, idx) => {
+          const pSvcs = p.service_ids.map((id) => svcs.find((x) => x.id === id)).filter(Boolean);
+          const sub = pSvcs.reduce((a, b) => a + Number(b.price || 0), 0);
+          return `
+            <div class="occasion-review-card">
+              <div class="row">
+                <strong>${esc(displayGuestLabel(p, idx))}</strong>
+                <strong>${money(sub)}</strong>
+              </div>
+              <div class="muted">${pSvcs.map((sv) => esc(nameOf(sv))).join(' + ')}</div>
+            </div>
+          `;
+        })
+        .join('')}
+      <label class="check" style="margin-top:12px">
+        <input type="checkbox" name="terms" required>
+        <span>${t('أوافق على السياسات وأفهم أن طلب المناسبة ينتظر موافقة الفريق وتوفر المختصات.', 'I accept the terms and understand occasion requests await team capacity approval.')}</span>
+      </label>
+    `;
+  };
+
   return `
     <main id="main" class="wrap">
       ${head(
         t('تنسيق جلسات المناسبات', 'Occasion Experiences'),
-        t('نسّقي جلسات العناية والاسترخاء والأظافر لمنزلكِ في المدينة المنورة لاحتفالاتكِ ومناسباتكِ (من 2 إلى 5 مستفيدات).', 'Arrange coordinated home spa and nail appointments in Madinah for special celebrations (2 to 5 participants).'),
+        t('نسّقي جلسات العناية والاسترخاء والأظافر لمنزلكِ في المدينة المنورة لاحتفالاتكِ ومناسباتكِ في خمس خطوات واضحة.', 'Arrange coordinated home spa and nail sessions in Madinah across 5 guided steps (2 to 5 participants).'),
         [[t('الرئيسية', 'Home'), 'home'], [t('تنسيق جلسات المناسبات', 'Occasion Experiences'), '']],
       )}
+      <div class="progress five" role="navigation" aria-label="${t('خطوات تنسيق المناسبة', 'Occasion wizard steps')}">
+        ${wizardSteps
+          .map(
+            ([n, ar, en]) => `
+              <span class="${step === n ? 'current' : step > n ? 'done' : ''}" ${n < step ? `data-occ-jump="${n}" style="cursor:pointer"` : ''}>
+                <b>${num(n)}</b>
+                <em>${t(ar, en)}</em>
+              </span>
+            `,
+          )
+          .join('')}
+      </div>
       <div class="notice">${t(
-        'تخضع طلبات المناسبات لمراجعة الإدارة وتنسيق الطاقة الاستيعابية وعدد المختصات قبل أي تأكيد.',
-        'Occasion coordination requests strictly require administrative approval and staff capacity review before confirmation.',
+        'تخضع طلبات المناسبات لمراجعة فريق العمليات وتنسيق الطاقة الاستيعابية وعدد المختصات قبل أي تأكيد.',
+        'Occasion coordination requests strictly require operations review and specialist allocation before confirmation.',
       )}</div>
       ${provisional()}
       <form id="group-form" class="occasion-layout booking-layout">
         <div class="card booking-main">
           <div id="form-error" role="alert"></div>
-          <div class="form-grid">
-            ${field(t('اسم منسّقة المناسبة', 'Coordinator name'), 'organizer_name', 'text', g.organizer_name || state.user?.name || '', 'required')}
-            ${field(t('رقم الجوال السعودي', 'Saudi mobile'), 'organizer_phone', 'tel', g.organizer_phone || state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
-            ${field(t('التاريخ المفضل', 'Preferred date'), 'date', 'date', g.date || new Date(Date.parse(riyadhToday() + 'T12:00:00Z') + 86400000).toISOString().slice(0, 10), `required min="${riyadhToday()}"`)}
-            ${field(t('الوقت المفضل', 'Preferred time'), 'time', 'time', g.time, 'required')}
-          </div>
-          <label class="field">
-            ${t('الحي في المدينة المنورة', 'Madinah neighborhood')}
+          ${renderStepBody()}
+          <div class="form-actions" style="margin-top:18px;display:flex;justify-content:space-between;gap:12px">
+            ${step > 1 ? `<button type="button" class="btn light" id="occ-prev">${t('السابق', 'Back')}</button>` : '<span></span>'}
             ${
-              s.areas?.length
-                ? `<select name="neighborhood" required><option value="">${t('اختاري الحي', 'Select')}</option>${s.areas.map((a) => `<option value="${esc(a)}" ${g.neighborhood === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>`
-                : `<input name="neighborhood" value="${esc(g.neighborhood)}" required>`
+              step < 5
+                ? `<button type="button" class="btn" id="occ-next">${t('التالي', 'Continue')}</button>`
+                : `<button type="submit" class="btn">${t('إرسال طلب تنسيق المناسبة', 'Submit Occasion Request')}</button>`
             }
-          </label>
-
-          <h3 style="margin-top:8px">${t('المستفيدات والخدمات المطلوبة', 'Participants & Selected Services')}</h3>
-          ${g.participants
-            .map(
-              (p, idx) => `
-            <div class="card occasion-guest-card">
-              <div class="row" style="margin-bottom:10px">
-                <strong>${t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`)}</strong>
-                ${g.participants.length > 2 ? `<button type="button" class="btn small light" data-remove-guest="${idx}">${t('إزالة', 'Remove')}</button>` : ''}
-              </div>
-              <label class="field">
-                ${t('الاسم أو الوصف', 'Name / Label')}
-                <input type="text" data-guest-label="${idx}" value="${esc(p.label)}" maxlength="60" required>
-              </label>
-              <div class="control-group" style="margin-bottom:0">
-                <span class="control-label">${t('اختاري خدمة أو أكثر', 'Choose services')}</span>
-                <div class="occasion-svc-grid" data-guest-services="${idx}">
-                  ${svcs
-                    .map((sv) => {
-                      const active = p.service_ids.includes(sv.id);
-                      return `
-                        <label class="occasion-svc-chip ${active ? 'is-selected' : ''}">
-                          <input type="checkbox" data-guest-svc="${idx}" value="${esc(sv.id)}" ${active ? 'checked' : ''}>
-                          <span>${esc(nameOf(sv))}</span>
-                          <small><bdi>${money(sv.price)}</bdi> · <bdi>${minutes(sv.duration)}</bdi></small>
-                        </label>
-                      `;
-                    })
-                    .join('')}
-                </div>
-              </div>
-            </div>
-          `,
-            )
-            .join('')}
-
-          ${g.participants.length < 5 ? `<button type="button" class="btn small light" id="add-guest" style="margin-bottom:16px">+ ${t('إضافة مستفيدة', 'Add participant')}</button>` : ''}
-
-          <label class="check">
-            <input type="checkbox" name="terms" required>
-            <span>${t('أوافق على السياسات وأفهم أن طلب المناسبة ينتظر موافقة الإدارة وتوفر المختصات.', 'I accept the terms and understand occasion bookings require admin approval.')}</span>
-          </label>
-          <button type="submit" class="btn" style="width:100%">${t('إرسال طلب تنسيق المناسبة', 'Submit Occasion Request')}</button>
+          </div>
         </div>
 
         <aside class="summary occasion-summary">
@@ -361,7 +553,7 @@ export function groupBookingPage() {
             .map((p, idx) => {
               const pSvcs = p.service_ids.map((id) => svcs.find((x) => x.id === id)).filter(Boolean);
               const subTotal = pSvcs.reduce((a, b) => a + Number(b.price || 0), 0);
-              return `<div class="summary-line"><span>${esc(p.label || t(`المستفيدة ${num(idx + 1)}`, `Guest ${num(idx + 1)}`))}</span><span>${money(subTotal)}</span></div>`;
+              return `<div class="summary-line"><span>${esc(displayGuestLabel(p, idx))} (${num(p.service_ids.length)})</span><span>${money(subTotal)}</span></div>`;
             })
             .join('')}
           <div class="summary-line">
@@ -500,7 +692,7 @@ export function bindExperiences(renderFn) {
   const syncGroupDraft = () => {
     const f = $('#group-form');
     if (!f) return;
-    for (const k of ['organizer_name', 'organizer_phone', 'date', 'time', 'neighborhood']) {
+    for (const k of ['organizer_name', 'organizer_phone', 'date', 'time', 'neighborhood', 'notes']) {
       if (f.elements[k]) state.groupDraft[k] = f.elements[k].value;
     }
     state.groupDraft.participants.forEach((p, idx) => {
@@ -511,7 +703,7 @@ export function bindExperiences(renderFn) {
     });
   };
 
-  $('#add-guest')?.addEventListener('click', () => {
+  const addGuest = () => {
     syncGroupDraft();
     if (state.groupDraft.participants.length < 5) {
       state.groupDraft.participants.push({
@@ -520,6 +712,64 @@ export function bindExperiences(renderFn) {
       });
       renderFn();
     }
+  };
+
+  $('#occ-inc-guest')?.addEventListener('click', addGuest);
+  $('#occ-dec-guest')?.addEventListener('click', () => {
+    syncGroupDraft();
+    if (state.groupDraft.participants.length > 2) {
+      state.groupDraft.participants.pop();
+      state.occasionGuestTab = Math.min(state.occasionGuestTab, state.groupDraft.participants.length - 1);
+      renderFn();
+    }
+  });
+
+  document.querySelectorAll('[data-occ-type]').forEach((b) => {
+    b.onclick = () => {
+      syncGroupDraft();
+      state.groupDraft.occasion_type = b.dataset.occType;
+      renderFn();
+    };
+  });
+
+  document.querySelectorAll('[data-occ-tab]').forEach((b) => {
+    b.onclick = () => {
+      syncGroupDraft();
+      state.occasionGuestTab = Number(b.dataset.occTab);
+      renderFn();
+    };
+  });
+
+  document.querySelectorAll('[data-occ-cat]').forEach((b) => {
+    b.onclick = () => {
+      syncGroupDraft();
+      state.occasionCatFilter = b.dataset.occCat;
+      renderFn();
+    };
+  });
+
+  document.querySelectorAll('[data-occ-date]').forEach((b) => {
+    b.onclick = () => {
+      syncGroupDraft();
+      state.groupDraft.date = b.dataset.occDate;
+      renderFn();
+    };
+  });
+
+  document.querySelectorAll('[data-occ-time]').forEach((b) => {
+    b.onclick = () => {
+      syncGroupDraft();
+      state.groupDraft.time = b.dataset.occTime;
+      renderFn();
+    };
+  });
+
+  document.querySelectorAll('[data-occ-jump]').forEach((el) => {
+    el.onclick = () => {
+      syncGroupDraft();
+      state.occasionStep = Number(el.dataset.occJump);
+      renderFn();
+    };
   });
 
   document.querySelectorAll('[data-remove-guest]').forEach((b) => {
@@ -528,6 +778,7 @@ export function bindExperiences(renderFn) {
       const idx = Number(b.dataset.removeGuest);
       if (state.groupDraft.participants.length > 2) {
         state.groupDraft.participants.splice(idx, 1);
+        state.occasionGuestTab = Math.min(state.occasionGuestTab, state.groupDraft.participants.length - 1);
         renderFn();
       }
     };
@@ -540,17 +791,75 @@ export function bindExperiences(renderFn) {
     };
   });
 
+  $('#occ-prev')?.addEventListener('click', () => {
+    syncGroupDraft();
+    state.occasionStep = Math.max(1, state.occasionStep - 1);
+    renderFn();
+  });
+
+  $('#occ-next')?.addEventListener('click', () => {
+    syncGroupDraft();
+    const g = state.groupDraft;
+    const errBox = $('#form-error');
+    if (errBox) errBox.innerHTML = '';
+
+    if (state.occasionStep === 1) {
+      if (!String(g.organizer_name || '').trim()) {
+        if (errBox) errBox.innerHTML = `<div class="error">${t('يرجى كتابة اسم منسّقة المناسبة', 'Please enter coordinator name')}</div>`;
+        return;
+      }
+      if (!/^(\+?966|0)?5\d{8}$/.test(String(g.organizer_phone || '').replace(/\s+/g, ''))) {
+        if (errBox) errBox.innerHTML = `<div class="error">${t('يرجى إدخال رقم جوال سعودي صحيح (05xxxxxxxx)', 'Please enter a valid Saudi mobile number (05xxxxxxxx)')}</div>`;
+        return;
+      }
+    } else if (state.occasionStep === 2) {
+      if (g.participants.some((p) => !String(p.label || '').trim())) {
+        if (errBox) errBox.innerHTML = `<div class="error">${t('يرجى كتابة اسم أو صفة كل مستفيدة', 'Please enter a name or role for each participant')}</div>`;
+        return;
+      }
+    } else if (state.occasionStep === 3) {
+      const missingIdx = g.participants.findIndex((p) => !Array.isArray(p.service_ids) || !p.service_ids.length);
+      if (missingIdx !== -1) {
+        state.occasionGuestTab = missingIdx;
+        renderFn();
+        $('#form-error').innerHTML = `<div class="error">${t('يرجى اختيار خدمة واحدة على الأقل لكل مستفيدة (1–6 خدمات)', 'Please select at least 1 service for each participant')}</div>`;
+        return;
+      }
+      if (g.participants.some((p) => p.service_ids.length > 6)) {
+        if (errBox) errBox.innerHTML = `<div class="error">${t('الحد الأقصى 6 خدمات لكل مستفيدة', 'Maximum 6 services per participant')}</div>`;
+        return;
+      }
+    } else if (state.occasionStep === 4) {
+      if (!g.date || g.date < riyadhToday() || !g.time || !String(g.neighborhood || '').trim()) {
+        if (errBox) errBox.innerHTML = `<div class="error">${t('يرجى اختيار التاريخ والوقت والحي في المدينة المنورة', 'Please select preferred date, time, and Madinah neighborhood')}</div>`;
+        return;
+      }
+    }
+
+    state.occasionStep = Math.min(5, state.occasionStep + 1);
+    renderFn();
+  });
+
   $('#group-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     syncGroupDraft();
     const f = e.target;
+    const occMeta = OCCASION_TYPES.find((x) => x[0] === state.groupDraft.occasion_type) || OCCASION_TYPES[0];
+    const combinedNotes = [occMeta[1], state.groupDraft.notes].filter(Boolean).join(' — ');
     e.submitter.disabled = true;
     try {
       const r = await api('/group-requests', {
-        ...state.groupDraft,
+        organizer_name: state.groupDraft.organizer_name,
+        organizer_phone: state.groupDraft.organizer_phone,
+        date: state.groupDraft.date,
+        time: state.groupDraft.time,
+        neighborhood: state.groupDraft.neighborhood,
+        participants: state.groupDraft.participants,
+        notes: combinedNotes,
         terms: f.elements.terms.checked,
       });
       state.groupResult = r;
+      state.occasionStep = 1;
       state.account = null;
       renderFn();
     } catch (err) {
@@ -561,6 +870,7 @@ export function bindExperiences(renderFn) {
 
   $('#new-group-req')?.addEventListener('click', () => {
     state.groupResult = null;
+    state.occasionStep = 1;
     renderFn();
   });
 

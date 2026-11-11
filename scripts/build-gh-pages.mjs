@@ -7,15 +7,18 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const baseFlag = args.find((a) => a.startsWith('--base='));
 const BASE = (baseFlag ? baseFlag.slice(7) : '/J_BEAUTY').replace(/\/+$/, '');
-const ASSET_BASE = `${BASE}/public`;
+const ASSET_BASE = `${BASE}/apps/customer`;
 const APP_BASE = `${BASE}/pages`;
 const PAGES_DIR = path.join(ROOT, 'pages');
-const PUBLIC_DIR = path.join(ROOT, 'public');
+const CUSTOMER_DIR = path.join(ROOT, 'apps', 'customer');
+const SHARED_DIR = path.join(ROOT, 'packages', 'shared');
 
 rmSync(PAGES_DIR, { recursive: true, force: true });
 mkdirSync(path.join(PAGES_DIR, 'js'), { recursive: true });
+mkdirSync(path.join(PAGES_DIR, 'shared'), { recursive: true });
 mkdirSync(path.join(PAGES_DIR, 'data'), { recursive: true });
 writeFileSync(path.join(ROOT, '.nojekyll'), '');
+cpSync(path.join(SHARED_DIR, 'tokens.css'), path.join(PAGES_DIR, 'shared', 'tokens.css'));
 
 // Export catalog data directly from canonical SQLite seed schema
 const db = openDatabase(':memory:');
@@ -43,18 +46,19 @@ const rewriteHtml = (html) =>
     .replaceAll('src="/assets/', `src="${ASSET_BASE}/assets/`)
     .replaceAll('href="/fonts/', `href="${ASSET_BASE}/fonts/`)
     .replaceAll('href="/styles.css"', `href="${APP_BASE}/styles.css"`)
+    .replaceAll('href="/shared/tokens.css"', `href="${APP_BASE}/shared/tokens.css"`)
     .replaceAll('href="/concepts.css"', `href="${APP_BASE}/concepts.css"`)
     .replaceAll('src="/app.js"', `src="${APP_BASE}/app.js"`)
     .replaceAll('src="/concepts.js"', `src="${APP_BASE}/concepts.js"`)
     .replaceAll('href="/ar/booking"', `href="${BASE}/ar/booking"`)
     .replaceAll('href="/ar/"', `href="${BASE}/ar/"`);
 
-const indexHtml = rewriteHtml(readFileSync(path.join(PUBLIC_DIR, 'index.html'), 'utf8'));
+const indexHtml = rewriteHtml(readFileSync(path.join(CUSTOMER_DIR, 'index.html'), 'utf8'));
 writeFileSync(path.join(ROOT, 'index.html'), indexHtml);
 writeFileSync(path.join(ROOT, '404.html'), indexHtml);
 
 for (const name of ['concepts.html', 'concepts.css', 'concepts.js']) {
-  const src = readFileSync(path.join(PUBLIC_DIR, name), 'utf8');
+  const src = readFileSync(path.join(CUSTOMER_DIR, name), 'utf8');
   writeFileSync(
     path.join(PAGES_DIR, name),
     name === 'concepts.html' ? rewriteHtml(src) : src.replaceAll("url('/fonts/", `url('${ASSET_BASE}/fonts/`),
@@ -63,7 +67,7 @@ for (const name of ['concepts.html', 'concepts.css', 'concepts.js']) {
 
 writeFileSync(
   path.join(PAGES_DIR, 'styles.css'),
-  readFileSync(path.join(PUBLIC_DIR, 'styles.css'), 'utf8').replaceAll("url('/fonts/", `url('${ASSET_BASE}/fonts/`),
+  readFileSync(path.join(CUSTOMER_DIR, 'styles.css'), 'utf8').replaceAll("url('/fonts/", `url('${ASSET_BASE}/fonts/`),
 );
 
 const rewriteAssetStrings = (code) =>
@@ -72,14 +76,14 @@ const rewriteAssetStrings = (code) =>
     .replaceAll("'/assets/", `'${ASSET_BASE}/assets/`)
     .replaceAll('`/assets/', `\`${ASSET_BASE}/assets/`);
 
-let appCode = rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'app.js'), 'utf8'));
+let appCode = rewriteAssetStrings(readFileSync(path.join(CUSTOMER_DIR, 'app.js'), 'utf8'));
 appCode = appCode.replace(
   'document.querySelectorAll(`a[href^="/${state.lang}/"]`)',
   "document.querySelectorAll(`a[href^=\"${href('')}\"]`)",
 );
 writeFileSync(path.join(PAGES_DIR, 'app.js'), appCode);
 
-let compCode = rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'js', 'components.js'), 'utf8'));
+let compCode = rewriteAssetStrings(readFileSync(path.join(CUSTOMER_DIR, 'js', 'components.js'), 'utf8'));
 compCode = compCode.replace(
   /t\(\s*'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',\s*'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',?\s*\)/,
   "t(\n        'معاينة تجريبية لـ J Beauty على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',\n        'J Beauty static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',\n      )",
@@ -89,14 +93,14 @@ if (!compCode.includes('static preview on GitHub Pages')) {
 }
 writeFileSync(path.join(PAGES_DIR, 'js', 'components.js'), compCode);
 
-for (const file of ['atelier.js', 'booking.js', 'experiences.js', 'motion.js', 'pages-public.js', 'account.js', 'admin.js']) {
+for (const file of ['atelier.js', 'booking.js', 'experiences.js', 'motion.js', 'pages-public.js', 'account.js']) {
   writeFileSync(
     path.join(PAGES_DIR, 'js', file),
-    rewriteAssetStrings(readFileSync(path.join(PUBLIC_DIR, 'js', file), 'utf8')),
+    rewriteAssetStrings(readFileSync(path.join(CUSTOMER_DIR, 'js', file), 'utf8')),
   );
 }
 
-let stateCode = readFileSync(path.join(PUBLIC_DIR, 'js', 'state.js'), 'utf8');
+let stateCode = readFileSync(path.join(CUSTOMER_DIR, 'js', 'state.js'), 'utf8');
 const staticHelpers = `
 const SITE_BASE =
   location.pathname === '${BASE}' || location.pathname.startsWith('${BASE}/') ? '${BASE}' : '';
@@ -293,7 +297,7 @@ export async function api(path, body) {
   }
   throw new Error(t(
     'هذه الصفحة تحتاج إلى تشغيل خادم Node.js 24 وقاعدة بيانات SQLite (المعاينة الحالية تعمل بشكل ثابت على GitHub Pages).',
-    'Live customer accounts, loyalty persistence, and Admin require the Node.js 24 + SQLite backend (GitHub Pages is static preview only).',
+    'Live customer accounts, persisted bookings, and J Petals rewards require the Node.js 24 + SQLite backend (GitHub Pages is static preview only).',
   ));
 }`,
 );

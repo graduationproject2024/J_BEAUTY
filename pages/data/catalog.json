@@ -22,7 +22,7 @@
       ],
       "precautions_ar": "لا يعد بديلاً عن الرعاية الطبية. يُرجى إبلاغ المختصة بأي حساسية جلدية أو حمل قبل الموعد.",
       "precautions_en": "Not a substitute for medical care. Please share any skin sensitivities or pregnancy prior to your session.",
-      "image": "/J_BEAUTY/public/assets/images/services/relaxation.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/relaxation.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 195
@@ -49,7 +49,7 @@
       ],
       "precautions_ar": "تتطلب هذه الخدمة اعتماد المؤهلات المهنية والاحتياطات من الإدارة قبل تأكيد الحجز. غير مخصصة للحالات الطبية الحادة.",
       "precautions_en": "Requires business credential approval and precaution review prior to confirmation. Not intended for acute medical conditions.",
-      "image": "/J_BEAUTY/public/assets/images/services/therapeutic.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/therapeutic.webp",
       "credentials_required": true,
       "credentials_approved": false,
       "price": 225
@@ -76,7 +76,7 @@
       ],
       "precautions_ar": "غير مناسبة للبشرة شديدة الحساسية للحرارة أو حالات ارتفاع الحرارة أو الحمل المبكر.",
       "precautions_en": "Not advised for heat-sensitive skin, fever, or early pregnancy; inform our team of sensitivities.",
-      "image": "/J_BEAUTY/public/assets/images/services/hot-stone.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/hot-stone.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 265
@@ -103,7 +103,7 @@
       ],
       "precautions_ar": "تتطلب اعتماد المؤهلات والاحتياطات المهنية من الإدارة قبل التقديم. يُرجى استشارة الطبيب للحالات الصحية الخاصة.",
       "precautions_en": "Requires business credential and precaution approval prior to delivery. Consult a physician for medical post-op or vascular conditions.",
-      "image": "/J_BEAUTY/public/assets/images/services/lymphatic.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/lymphatic.webp",
       "credentials_required": true,
       "credentials_approved": false,
       "price": 255
@@ -130,7 +130,7 @@
       ],
       "precautions_ar": "يُرجى إبلاغنا مسبقاً بأي التهابات جلدية أو حساسية في الأظافر.",
       "precautions_en": "Please let us know ahead of time if you have nail sensitivities or irritated skin.",
-      "image": "/J_BEAUTY/public/assets/images/services/classic.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/classic.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 185
@@ -157,7 +157,7 @@
       ],
       "precautions_ar": "نستخدم حوضاً ومناشف وأدوات نظيفة مخصصة للخدمة المنزلية.",
       "precautions_en": "Delivered with sanitized portable foot-care essentials and fresh linens.",
-      "image": "/J_BEAUTY/public/assets/images/services/pedicure.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/pedicure.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 125
@@ -184,7 +184,7 @@
       ],
       "precautions_ar": "يتطلب وقت جفاف قصير بعد الطلاء الكلاسيكي.",
       "precautions_en": "Allow brief drying time after traditional polish application.",
-      "image": "/J_BEAUTY/public/assets/images/services/french-tip.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/french-tip.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 155
@@ -211,7 +211,7 @@
       ],
       "precautions_ar": "خدمة تلوين وتنسيق سريعة لا تشمل نقعاً أو إزالة جل سابق.",
       "precautions_en": "Express polish service; does not include full soak or prior gel removal.",
-      "image": "/J_BEAUTY/public/assets/images/services/french-polish.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/french-polish.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 70
@@ -238,7 +238,7 @@
       ],
       "precautions_ar": "تتطلب الإزالة الآمنة لاحقاً خدمة إزالة جل متخصصة لتجنب إضعاف الظفر.",
       "precautions_en": "For nail health, remove later with gentle soak-off care rather than peeling.",
-      "image": "/J_BEAUTY/public/assets/images/services/gel-polish.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/gel-polish.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 115
@@ -265,7 +265,7 @@
       ],
       "precautions_ar": "في حال وجود جل سابق على الأظافر، يُنصح بإضافة خدمة إزالة الجل.",
       "precautions_en": "If wearing existing gel, consider adding Gel Removal to your appointment.",
-      "image": "/J_BEAUTY/public/assets/images/services/french-gel.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/french-gel.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 145
@@ -292,7 +292,7 @@
       ],
       "precautions_ar": "تأكدي من اختيار إزالة الجل إذا كانت أظافركِ تحتوي على جل حالي.",
       "precautions_en": "Please add Gel Removal if removing previous gel at the same visit.",
-      "image": "/J_BEAUTY/public/assets/images/services/colored-french.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/colored-french.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 155
@@ -319,7 +319,7 @@
       ],
       "precautions_ar": "مخصصة لإزالة طلاء الجل الناعم (Soak-Off Gel) وليس الأكريليك الصلب.",
       "precautions_en": "Designed for soak-off soft gel polish; please note hard acrylic extensions separately.",
-      "image": "/J_BEAUTY/public/assets/images/services/gel-removal.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/gel-removal.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 50
@@ -346,7 +346,7 @@
       ],
       "precautions_ar": "مثالية للمحافظة على مظهر متجدد دون الإضرار بصفيحة الظفر.",
       "precautions_en": "Ideal for keeping your gel finish fresh while protecting natural nail integrity.",
-      "image": "/J_BEAUTY/public/assets/images/services/gel-reapplication.webp",
+      "image": "/J_BEAUTY/apps/customer/assets/images/services/gel-reapplication.webp",
       "credentials_required": false,
       "credentials_approved": false,
       "price": 150

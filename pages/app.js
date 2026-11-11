@@ -24,7 +24,6 @@ import {
 } from './js/pages-public.js';
 import { bindBooking, booking } from './js/booking.js';
 import { accountPage, auth, bindAccount, petalsPage } from './js/account.js';
-import { adminPage, bindAdmin } from './js/admin.js';
 
 let lastBeaconRoute = '';
 let loadedSharedCode = '';
@@ -50,7 +49,7 @@ function updateMobileBar(cur) {
   const btn = $('#mobile-bar #mobile-book-btn');
   if (!bar || !btn) return;
   const isMobile = window.innerWidth <= 780;
-  const hideOn = ['booking', 'admin', 'account', 'bookings', 'rewards', 'login', 'register', 'reset', 'atelier', 'occasions', 'gifts'];
+  const hideOn = ['booking', 'account', 'bookings', 'rewards', 'login', 'register', 'reset', 'atelier', 'occasions', 'gifts'];
   const scrolledEnough = window.scrollY > 240;
   const show = isMobile && !hideOn.includes(cur) && scrolledEnough;
   bar.hidden = !show;
@@ -134,7 +133,6 @@ export async function render() {
     else if (cur === 'contact') body = contact();
     else if (cur === 'faq') body = faq();
     else if (cur === 'recovery') body = recovery();
-    else if (cur === 'admin') body = await adminPage();
     else body = notFound();
   } catch (err) {
     body = `<main id="main" class="wrap">${head(t('تعذر تحميل الصفحة', 'Unable to load page'))}<div class="error">${esc(err.message)}</div><button class="btn" id="retry" type="button">${t('إعادة المحاولة', 'Try again')}</button></main>`;
@@ -211,7 +209,6 @@ function bind(cur) {
   bindExperiences(render);
   bindBooking(render);
   bindAccount(go, render);
-  bindAdmin(render);
 }
 
 window.addEventListener('popstate', async () => {

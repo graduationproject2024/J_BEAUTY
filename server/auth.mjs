@@ -6,6 +6,7 @@ import {
   timingSafeEqual,
 } from 'node:crypto';
 import { fail, maskPhone } from './validation.mjs';
+import { resolveUserCapabilities } from './authorization/permissions.mjs';
 
 export const token = () => randomBytes(32).toString('hex');
 export const hash = (value) => createHash('sha256').update(value).digest('hex');
@@ -69,6 +70,28 @@ export function publicUser(user) {
   };
 }
 
+export function staffPublicUser(user) {
+  if (!user) return null;
+  let overrides = null;
+  if (user.permissions_json) {
+    try {
+      overrides = JSON.parse(user.permissions_json);
+    } catch {
+      overrides = null;
+    }
+  }
+  return {
+    id: user.id,
+    name: user.name,
+    phone: user.phone,
+    role: user.role,
+    mfa_enabled: !!user.mfa_enabled,
+    capabilities: [...resolveUserCapabilities(user)],
+    permission_overrides: overrides,
+    created_at: user.created_at,
+  };
+}
+
 export function employeeCustomerView(user, hasPendingVerification) {
   return {
     id: user.id,
@@ -92,11 +115,30 @@ export function checkRateLimit(db, key, max, windowMs = 900000) {
   db.run('UPDATE rate_limits SET count=count+1 WHERE key=?', key);
 }
 
-export function setSessionCookie(res, sessionId, maxAgeSeconds, secure) {
+export function sessionCookieName(scope, secure) {
+  const base = scope === 'ops' ? 'jb_ops_session' : 'jb_customer_session';
+  return secure ? `__Host-${base}` : base;
+}
+
+export function readScopedSessionCookie(req, scope, secure) {
+  const name = sessionCookieName(scope, secure);
+  const cookies = String(req.headers.cookie || '')
+    .split(';')
+    .map((v) => v.trim());
+  const match = cookies.find((v) => v.startsWith(`${name}=`));
+  return match ? match.slice(name.length + 1) : '';
+}
+
+export function setScopedSessionCookie(res, scope, sessionId, maxAgeSeconds, secure) {
+  const name = sessionCookieName(scope, secure);
   const secureFlag = secure ? '; Secure' : '';
+  // Strictly host-only (zero Domain attribute) with distinct names & SameSite=Strict
   res.setHeader(
     'Set-Cookie',
-    `jspa_session=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAgeSeconds}${secureFlag}`,
+    `${name}=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAgeSeconds}${secureFlag}`,
   );
 }
 
+export function setSessionCookie(res, sessionId, maxAgeSeconds, secure) {
+  return setScopedSessionCookie(res, 'customer', sessionId, maxAgeSeconds, secure);
+}
