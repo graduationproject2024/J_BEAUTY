@@ -67,3 +67,16 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     });
   }
 }
+
+// Serverless handler export for Vercel / Cloud Functions compatibility
+let vercelPlatform = null;
+export default async function handler(req, res) {
+  if (!vercelPlatform) {
+    vercelPlatform = createPlatform();
+  }
+  const url = req.url || '/';
+  if (url.startsWith('/api/ops')) {
+    return vercelPlatform.ops.handler(req, res);
+  }
+  return vercelPlatform.customer.handler(req, res);
+}
