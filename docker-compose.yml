@@ -1,0 +1,23 @@
+services:
+  j-beauty:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: j-beauty-platform
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+      - "${OPS_PORT:-3100}:3100"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      - OPS_PORT=3100
+      - DB_PATH=/app/data/jspa.sqlite
+      - OPS_MFA_REQUIRED=${OPS_MFA_REQUIRED:-all}
+      - OPS_MFA_SECRET_KEY=${OPS_MFA_SECRET_KEY:-}
+      - CUSTOMER_ORIGIN=${CUSTOMER_ORIGIN:-http://localhost:3000}
+      - OPS_ORIGIN=${OPS_ORIGIN:-http://localhost:3100}
+      - PUBLIC_ORIGIN=${PUBLIC_ORIGIN:-http://localhost:3000}
+    volumes:
+      - ./data:/app/data
