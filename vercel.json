@@ -1,12 +1,6 @@
 {
   "version": 2,
   "cleanUrls": false,
-  "functions": {
-    "api/*.mjs": {
-      "runtime": "nodejs22.x",
-      "includeFiles": "data/**"
-    }
-  },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/index.mjs" },
     { "source": "/ops", "destination": "/apps/staff/index.html" },
