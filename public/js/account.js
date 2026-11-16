@@ -185,7 +185,7 @@ export function petalsContent() {
         <div class='jb-rewards-heading'>
           <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
           <h2 id='jb-rewards-heading'>${t('نادي البتلات', 'Petals Rewards')}</h2>
-          <p>${t('مكافآت واضحة من زيارات حقيقية ومكتملة ومدفوعة. يحتسب الفريق البتلات وفق قواعد البرنامج بعد التحقق من استحقاقها.', 'Transparent rewards earned from genuine, completed and verified-paid visits, subject to the program rules.')}</p>
+          <p>${t('نادي بتلات J هو تعبيرنا عن الامتنان لثقتكِ الدائمة. كل جلسة عناية مكتملة تقربكِ من مكافآت وتجارب استرخاء استثنائية.', 'Petals Club is our heartfelt appreciation for your trust. Every completed ritual brings you closer to exclusive treats and savings.')}</p>
         </div>
         <div class='jb-points-display jb-points-hero' aria-live='polite'>
           <div>
@@ -217,13 +217,17 @@ export function petalsContent() {
     </section>
     <section class='jb-rewards-catalog' aria-labelledby='jb-rewards-catalog-title'>
       <div class='section-head'><div><span class='eyebrow'>${t('المكافآت', 'REWARDS')}</span><h2 id='jb-rewards-catalog-title'>${t('مكافآت متاحة للطلب', 'Rewards you can request')}</h2></div></div>
-      ${rewards.length ? `<div class='jb-reward-grid'>${rewards.map((r) => `
+      ${rewards.length ? `<div class='jb-reward-grid'>${rewards.map((r) => {
+        const title = r.name_ar ? t(r.name_ar, r.name_en) : (r.value === 10 ? t('قسيمة خصم ترحيبية (10 ر.س)', 'Welcome Voucher (10 SAR)') : r.value === 30 ? t('مكافأة الدلال الفضي (30 ر.س)', 'Silver Reward (30 SAR)') : t(`مكافأة ${money(r.value)}`, `${money(r.value)} Reward`));
+        const desc = r.description_ar ? t(r.description_ar, r.description_en) : (r.value === 10 ? t('تُخصم مباشرة من قيمة جلستكِ القادمة عند تأكيد الموعد.', 'Deducted directly from your next appointment.') : r.value === 30 ? t('خصم يمنحكِ ترقية أو إضافة خدمة عناية خاصة لموعدكِ.', 'Upgrade or add treatments to your visit.') : t('خصم يُطبق على حجز مؤهل قبل الدفع.', 'Applied to an eligible booking before payment.'));
+        return `
         <article class='jb-reward-card'>
           <div class='jb-reward-top'><span>${num(r.points)} ${t('بتلة', 'Petals')}</span><strong>${money(r.value)}</strong></div>
-          <h3>${t('خصم على حجز مؤهل', 'Discount on an eligible booking')}</h3>
-          <p>${t('بعد موافقة الفريق، تُطبق هذه المكافأة على حجز مستحق قبل الدفع.', 'After team approval, this reward is applied to an eligible booking before payment.')}</p>
+          <h3>${esc(title)}</h3>
+          <p>${esc(desc)}</p>
           ${hasLive ? `<button type='button' class='btn small' data-reward='${esc(r.id)}' ${balance < r.points || pendingReq ? 'disabled' : ''}>${pendingReq ? t('يوجد طلب قيد المراجعة', 'Pending request active') : balance >= r.points ? t('اطلبي المكافأة', 'Request reward') : t('الرصيد غير كافٍ', 'Not enough Petals')}</button>` : ''}
-        </article>`).join('')}</div>` : `<div class='empty'>${t('لم تُضف مكافآت إلى البرنامج بعد.', 'No rewards are configured yet.')}</div>`}
+        </article>`;
+      }).join('')}</div>` : `<div class='empty'>${t('لم تُضف مكافآت إلى البرنامج بعد.', 'No rewards are configured yet.')}</div>`}
     </section>
   `;
 }

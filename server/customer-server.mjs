@@ -445,6 +445,39 @@ export function createCustomerApp({
       }
 
       if (method === 'POST' && route === '/api/reviews') {
+        if (!body.booking_id || body.guest === true) {
+          if (!Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5) {
+            fail('Invalid rating');
+          }
+          const reviewBody = text(body.body, 2000);
+          const displayName = optionalText(body.display_name, 60) || (user?.name || 'زائرة J Beauty');
+          if (/(?:\+?966|05)\d{8,9}/.test(`${reviewBody} ${displayName}`)) {
+            fail('Please remove phone numbers from your review');
+          }
+          const review = {
+            id: uid(),
+            rating: body.rating,
+            body: reviewBody,
+            display_name: displayName,
+            service_name: optionalText(body.service_name, 80) || '',
+            approved: false,
+            moderation_status: 'pending',
+            moderation_note: '',
+            is_guest: true,
+            created_at: now(),
+          };
+          const guestBookingId = `guest_rev_${review.id}`;
+          const reviewerId = user ? user.id : 'guest';
+          db.run(
+            'INSERT INTO reviews(id,user_id,booking_id,data) VALUES(?,?,?,?)',
+            review.id,
+            reviewerId,
+            guestBookingId,
+            JSON.stringify(review),
+          );
+          return send({ ok: true, review: { ...review, booking_id: guestBookingId } }, 201);
+        }
+
         needUser();
         if (!user.verified) fail('Phone verification required', 403);
         const b = helpers.bookings().find((x) => x.id === body.booking_id);

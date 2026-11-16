@@ -98,8 +98,13 @@ export function catalogView(d) {
                 </div>
               </div>
               <div class="ops-row">
-                <label class="ops-check"><input type="checkbox" name="active" checked><span>${t('باقة متاحة للحجز', 'Active Package')}</span></label>
-                <button type="submit" class="btn small">${t('حفظ الباقة', 'Save Package')}</button>
+                <div class="ops-chip-row">
+                  <label class="ops-check"><input type="checkbox" name="active" checked><span>${t('باقة متاحة للحجز', 'Active Package')}</span></label>
+                </div>
+                <div class="ops-chip-row">
+                  <button type="button" class="btn small light" id="pkg-reset-btn">${t('جديد / مسح', 'Clear')}</button>
+                  <button type="submit" class="btn small">${t('حفظ الباقة', 'Save Package')}</button>
+                </div>
               </div>
             </form>
 
@@ -111,6 +116,7 @@ export function catalogView(d) {
                       <strong>${esc(nameOf(p))}</strong>
                       <div class="ops-chip-row">
                         <span><bdi>${money(p.price)}</bdi></span>
+                        <button type="button" class="btn small light" data-edit-pkg="${esc(p.id)}">${t('تعديل', 'Edit')}</button>
                         <button type="button" class="btn small light" data-remove-pkg="${esc(p.id)}">${t('حذف', 'Remove')}</button>
                       </div>
                     </div>
@@ -202,6 +208,32 @@ export function bindCatalog(d, renderFn) {
       opsToast(err.message);
       e.submitter.disabled = false;
     }
+  });
+
+  const pkgForm = $ops('#ops-package-form');
+  $ops('#pkg-reset-btn')?.addEventListener('click', () => {
+    pkgForm?.reset();
+    if (pkgForm) {
+      pkgForm.elements.id.value = '';
+      pkgForm.querySelectorAll('[data-pkg-svc]').forEach((cb) => (cb.checked = false));
+    }
+  });
+
+  document.querySelectorAll('[data-edit-pkg]').forEach((btn) => {
+    btn.onclick = () => {
+      const p = (d.packages || []).find((x) => x.id === btn.dataset.editPkg);
+      if (!p || !pkgForm) return;
+      pkgForm.elements.id.value = p.id;
+      pkgForm.elements.name_ar.value = p.name_ar || '';
+      pkgForm.elements.name_en.value = p.name_en || '';
+      pkgForm.elements.price.value = p.price || '';
+      pkgForm.elements.active.checked = p.active !== false;
+      const svcSet = new Set(p.service_ids || []);
+      pkgForm.querySelectorAll('[data-pkg-svc]').forEach((cb) => {
+        cb.checked = svcSet.has(cb.dataset.pkgSvc);
+      });
+      pkgForm.scrollIntoView({ behavior: 'smooth' });
+    };
   });
 
   document.querySelectorAll('[data-remove-pkg]').forEach((btn) => {

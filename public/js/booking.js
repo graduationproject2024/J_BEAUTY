@@ -352,12 +352,21 @@ function stepFourDetailsHtml() {
     </label>
     ${
       !state.user
-        ? `<div class="card" style="background:var(--cream);padding:16px 18px">
-             <strong>${t('الحجز كزائرة متاح دائماً', 'Guest booking is always welcome')}</strong>
-             <p class="muted" style="margin:4px 0 0">${t(
-               'يمكنكِ إكمال الحجز مباشرة بدون حساب، أو إنشاء حساب لاحقاً لمتابعة زياراتكِ وبتلاتكِ.',
-               'Complete your request directly as a guest, or create an account later for your Beauty Passport.',
-             )}</p>
+        ? `<div class="card booking-guest-loyalty-notice" style="background:var(--blush-tint);border:1.5px solid var(--rose-gold);padding:18px 20px;border-radius:var(--r-md);margin-top:14px">
+             <div class="row" style="align-items:flex-start;gap:12px">
+               <span style="color:var(--rose-gold);font-size:22px;line-height:1">✦</span>
+               <div style="flex:1">
+                 <strong style="color:var(--plum);display:block;margin-bottom:6px;font-size:15px">${t('تنبيه هام حول نقاط الولاء (بتلات J Petals)', 'Important Notice About J Petals')}</strong>
+                 <p style="margin:0 0 12px;color:var(--ink-muted);font-size:14px;line-height:1.6">${t(
+                   'عند إتمام الحجز كزائرة، لن يتم احتساب نقاط "بتلات J" في رصيدكِ لعدم وجود حساب مسجل مربوط برقمكِ. سجلي دخولكِ أو أنشئي حسابكِ الآن للاستفادة من المكافآت والخصومات.',
+                   'Booking as a guest means loyalty Petals cannot be credited without an account. Sign in or create an account to earn Petals and redeem luxury rewards.',
+                 )}</p>
+                 <div class="row" style="gap:10px;flex-wrap:wrap">
+                   <a class="btn small" href="${href('login')}" style="padding:6px 14px;font-size:13px">${t('تسجيل الدخول لحفظ البتلات', 'Sign in to earn Petals')}</a>
+                   <a class="btn small light" href="${href('register')}" style="padding:6px 14px;font-size:13px">${t('إنشاء حساب جديد', 'Create account')}</a>
+                 </div>
+               </div>
+             </div>
            </div>`
         : ''
     }
@@ -380,6 +389,16 @@ function stepFiveReviewHtml() {
       <p style="margin-bottom:0"><strong>${t('الإجمالي التقديري:', 'Estimated total:')} ${money(s.total)}</strong></p>
       ${state.draft.notes ? `<p class="muted" style="margin-top:8px;margin-bottom:0">${t('ملاحظات:', 'Notes:')} ${esc(state.draft.notes)}</p>` : ''}
     </div>
+    ${
+      !state.user
+        ? `<div class="notice" style="border-color:var(--rose-gold);background:var(--blush-tint);margin-bottom:14px">
+             <strong>${t('تنويه الزائرة:', 'Guest Notice:')}</strong> ${t(
+               'أنتِ بصدد إتمام الحجز كزائرة بدون حساب — لن تُحتسب نقاط بتلات J في رصيدكِ ما لم تسجلي دخولكِ.',
+               'You are booking as a guest — loyalty Petals will not be credited.',
+             )}
+           </div>`
+        : ''
+    }
     <label class="check">
       <input type="checkbox" name="terms" required ${state.draft.terms ? 'checked' : ''}>
       <span>

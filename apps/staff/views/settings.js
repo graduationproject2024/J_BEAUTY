@@ -21,12 +21,26 @@ export function settingsView(d) {
           <label class="field">${t('واتساب استقبال الطلبات', 'Business WhatsApp Phone')}<input type="tel" name="business_phone" value="${esc(s.business_phone || '')}" placeholder="05xxxxxxxx"></label>
           <label class="field">${t('Instagram URL', 'Instagram URL')}<input type="url" name="instagram" value="${esc(s.instagram || '')}"></label>
           <label class="field">${t('TikTok URL', 'TikTok URL')}<input type="url" name="tiktok" value="${esc(s.tiktok || '')}"></label>
+          <label class="field">${t('Snapchat URL', 'Snapchat URL')}<input type="url" name="snapchat" value="${esc(s.snapchat || '')}"></label>
           <label class="field">${t('الطاقة التزامنية القصوى (Capacity)', 'Concurrent Capacity')}<input type="number" min="0" max="1000" name="capacity" value="${esc(s.capacity ?? 0)}" required></label>
           <label class="field">${t('فاصل التنقل بين المواعيد (دقيقة)', 'Travel Buffer (min)')}<input type="number" min="0" max="1000" name="travel_buffer" value="${esc(s.travel_buffer ?? 30)}" required></label>
           <label class="field">${t('الحد الأدنى للمهلة المسبقة (ساعة)', 'Minimum Lead Hours')}<input type="number" min="0" max="1000" name="lead_hours" value="${esc(s.lead_hours ?? 12)}" required></label>
           <label class="field">${t('بداية الدوام (HH:MM)', 'Opening Time')}<input type="time" name="opening_time" value="${esc(s.opening_time || '09:00')}" required></label>
           <label class="field">${t('نهاية الدوام (HH:MM)', 'Closing Time')}<input type="time" name="closing_time" value="${esc(s.closing_time || '22:00')}" required></label>
           <label class="field">${t('معدل بتلات J لكل ر.س', 'Petals per SAR')}<input type="number" step="0.1" min="0" max="100" name="points_per_sar" value="${esc(s.points_per_sar ?? 1)}" required></label>
+        </div>
+
+        <div class="ops-card" style="margin:16px 0;background:var(--ivory);border:1px solid var(--border)">
+          <h3>${t('شريط الإعلانات والعروض المتحرك أعلى الموقع', 'Announcement & Offers Ticker')}</h3>
+          <label class="ops-check" style="margin-bottom:12px">
+            <input type="checkbox" name="announcement_active" ${s.announcement_active !== false ? 'checked' : ''}>
+            <span>${t('تفعيل شريط الإعلانات أعلى الموقع', 'Enable Announcement Ticker')}</span>
+          </label>
+          <div class="form-grid">
+            <label class="field">${t('نص الإعلان (عربي)', 'Announcement Text (AR)')}<input type="text" name="announcement_text_ar" value="${esc(s.announcement_text_ar || '')}" placeholder="سبا نسائي منزلي..."></label>
+            <label class="field">${t('نص الإعلان (إنجليزي)', 'Announcement Text (EN)')}<input type="text" name="announcement_text_en" value="${esc(s.announcement_text_en || '')}" placeholder="Luxury Women’s Home Spa..."></label>
+            <label class="field">${t('رابط الإعلان (اختياري)', 'Announcement Link (Optional)')}<input type="text" name="announcement_link" value="${esc(s.announcement_link || '')}" placeholder="/booking أو /packages"></label>
+          </div>
         </div>
 
         <div class="field">
@@ -80,6 +94,11 @@ export function bindSettings(renderFn) {
         business_phone: fd.get('business_phone') || '',
         instagram: fd.get('instagram') || '',
         tiktok: fd.get('tiktok') || '',
+        snapchat: fd.get('snapchat') || '',
+        announcement_active: f.elements.announcement_active.checked,
+        announcement_text_ar: fd.get('announcement_text_ar') || '',
+        announcement_text_en: fd.get('announcement_text_en') || '',
+        announcement_link: fd.get('announcement_link') || '',
         capacity: Number(fd.get('capacity')),
         travel_buffer: Number(fd.get('travel_buffer')),
         lead_hours: Number(fd.get('lead_hours')),

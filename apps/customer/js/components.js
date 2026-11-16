@@ -3,12 +3,17 @@ import { renderSignatureBloomSVG } from './motion.js';
 
 export function monogramSvg(cls = 'brand-mark') {
   return `<svg class="${cls}" viewBox="0 0 96 96" fill="none" aria-hidden="true">
-    <circle cx="48" cy="48" r="44" stroke="#D4AF7C" stroke-width="1.6"/>
-    <path d="M48 12C54 22 54 32 48 40C42 32 42 22 48 12Z" fill="#D9B7C0" fill-opacity="0.45" stroke="currentColor" stroke-width="1.2"/>
-    <path d="M18 36C27 34 36 39 40 46C31 48 22 44 18 36Z" fill="#A7B79F" fill-opacity="0.45" stroke="currentColor" stroke-width="1.2"/>
-    <path d="M78 36C69 34 60 39 56 46C65 48 74 44 78 36Z" fill="#A7B79F" fill-opacity="0.45" stroke="currentColor" stroke-width="1.2"/>
-    <path d="M53 34V61C53 70.5 46.5 76 38.5 76C32.5 76 28.5 72.5 28.5 68C28.5 64.5 31 62 34 62C36.8 62 38.5 64 38.5 66.2" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-    <circle cx="53" cy="25" r="2.6" fill="#D4AF7C"/>
+    <circle cx="48" cy="48" r="44" stroke="#D4AF7C" stroke-width="1.4"/>
+    <circle cx="48" cy="48" r="40.5" stroke="#D9B7C0" stroke-width="0.75" stroke-dasharray="1.5 2.5" opacity="0.8"/>
+    <g transform="translate(48, 48)">
+      <path d="M 0,-7 C -6.2,-15 -6.8,-23.5 0,-27 C 6.8,-23.5 6.2,-15 0,-7 Z" fill="#D9B7C0" fill-opacity="0.4" stroke="#D4AF7C" stroke-width="1.35" stroke-linejoin="round"/>
+      <path d="M 0,-7 C -6.2,-15 -6.8,-23.5 0,-27 C 6.8,-23.5 6.2,-15 0,-7 Z" transform="rotate(72)" fill="#D9B7C0" fill-opacity="0.4" stroke="#D4AF7C" stroke-width="1.35" stroke-linejoin="round"/>
+      <path d="M 0,-7 C -6.2,-15 -6.8,-23.5 0,-27 C 6.8,-23.5 6.2,-15 0,-7 Z" transform="rotate(144)" fill="#D9B7C0" fill-opacity="0.4" stroke="#D4AF7C" stroke-width="1.35" stroke-linejoin="round"/>
+      <path d="M 0,-7 C -6.2,-15 -6.8,-23.5 0,-27 C 6.8,-23.5 6.2,-15 0,-7 Z" transform="rotate(216)" fill="#D9B7C0" fill-opacity="0.4" stroke="#D4AF7C" stroke-width="1.35" stroke-linejoin="round"/>
+      <path d="M 0,-7 C -6.2,-15 -6.8,-23.5 0,-27 C 6.8,-23.5 6.2,-15 0,-7 Z" transform="rotate(288)" fill="#D9B7C0" fill-opacity="0.4" stroke="#D4AF7C" stroke-width="1.35" stroke-linejoin="round"/>
+      <circle cx="0" cy="0" r="6.2" fill="#FAF7F5" stroke="#D4AF7C" stroke-width="1.35"/>
+      <circle cx="0" cy="0" r="2.5" fill="#D4AF7C"/>
+    </g>
   </svg>`;
 }
 
@@ -23,12 +28,17 @@ export function icon(kind) {
     star: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><polygon points="12 2.5 15.09 8.76 22 9.77 17 14.64 18.18 21.5 12 18.26 5.82 21.5 7 14.64 2 9.77 8.91 8.76 12 2.5"/></svg>',
     calendar: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
     check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 13l4 4L19 7"/></svg>',
+    instagram: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>',
+    tiktok: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.86.12V9.42a6.34 6.34 0 0 0-.86-.06 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.34a8.28 8.28 0 0 0 4.85 1.57V6.69z"/></svg>',
+    snapchat: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-3.8 0-6 2.7-6 6.1 0 1.2.4 2.4.9 3.3-.2.3-.7.7-1.4.9-.4.1-.7.4-.7.8 0 .5.4.8.9.9 1.1.2 1.6.8 1.8 1.4-.4.3-1.1.8-1.5 1.4-.3.4-.2.9.2 1.2.6.4 1.5.4 2.3.2.7 1.4 2 2.1 3.5 2.1 1.5 0 2.8-.7 3.5-2.1.8.2 1.7.2 2.3-.2.4-.3.5-.8.2-1.2-.4-.6-1.1-1.1-1.5-1.4.2-.6.7-1.2 1.8-1.4.5-.1.9-.4.9-.9 0-.4-.3-.7-.7-.8-.7-.2-1.2-.6-1.4-.9.5-.9.9-2.1.9-3.3C18 4.7 15.8 2 12 2z"/></svg>',
+    whatsapp: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
   };
   return icons[kind] || '';
 }
 
 export function header() {
   const cur = page();
+  const s = state.catalog.settings || {};
   const navLinks = [
     ['home', 'الرئيسية', 'Home'],
     ['services', 'الخدمات', 'Services'],
@@ -40,13 +50,34 @@ export function header() {
   ];
   const accountRoute = state.user ? 'account' : 'login';
 
-  return `
-    <div class="announcement">
-      ${t(
-        'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',
-        'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',
-      )}
+  const annActive = s.announcement_active !== false;
+  const annText = t(
+    s.announcement_text_ar || 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستكِ في راحة بيتكِ',
+    s.announcement_text_en || 'Luxury Women’s Home Spa in Al Madinah ✦ Personally Confirmed Appointments ✦ 20% Off Curated Packages ✦ Book Your Home Sanctuary',
+  );
+  const annLink = s.announcement_link ? href(s.announcement_link.replace(/^\//, '')) : null;
+  const annInner = `
+    <div class="ticker-content">
+      <div class="ticker-track">
+        <span class="ticker-item">${annText}</span>
+        <span class="ticker-sep">✦</span>
+        <span class="ticker-item">${annText}</span>
+        <span class="ticker-sep">✦</span>
+        <span class="ticker-item">${annText}</span>
+        <span class="ticker-sep">✦</span>
+      </div>
     </div>
+  `;
+  const annHtml = annActive
+    ? `<div class="announcement-ticker" role="region" aria-label="${t('شريط الإعلانات والعروض', 'Announcements & Offers')}">${annLink ? `<a href="${annLink}" class="ticker-link">${annInner}</a>` : annInner}</div>`
+    : '';
+
+  const waDigits = String(s.business_phone || '').replace(/\D/g, '');
+  const waUrl = waDigits ? `https://wa.me/${esc(waDigits)}` : 'https://wa.me/966500000000';
+  const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://instagram.com/jbeauty.spa';
+
+  return `
+    ${annHtml}
     <div class="header-shell">
       <header class="wrap header">
         <a class="brand" href="${href('home')}">
@@ -68,6 +99,12 @@ export function header() {
           </div>
         </nav>
         <div class="header-tools">
+          <a class="header-social-btn wa" href="${waUrl}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="${t('تواصلي معنا عبر واتساب', 'Chat on WhatsApp')}">
+            ${icon('whatsapp')}
+          </a>
+          <a class="header-social-btn ig" href="${igUrl}" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="${t('حسابنا في انستغرام', 'Instagram')}">
+            ${icon('instagram')}
+          </a>
           <button class="lang" id="language" type="button" aria-label="${t('Switch to English', 'التبديل للعربية')}">
             ${t('EN', 'عربي')}
           </button>
@@ -88,13 +125,10 @@ export function header() {
 export function footer() {
   const s = state.catalog.settings || {};
   const waDigits = String(s.business_phone || '').replace(/\D/g, '');
-  const socialLinks = ['instagram', 'tiktok']
-    .filter((k) => safeURL(s[k]))
-    .map(
-      (k) =>
-        `<a href="${esc(s[k])}" target="_blank" rel="noopener noreferrer">${k === 'instagram' ? 'Instagram' : 'TikTok'}</a>`,
-    )
-    .join('');
+  const waUrl = waDigits ? `https://wa.me/${esc(waDigits)}` : 'https://wa.me/966500000000';
+  const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://instagram.com/jbeauty.spa';
+  const ttUrl = safeURL(s.tiktok) ? esc(s.tiktok) : 'https://tiktok.com/@jbeauty.spa';
+  const scUrl = safeURL(s.snapchat) ? esc(s.snapchat) : 'https://snapchat.com/add/jbeauty.spa';
 
   return `
     <footer class="footer">
@@ -109,12 +143,26 @@ export function footer() {
               </span>
             </a>
             <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلكِ.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
+            <div class="footer-social-bar">
+              <a href="${igUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn ig" aria-label="Instagram" title="Instagram">
+                ${icon('instagram')}
+              </a>
+              <a href="${ttUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn tt" aria-label="TikTok" title="TikTok">
+                ${icon('tiktok')}
+              </a>
+              <a href="${scUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn sc" aria-label="Snapchat" title="Snapchat">
+                ${icon('snapchat')}
+              </a>
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn wa" aria-label="WhatsApp" title="WhatsApp">
+                ${icon('whatsapp')}
+              </a>
+            </div>
           </div>
           <div class="footer-links">
             <strong>${t('التجارب والخدمات', 'Experiences')}</strong>
             ${[
               ['services', 'جميع الخدمات (13)', 'All services (13)'],
-              ['packages', 'الباقات', 'Packages'],
+              ['packages', 'الباقات المتناغمة', 'Curated Packages'],
               ['atelier', 'أتيليه J للأظافر', 'J Nail Atelier'],
               ['studio', 'استوديو اختيار الخدمات', 'J Ritual Studio'],
               ['lookbook', 'معرض الإطلالات', 'Beauty Lookbook'],
@@ -138,8 +186,6 @@ export function footer() {
             ]
               .map(([r, ar, en]) => `<a href="${href(r)}">${t(ar, en)}</a>`)
               .join('')}
-            ${waDigits ? `<a href="https://wa.me/${esc(waDigits)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>` : ''}
-            ${socialLinks}
           </div>
         </div>
         <div class="footer-bottom">
@@ -448,40 +494,55 @@ export function reviewModerationStatusBadge(r) {
 
 export function openReviewModal({ bookings = [], existingReviews = [], initialBookingId = '', onSaved }) {
   const completedBookings = bookings.filter((b) => b.status === 'completed');
-  if (!completedBookings.length) return;
+  const isGuestReview = !completedBookings.length;
   const chosenId = initialBookingId && completedBookings.some((b) => b.id === initialBookingId)
     ? initialBookingId
-    : completedBookings[0].id;
+    : (completedBookings[0]?.id || '');
   const labels = starRatingLabels();
 
   const findReview = (bid) => existingReviews.find((r) => r.booking_id === bid) || null;
   let currentBookingId = chosenId;
-  let existing = findReview(currentBookingId);
-  let selectedRating = Number(existing?.rating || 0);
+  let existing = currentBookingId ? findReview(currentBookingId) : null;
+  let selectedRating = Number(existing?.rating || 5);
+  const svcs = state.catalog.services || [];
 
   openDialog(`
-    <h2>${existing ? t('تعديل تقييمكِ', 'Edit your review') : t('قيّمي تجربتكِ معنا', 'Rate Your Experience')}</h2>
+    <h2>${existing ? t('تعديل تقييمكِ', 'Edit your review') : t('شاركينا انطباعكِ وتقييمكِ', 'Share Your Review & Rating')}</h2>
     <p class="muted" style="margin-bottom:14px">${t(
-      'تُراجع التقييمات من فريقنا قبل نشرها لضمان المصداقية وحماية خصوصيتكِ.',
-      'All reviews are verified against completed appointments and moderated before publication.',
+      'يسعدنا سماع رأيكِ. تُراجع التقييمات من فريق J Beauty قبل نشرها لضمان المصداقية وحماية الخصوصية.',
+      'We value your feedback. All reviews are moderated before publication to protect privacy and authenticity.',
     )}</p>
     <form id="review-form" novalidate>
       <div id="review-form-error" role="alert"></div>
-      <label class="field">
-        ${t('الزيارة المكتملة', 'Completed appointment')}
-        <select name="booking_id" id="review-booking-select">
-          ${completedBookings
-            .map((b) => {
-              const ex = findReview(b.id);
-              const itemsText = (b.items || []).map((i) => esc(nameOf(i) || i.name)).join(' + ');
-              return `<option value="${esc(b.id)}" ${b.id === currentBookingId ? 'selected' : ''}>${esc(b.reference)} · ${esc(b.date)} · ${itemsText}${ex ? ` (${t('تقييم سابق', 'Reviewed')})` : ''}</option>`;
-            })
-            .join('')}
-        </select>
-      </label>
+      ${
+        !isGuestReview
+          ? `
+            <label class="field">
+              ${t('الزيارة المكتملة', 'Completed appointment')}
+              <select name="booking_id" id="review-booking-select">
+                ${completedBookings
+                  .map((b) => {
+                    const ex = findReview(b.id);
+                    const itemsText = (b.items || []).map((i) => esc(nameOf(i) || i.name)).join(' + ');
+                    return `<option value="${esc(b.id)}" ${b.id === currentBookingId ? 'selected' : ''}>${esc(b.reference)} · ${esc(b.date)} · ${itemsText}${ex ? ` (${t('تقييم سابق', 'Reviewed')})` : ''}</option>`;
+                  })
+                  .join('')}
+              </select>
+            </label>
+          `
+          : `
+            <label class="field">
+              ${t('الخدمة أو الجلسة التي جربتها (اختياري)', 'Service Experienced (Optional)')}
+              <select name="service_name">
+                <option value="">${t('تجربة عناية عامة مع J Beauty', 'General J Beauty Care Experience')}</option>
+                ${svcs.map((s) => `<option value="${esc(nameOf(s))}">${esc(nameOf(s))}</option>`).join('')}
+              </select>
+            </label>
+          `
+      }
 
       <div class="control-group">
-        <span class="control-label" id="star-group-label">${t('التقييم العام *', 'Your star rating *')}</span>
+        <span class="control-label" id="star-group-label">${t('تقييمكِ بالنجوم *', 'Your star rating *')}</span>
         <div class="star-picker" id="star-picker" role="radiogroup" aria-labelledby="star-group-label">
           ${[1, 2, 3, 4, 5]
             .map(
@@ -489,7 +550,7 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
             <button type="button" class="star-btn ${n <= selectedRating ? 'is-filled' : ''}" role="radio"
               aria-checked="${n === selectedRating ? 'true' : 'false'}"
               aria-label="${esc(labels[n])}"
-              data-star="${n}" tabindex="${n === (selectedRating || 1) ? '0' : '-1'}">
+              data-star="${n}" tabindex="${n === selectedRating ? '0' : '-1'}">
               ${icon('star')}
             </button>`,
             )
@@ -500,16 +561,22 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
         </div>
       </div>
 
-      ${field(t('الاسم الظاهر للعامة (اختياري)', 'Public display name (optional)'), 'display_name', 'text', editableDisplayName(existing), 'maxlength="60" placeholder="' + t('مثال: نورة ع.', 'e.g. Noura A.') + '"')}
+      ${field(
+        t('الاسم أو اللقب الظاهر (مثلاً: سارة، أم فيصل)', 'Display Name (e.g. Sara, Um Faisal)'),
+        'display_name',
+        'text',
+        state.user?.name || editableDisplayName(existing),
+        'maxlength="60" placeholder="' + t('مثال: سارة ع. أو زائرة', 'e.g. Sara A. or Guest') + '"',
+      )}
       <label class="field">
-        ${t('تفاصيل تجربتكِ *', 'Your experience *')}
-        <textarea name="body" id="review-body-input" required maxlength="2000" placeholder="${t('شاركينا رأيكِ في جودة الخدمة، اللباقة، وترتيب الزيارة...', 'Share your honest impression of service care and attention...')}">${esc(existing?.body || '')}</textarea>
+        ${t('تعليقكِ وانطباعكِ عن التجربة *', 'Your comments & feedback *')}
+        <textarea name="body" id="review-body-input" required maxlength="2000" placeholder="${t('صفي لنا تجربتكِ مع الأخصائية، جودة العناية والراحة في منزلكِ...', 'Tell us about the care quality, therapist attention, and comfort in your home...')}">${esc(existing?.body || '')}</textarea>
       </label>
       <p class="muted" style="font-size:13px">${t(
-        'حفاظاً على خصوصيتكِ، يُرجى عدم إدراج رقم الجوال أو العنوان التفصيلي.',
-        'For your privacy, please do not include phone numbers or home addresses.',
+        'حفاظاً على خصوصيتكِ، يُرجى عدم كتابة رقم الجوال أو العنوان التفصيلي في التعليق.',
+        'For your privacy, please do not include phone numbers or sensitive addresses.',
       )}</p>
-      <button class="btn" type="submit" id="submit-review-btn">${existing ? t('إرسال التعديل للمراجعة', 'Update & submit for review') : t('إرسال التقييم للمراجعة', 'Submit review for moderation')}</button>
+      <button class="btn" type="submit" id="submit-review-btn">${existing ? t('إرسال التعديل للمراجعة', 'Update & submit for review') : t('إرسال التقييم', 'Submit Review')}</button>
     </form>
   `);
 
@@ -602,13 +669,22 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
     const submitBtn = $('#submit-review-btn');
     if (submitBtn) submitBtn.disabled = true;
     try {
-      await api('/reviews', {
-        booking_id: currentBookingId,
-        rating: selectedRating,
-        display_name: d.display_name,
-        body: reviewText,
-        edit: Boolean(existing),
-      });
+      const payload = isGuestReview || !currentBookingId
+        ? {
+            guest: true,
+            rating: selectedRating,
+            display_name: d.display_name,
+            service_name: d.service_name || '',
+            body: reviewText,
+          }
+        : {
+            booking_id: currentBookingId,
+            rating: selectedRating,
+            display_name: d.display_name,
+            body: reviewText,
+            edit: Boolean(existing),
+          };
+      await api('/reviews', payload);
       $('#modal')?.close();
       state.account = null;
       toast(t('تم استلام تقييمكِ بنجاح؛ بانتظار مراجعة الإدارة قبل النشر.', 'Thank you — your review is saved and pending moderation.'));

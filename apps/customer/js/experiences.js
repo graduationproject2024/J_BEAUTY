@@ -251,6 +251,14 @@ const OCCASION_TYPES = [
   ['eid', 'تهيئة عيد ومناسبة خاصة', 'Celebration & Eid Prep', 'تجهيز جماعي أنيق قبل العيد أو الحفل'],
 ];
 
+const customGuestName = (p) => {
+  const raw = String(p?.label || '').trim();
+  if (!raw || /^(المستفيدة|Guest|Participant)\s*\d+$/i.test(raw)) {
+    return '';
+  }
+  return raw;
+};
+
 const displayGuestLabel = (p, idx) => {
   const raw = String(p?.label || '').trim();
   if (!raw || /^(المستفيدة|Guest|Participant)\s*\d+$/i.test(raw)) {
@@ -362,7 +370,7 @@ export function groupBookingPage() {
                 </div>
                 <label class="field" style="margin-bottom:0">
                   ${t('الاسم أو الصفة (مثلاً: العروس، أختي، والدتي)', 'Name or role (e.g. Bride, Sister, Mom)')}
-                  <input type="text" data-guest-label="${idx}" value="${esc(displayGuestLabel(p, idx))}" maxlength="60" required>
+                  <input type="text" data-guest-label="${idx}" value="${esc(customGuestName(p))}" placeholder="${t('مثال: العروس، أختي، والدتي، أو اكتبي الاسم...', 'e.g. Bride, Sister, Mom, or enter name...')}" maxlength="60">
                 </label>
               </div>
             `,
@@ -698,7 +706,10 @@ export function bindExperiences(renderFn) {
     state.groupDraft.participants.forEach((p, idx) => {
       const lbl = f.querySelector(`[data-guest-label="${idx}"]`);
       const boxes = [...f.querySelectorAll(`[data-guest-svc="${idx}"]`)];
-      if (lbl) p.label = lbl.value;
+      if (lbl) {
+        const val = lbl.value.trim();
+        p.label = val || t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`);
+      }
       if (boxes.length) p.service_ids = boxes.filter((b) => b.checked).map((b) => b.value);
     });
   };
