@@ -42,8 +42,8 @@ function getPlatform() {
 export default async function handler(req, res) {
   try {
     const platform = getPlatform();
-    if (req.headers['x-matched-path']) {
-      req.url = req.headers['x-matched-path'];
+    if (req.url && !req.url.startsWith('/api') && req.url !== '/') {
+      req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
     }
     const url = req.url || '/';
 
