@@ -201,6 +201,7 @@ let browser;
 
   await guest.goto(custBase + '/ar/atelier');
   await guest.locator('[data-at-shape="oval"]').click();
+  await guest.locator('[data-at-tab="finish"]').click();
   await guest.locator('[data-at-finish="gloss"]').click();
   await guest.waitForTimeout(250);
   await guest.screenshot({ path: join(out, 'nail-atelier-mobile.png'), fullPage: false });

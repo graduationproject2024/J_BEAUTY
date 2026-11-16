@@ -1,0 +1,112 @@
+{
+  "capturedAt": "2026-11-11T15:00:00.726Z",
+  "viewports": {
+    "ar-1440": {
+      "scrollHeight": 1757,
+      "stageWidth": 346,
+      "stageHeight": 346,
+      "controlsHeight": 864
+    },
+    "en-1440": {
+      "scrollHeight": 1696,
+      "stageWidth": 346,
+      "stageHeight": 346,
+      "controlsHeight": 833
+    },
+    "ar-360": {
+      "scrollHeight": 2602,
+      "viewportHeight": 780,
+      "previewCardHeight": 241,
+      "stageHeight": 185,
+      "stageViewportPct": 24,
+      "controlsHeight": 1286
+    },
+    "ar-390": {
+      "scrollHeight": 2498,
+      "viewportHeight": 844,
+      "previewCardHeight": 241,
+      "stageHeight": 185,
+      "stageViewportPct": 22,
+      "controlsHeight": 1182
+    },
+    "en-390": {
+      "scrollHeight": 2459,
+      "viewportHeight": 844,
+      "previewCardHeight": 241,
+      "stageHeight": 185,
+      "stageViewportPct": 22,
+      "controlsHeight": 1138
+    }
+  },
+  "presets": [
+    {
+      "file": "before-preset-1-fair-short-oval-blush.png",
+      "label": "Fair + Short + Oval + Sheer Blush",
+      "skin": "fair",
+      "shape": "oval",
+      "length": "short",
+      "polish": "#F3DCE1",
+      "french": "none",
+      "finish": "gloss",
+      "suggestedService": "الخدمة المقترحة لهذا التصميم: طلاء جل (115 ر.س)"
+    },
+    {
+      "file": "before-preset-2-warm-medium-almond-classic-french.png",
+      "label": "Warm + Medium + Almond + Classic French",
+      "skin": "warm",
+      "shape": "almond",
+      "length": "medium",
+      "polish": "#F3DCE1",
+      "french": "classic",
+      "tip": "#F5EFE8",
+      "finish": "gloss",
+      "suggestedService": "الخدمة المقترحة لهذا التصميم: جل فرنسي (145 ر.س)"
+    },
+    {
+      "file": "before-preset-3-olive-medium-squoval-sage-matte.png",
+      "label": "Olive + Medium + Soft Square + Sage Matte",
+      "skin": "olive",
+      "shape": "squoval",
+      "length": "medium",
+      "polish": "#89A17F",
+      "french": "none",
+      "finish": "matte",
+      "suggestedService": "الخدمة المقترحة لهذا التصميم: طلاء جل (115 ر.س)"
+    },
+    {
+      "file": "before-preset-4-deep-long-coffin-burgundy-gloss.png",
+      "label": "Deep + Long + Coffin + Burgundy Gloss",
+      "skin": "deep",
+      "shape": "coffin",
+      "length": "long",
+      "polish": "#612136",
+      "french": "none",
+      "finish": "gloss",
+      "suggestedService": "الخدمة المقترحة لهذا التصميم: طلاء جل (115 ر.س)"
+    },
+    {
+      "file": "before-preset-5-deep-long-square-micro-french.png",
+      "label": "Deep + Long + Square + Micro French",
+      "skin": "deep",
+      "shape": "square",
+      "length": "long",
+      "polish": "#F3DCE1",
+      "french": "micro",
+      "tip": "#F5EFE8",
+      "finish": "gloss",
+      "suggestedService": "الخدمة المقترحة لهذا التصميم: جل فرنسي (145 ر.س)"
+    },
+    {
+      "file": "before-preset-6-warm-medium-oval-ombre.png",
+      "label": "Warm + Medium + Oval + Ombre",
+      "skin": "warm",
+      "shape": "oval",
+      "length": "medium",
+      "polish": "#E6BCC4",
+      "french": "ombre",
+      "tip": "#F5EFE8",
+      "finish": "gloss",
+      "suggestedService": "الخدمة المقترحة لهذا التصميم: جل فرنسي (145 ر.س)"
+    }
+  ]
+}

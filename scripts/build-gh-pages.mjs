@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHelpers, openDatabase } from '../server/db.mjs';
@@ -14,7 +14,8 @@ const CUSTOMER_DIR = path.join(ROOT, 'apps', 'customer');
 const SHARED_DIR = path.join(ROOT, 'packages', 'shared');
 
 rmSync(PAGES_DIR, { recursive: true, force: true });
-mkdirSync(path.join(PAGES_DIR, 'js'), { recursive: true });
+mkdirSync(path.join(PAGES_DIR, 'js', 'atelier'), { recursive: true });
+mkdirSync(path.join(PAGES_DIR, 'vendor', 'three'), { recursive: true });
 mkdirSync(path.join(PAGES_DIR, 'shared'), { recursive: true });
 mkdirSync(path.join(PAGES_DIR, 'data'), { recursive: true });
 writeFileSync(path.join(ROOT, '.nojekyll'), '');
@@ -99,6 +100,14 @@ for (const file of ['atelier.js', 'booking.js', 'experiences.js', 'motion.js', '
     rewriteAssetStrings(readFileSync(path.join(CUSTOMER_DIR, 'js', file), 'utf8')),
   );
 }
+for (const file of readdirSync(path.join(CUSTOMER_DIR, 'js', 'atelier'))) {
+  if (!file.endsWith('.js')) continue;
+  writeFileSync(
+    path.join(PAGES_DIR, 'js', 'atelier', file),
+    rewriteAssetStrings(readFileSync(path.join(CUSTOMER_DIR, 'js', 'atelier', file), 'utf8')),
+  );
+}
+cpSync(path.join(CUSTOMER_DIR, 'vendor', 'three'), path.join(PAGES_DIR, 'vendor', 'three'), { recursive: true });
 
 let stateCode = readFileSync(path.join(CUSTOMER_DIR, 'js', 'state.js'), 'utf8');
 const staticHelpers = `

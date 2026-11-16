@@ -1,0 +1,42 @@
+{
+  "mobile-360-ar": {
+    "scrollWidth": 360,
+    "clientWidth": 360,
+    "scrollHeight": 2344,
+    "stageHeight": 320,
+    "stageWidth": 310,
+    "stageViewportPct": 0.41,
+    "tabsDisplay": "grid",
+    "canvasCount": 1
+  },
+  "mobile-390-en": {
+    "scrollWidth": 390,
+    "clientWidth": 390,
+    "scrollHeight": 2287,
+    "stageHeight": 346,
+    "stageWidth": 340,
+    "stageViewportPct": 0.41,
+    "tabsDisplay": "grid",
+    "canvasCount": 1
+  },
+  "mobile-430-ar": {
+    "scrollWidth": 430,
+    "clientWidth": 430,
+    "scrollHeight": 2280,
+    "stageHeight": 355,
+    "stageWidth": 365,
+    "stageViewportPct": 0.381,
+    "tabsDisplay": "grid",
+    "canvasCount": 1
+  },
+  "tablet-768-ar": {
+    "scrollWidth": 768,
+    "clientWidth": 768,
+    "scrollHeight": 2092,
+    "stageHeight": 355,
+    "stageWidth": 673,
+    "stageViewportPct": 0.347,
+    "tabsDisplay": "grid",
+    "canvasCount": 1
+  }
+}

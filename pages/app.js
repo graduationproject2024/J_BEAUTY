@@ -1,7 +1,7 @@
 import { $, api, esc, href, page, refreshSession, state, t } from './js/state.js';
 import { footer, head, header } from './js/components.js';
 import { initScrollReveals, trackFunnel } from './js/motion.js';
-import { atelierPage, bindAtelier } from './js/atelier.js';
+import { atelierPage, bindAtelier, disposeAtelierRenderers } from './js/atelier.js';
 import {
   bindExperiences,
   giftsPage,
@@ -97,7 +97,7 @@ export async function render() {
           if (shared?.style) {
             state.atelier = { ...state.atelier, ...shared.style, lastShareUrl: location.href };
           }
-        } catch {}
+        } catch { }
       }
       body = atelierPage();
     } else if (cur === 'booking') {
@@ -126,7 +126,7 @@ export async function render() {
       if (state.user?.role === 'customer' && !state.account) {
         try {
           state.account = await api('/account');
-        } catch {}
+        } catch { }
       }
       body = reviewsPage();
     } else if (['about', 'privacy', 'terms', 'policies'].includes(cur)) body = contentPage(cur);
@@ -138,6 +138,7 @@ export async function render() {
     body = `<main id="main" class="wrap">${head(t('تعذر تحميل الصفحة', 'Unable to load page'))}<div class="error">${esc(err.message)}</div><button class="btn" id="retry" type="button">${t('إعادة المحاولة', 'Try again')}</button></main>`;
   }
 
+  disposeAtelierRenderers();
   $('#app').innerHTML = header() + body + footer();
   const titleMap = {
     home: t('سبا نسائي منزلي في المدينة المنورة', 'Home Spa Madinah'),

@@ -36,7 +36,10 @@ export const state = {
     finish: 'gloss',
     accent: 'none',
     skin: 'warm',
-    lightX: 45,
+    lightX: 42,
+    cameraPreset: 'editorial',
+    activeTab: 'shape',
+    includeRemoval: false,
     lastShareUrl: '',
   },
   studio: {
@@ -136,7 +139,7 @@ export async function refreshSession() {
       const acc = await api('/account');
       state.account = acc;
       state.favorites = acc.passport?.favorites || [];
-    } catch {}
+    } catch { }
   }
   return r;
 }

@@ -1,0 +1,365 @@
+{
+  "issues": [],
+  "results": [
+    {
+      "label": "ar-home-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 4899,
+      "hasLegacyBrand": false,
+      "h1Text": "جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ."
+    },
+    {
+      "label": "en-home-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 4982,
+      "hasLegacyBrand": false,
+      "h1Text": "Your Beauty.\nYour Ritual. Your Moment."
+    },
+    {
+      "label": "ar-services-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 4089,
+      "hasLegacyBrand": false,
+      "h1Text": "خدماتنا المنزلية"
+    },
+    {
+      "label": "ar-service-gel-removal-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 2304,
+      "hasLegacyBrand": false,
+      "h1Text": "إزالة الجل"
+    },
+    {
+      "label": "ar-service-relaxation-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 2304,
+      "hasLegacyBrand": false,
+      "h1Text": "مساج استرخائي"
+    },
+    {
+      "label": "ar-packages-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1711,
+      "hasLegacyBrand": false,
+      "h1Text": "باقات السبا المنزلي"
+    },
+    {
+      "label": "ar-studio-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1869,
+      "hasLegacyBrand": false,
+      "h1Text": "استوديو اختيار الخدمات"
+    },
+    {
+      "label": "ar-lookbook-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 2008,
+      "hasLegacyBrand": false,
+      "h1Text": "معرض الإطلالات والأناقة"
+    },
+    {
+      "label": "ar-occasions-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1609,
+      "hasLegacyBrand": false,
+      "h1Text": "تنسيق جلسات المناسبات"
+    },
+    {
+      "label": "ar-gifts-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1555,
+      "hasLegacyBrand": false,
+      "h1Text": "أهدي لحظة عناية"
+    },
+    {
+      "label": "ar-petals-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1819,
+      "hasLegacyBrand": false,
+      "h1Text": "نادي بتلات J"
+    },
+    {
+      "label": "ar-reviews-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1260,
+      "hasLegacyBrand": false,
+      "h1Text": "تجارب وآراء العميلات"
+    },
+    {
+      "label": "ar-booking-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1344,
+      "hasLegacyBrand": false,
+      "h1Text": "طلب موعد منزلي"
+    },
+    {
+      "label": "ar-contact-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1217,
+      "hasLegacyBrand": false,
+      "h1Text": "تواصلي معنا"
+    },
+    {
+      "label": "ar-faq-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1237,
+      "hasLegacyBrand": false,
+      "h1Text": "الأسئلة الشائعة"
+    },
+    {
+      "label": "ar-policies-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1093,
+      "hasLegacyBrand": false,
+      "h1Text": "سياسة الحجز والمواعيد"
+    },
+    {
+      "label": "ar-privacy-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1166,
+      "hasLegacyBrand": false,
+      "h1Text": "سياسة الخصوصية وحماية البيانات"
+    },
+    {
+      "label": "ar-terms-1440",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 1138,
+      "hasLegacyBrand": false,
+      "h1Text": "الشروط والأحكام"
+    },
+    {
+      "label": "ar-home-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 9426,
+      "hasLegacyBrand": false,
+      "h1Text": "جمالكِ. طقوسكِ.\nلحظتكِ الخاصة في بيتكِ."
+    },
+    {
+      "label": "en-home-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 9762,
+      "hasLegacyBrand": false,
+      "h1Text": "Your Beauty.\nYour Ritual. Your Moment."
+    },
+    {
+      "label": "ar-services-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 9313,
+      "hasLegacyBrand": false,
+      "h1Text": "خدماتنا المنزلية"
+    },
+    {
+      "label": "ar-service-gel-removal-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 4068,
+      "hasLegacyBrand": false,
+      "h1Text": "إزالة الجل"
+    },
+    {
+      "label": "ar-service-relaxation-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 4068,
+      "hasLegacyBrand": false,
+      "h1Text": "مساج استرخائي"
+    },
+    {
+      "label": "ar-packages-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 2671,
+      "hasLegacyBrand": false,
+      "h1Text": "باقات السبا المنزلي"
+    },
+    {
+      "label": "ar-studio-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 2730,
+      "hasLegacyBrand": false,
+      "h1Text": "استوديو اختيار الخدمات"
+    },
+    {
+      "label": "ar-lookbook-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 4341,
+      "hasLegacyBrand": false,
+      "h1Text": "معرض الإطلالات والأناقة"
+    },
+    {
+      "label": "ar-occasions-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 2552,
+      "hasLegacyBrand": false,
+      "h1Text": "تنسيق جلسات المناسبات"
+    },
+    {
+      "label": "ar-gifts-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1889,
+      "hasLegacyBrand": false,
+      "h1Text": "أهدي لحظة عناية"
+    },
+    {
+      "label": "ar-petals-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 2782,
+      "hasLegacyBrand": false,
+      "h1Text": "نادي بتلات J"
+    },
+    {
+      "label": "ar-reviews-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1494,
+      "hasLegacyBrand": false,
+      "h1Text": "تجارب وآراء العميلات"
+    },
+    {
+      "label": "ar-booking-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1851,
+      "hasLegacyBrand": false,
+      "h1Text": "طلب موعد منزلي"
+    },
+    {
+      "label": "ar-contact-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1608,
+      "hasLegacyBrand": false,
+      "h1Text": "تواصلي معنا"
+    },
+    {
+      "label": "ar-faq-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1365,
+      "hasLegacyBrand": false,
+      "h1Text": "الأسئلة الشائعة"
+    },
+    {
+      "label": "ar-policies-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1308,
+      "hasLegacyBrand": false,
+      "h1Text": "سياسة الحجز والمواعيد"
+    },
+    {
+      "label": "ar-privacy-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1569,
+      "hasLegacyBrand": false,
+      "h1Text": "سياسة الخصوصية وحماية البيانات"
+    },
+    {
+      "label": "ar-terms-390",
+      "brokenImgs": [],
+      "overflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 1410,
+      "hasLegacyBrand": false,
+      "h1Text": "الشروط والأحكام"
+    }
+  ]
+}
