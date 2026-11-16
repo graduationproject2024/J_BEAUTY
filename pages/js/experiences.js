@@ -9,9 +9,9 @@ export function studioPage() {
   const imgFor = (rec) => {
     if (rec.kind === 'package') {
       const first = allSvcs.find((sv) => sv.id === rec.item.service_ids?.[0]);
-      return first?.image || '/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp';
+      return first?.image || '/assets/images/hero-sanctuary.webp';
     }
-    return rec.item?.image || `/J_BEAUTY/apps/customer/assets/images/services/${rec.item?.id}.webp`;
+    return rec.item?.image || `/assets/images/services/${rec.item?.id}.webp`;
   };
 
   const moodOpts = [
@@ -152,7 +152,7 @@ export function lookbookPage() {
   const entries = [
     {
       cat: 'massage',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/hot-stone.webp',
+      img: '/assets/images/services/hot-stone.webp',
       ar: 'سكينة الأحجار الدافئة',
       en: 'Warm Basalt Sanctuary',
       sub_ar: 'مساج الأحجار الساخنة · 60 دقيقة · 265 ر.س',
@@ -161,7 +161,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/french-tip.webp',
+      img: '/assets/images/services/french-tip.webp',
       ar: 'فرنش كلاسيكي ناعم',
       en: 'Timeless Ivory French Tip',
       sub_ar: 'منيكير فرنش تيب · قاعدة وردية شفافة',
@@ -170,7 +170,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/colored-french.webp',
+      img: '/assets/images/services/colored-french.webp',
       ar: 'أطراف مريمية عصرية',
       en: 'Sage Micro-French Gel',
       sub_ar: 'جل فرنسي بأطراف ملونة · 60 دقيقة',
@@ -179,7 +179,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/pedicure.webp',
+      img: '/assets/images/services/pedicure.webp',
       ar: 'طقوس العناية بالقدمين',
       en: 'Rose-Petal Foot Sanctuary',
       sub_ar: 'بديكير دافئ ببتلات الورد · 45 دقيقة',
@@ -188,7 +188,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/french-gel.webp',
+      img: '/assets/images/services/french-gel.webp',
       ar: 'لمعان الفرنش الزجاجي',
       en: 'Glass-Shine French Gel',
       sub_ar: 'جل فرنسي ثابت · مثالي للمناسبات',
@@ -197,7 +197,7 @@ export function lookbookPage() {
     },
     {
       cat: 'massage',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/lymphatic.webp',
+      img: '/assets/images/services/lymphatic.webp',
       ar: 'جلسة الخفة والانتعاش',
       en: 'Rose Quartz & Calm Flow',
       sub_ar: 'التصريف اللمفاوي · يتطلب اعتماد المؤهلات',
@@ -250,6 +250,14 @@ const OCCASION_TYPES = [
   ['gathering', 'جمعة صديقات وقهوة', 'Friends Ritual', 'تجربة سبا نسائية مشتركة في راحة البيت'],
   ['eid', 'تهيئة عيد ومناسبة خاصة', 'Celebration & Eid Prep', 'تجهيز جماعي أنيق قبل العيد أو الحفل'],
 ];
+
+const customGuestName = (p) => {
+  const raw = String(p?.label || '').trim();
+  if (!raw || /^(المستفيدة|Guest|Participant)\s*\d+$/i.test(raw)) {
+    return '';
+  }
+  return raw;
+};
 
 const displayGuestLabel = (p, idx) => {
   const raw = String(p?.label || '').trim();
@@ -362,7 +370,7 @@ export function groupBookingPage() {
                 </div>
                 <label class="field" style="margin-bottom:0">
                   ${t('الاسم أو الصفة (مثلاً: العروس، أختي، والدتي)', 'Name or role (e.g. Bride, Sister, Mom)')}
-                  <input type="text" data-guest-label="${idx}" value="${esc(displayGuestLabel(p, idx))}" maxlength="60" required>
+                  <input type="text" data-guest-label="${idx}" value="${esc(customGuestName(p))}" placeholder="${t('مثال: العروس، أختي، والدتي، أو اكتبي الاسم...', 'e.g. Bride, Sister, Mom, or enter name...')}" maxlength="60">
                 </label>
               </div>
             `,
@@ -698,7 +706,10 @@ export function bindExperiences(renderFn) {
     state.groupDraft.participants.forEach((p, idx) => {
       const lbl = f.querySelector(`[data-guest-label="${idx}"]`);
       const boxes = [...f.querySelectorAll(`[data-guest-svc="${idx}"]`)];
-      if (lbl) p.label = lbl.value;
+      if (lbl) {
+        const val = lbl.value.trim();
+        p.label = val || t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`);
+      }
       if (boxes.length) p.service_ids = boxes.filter((b) => b.checked).map((b) => b.value);
     });
   };

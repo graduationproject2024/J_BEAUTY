@@ -158,7 +158,7 @@ export async function render() {
 }
 
 function bind(cur) {
-  document.querySelectorAll(`a[href^="${href('')}"]`).forEach((a) => {
+  document.querySelectorAll(`a[href^="/${state.lang}/"]`).forEach((a) => {
     a.addEventListener('click', async (e) => {
       if (a.target || e.ctrlKey || e.metaKey || e.shiftKey) return;
       e.preventDefault();
