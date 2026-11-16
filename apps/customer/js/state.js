@@ -10,7 +10,7 @@ export const esc = (v) =>
   })[c]);
 
 export const state = {
-  lang: location.pathname.split('/')[1] === 'en' ? 'en' : 'ar',
+  lang: typeof location !== 'undefined' && location.pathname ? (location.pathname.split('/')[1] === 'en' ? 'en' : 'ar') : 'ar',
   user: null,
   csrf: '',
   catalog: { services: [], packages: [], settings: {}, reviews: [] },
