@@ -56,7 +56,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       platform.db.close();
     }
   } else {
-    const host = process.env.HOST || '127.0.0.1';
+    const host = process.env.HOST || '0.0.0.0';
     const customerPort = Number(process.env.PORT || 3000);
     const opsPort = Number(process.env.OPS_PORT || 3100);
     platform.customerServer.listen(customerPort, host, () => {
