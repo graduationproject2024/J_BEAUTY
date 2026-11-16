@@ -8,14 +8,17 @@
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.mjs" },
+    { "source": "/api/:path*", "destination": "/api/index.mjs" },
     { "source": "/ops", "destination": "/apps/staff/index.html" },
-    { "source": "/ops/(.*)", "destination": "/apps/staff/$1" },
+    { "source": "/ops/:path*", "destination": "/apps/staff/:path*" },
     { "source": "/ar/ops", "destination": "/apps/staff/index.html" },
     { "source": "/en/ops", "destination": "/apps/staff/index.html" },
-    { "source": "/ar/ops/(.*)", "destination": "/apps/staff/$1" },
-    { "source": "/en/ops/(.*)", "destination": "/apps/staff/$1" },
-    { "source": "/shared/(.*)", "destination": "/shared/$1" },
-    { "source": "/(ar|en)/?(.*)", "destination": "/index.html" }
+    { "source": "/ar/ops/:path*", "destination": "/apps/staff/:path*" },
+    { "source": "/en/ops/:path*", "destination": "/apps/staff/:path*" },
+    { "source": "/shared/:path*", "destination": "/shared/:path*" },
+    { "source": "/ar", "destination": "/index.html" },
+    { "source": "/ar/:path*", "destination": "/index.html" },
+    { "source": "/en", "destination": "/index.html" },
+    { "source": "/en/:path*", "destination": "/index.html" }
   ]
 }
