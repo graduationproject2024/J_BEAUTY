@@ -379,6 +379,7 @@ export function createOpsApp({
 
   return {
     server,
+    handler,
     db: db.raw,
     ownerBootstrap,
     close: () =>

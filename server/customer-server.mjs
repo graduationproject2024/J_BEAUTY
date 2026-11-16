@@ -506,6 +506,7 @@ export function createCustomerApp({
 
   return {
     server,
+    handler,
     db: db.raw,
     close: () =>
       new Promise((resolve) => {
