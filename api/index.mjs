@@ -43,23 +43,22 @@ export default async function handler(req, res) {
   try {
     const platform = getPlatform();
 
-    // Normalize URL for Vercel Serverless Function routing
-    let url = req.url || '/';
-    if (req.query?.path) {
-      const sub = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
-      url = `/api/${sub}`;
-      req.url = url;
-    } else if (url.startsWith('/api/[...path]') || url.startsWith('/api/index')) {
-      // Check if x-matched-path or x-now-route-matches has real path
+    // Reconstruct clean API route from Vercel rewrite or catch-all path parameter
+    const parsed = new URL(req.url || '/', 'http://localhost');
+    const pathParam = parsed.searchParams.get('path') || (req.query && req.query.path);
+    if (pathParam) {
+      const sub = Array.isArray(pathParam) ? pathParam.join('/') : pathParam;
+      parsed.pathname = `/api/${sub.replace(/^\/+/, '')}`;
+      parsed.searchParams.delete('path');
+      req.url = parsed.pathname + (parsed.search ? parsed.search : '');
+    } else if (req.headers['x-matched-path'] && req.headers['x-matched-path'].startsWith('/api')) {
       const matched = req.headers['x-matched-path'];
-      if (matched && matched.startsWith('/api') && !matched.includes('[')) {
-        url = matched;
-        req.url = url;
+      if (!matched.includes('[')) {
+        req.url = matched;
       }
-    } else if (!url.startsWith('/api') && url !== '/') {
-      url = `/api${url.startsWith('/') ? url : '/' + url}`;
-      req.url = url;
     }
+
+    const url = req.url || '/';
 
     // Route ops API requests to operations app
     if (url.startsWith('/api/ops')) {

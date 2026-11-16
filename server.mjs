@@ -92,8 +92,18 @@ export default async function handler(req, res) {
     if (!vercelPlatform) {
       vercelPlatform = createPlatform({ dbPath: resolveDefaultDbPath() });
     }
-    if (req.url && !req.url.startsWith('/api') && req.url !== '/') {
-      req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+    const parsed = new URL(req.url || '/', 'http://localhost');
+    const pathParam = parsed.searchParams.get('path') || (req.query && req.query.path);
+    if (pathParam) {
+      const sub = Array.isArray(pathParam) ? pathParam.join('/') : pathParam;
+      parsed.pathname = `/api/${sub.replace(/^\/+/, '')}`;
+      parsed.searchParams.delete('path');
+      req.url = parsed.pathname + (parsed.search ? parsed.search : '');
+    } else if (req.headers['x-matched-path'] && req.headers['x-matched-path'].startsWith('/api')) {
+      const matched = req.headers['x-matched-path'];
+      if (!matched.includes('[')) {
+        req.url = matched;
+      }
     }
     const url = req.url || '/';
     if (url.startsWith('/api/ops')) {
