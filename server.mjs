@@ -92,6 +92,9 @@ export default async function handler(req, res) {
     if (!vercelPlatform) {
       vercelPlatform = createPlatform({ dbPath: resolveDefaultDbPath() });
     }
+    if (req.headers['x-matched-path']) {
+      req.url = req.headers['x-matched-path'];
+    }
     const url = req.url || '/';
     if (url.startsWith('/api/ops')) {
       return await vercelPlatform.ops.handler(req, res);

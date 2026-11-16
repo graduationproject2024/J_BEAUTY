@@ -42,6 +42,9 @@ function getPlatform() {
 export default async function handler(req, res) {
   try {
     const platform = getPlatform();
+    if (req.headers['x-matched-path']) {
+      req.url = req.headers['x-matched-path'];
+    }
     const url = req.url || '/';
 
     // Route ops API requests to operations app
