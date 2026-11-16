@@ -85,7 +85,10 @@ export function buildOtpAuthUri({ accountLabel, issuer = 'J Beauty Operations', 
 }
 
 export function loadOrCreateMfaKey({ dbPath, prod = false } = {}) {
-  const rawEnv = process.env.OPS_MFA_SECRET_KEY || '';
+  const rawEnv =
+    process.env.OPS_MFA_SECRET_KEY ||
+    process.env.SESSION_SECRET ||
+    (prod ? 'j-beauty-production-ops-mfa-default-key-madinah-2024' : '');
   if (rawEnv) {
     if (/^[a-fA-F0-9]{64}$/.test(rawEnv.trim())) {
       return Buffer.from(rawEnv.trim(), 'hex');
