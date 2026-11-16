@@ -1,4 +1,6 @@
 import path from 'node:path';
+import os from 'node:os';
+import { existsSync, cpSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createHelpers, openDatabase } from './server/db.mjs';
 import { createCustomerApp } from './server/customer-server.mjs';
@@ -6,8 +8,23 @@ import { createOpsApp } from './server/ops-server.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 
+export function resolveDefaultDbPath() {
+  if (process.env.DB_PATH) return process.env.DB_PATH;
+  if (process.env.VERCEL) {
+    const tmpPath = path.join(os.tmpdir(), 'jspa.sqlite');
+    const seedDb = path.join(ROOT, 'data', 'jspa.sqlite');
+    if (!existsSync(tmpPath) && existsSync(seedDb)) {
+      try {
+        cpSync(seedDb, tmpPath);
+      } catch {}
+    }
+    return tmpPath;
+  }
+  return path.join(ROOT, 'data', 'jspa.sqlite');
+}
+
 export function createPlatform({
-  dbPath = process.env.DB_PATH || path.join(ROOT, 'data', 'jspa.sqlite'),
+  dbPath = resolveDefaultDbPath(),
   customerOrigin = process.env.CUSTOMER_ORIGIN || process.env.PUBLIC_ORIGIN || null,
 } = {}) {
   const db = openDatabase(dbPath);
@@ -71,12 +88,18 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 // Serverless handler export for Vercel / Cloud Functions compatibility
 let vercelPlatform = null;
 export default async function handler(req, res) {
-  if (!vercelPlatform) {
-    vercelPlatform = createPlatform();
+  try {
+    if (!vercelPlatform) {
+      vercelPlatform = createPlatform({ dbPath: resolveDefaultDbPath() });
+    }
+    const url = req.url || '/';
+    if (url.startsWith('/api/ops')) {
+      return await vercelPlatform.ops.handler(req, res);
+    }
+    return await vercelPlatform.customer.handler(req, res);
+  } catch (error) {
+    console.error('Serverless API error:', error);
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: error?.message || 'Internal Server Error' }));
   }
-  const url = req.url || '/';
-  if (url.startsWith('/api/ops')) {
-    return vercelPlatform.ops.handler(req, res);
-  }
-  return vercelPlatform.customer.handler(req, res);
 }

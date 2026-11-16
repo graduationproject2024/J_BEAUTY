@@ -1,4 +1,5 @@
 import path from 'node:path';
+import os from 'node:os';
 import { existsSync, cpSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createHelpers, openDatabase } from '../server/db.mjs';
@@ -15,13 +16,13 @@ function getPlatform() {
   let dbPath = process.env.DB_PATH;
   if (!dbPath) {
     if (process.env.VERCEL) {
-      dbPath = '/tmp/jspa.sqlite';
+      dbPath = path.join(os.tmpdir(), 'jspa.sqlite');
       const seedDb = path.join(ROOT, 'data', 'jspa.sqlite');
       if (!existsSync(dbPath) && existsSync(seedDb)) {
         try {
           cpSync(seedDb, dbPath);
         } catch {
-          // Fallback to fresh db in /tmp
+          // Fallback to fresh db in tmp
         }
       }
     } else {
@@ -53,6 +54,6 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Vercel API error:', error);
     res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    res.end(JSON.stringify({ error: error?.message || 'Internal Server Error' }));
   }
 }

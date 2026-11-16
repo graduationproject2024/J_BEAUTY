@@ -12,10 +12,15 @@ ENV NODE_ENV=production \
 # Set up persistent data directory and proper ownership
 RUN mkdir -p /app/data && chown -R node:node /app
 
-# Copy application source code
-COPY --chown=node:node package.json server.mjs seo.mjs backup.mjs ./
+# Copy application source code and static assets
+COPY --chown=node:node package.json server.mjs seo.mjs backup.mjs index.html app.js styles.css concepts.* ./
 COPY --chown=node:node apps ./apps
 COPY --chown=node:node packages ./packages
+COPY --chown=node:node assets ./assets
+COPY --chown=node:node fonts ./fonts
+COPY --chown=node:node js ./js
+COPY --chown=node:node vendor ./vendor
+COPY --chown=node:node shared ./shared
 COPY --chown=node:node server ./server
 COPY --chown=node:node api ./api
 COPY --chown=node:node data ./data

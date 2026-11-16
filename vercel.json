@@ -1,23 +1,21 @@
 {
   "version": 2,
-  "cleanUrls": true,
+  "cleanUrls": false,
+  "functions": {
+    "api/*.mjs": {
+      "runtime": "nodejs22.x",
+      "includeFiles": "data/**"
+    }
+  },
   "rewrites": [
-    { "source": "/J_BEAUTY/apps/customer/assets/(.*)", "destination": "/apps/customer/assets/$1" },
-    { "source": "/J_BEAUTY/apps/customer/fonts/(.*)", "destination": "/apps/customer/fonts/$1" },
-    { "source": "/J_BEAUTY/pages/(.*)", "destination": "/pages/$1" },
-    { "source": "/J_BEAUTY/(.*)", "destination": "/$1" },
     { "source": "/api/(.*)", "destination": "/api/index.mjs" },
-    { "source": "/assets/(.*)", "destination": "/apps/customer/assets/$1" },
-    { "source": "/fonts/(.*)", "destination": "/apps/customer/fonts/$1" },
-    { "source": "/shared/(.*)", "destination": "/packages/shared/$1" },
-    { "source": "/vendor/(.*)", "destination": "/apps/customer/vendor/$1" },
-    { "source": "/js/(.*)", "destination": "/apps/customer/js/$1" },
-    { "source": "/styles.css", "destination": "/apps/customer/styles.css" },
-    { "source": "/app.js", "destination": "/apps/customer/app.js" },
-    { "source": "/concepts.(.*)", "destination": "/apps/customer/concepts.$1" },
+    { "source": "/ops", "destination": "/apps/staff/index.html" },
     { "source": "/ops/(.*)", "destination": "/apps/staff/$1" },
+    { "source": "/ar/ops", "destination": "/apps/staff/index.html" },
+    { "source": "/en/ops", "destination": "/apps/staff/index.html" },
     { "source": "/ar/ops/(.*)", "destination": "/apps/staff/$1" },
     { "source": "/en/ops/(.*)", "destination": "/apps/staff/$1" },
-    { "source": "/(.*)", "destination": "/apps/customer/index.html" }
+    { "source": "/shared/(.*)", "destination": "/shared/$1" },
+    { "source": "/(ar|en)/?(.*)", "destination": "/index.html" }
   ]
 }

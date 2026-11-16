@@ -1,1 +1,17 @@
-{"name":"j-spa","version":"1.0.0","private":true,"type":"module","engines":{"node":">=22.5.0"},"scripts":{"start":"node server.mjs","create-owner":"node scripts/create-owner.mjs","test":"node tests/integration.mjs","audit":"node tests/audit-a11y-perf.cjs","backup":"node backup.mjs","build:pages":"node scripts/build-gh-pages.mjs"}}
+{
+  "name": "j-spa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "create-owner": "node scripts/create-owner.mjs",
+    "test": "node tests/integration.mjs",
+    "audit": "node tests/audit-a11y-perf.cjs",
+    "backup": "node backup.mjs",
+    "build:pages": "node scripts/build-gh-pages.mjs"
+  }
+}

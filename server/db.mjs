@@ -1,8 +1,18 @@
-import { DatabaseSync } from 'node:sqlite';
+import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { applyMigrations } from './database/migrations.mjs';
+
+const require = createRequire(import.meta.url);
+let DatabaseSync;
+try {
+  const sqlite = require('node:sqlite');
+  DatabaseSync = sqlite.DatabaseSync;
+} catch {
+  // Detected on older Node versions
+}
 
 export const uid = () => randomUUID();
 export const now = () => new Date().toISOString();
@@ -425,11 +435,40 @@ export const SEED_PACKAGES = [
 ];
 
 export function openDatabase(dbPath) {
-  if (dbPath !== ':memory:') {
-    mkdirSync(path.dirname(path.resolve(dbPath)), { recursive: true });
+  if (!DatabaseSync) {
+    throw new Error(
+      `Node.js 22.5.0 or higher is required for built-in SQLite (current version: ${process.version}). Please configure Node 22.x or 24.x in your hosting environment settings.`
+    );
   }
-  const db = new DatabaseSync(dbPath);
-  db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+
+  let resolvedPath = dbPath;
+  if (dbPath !== ':memory:') {
+    try {
+      resolvedPath = path.resolve(dbPath);
+      mkdirSync(path.dirname(resolvedPath), { recursive: true });
+    } catch {
+      resolvedPath = path.join(os.tmpdir(), 'jspa.sqlite');
+      try {
+        mkdirSync(path.dirname(resolvedPath), { recursive: true });
+      } catch {
+        resolvedPath = ':memory:';
+      }
+    }
+  }
+
+  let db;
+  try {
+    db = new DatabaseSync(resolvedPath);
+    db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+  } catch {
+    try {
+      db = new DatabaseSync(resolvedPath);
+      db.exec('PRAGMA journal_mode=MEMORY; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+    } catch {
+      db = new DatabaseSync(':memory:');
+      db.exec('PRAGMA foreign_keys=ON;');
+    }
+  }
   db.exec(`
     CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY,name TEXT NOT NULL,phone TEXT UNIQUE NOT NULL,password TEXT NOT NULL,role TEXT NOT NULL DEFAULT 'customer',verified INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,user_id TEXT,csrf TEXT NOT NULL,expires INTEGER NOT NULL);
