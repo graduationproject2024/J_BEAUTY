@@ -2,7 +2,7 @@
   "version": 2,
   "cleanUrls": false,
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index.mjs" },
+    { "source": "/api/(.*)", "destination": "/api/[...path]?path=$1" },
     { "source": "/ops", "destination": "/apps/staff/index.html" },
     { "source": "/ops/:path*", "destination": "/apps/staff/:path*" },
     { "source": "/ar/ops", "destination": "/apps/staff/index.html" },

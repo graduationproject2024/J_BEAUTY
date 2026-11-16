@@ -42,10 +42,24 @@ function getPlatform() {
 export default async function handler(req, res) {
   try {
     const platform = getPlatform();
-    if (req.url && !req.url.startsWith('/api') && req.url !== '/') {
-      req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+
+    // Normalize URL for Vercel Serverless Function routing
+    let url = req.url || '/';
+    if (req.query?.path) {
+      const sub = Array.isArray(req.query.path) ? req.query.path.join('/') : req.query.path;
+      url = `/api/${sub}`;
+      req.url = url;
+    } else if (url.startsWith('/api/[...path]') || url.startsWith('/api/index')) {
+      // Check if x-matched-path or x-now-route-matches has real path
+      const matched = req.headers['x-matched-path'];
+      if (matched && matched.startsWith('/api') && !matched.includes('[')) {
+        url = matched;
+        req.url = url;
+      }
+    } else if (!url.startsWith('/api') && url !== '/') {
+      url = `/api${url.startsWith('/') ? url : '/' + url}`;
+      req.url = url;
     }
-    const url = req.url || '/';
 
     // Route ops API requests to operations app
     if (url.startsWith('/api/ops')) {
