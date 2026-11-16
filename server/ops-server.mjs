@@ -128,7 +128,8 @@ export function createOpsApp({
           return res.end('Not found');
         }
 
-        const resolved = resolveSafeSubpath(STAFF_DIR, route === '/' ? '/index.html' : route);
+        const cleanRoute = route.replace(/^\/(?:ar|en)?\/ops(?:\/|$)/, '/').replace(/^\/ops(?:\/|$)/, '/');
+        const resolved = resolveSafeSubpath(STAFF_DIR, (cleanRoute === '' || cleanRoute === '/') ? '/index.html' : cleanRoute);
         const ext = path.extname(resolved);
         if (ext) {
           if (serveFileResponse(res, method, resolved, { noStore: true })) return;

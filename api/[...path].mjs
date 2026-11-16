@@ -18,11 +18,24 @@ function getPlatform() {
     if (process.env.VERCEL) {
       dbPath = path.join(os.tmpdir(), 'jspa.sqlite');
       const seedDb = path.join(ROOT, 'data', 'jspa.sqlite');
-      if (!existsSync(dbPath) && existsSync(seedDb)) {
-        try {
-          cpSync(seedDb, dbPath);
-        } catch {
-          // Fallback to fresh db in tmp
+      if (existsSync(seedDb)) {
+        let needSync = !existsSync(dbPath);
+        if (!needSync) {
+          try {
+            const probeDb = openDatabase(dbPath);
+            const hasOwner = probeDb.get("SELECT id FROM users WHERE role='owner'");
+            probeDb.close();
+            if (!hasOwner) needSync = true;
+          } catch {
+            needSync = true;
+          }
+        }
+        if (needSync) {
+          try {
+            cpSync(seedDb, dbPath, { force: true });
+          } catch {
+            // Fallback to fresh db in tmp
+          }
         }
       }
     } else {
