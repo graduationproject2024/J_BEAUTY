@@ -261,7 +261,30 @@ export function createOpsApp({
         checkRate(`ops-login-ip:${req.socket.remoteAddress}`, 40);
         const p = phone(body.phone);
         checkRate(`ops-login:${p}`, 10);
-        const u = db.get('SELECT * FROM users WHERE phone=?', p);
+        let u = db.get('SELECT * FROM users WHERE phone=?', p);
+        if (!u && !db.get("SELECT id FROM users WHERE role='owner'")) {
+          const newOwner = {
+            id: uid(),
+            name: process.env.OWNER_NAME || 'إدارة J Beauty',
+            phone: p,
+            password: hashPassword(body.password),
+            role: 'owner',
+            verified: 1,
+            created_at: now(),
+          };
+          db.run(
+            'INSERT INTO users(id,name,phone,password,role,verified,created_at) VALUES(?,?,?,?,?,?,?)',
+            newOwner.id,
+            newOwner.name,
+            newOwner.phone,
+            newOwner.password,
+            newOwner.role,
+            newOwner.verified,
+            newOwner.created_at,
+          );
+          helpers.audit(newOwner, 'ops.owner_first_bootstrap', newOwner.id);
+          u = newOwner;
+        }
         if (!u || u.role === 'disabled_employee' || !verifyPassword(body.password, u.password)) {
           fail('Invalid phone or password', 401);
         }
