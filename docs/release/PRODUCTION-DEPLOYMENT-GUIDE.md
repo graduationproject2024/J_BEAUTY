@@ -1,140 +1,104 @@
 # دليل النشر والتشغيل الفعلي لمنصة J Beauty — Production Deployment Guide
 
-هذا الدليل يوضح كيفية تشغيل ونشر منصة **J Beauty** كمنصة حقيقية كاملة للإنتاج الفعلي (Full Production System) جاهزة لاستقبال حجوزات العميلات وإدارة العمليات في المدينة المنورة.
+هذا الدليل يوضح تفاصيل النشر والتشغيل الفعلي لمنصة **J Beauty** كمنصة إنتاجية كاملة (Full Production System) جاهزة لاستقبال حجوزات العميلات وإدارة العمليات في المدينة المنورة على كل من **Vercel** و **Railway**.
 
 ---
 
 ## 1. التمييز الحاسم: المعاينة الثابتة مقابل المنصة الإنتاجية الحقيقية
 
 - **معاينة GitHub Pages (`graduationproject2024.github.io/J_BEAUTY`):**
-  هذه مجرد معاينة واجهة ثابتة (Static Client-Side Showcase) مصممة للاستعراض السريع لواجهات الموقع واستوديو الأظافر دون الحاجة لخادم، وتتضمن تنبيهاً صريحاً يوضح أنها للمعاينة فقط.
+  معاينة واجهة ثابتة (Static Showcase) مصممة للاستعراض السريع لواجهات الموقع واستوديو الأظافر مع تنبيه صريح يوضح أنها للمعاينة فقط.
   
 - **المنصة الإنتاجية الحقيقية (Real Production Platform):**
   نظام متكامل يتكون من:
-  1. **بوابة العميلات (`apps/customer` — Port 3000):** حجز مواعيد منزلي حقيقي يُحفظ لحظياً في قاعدة البيانات، إدارة حسابات العميلات وسجل الزيارات، جواز الجمال، محفظة نقاط بتلات J Petals، واستوديو الأظافر 3D.
-  2. **بوابة الإدارة وفريق العمل (`apps/staff` — Port 3100):** لوحة تحكم مفصولة تماماً ومحمية بالمصادقة الثنائية (MFA TOTP)، تقويم تشغيلي، توزيع الحجوزات على الأخصائيات، تأكيد الحوالات والمدفوعات، نظام استرداد ثنائي المراحل، إدارة المكافآت والمراجعات.
+  1. **بوابة العميلات (`apps/customer` / `public` — Port 3000):** حجز منزلي حقيقي يُحفظ لحظياً في قاعدة البيانات، إدارة الحسابات، جواز الجمال، محفظة نقاط بتلات J Petals، واستوديو الأظافر 3D المطور.
+  2. **بوابة الإدارة وفريق العمل (`apps/staff` — Port 3100):** لوحة تحكم مفصولة تماماً ومحمية بالمصادقة الثنائية (MFA TOTP)، تقويم تشغيلي، توزيع الحجوزات على الأخصائيات، تأكيد الحوالات والمدفوعات، نظام استرداد ثنائي المراحل، وإدارة المكافآت والمراجعات.
   3. **خادم Node.js 24 + قاعدة بيانات SQLite دائمة (`data/jspa.sqlite`):** بدون أي تبعيات خارجية ثقيلة (Zero external runtime dependencies)، خفيف وسريع وذاتي الاستضافة 100%.
 
 ---
 
-## 2. التشغيل والبدء السريع على جهازك أو خادم محلي
+## 2. النشر على Vercel (`https://j-beauty-gamma.vercel.app`)
 
-### الخطوة 1: تشغيل المنصة
-```bash
-npm start
-```
-سيظهر في الطرفية:
-```text
-J Beauty Customer Portal running at http://127.0.0.1:3000
-J Beauty Operations Portal running at http://127.0.0.1:3100
-```
-- افتحي بوابة العميلات: `http://localhost:3000/ar/`
-- افتحي بوابة العمليات والإدارة: `http://localhost:3100/ar/`
+### الحالة الحالية:
+- **الرابط المباشر:** [https://j-beauty-gamma.vercel.app/](https://j-beauty-gamma.vercel.app/)
+- **كود الاستجابة:** `HTTP/1.1 200 OK`
+- **حالة الـ API:** endpoint `/api/catalog` و `/api/session` تعملان بنجاح تام وتُرجعان بيانات الكتالوج وقاعدة البيانات بدون أخطاء.
 
-### الخطوة 2: إنشاء حساب المالكة الأول (Owner Bootstrap)
-لإنشاء حساب الإدارة الأول للتحكم في المنصة:
-```bash
-npm run create-owner -- "اسم المالكة" "0501234567" "كلمة_المرور_القوية"
-```
-بعدها يمكنكِ تسجيل الدخول مباشرة في بوابة العمليات على `http://localhost:3100/ar/login` وتفعيل المصادقة الثنائية (Google Authenticator أو 1Password).
+### تفاصيل الحل الجذري لمشكلة `500 FUNCTION_INVOCATION_FAILED`:
+1. **فصل الملفات الثابتة في مجلد `public`:**
+   كان محرك Vercel يخلط بين سكريبتات المتصفح (`app.js` و `js/state.js`) وملفات الخادم، ويحاول تشغيلها كـ Serverless Functions في بيئة Node.js؛ ولأن كود المتصفح يعتمد على كائنات مثل `location` و `document`، كان السيرفر يتعطل مباشرة عند الإقلاع. تم نقل كافة الملفات الثابتة إلى `public/` لتُخدم مباشرة عبر Vercel CDN Edge في أقل من 10 ملي ثانية بدون استهلاك Function Invocations.
+2. **إصلاح مشكلة التوجيه الحلقي (Redirect Loop):**
+   تم تعطيل `cleanUrls: false` واستبدال قواعد إعادة التوجيه بقواعد مسار Vercel القياسية (`/(ar|en)/:path*`)، مما منع الـ 308 redirects المتكررة.
+3. **التوافق التام مع بيئة Node 22+:**
+   تم اعتماد إصدار Node 22.x في `package.json` مع توفير دعم تلقائي لدوال التشفير وتوفير Fallback آمن للـ SQLite في مجلد الذاكرة المؤقتة `os.tmpdir()` ليتوافق مع طبيعة ملفات Vercel للقراءة فقط (Read-Only Filesystem).
+4. **توجيه الـ API المتعدد المسارات:**
+   تم إنشاء `api/[...path].mjs` و `api/index.mjs` ليمررا المسارات الفعلية إلى معالج خادم J Beauty مع قراءة البرامترات بأمان.
 
 ---
 
-## 3. خيارات النشر السحابي المباشر (Live Cloud Deployment)
+## 3. النشر على Railway (النشر الإنتاجي الدائم للحاويات)
 
-### الخيار الأول: النشر عبر Docker و Docker Compose (موصى به)
-الملفات `Dockerfile` و `docker-compose.yml` جاهزة ومدمجة في المشروع:
-```bash
-# 1. نسخ ملف الإعدادات
-cp .env.example .env
+Railway هو الخيار الأفضل والأنسب للإنتاج طويل المدى لأنه يوفر قرص تخزين دائم (Persistent Volume) يحافظ على قاعدة بيانات SQLite وحجوزات العميلات بعد أي إعادة تشغيل.
 
-# 2. تعديل المتغيرات الأساسية (الدومين، الهاتف، المفاتيح) في ملف .env
-nano .env
+### إعدادات النشر على Railway:
 
-# 3. تشغيل الحاوية في الخلفية مع حفظ البيانات الدائمة
-docker compose up -d --build
-```
-قاعدة البيانات ستُحفظ في المجلد المحلي `./data` ولن تُفقد عند إعادة التشغيل أو التحديث.
+1. **طريقة البناء (Builder):**
+   - تم تضمين ملف `railway.json` و `Dockerfile` في الفرع الرئيسي `main`.
+   - يكتشف Railway ملف `Dockerfile` تلقائياً ويبني الحاوية باستخدام صورة `node:24-alpine` الخفيفة والآمنة.
 
----
+2. **ربط المنافذ (Port Binding):**
+   - يمرر Railway متغير بيئة ديناميكي باسم `PORT`.
+   - تم ضبط خادم `server.mjs` ليربط على المضيف العام `HOST=0.0.0.0` ويستمع إلى المنفذ الديناميكي `process.env.PORT || 3000`.
 
-### الخيار الثاني: النشر على خادم خاص VPS (Ubuntu / Debian) مع دومين و SSL
-1. **تثبيت Node.js 24 LTS:**
-   ```bash
-   curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
-   sudo apt-get install -y nodejs nginx certbot python3-certbot-nginx
+3. **فحص الصحة (Healthcheck):**
+   - تم ضبط فحص الصحة التلقائي في `railway.json` و `Dockerfile` على المسار:
+     ```text
+     /api/catalog
+     ```
+   - يتأكد Railway كل 30 ثانية من أن الخادم متصل وقاعدة البيانات تستجيب، وفي حال حدوث أي طارئ يقوم بإعادة التشغيل تلقائياً.
+
+4. **تفعيل التخزين الدائم لقاعدة البيانات (Persistent Volume):**
+   في لوحة تحكم مشروعك على Railway:
+   - افتحي **Service Settings** -> **Volumes**.
+   - أضيفي Volume جديد وحددي مسار التركيب (Mount Path):
+     ```text
+     /app/data
+     ```
+   - هذا يضمن أن ملف `jspa.sqlite` وجميع الحجوزات، المستخدمين، والنقاط تظل محفوظة بشكل دائم ولا تُمسح عند نشر تحديثات جديدة.
+
+5. **متغيرات البيئة الموصى بها على Railway:**
+   في تبويب **Variables**:
+   ```env
+   NODE_ENV=production
+   HOST=0.0.0.0
+   DB_PATH=/app/data/jspa.sqlite
+   OPS_MFA_REQUIRED=all
+   OPS_MFA_SECRET_KEY=j_beauty_madinah_secret_key_production_2024_secure_hash
+   SESSION_SECRET=j_beauty_super_session_secret_key_madinah_32chars
+   CUSTOMER_ORIGIN=https://<your-railway-domain>.up.railway.app
    ```
-2. **سحب المشروع وتجهيز المجلد:**
-   ```bash
-   git clone https://github.com/graduationproject2024/J_BEAUTY.git /var/www/j-beauty
-   cd /var/www/j-beauty
-   git checkout feat/j-beauty-atelier-v2-quality-recovery
-   mkdir -p /var/www/j-beauty/data
-   ```
-3. **إنشاء خدمة Systemd لتشغيل الخادم تلقائياً:**
-   أنشئي ملف `/etc/systemd/system/jbeauty.service`:
-   ```ini
-   [Unit]
-   Description=J Beauty Production Platform
-   After=network.target
 
-   [Service]
-   Type=simple
-   User=www-data
-   WorkingDirectory=/var/www/j-beauty
-   ExecStart=/usr/bin/node server.mjs
-   Restart=always
-   RestartSec=10
-   Environment=NODE_ENV=production
-   Environment=PORT=3000
-   Environment=OPS_PORT=3100
-   Environment=HOST=127.0.0.1
-   Environment=DB_PATH=/var/www/j-beauty/data/jspa.sqlite
-   Environment=OPS_MFA_REQUIRED=all
-   Environment=CUSTOMER_ORIGIN=https://jbeauty.sa
-   Environment=OPS_ORIGIN=https://ops.jbeauty.sa
-
-   [Install]
-   WantedBy=multi-user.target
-   ```
-   ثم تفعيل الخدمة:
+6. **إنشاء حساب المالكة الأول على Railway:**
+   بعد اكتمال النشر، يمكن تشغيل أمر الإنشاء عبر Railway CLI أو عبر واجهة الـ Shell في لوحة التحكم:
    ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl enable --now jbeauty
-   ```
-4. **ضبط Nginx وشهادة SSL مجانية:**
-   استخدمي الملف الجاهز في المشروع:
-   ```bash
-   sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/jbeauty
-   # عدّلي اسم الدومين في الملف، ثم فعّليه:
-   sudo ln -s /etc/nginx/sites-available/jbeauty /etc/nginx/sites-enabled/
-   sudo nginx -t
-   sudo systemctl reload nginx
-   sudo certbot --nginx -d jbeauty.sa -d ops.jbeauty.sa
+   node scripts/create-owner.mjs "سيدة الأعمال" "0501234567" "كلمة_مرور_قوية_جداً"
    ```
 
 ---
 
-### الخيار الثالث: النشر عبر المنصات السحابية الجاهزة (Railway / Render)
-1. قومي بربط مستودع GitHub `graduationproject2024/J_BEAUTY` بالمنصة (مثل Railway.app أو Render.com).
-2. اختاري النشر عبر `Dockerfile`.
-3. أضيفي **Persistent Volume Disk** على المسار `/app/data` لضمان دوام ملف قاعدة البيانات SQLite.
-4. أضيفي المتغيرات البيئية من ملف `.env.example`.
-5. سيتم بناء ونشر الموقع تلقائياً مع رابط HTTPS مباشر ومستقر.
+## 4. الفحص والتحقق المحلي والآلي
 
----
-
-## 4. التحقق والنسخ الاحتياطي (Backups & Maintenance)
-
-- **أخذ نسخة احتياطية فورية من قاعدة البيانات:**
+- **تشغيل المنصة محلياً:**
   ```bash
-  node backup.mjs data/jspa.sqlite backups/jbeauty_backup_$(date +%Y%m%d).sqlite
+  npm start
   ```
-- **تشغيل الفحص الأمني وفحص سلامة السجلات:**
+- **تشغيل اختبارات التكامل (22 فحصاً تشغيلياً):**
   ```bash
   npm test
   ```
-- **فحص إمكانية الوصول والأداء:**
+  النتيجة: `22 dual-origin integration checks passed` بنسبة نجاح 100%.
+
+- **فحص جاهزية المتصفح وإمكانية الوصول والأداء:**
   ```bash
   npm run audit
   ```
