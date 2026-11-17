@@ -13,6 +13,7 @@ import {
 } from './state.js';
 import { field, head, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
+import { openRewardsWheelDialog } from './wheel.js';
 
 export const BOOKING_ADD_ONS = [
   {
@@ -132,7 +133,7 @@ function summaryBodyHtml() {
         : ''
     }
     <div class="summary-line">
-      <span>${t('المدة التقديرية', 'Estimated duration')}</span>
+      <span>${t('مدة الجلسة', 'Duration')}</span>
       <span>${minutes(s.duration)}</span>
     </div>
     ${
@@ -146,7 +147,7 @@ function summaryBodyHtml() {
         : ''
     }
     <div class="summary-line summary-total">
-      <span>${t('الإجمالي التقديري', 'Estimated total')}</span>
+      <span>${t('إجمالي الحجز', 'Booking total')}</span>
       <span>${money(s.total)}</span>
     </div>
     <p class="muted" style="margin-top:12px;margin-bottom:0">${t(
@@ -471,8 +472,9 @@ function stepFourDetailsHtml() {
     </label>
 
     <div class="card coupon-input-card" style="margin-top:16px;background:var(--blush-tint);border:1px dashed var(--rose-gold);padding:16px 20px;border-radius:var(--r-md)">
-      <div class="row" style="margin-bottom:8px">
-        <strong style="color:var(--plum);font-size:15px">✦ ${t('هل لديكِ كود خصم أو كوبون؟', 'Have a promo or discount code?')}</strong>
+      <div class="row" style="margin-bottom:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <strong style="color:var(--plum);font-size:15px">✦ ${t('هل لديك كود خصم أو كوبون؟', 'Have a promo or discount code?')}</strong>
+        <button type="button" class="btn text-link small" id="open-wheel-from-booking" style="color:var(--plum);font-weight:600;padding:2px 10px;font-size:13px;border-radius:var(--r-sm);border:1px solid var(--rose-gold);background:#fff">🎁 ${t('دوري عجلة المكافآت واربحي خصما فوريا', 'Spin Rewards Wheel')}</button>
       </div>
       <div class="row" style="gap:8px;align-items:center">
         <input type="text" id="coupon-code-input" value="${esc(state.draft.coupon_code || '')}" placeholder="${t('مثال: SPAWHEEL10 أو LUXURY15', 'e.g. SPAWHEEL10')}" style="flex:1;text-transform:uppercase;padding:8px 12px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:#fff">
@@ -518,9 +520,9 @@ function stepFiveReviewHtml() {
       <p class="muted" style="margin-bottom:6px">${t('الحي:', 'Neighborhood:')} ${esc(state.draft.neighborhood)}</p>
       <p class="muted" style="margin-bottom:6px">${t('المختار:', 'Selection:')} ${s.items.map((x) => esc(nameOf(x))).join(' + ')}</p>
       ${s.addOns.length ? `<p class="muted" style="margin-bottom:6px">${t('الخدمات الإضافية:', 'Add-ons:')} ${s.addOns.map((a) => `${esc(t(a.ar, a.en))} (+${money(a.price)})`).join(' · ')}</p>` : ''}
-      <p class="muted" style="margin-bottom:6px">${t('المدة التقديرية:', 'Estimated duration:')} ${minutes(s.duration)}</p>
+      <p class="muted" style="margin-bottom:6px">${t('مدة الجلسة:', 'Duration:')} ${minutes(s.duration)}</p>
       ${s.discount > 0 ? `<p class="muted" style="margin-bottom:6px">${t('المجموع قبل الخصم:', 'Subtotal:')} ${money(s.subtotal)} · <span style="color:var(--sage-deep);font-weight:600">${t('الخصم:', 'Discount:')} -${money(s.discount)} (${esc(s.coupon.code)})</span></p>` : ''}
-      <p style="margin-bottom:0"><strong>${t('الإجمالي التقديري:', 'Estimated total:')} ${money(s.total)}</strong></p>
+      <p style="margin-bottom:0"><strong>${t('إجمالي الحجز:', 'Booking total:')} ${money(s.total)}</strong></p>
       ${state.draft.notes ? `<p class="muted" style="margin-top:8px;margin-bottom:0">${t('ملاحظات:', 'Notes:')} ${esc(state.draft.notes)}</p>` : ''}
     </div>
     ${
@@ -785,6 +787,10 @@ export function bindBooking(renderFn) {
       if (fb) fb.innerHTML = `<span style="color:var(--error-text)">${esc(err.message)}</span>`;
       updateSelectionSummaryDOM();
     }
+  });
+
+  $('#open-wheel-from-booking')?.addEventListener('click', () => {
+    openRewardsWheelDialog();
   });
 
   document.querySelectorAll('[data-pick-date]').forEach((btn) => {

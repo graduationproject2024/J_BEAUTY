@@ -1,7 +1,7 @@
 // J Beauty Spa — Interactive Wheel of Rewards (عجلة مكافآت J Beauty Spa)
 // Official brand colors: #D9B7C0 (Dusty Pink), #C9AEB6 (Mauve Pink), #A7B79F (Sage Green), #D4AF7C (Rose Gold)
 
-import { state, t, toast, href } from './state.js';
+import { state, t, toast, href, esc } from './state.js';
 import { openDialog } from './components.js';
 
 export const WHEEL_PRIZES = [
@@ -305,12 +305,12 @@ export function openRewardsWheelDialog() {
       } else {
         isSpinning = false;
         localStorage.setItem('jbeauty_wheel_prize', JSON.stringify(winningPrize));
-        toast(t('مبروك! فزتِ بـ ' + winningPrize.title_ar + ' 🌸', 'Congratulations! You won ' + winningPrize.title_en + ' 🌸'));
+        toast(t('مبروك! فزت بـ ' + winningPrize.title_ar + ' 🌸', 'Congratulations! You won ' + winningPrize.title_en + ' 🌸'));
 
         if (actionArea) {
           actionArea.innerHTML = `
             <div class="card" style="background:var(--blush-tint);border:1.5px solid var(--rose-gold);padding:18px 20px;border-radius:var(--r-md);margin-bottom:14px;animation:fadeIn 0.4s ease-out">
-              <span class="badge" style="background:var(--sage);color:#fff;margin-bottom:6px">🎉 ${t('مبروك! فزتِ معنا', 'Congratulations!')}</span>
+              <span class="badge" style="background:var(--sage);color:#fff;margin-bottom:6px">🎉 ${t('مبروك! فزت معنا', 'Congratulations!')}</span>
               <h3 style="margin:4px 0;color:var(--plum);font-size:20px">${esc(t(winningPrize.title_ar, winningPrize.title_en))}</h3>
               <p class="muted" style="margin:0 0 12px;font-size:14px">${esc(t(winningPrize.desc_ar, winningPrize.desc_en))}</p>
               <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">

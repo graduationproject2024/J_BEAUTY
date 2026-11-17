@@ -176,7 +176,7 @@ export function bindCoupons(rerender) {
 
   $ops('button[data-coupon-delete]').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm(t('هل أنتِ متأكدة من حذف هذا الكوبون نهائياً؟', 'Delete this coupon permanently?'))) return;
+      if (!confirm(t('هل أنت متأكدة من حذف هذا الكوبون نهائياً؟', 'Delete this coupon permanently?'))) return;
       const id = btn.dataset.couponDelete;
       try {
         await opsApi(`/api/ops/coupons/${id}`, { action: 'delete' });

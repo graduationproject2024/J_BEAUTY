@@ -110,7 +110,7 @@ export function customersView(d) {
                     `احجزي موعدك الآن بكل سهولة ونصلك في راحة بيتك.`
                   );
                   const birthdayMsg = encodeURIComponent(
-                    `كل عام وأنتِ بألف خير وتألق ${c.name}! 🎉🌸\n` +
+                    `كل عام وأنت بألف خير وتألق ${c.name}! 🎉🌸\n` +
                     `أسرة J Beauty Spa تتمنى لك عاماً مليئاً بالجمال والسعادة.\n` +
                     `يسعدنا إهداؤك خصم 15% بمناسبة يوم ميلادك بكود: [LUXURY15] 🎁✨\n` +
                     `نتشرف دائماً بخدمتك.`
@@ -151,7 +151,7 @@ export function customersView(d) {
                 `مرت فترة منذ جلستك الأخيرة.. هل حان وقت تجديد الدلال والراحة؟ كود خصم خاص 10%: [SPAWHEEL10] ✨`
               );
               const birthdayMsg = encodeURIComponent(
-                `كل عام وأنتِ بخير ${c.name}! 🎉 هدية يوم ميلادك خصم 15% من J Beauty Spa بكود: [LUXURY15] 🎁`
+                `كل عام وأنت بخير ${c.name}! 🎉 هدية يوم ميلادك خصم 15% من J Beauty Spa بكود: [LUXURY15] 🎁`
               );
               return `
                 <div class="ops-mobile-card">

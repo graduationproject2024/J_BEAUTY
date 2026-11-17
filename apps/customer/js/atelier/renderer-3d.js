@@ -12,25 +12,25 @@ import {
 
 export const CAMERA_PRESETS = {
   editorial: {
-    pos: [4.2, 17.5, 17.2],
-    target: [0.15, -0.45, 2.8],
-    fov: 28,
+    pos: [1.8, 14.0, 13.5],
+    target: [0.0, -0.35, 4.6],
+    fov: 24,
   },
   overhead: {
-    pos: [0.5, 29.5, 1.2],
-    target: [0.4, -0.35, 1.0],
-    fov: 30,
+    pos: [0.0, 16.5, 4.6],
+    target: [0.0, -0.25, 4.4],
+    fov: 26,
   },
   closeup: {
     // Cleanly frames the manicured fingers with macro salon clarity
-    pos: [-1.8, 13.5, 17.5],
-    target: [-1.5, -0.55, 4.8],
-    fov: 26,
+    pos: [-0.2, 9.8, 11.2],
+    target: [0.0, -0.3, 4.9],
+    fov: 20,
   },
   profile: {
-    pos: [13.0, 4.5, 10.5],
-    target: [-0.2, -0.5, 4.8],
-    fov: 24,
+    pos: [9.5, 3.2, 7.5],
+    target: [0.0, -0.3, 4.6],
+    fov: 22,
   },
 };
 

@@ -24,7 +24,7 @@ import {
 } from './js/pages-public.js';
 import { bindBooking, booking } from './js/booking.js';
 import { accountPage, auth, bindAccount, petalsPage } from './js/account.js';
-import { initWheelFloatingButton } from './js/wheel.js';
+import { initWheelFloatingButton, openRewardsWheelDialog } from './js/wheel.js';
 
 let lastBeaconRoute = '';
 let loadedSharedCode = '';
@@ -225,6 +225,14 @@ window.addEventListener('keydown', (e) => {
     $('#menu')?.setAttribute('aria-expanded', 'false');
     $('#menu')?.focus();
     updateMobileBar(page());
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const trigger = e.target.closest('[data-open-wheel], .trigger-wheel-btn');
+  if (trigger) {
+    e.preventDefault();
+    openRewardsWheelDialog();
   }
 });
 

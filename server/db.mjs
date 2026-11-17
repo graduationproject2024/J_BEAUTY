@@ -138,6 +138,18 @@ export const DEFAULT_COUPONS = [
     active: 1,
   },
   {
+    id: 'coupon-petals50',
+    code: 'PETALS50',
+    discount_type: 'fixed',
+    discount_value: 25,
+    min_spend: 150,
+    valid_from: '2026-01-01',
+    valid_until: '2027-12-31',
+    max_uses: 1000,
+    used_count: 0,
+    active: 1,
+  },
+  {
     id: 'coupon-welcome10',
     code: 'WELCOME10',
     discount_type: 'percent',
@@ -745,24 +757,21 @@ export function openDatabase(dbPath) {
     run('INSERT INTO config VALUES(1,?)', JSON.stringify(DEFAULT_SETTINGS));
   }
 
-  const hasCoupons = get('SELECT id FROM coupons LIMIT 1');
-  if (!hasCoupons) {
-    for (const c of DEFAULT_COUPONS) {
-      run(
-        'INSERT OR IGNORE INTO coupons(id, code, discount_type, discount_value, min_spend, valid_from, valid_until, max_uses, used_count, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
-        c.id,
-        c.code,
-        c.discount_type,
-        c.discount_value,
-        c.min_spend,
-        c.valid_from,
-        c.valid_until,
-        c.max_uses,
-        c.used_count,
-        c.active,
-        now(),
-      );
-    }
+  for (const c of DEFAULT_COUPONS) {
+    run(
+      'INSERT OR IGNORE INTO coupons(id, code, discount_type, discount_value, min_spend, valid_from, valid_until, max_uses, used_count, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+      c.id,
+      c.code,
+      c.discount_type,
+      c.discount_value,
+      c.min_spend,
+      c.valid_from,
+      c.valid_until,
+      c.max_uses,
+      c.used_count,
+      c.active,
+      now(),
+    );
   }
 
   const hasShades = get('SELECT id FROM nail_shades LIMIT 1');

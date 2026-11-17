@@ -206,6 +206,22 @@ export function home() {
           ${atelierMiniWidget()}
         </section>
 
+        <!-- 5b. Wheel of Rewards Interactive Spotlight -->
+        <section class="section-tight" data-reveal>
+          <div class="wheel-spotlight-banner">
+            <div class="wheel-spotlight-content">
+              <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('مكافآت وهدايا فورية', 'INSTANT GIFTS & PROMOS')} ✦</span>
+              <h3>${t('عجلة مكافآت J Beauty Spa 🌸', 'J Beauty Spa Wheel of Rewards 🌸')}</h3>
+              <p>${t('دوري العجلة واحصلي على كود خصم فوري يصل إلى 15% أو ماسك مجاني أو رصيد بتلات إضافي لموعدك القادم!', 'Spin the wheel for an instant discount up to 15%, a free hydrating mask, or bonus loyalty petals!')}</p>
+            </div>
+            <div class="wheel-spotlight-action">
+              <button type="button" class="btn trigger-wheel-btn" data-open-wheel style="box-shadow:var(--shadow-gold);padding:14px 28px;font-size:16px">
+                🎁 ${t('تدوير العجلة الآن ✦', 'Spin the Wheel ✦')}
+              </button>
+            </div>
+          </div>
+        </section>
+
         <!-- 6. J Beauty loyalty: Luxury bloom medallion + clear rewarding flow -->
         <section class='loyalty-band jb-loyalty-intro' data-reveal>
           <div class='loyalty-copy-col'>
@@ -247,12 +263,21 @@ export function home() {
 
         <!-- 8. Final Booking CTA -->
         <section class="cta-band" data-reveal>
-          <span class="eyebrow">${t('جاهزة للحظتك؟', 'YOUR MOMENT AWAITS')}</span>
-          <h2>${t('احجزي طقسك المنزلي اليوم', 'Reserve your calm moment at home')}</h2>
-          <p>${t('ابدئي باختيار فئة الخدمة، أو صممي إطلالة أظافرك، أو دعي استوديو J يقترح عليك الأنسب.', 'Start your appointment request, explore J Nail Atelier, or get tailored studio suggestions.')}</p>
-          <div class="hero-actions" style="justify-content:center">
-            <a class="btn" href="${href('booking')}">${t('ابدئي طلب الحجز الآن', 'Request your appointment')}</a>
-            <a class="btn light" href="${href('lookbook')}">${t('تصفحي معرض الإطلالات', 'Browse Lookbook')}</a>
+          <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="cta-band-emblem">
+          <span class="eyebrow">${t('✦ تجربة دلال منزلية استثنائية · سيدات فقط ✦', 'EXCLUSIVE WOMEN’S HOME SPA SANCTUARY')}</span>
+          <h2>${t('احجزي طقسك المنزلي الفاخر في المدينة المنورة', 'Reserve your calm moment at home')}</h2>
+          <p>${t('خدمات سبا ومساج وعناية أظافر متكاملة تصلك إلى راحة منزلك، بأيدي خبيرات محترفات، حقائب وأدوات معقمة بالكامل وفق أعلى معايير الصالونات العالمية، لتستمتعي بلحظة هدوء واسترخاء تليق بك.', 'Curated home spa, therapeutic massage, and couture nail rituals delivered to your door with hospital-grade sanitization and five-star care.')}</p>
+          <div class="cta-features-grid">
+            <span class="cta-feature-pill">🌸 ${t('سيدات فقط وخصوصية تامة', 'Women only · Complete privacy')}</span>
+            <span class="cta-feature-pill">✨ ${t('معايير تعقيم صالونات 5 نجوم', '5-Star sterilization')}</span>
+            <span class="cta-feature-pill">📍 ${t('تغطية شاملة للمدينة المنورة', 'All Madinah neighborhoods')}</span>
+            <span class="cta-feature-pill">🎁 ${t('كسب فوري لنقاط بتلات', 'Earn instant Petals')}</span>
+          </div>
+          <div class="cta-actions-wrap">
+            <a class="btn" href="${href('booking')}" style="padding:14px 32px;font-size:16px;box-shadow:var(--shadow-gold)">${t('احجزي موعدك الآن ✦', 'Book your ritual ✦')}</a>
+            <a class="btn light" href="https://wa.me/966533718324" target="_blank" rel="noopener noreferrer" style="padding:14px 24px;font-size:15px">💬 ${t('تنسيق فوري عبر واتساب', 'Chat on WhatsApp')}</a>
+            <button type="button" class="btn rose trigger-wheel-btn" data-open-wheel style="padding:14px 22px;font-size:15px">🎁 ${t('عجلة المكافآت', 'Rewards Wheel')}</button>
+            <a class="btn text-link" href="${href('packages')}" style="padding:14px 18px;font-size:14.5px">${t('تصفحي الباقات والعروض', 'Browse packages')}</a>
           </div>
         </section>
       </div>

@@ -345,7 +345,7 @@ export function bindCatalog(d, renderFn) {
 
   document.querySelectorAll('[data-delete-shade]').forEach((btn) => {
     btn.onclick = async () => {
-      if (!confirm(t('هل أنتِ متأكدة من حذف هذا اللون؟', 'Are you sure you want to delete this shade?'))) return;
+      if (!confirm(t('هل أنت متأكدة من حذف هذا اللون؟', 'Are you sure you want to delete this shade?'))) return;
       btn.disabled = true;
       try {
         await opsApi(`/atelier/colors/${btn.dataset.deleteShade}`, {

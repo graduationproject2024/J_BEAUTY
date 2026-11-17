@@ -53,17 +53,17 @@ function recommendStaticRituals(input = {}) {
       const catRank = preferredCats.indexOf(svc.category);
       if (catRank !== -1) {
         score += 40 - catRank * 10;
-        reasons_ar.push('تتوافق مع نوع العناية الذي اخترتِه');
+        reasons_ar.push('تتوافق مع نوع العناية الذي اخترته');
         reasons_en.push('Matches your desired service preference');
       }
       if (svc.duration <= maxMinutes) {
         score += 25;
-        reasons_ar.push(`يناسب وقتكِ (${svc.duration} دقيقة)`);
+        reasons_ar.push(`يناسب وقتك (${svc.duration} دقيقة)`);
         reasons_en.push(`Fits comfortably within ${svc.duration} min`);
       } else score -= 20;
       if (svc.price <= maxBudget) {
         score += 25;
-        reasons_ar.push(`ضمن ميزانيتكِ (${svc.price} ر.س)`);
+        reasons_ar.push(`ضمن ميزانيتك (${svc.price} ر.س)`);
         reasons_en.push(`Within your ${maxBudget} SAR budget (${svc.price} SAR)`);
       } else score -= 25;
       if (svc.credentials_required && !svc.credentials_approved) {
@@ -83,18 +83,18 @@ function recommendStaticRituals(input = {}) {
       const catHits = pkgSvcs.filter((sv) => preferredCats.includes(sv.category)).length;
       score += catHits * 18;
       if (catHits > 0) {
-        reasons_ar.push('باقة متكاملة تجمع خدمات متوافقة مع اختياركِ');
+        reasons_ar.push('باقة متكاملة تجمع خدمات متوافقة مع اختيارك');
         reasons_en.push('Combines complementary services aligned with your goal');
       }
       if (pkg.duration <= maxMinutes) {
         score += 22;
-        reasons_ar.push(`المدة المجمعة ${pkg.duration} دقيقة ضمن وقتكِ`);
+        reasons_ar.push(`المدة المجمعة ${pkg.duration} دقيقة ضمن وقتك`);
         reasons_en.push(`Total combined duration (${pkg.duration} min) fits your window`);
       } else score -= 18;
       if (pkg.price <= maxBudget) {
         score += 24;
         const saving = Math.max(0, (pkg.original_total || 0) - pkg.price);
-        reasons_ar.push(saving > 0 ? `ضمن ميزانيتكِ (${pkg.price} ر.س بتوفير ${saving} ر.س)` : `ضمن ميزانيتكِ (${pkg.price} ر.س)`);
+        reasons_ar.push(saving > 0 ? `ضمن ميزانيتك (${pkg.price} ر.س بتوفير ${saving} ر.س)` : `ضمن ميزانيتك (${pkg.price} ر.س)`);
         reasons_en.push(saving > 0 ? `Within budget (${pkg.price} SAR, saving ${saving} SAR)` : `Within budget (${pkg.price} SAR)`);
       } else score -= 25;
       results.push({ kind: 'package', item: pkg, score, reasons_ar, reasons_en });
