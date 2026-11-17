@@ -14,10 +14,43 @@ import {
 
 export function staffView(d) {
   const list = d.staff || [];
+  const commissions = d.commissions || [];
   const legacyPending = list.filter((u) => u.role === 'legacy_employee');
   const selected = list.find((u) => u.id === opsState.selectedStaffId && u.role !== 'owner');
 
   return `
+    <div class="ops-card">
+      <div class="row" style="margin-bottom:12px">
+        <h2>${t('إنتاجية وعمولات المختصات لهذا الشهر (الهدف 50 زيارة / 5% عمولة)', 'Practitioner Monthly Performance & Commission (50 visits threshold / 5% commission)')}</h2>
+      </div>
+      <div class="ops-table-wrap">
+        <table class="ops-table">
+          <thead>
+            <tr>
+              <th>${t('المختصة', 'Practitioner')}</th>
+              <th>${t('الزيارات المكتملة هذا الشهر', 'Visits This Month')}</th>
+              <th>${t('الهدف الشهري', 'Monthly Target')}</th>
+              <th>${t('الزيارات الإضافية المستحقة للعمولة', 'Visits Beyond 50')}</th>
+              <th>${t('نسبة العمولة', 'Rate')}</th>
+              <th>${t('مبلغ العمولة المستحق', 'Earned Commission')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${commissions.map((c) => `
+              <tr>
+                <td><strong>${esc(c.name)}</strong></td>
+                <td><span class="badge ${c.visits_count >= c.threshold ? 'mfa-ok' : ''}">${num(c.visits_count)} ${t('زيارة', 'visits')}</span></td>
+                <td>${num(c.threshold)} ${t('زيارة', 'visits')}</td>
+                <td><strong>${num(c.excess_visits)}</strong></td>
+                <td>5%</td>
+                <td><strong style="color:var(--sage-ink);font-size:15px">${num(c.commission_amount)} ر.س</strong></td>
+              </tr>
+            `).join('') || `<tr><td colspan="6" class="muted">${t('لا توجد أخصائيات مسجلات بعد.', 'No practitioners assigned yet.')}</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     ${
       legacyPending.length
         ? `<div class="alert warn">

@@ -20,12 +20,12 @@ export const uid = () => randomUUID();
 export const now = () => new Date().toISOString();
 
 export const DEFAULT_SETTINGS = {
-  business_phone: '',
-  instagram: 'https://instagram.com/jbeauty.spa',
-  tiktok: 'https://tiktok.com/@jbeauty.spa',
-  snapchat: 'https://snapchat.com/add/jbeauty.spa',
-  whatsapp: '',
-  announcement_text_ar: 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستكِ في راحة بيتكِ',
+  business_phone: '966533718324',
+  instagram: 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh',
+  tiktok: 'https://www.tiktok.com/@j_beautyspa?_r=1&_t=ZS-9BGSeUNcuyj',
+  snapchat: 'https://snapchat.com/add/j.beautyspa',
+  whatsapp: 'https://wa.me/966533718324',
+  announcement_text_ar: 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستك في راحة بيتك',
   announcement_text_en: 'Luxury Women’s Home Spa in Al Madinah ✦ Personally Confirmed Appointments ✦ 20% Off Curated Packages ✦ Book Your Home Sanctuary',
   announcement_active: true,
   announcement_link: '/booking',
@@ -45,7 +45,7 @@ export const DEFAULT_SETTINGS = {
       value: 10,
       name_ar: 'قسيمة خصم ترحيبية (10 ر.س)',
       name_en: 'Welcome Petals Voucher (10 SAR)',
-      description_ar: 'تُخصم مباشرة من قيمة جلستكِ القادمة عند تأكيد الموعد.',
+      description_ar: 'تُخصم مباشرة من قيمة جلستك القادمة عند تأكيد الموعد.',
       description_en: 'Deducted directly from your next eligible appointment.',
     },
     {
@@ -54,7 +54,7 @@ export const DEFAULT_SETTINGS = {
       value: 30,
       name_ar: 'مكافأة الدلال الفضي (30 ر.س)',
       name_en: 'Silver Indulgence Reward (30 SAR)',
-      description_ar: 'خصم مالي يمنحكِ ترقية أو إضافة خدمة عناية خاصة لموعدكِ.',
+      description_ar: 'خصم مالي يمنحك ترقية أو إضافة خدمة عناية خاصة لموعدك.',
       description_en: 'Special savings to upgrade or add ritual treatments to your visit.',
     },
     {
@@ -63,7 +63,7 @@ export const DEFAULT_SETTINGS = {
       value: 60,
       name_ar: 'مكافأة الدلال الذهبي (60 ر.س)',
       name_en: 'Golden Blossom Privilege (60 SAR)',
-      description_ar: 'خصم استثنائي تقديراً لولائكِ وثقتكِ الدائمة بخدمات J Beauty.',
+      description_ar: 'خصم استثنائي تقديراً لولائك وثقتك الدائمة بخدمات J Beauty Spa.',
       description_en: 'Our premier privilege discount honoring your lasting loyalty.',
     },
   ],
@@ -80,25 +80,96 @@ export const DEFAULT_SETTINGS = {
   faq_en: '',
 };
 
+export const BOOKING_ADD_ONS = [
+  { id: 'mask-hands', name_ar: 'ماسك ترطيب عميق لليدين', name_en: 'Deep Hydrating Hand Mask', price: 35, duration: 15 },
+  { id: 'mask-feet', name_ar: 'ماسك ترطيب وتنعيم القدمين', name_en: 'Soothing Foot Moisture Mask', price: 40, duration: 15 },
+  { id: 'extend-massage', name_ar: 'تمديد وقت المساج 15 دقيقة', name_en: '15-Min Massage Extension', price: 50, duration: 15 },
+  { id: 'scalp-oils', name_ar: 'مساج فروة الرأس والزيوت العطرية', name_en: 'Aromatherapy Scalp Massage', price: 45, duration: 15 },
+  { id: 'heel-peel', name_ar: 'تقشير كعب القدم المركز وتنعيم الحرير', name_en: 'Silk Heel Smoothing Peel', price: 35, duration: 15 },
+];
+
+export const DEFAULT_COUPONS = [
+  {
+    id: 'coupon-wheel10',
+    code: 'SPAWHEEL10',
+    discount_type: 'percent',
+    discount_value: 10,
+    min_spend: 100,
+    valid_from: '2026-01-01',
+    valid_until: '2027-12-31',
+    max_uses: 1000,
+    used_count: 0,
+    active: 1,
+  },
+  {
+    id: 'coupon-luxury15',
+    code: 'LUXURY15',
+    discount_type: 'percent',
+    discount_value: 15,
+    min_spend: 200,
+    valid_from: '2026-01-01',
+    valid_until: '2027-12-31',
+    max_uses: 500,
+    used_count: 0,
+    active: 1,
+  },
+  {
+    id: 'coupon-petal20',
+    code: 'PETAL20',
+    discount_type: 'fixed',
+    discount_value: 20,
+    min_spend: 150,
+    valid_from: '2026-01-01',
+    valid_until: '2027-12-31',
+    max_uses: 500,
+    used_count: 0,
+    active: 1,
+  },
+  {
+    id: 'coupon-freemask',
+    code: 'FREEMASK',
+    discount_type: 'fixed',
+    discount_value: 35,
+    min_spend: 150,
+    valid_from: '2026-01-01',
+    valid_until: '2027-12-31',
+    max_uses: 500,
+    used_count: 0,
+    active: 1,
+  },
+  {
+    id: 'coupon-welcome10',
+    code: 'WELCOME10',
+    discount_type: 'percent',
+    discount_value: 10,
+    min_spend: 100,
+    valid_from: '2026-01-01',
+    valid_until: '2027-12-31',
+    max_uses: 1000,
+    used_count: 0,
+    active: 1,
+  },
+];
+
 const OLD_GENERIC_AR =
-  'لحظة عناية هادئة في راحة منزلكِ. يناقش الفريق التفاصيل والاحتياطات معكِ قبل تأكيد الموعد.';
+  'لحظة عناية هادئة في راحة منزلك. يناقش الفريق التفاصيل والاحتياطات معك قبل تأكيد الموعد.';
 
 export const SEED_SERVICES = [
   {
     id: 'relaxation',
-    name_ar: 'مساج استرخائي',
+    name_ar: 'مساج الاسترخاء',
     name_en: 'Relaxation Massage',
     duration: 60,
-    price: 195,
+    price: 180,
     category: 'massage',
     image: '/assets/images/services/relaxation.webp',
     description_ar:
-      'جلسة تدليك هادئة بضغط لطيف إلى متوسط باستخدام زيوت نباتية دافئة لتخفيف التوتر اليومي واستعادة صفاء الذهن في هدوء منزلكِ.',
+      'جلسة تدليك هادئة بضغط لطيف إلى متوسط باستخدام زيوت نباتية دافئة لتخفيف التوتر واستعادة صفاء الذهن في هدوء منزلك.',
     description_en:
       'A soothing full-body massage with light-to-medium pressure and warm botanical oils to release everyday tension and restore calm at home.',
     inclusions_ar: [
       'جلسة 60 دقيقة بتقنيات انسيابية مريحة',
-      'زيوت عطرية نباتية مختارة حسب راحتكِ',
+      'زيوت عطرية نباتية مختارة حسب راحتك',
       'تهيئة أجواء هادئة بمستلزمات نظيفة ومعقمة',
     ],
     inclusions_en: [
@@ -112,10 +183,10 @@ export const SEED_SERVICES = [
   },
   {
     id: 'therapeutic',
-    name_ar: 'مساج علاجي',
+    name_ar: 'مساج علاجي عميق',
     name_en: 'Therapeutic Massage',
     duration: 60,
-    price: 225,
+    price: 220,
     category: 'massage',
     image: '/assets/images/services/therapeutic.webp',
     description_ar:
@@ -143,17 +214,17 @@ export const SEED_SERVICES = [
     name_ar: 'مساج الأحجار الساخنة',
     name_en: 'Hot Stone Massage',
     duration: 60,
-    price: 265,
+    price: 230,
     category: 'massage',
     image: '/assets/images/services/hot-stone.webp',
     description_ar:
-      'تجربة استرخاء دافئة تعتمد على أحجار البازلت الملساء المسخّنة بعناية لتتغلغل حرارتها اللطيفة في العضلات وتمنحكِ سكينة عميقة.',
+      'تجربة استرخاء دافئة تعتمد على أحجار البازلت الملساء المسخنة بعناية لتتغلغل حرارتها اللطيفة في العضلات وتمنحك سكينة عميقة.',
     description_en:
       'A deeply comforting treatment pairing smoothly polished heated basalt stones with slow massage strokes to melt away stiffness.',
     inclusions_ar: [
       'تسخين مضبوط لأحجار البازلت الطبيعية الملساء',
       'تدليك انسيابي بالزيت الدافئ والأحجار',
-      'عناية دقيقة باختبار حرارة الأحجار لراحتكِ',
+      'عناية دقيقة باختبار حرارة الأحجار لراحتك',
     ],
     inclusions_en: [
       'Temperature-controlled smooth natural basalt stones',
@@ -169,7 +240,7 @@ export const SEED_SERVICES = [
     name_ar: 'مساج التصريف اللمفاوي',
     name_en: 'Lymphatic Drainage Massage',
     duration: 60,
-    price: 255,
+    price: 199,
     category: 'massage',
     image: '/assets/images/services/lymphatic.webp',
     description_ar:
@@ -193,11 +264,115 @@ export const SEED_SERVICES = [
     credentials_required: true,
   },
   {
+    id: 'foot',
+    name_ar: 'مساج القدمين',
+    name_en: 'Reflexology Foot Massage',
+    duration: 30,
+    price: 70,
+    category: 'massage',
+    image: '/assets/images/services/pedicure.webp',
+    description_ar:
+      'تدليك مركز لنقاط الضغط الانعكاسية في باطن القدمين والساقين لتخفيف ثقل المشي اليومي وتنشيط الدورة الدموية.',
+    description_en:
+      'Focused pressure-point reflexology massage across the feet and calves to relieve daily fatigue and promote circulation.',
+    inclusions_ar: [
+      'كمادات دافئة لتليين العضلات',
+      'تدليك انعكاسي احترافي للقدمين والساقين',
+      'مرطب نباتي مغذٍ للبشرة الجافة',
+    ],
+    inclusions_en: [
+      'Warm soothing compress for muscles',
+      'Targeted foot and calf reflexology',
+      'Hydrating botanical balm application',
+    ],
+    precautions_ar: 'يرجى إبلاغ المختصة بوجود أي كسور أو دوالي حادة.',
+    precautions_en: 'Please inform staff of any recent fractures or acute vascular concerns.',
+    credentials_required: false,
+  },
+  {
+    id: 'head',
+    name_ar: 'مساج الرأس وفروة الرأس',
+    name_en: 'Head & Scalp Massage',
+    duration: 30,
+    price: 65,
+    category: 'massage',
+    image: '/assets/images/services/relaxation.webp',
+    description_ar:
+      'تدليك استرخائي لفروة الرأس والصدغين والرقبة يعزز تدفق الدورة الدموية ويزيل الصداع والإجهاد الذهني المتراكم.',
+    description_en:
+      'A deeply restorative scalp, temple, and nape massage to dissolve mental fatigue and encourage blissful stillness.',
+    inclusions_ar: [
+      'حركات دائرية هادئة على منابت الشعر ومسارات الاسترخاء',
+      'تدليك مهدئ للصدغين ومؤخرة الرأس',
+      'خيار إضافة قطرات الزيت العطري المنعش',
+    ],
+    inclusions_en: [
+      'Gentle circular rhythmic scalp motions',
+      'Soothing temple and occipital pressure points',
+      'Optional aromatic essential oil drops',
+    ],
+    precautions_ar: 'لا ينصح به لمن تعاني من جروح أو التهابات نشطة في فروة الرأس.',
+    precautions_en: 'Not recommended over active scalp irritations or open wounds.',
+    credentials_required: false,
+  },
+  {
+    id: 'neck-shoulder',
+    name_ar: 'مساج الرقبة والأكتاف',
+    name_en: 'Neck & Shoulder Massage',
+    duration: 30,
+    price: 70,
+    category: 'massage',
+    image: '/assets/images/services/therapeutic.webp',
+    description_ar:
+      'جلسة مركزة ومكثفة لفك عقد الشد العضلي الناتجة عن الجلوس المكتبي أو استخدام الهاتف والأجهزة الذكية.',
+    description_en:
+      'Targeted intensive relief for cervical and trapezius stiffness caused by screen time and daily posture.',
+    inclusions_ar: [
+      'فك تشنجات عضلات الترابيزيوس وأعلى الظهر',
+      'حركات إطالة خفيفة لمدى حركة الرقبة',
+      'استخدام بلسم دافئ مريح للأنسجة',
+    ],
+    inclusions_en: [
+      'Targeted trapezius and shoulder blade knot release',
+      'Gentle passive cervical stretching',
+      'Warm soothing balm application',
+    ],
+    precautions_ar: 'يُرجى إبلاغ المختصة بأي انزلاق غضروفي أو آلام حادة.',
+    precautions_en: 'Please notify us of any herniated discs or acute neurological pain.',
+    credentials_required: false,
+  },
+  {
+    id: 'back',
+    name_ar: 'مساج الظهر المركز',
+    name_en: 'Focused Back Massage',
+    duration: 30,
+    price: 99,
+    category: 'massage',
+    image: '/assets/images/services/therapeutic.webp',
+    description_ar:
+      'عناية مستهدفة لكامل مساحة الظهر من الفقرات القطنية إلى أعلى الكتفين لإزالة التصلب وإعادة الحيوية للجسم.',
+    description_en:
+      'Dedicated back therapy from the lumbar spine to upper shoulders to dissolve chronic tension and restore mobility.',
+    inclusions_ar: [
+      'ضغط متوسط إلى عميق حسب درجة التحمل',
+      'تركيز خاص على أسفل الظهر وجانبي العمود الفقري',
+      'زيت تدليك دافئ مهدئ للأعصاب',
+    ],
+    inclusions_en: [
+      'Customized medium-to-firm back pressure',
+      'Lumbar and paraspinal muscle soothing strokes',
+      'Warm calming botanical oil',
+    ],
+    precautions_ar: 'غير مناسب للحوامل في الأشهر الأولى دون استشارة طبية.',
+    precautions_en: 'Consult a physician during early pregnancy prior to deep back pressure.',
+    credentials_required: false,
+  },
+  {
     id: 'classic',
-    name_ar: 'منيكير وبديكير كلاسيك',
+    name_ar: 'بدكير ومناكير كلاسيك',
     name_en: 'Classic Manicure & Pedicure',
-    duration: 75,
-    price: 185,
+    duration: 60,
+    price: 159,
     category: 'nails',
     image: '/assets/images/services/classic.webp',
     description_ar:
@@ -220,10 +395,10 @@ export const SEED_SERVICES = [
   },
   {
     id: 'pedicure',
-    name_ar: 'بديكير',
-    name_en: 'Pedicure',
+    name_ar: 'بدكير كلاسيك',
+    name_en: 'Classic Pedicure',
     duration: 45,
-    price: 125,
+    price: 99,
     category: 'nails',
     image: '/assets/images/services/pedicure.webp',
     description_ar:
@@ -245,55 +420,107 @@ export const SEED_SERVICES = [
     credentials_required: false,
   },
   {
-    id: 'french-tip',
-    name_ar: 'منيكير فرنش تيب',
-    name_en: 'French Tip Manicure',
-    duration: 60,
-    price: 155,
+    id: 'manicure',
+    name_ar: 'مناكير كلاسيك',
+    name_en: 'Classic Manicure',
+    duration: 35,
+    price: 80,
     category: 'nails',
-    image: '/assets/images/services/french-tip.webp',
+    image: '/assets/images/services/classic.webp',
     description_ar:
-      'إطلالة كلاسيكية ناعمة تجمع بين عناية المنيكير الكاملة ورسم أطراف فرنسية دقيقة بلون عاجي نقي فوق قاعدة وردية شفافة.',
+      'عناية مخصصة لليدين تشمل تهيئة الأظافر، إزالة الزوائد الجلدية بلطف، ترطيب حريري، وتطبيق لون طلاء كلاسيكي.',
     description_en:
-      'Timeless elegance pairing complete cuticle and nail care with crisp ivory French tips over a sheer blush-pink base.',
+      'Dedicated hand grooming including warm nail prep, gentle cuticle care, silky hydration, and classic nail polish.',
     inclusions_ar: [
-      'تحضير الأظافر وترطيب اليدين الكامل',
-      'طبقة أساس وردية شفافة ورسم طرف فرنسي متقن',
-      'طبقة حماية لامعة لثبات أجمل',
+      'نقع دافئ لليدين وتنعيم الجلد المحيط بالظفر',
+      'برد وتنسيق طول وشكل الأظافر بتناسق',
+      'تدليك خفيف لليدين بطبقة مرطبة',
     ],
     inclusions_en: [
-      'Full manicure preparation and hand hydration',
-      'Sheer blush base with precision ivory French tips',
-      'High-shine protective top coat finish',
+      'Warm botanical hand soak and gentle cuticle softening',
+      'Precision nail filing and shaping',
+      'Light hand massage with velvety moisturizer',
     ],
-    precautions_ar: 'يتطلب وقت جفاف قصير بعد الطلاء الكلاسيكي.',
-    precautions_en: 'Allow brief drying time after traditional polish application.',
+    precautions_ar: 'يرجى إعطاء وقت جفاف كافٍ بعد الجلسة.',
+    precautions_en: 'Allow adequate natural drying time following lacquer application.',
     credentials_required: false,
   },
   {
-    id: 'french-polish',
-    name_ar: 'طلاء أظافر فرنسي',
-    name_en: 'French Polish',
-    duration: 25,
-    price: 70,
+    id: 'french-tip',
+    name_ar: 'فرنش أطراف الأظافر',
+    name_en: 'French Polish Tips',
+    duration: 20,
+    price: 39,
+    category: 'nails',
+    image: '/assets/images/services/french-tip.webp',
+    description_ar:
+      'إضافة لمسة الفرنش الكلاسيكية الناعمة على أطراف أظافر اليدين بلون عاجي ناصع أو وردي رقيق.',
+    description_en:
+      'Delicate micro-French tip application with crisp ivory or sheer pink tips over natural or manicured nails.',
+    inclusions_ar: [
+      'رسم خط ابتسامة دقيق متناسق لكل ظفر',
+      'طبقة حماية نهائية فائقة اللمعان',
+      'تثبيت سريع',
+    ],
+    inclusions_en: [
+      'Precision free-edge smile lines',
+      'High-gloss protective top coat',
+      'Quick-setting drops',
+    ],
+    precautions_ar: 'خدمة إضافة تصميم لأطراف الأظافر وتتطلب أظافر مهيأة مسبقاً.',
+    precautions_en: 'Nail art add-on service; requires clean prepped nail plates.',
+    credentials_required: false,
+  },
+  {
+    id: 'french-hands-feet',
+    name_ar: 'فرنش يدين وقدمين',
+    name_en: 'French Hands & Feet',
+    duration: 30,
+    price: 65,
+    category: 'nails',
+    image: '/assets/images/services/french-tip.webp',
+    description_ar:
+      'تنسيق فرنش متكامل وأنيق لأطراف أظافر اليدين والقدمين معاً لإطلالة أنثوية موحدة وفائقة الرقي.',
+    description_en:
+      'Harmonious French polish styling for both hands and feet for a timeless and elegant matching aesthetic.',
+    inclusions_ar: [
+      'رسم فرنش كلاسيكي متناسق لأظافر اليدين',
+      'رسم فرنش متقن لأظافر القدمين',
+      'طبقة حماية لامعة تدوم طويلاً',
+    ],
+    inclusions_en: [
+      'Matching French tips for hand nails',
+      'Neat French tips for toenails',
+      'Durable high-gloss clear coat seal',
+    ],
+    precautions_ar: 'تتطلب وقتاً قصيراً لتجفيف الطلاء.',
+    precautions_en: 'Requires a brief resting time for optimal polish curing.',
+    credentials_required: false,
+  },
+  {
+    id: 'polish-color',
+    name_ar: 'لون مناكير كلاسيك',
+    name_en: 'Classic Polish Color',
+    duration: 15,
+    price: 20,
     category: 'nails',
     image: '/assets/images/services/french-polish.webp',
     description_ar:
-      'خدمة سريعة لتنسيق وتلوين الأظافر بالنمط الفرنسي الأنيق لمن ترغب بتجديد إطلالتها بلمسة ناعمة ومرتبة.',
+      'تلوين سريع للأظافر بلونك المفضل من مجموعتنا الفاخرة لتجديد الإطلالة بأسرع وقت.',
     description_en:
-      'A crisp express French polish refresh with light nail shaping and neat ivory tips for an effortlessly polished finish.',
+      'Quick polish change in your chosen shade from our curated salon palette to refresh your hands instantly.',
     inclusions_ar: [
-      'برد وتنسيق سريع لشكل الأظافر',
-      'تطبيق الطلاء الفرنسي الكلاسيكي',
-      'زيت مغذٍ لمحيط الظفر',
+      'طبقة أساس لحماية الظفر الطبيعي',
+      'طبقتان من اللون المختار لعمق وغنى اللمعة',
+      'طبقة توب كوت واقية سريعة الجفاف',
     ],
     inclusions_en: [
-      'Quick nail shaping and surface buffing',
-      'Clean French polish base and tip application',
-      'Nourishing botanical cuticle oil drop',
+      'Protective clear base coat',
+      'Two rich lacquer color coats',
+      'Fast-dry high-shine seal',
     ],
-    precautions_ar: 'خدمة تلوين وتنسيق سريعة لا تشمل نقعاً أو إزالة جل سابق.',
-    precautions_en: 'Express polish service; does not include full soak or prior gel removal.',
+    precautions_ar: 'خدمة طلاء سريع لا تشمل إزالة طلاء سابق أو جل.',
+    precautions_en: 'Express polish application; excludes soak or gel removal.',
     credentials_required: false,
   },
   {
@@ -301,7 +528,7 @@ export const SEED_SERVICES = [
     name_ar: 'طلاء جل',
     name_en: 'Gel Polish',
     duration: 45,
-    price: 115,
+    price: 110,
     category: 'gel',
     image: '/assets/images/services/gel-polish.webp',
     description_ar:
@@ -324,10 +551,10 @@ export const SEED_SERVICES = [
   },
   {
     id: 'french-gel',
-    name_ar: 'جل فرنسي',
+    name_ar: 'فرنش جل',
     name_en: 'French Gel',
-    duration: 55,
-    price: 145,
+    duration: 50,
+    price: 130,
     category: 'gel',
     image: '/assets/images/services/french-gel.webp',
     description_ar:
@@ -349,37 +576,11 @@ export const SEED_SERVICES = [
     credentials_required: false,
   },
   {
-    id: 'colored-french',
-    name_ar: 'جل فرنسي بأطراف ملونة',
-    name_en: 'Colored French Gel',
-    duration: 60,
-    price: 155,
-    category: 'gel',
-    image: '/assets/images/services/colored-french.webp',
-    description_ar:
-      'لمسة عصرية على الفرنش الكلاسيكي بأطراف ملونة دقيقة بدرجات الورد الباستيل أو المريمية أو الألوان الموسمية حسب ذوقكِ.',
-    description_en:
-      'A modern twist on the classic French tip featuring delicate micro-tips in dusty rose, sage, or your favorite tonal palette.',
-    inclusions_ar: [
-      'تحضير شامل للظفر واختيار الدرجة المناسبة',
-      'رسم أطراف ملونة دقيقة بتناسق عالٍ',
-      'لمعان جل ثابت ومقاوم للتقشر',
-    ],
-    inclusions_en: [
-      'Complete nail prep and custom tip color selection',
-      'Precision micro-French colored tip artistry',
-      'Cured gloss seal and hydrating finish',
-    ],
-    precautions_ar: 'تأكدي من اختيار إزالة الجل إذا كانت أظافركِ تحتوي على جل حالي.',
-    precautions_en: 'Please add Gel Removal if removing previous gel at the same visit.',
-    credentials_required: false,
-  },
-  {
     id: 'gel-removal',
-    name_ar: 'إزالة الجل',
+    name_ar: 'إزالة طلاء الجل',
     name_en: 'Gel Removal',
-    duration: 25,
-    price: 50,
+    duration: 30,
+    price: 60,
     category: 'gel',
     image: '/assets/images/services/gel-removal.webp',
     description_ar:
@@ -400,70 +601,44 @@ export const SEED_SERVICES = [
     precautions_en: 'Designed for soak-off soft gel polish; please note hard acrylic extensions separately.',
     credentials_required: false,
   },
-  {
-    id: 'gel-reapplication',
-    name_ar: 'إعادة تطبيق الجل',
-    name_en: 'Gel Reapplication',
-    duration: 75,
-    price: 150,
-    category: 'gel',
-    image: '/assets/images/services/gel-reapplication.webp',
-    description_ar:
-      'تجديد متكامل يجمع بين الإزالة اللطيفة للجل السابق، تهيئة الظفر الطبيعي، وتطبيق طبقة جل جديدة بلونكِ المفضل.',
-    description_en:
-      'A seamless refresh combining gentle removal of existing gel, natural nail care, and a fresh cured coat in your chosen shade.',
-    inclusions_ar: [
-      'إزالة لطيفة للجل القديم والعناية بالظفر',
-      'تنسيق الشكل وتنظيف محيط الظفر',
-      'تطبيق جل جديد بالكامل وتغذية اليدين',
-    ],
-    inclusions_en: [
-      'Gentle soak-off removal of previous gel polish',
-      'Cuticle tidying and fresh nail shaping',
-      'Full base, color, and glossy top-coat gel reapplication',
-    ],
-    precautions_ar: 'مثالية للمحافظة على مظهر متجدد دون الإضرار بصفيحة الظفر.',
-    precautions_en: 'Ideal for keeping your gel finish fresh while protecting natural nail integrity.',
-    credentials_required: false,
-  },
 ];
 
 export const SEED_PACKAGES = [
   {
-    id: 'nail-glow',
-    name_ar: 'باقة إشراقة J',
-    name_en: 'J Nail Glow',
-    service_ids: ['pedicure', 'french-gel'],
+    id: 'luxury-experience',
+    name_ar: 'باقة التجربة الفاخرة',
+    name_en: 'The Luxury Experience',
+    service_ids: ['hot-stone', 'classic'],
+    price: 349,
+    tagline_ar: 'مساج الأحجار الساخنة 60 دقيقة + بدكير ومناكير كلاسيك (توفير 40 ر.س).',
+    tagline_en: 'Hot stone therapy (60m) paired with classic manicure & pedicure (save 40 SAR).',
+  },
+  {
+    id: 'integrated-care',
+    name_ar: 'باقة العناية المتكاملة',
+    name_en: 'Complete Care Package',
+    service_ids: ['classic', 'french-tip', 'neck-shoulder'],
     price: 239,
-    tagline_ar: 'عناية هادئة لليدين والقدمين بلمسة فرنسية لامعة.',
-    tagline_en: 'A polished ritual combining soothing foot care and luminous French gel.',
+    tagline_ar: 'بدكير ومناكير كلاسيك + فرنش أطراف الأظافر + مساج رقبة وأكتاف 30 دقيقة.',
+    tagline_en: 'Classic mani-pedi + French tips + 30m neck & shoulder tension relief.',
   },
   {
-    id: 'serenity',
-    name_ar: 'باقة لحظة هدوء',
-    name_en: 'J Serenity',
-    service_ids: ['relaxation', 'classic'],
+    id: 'relaxation-pamper',
+    name_ar: 'باقة الاسترخاء والدلال',
+    name_en: 'Relaxation & Pampering',
+    service_ids: ['therapeutic', 'classic'],
     price: 339,
-    tagline_ar: 'توازن مثالي بين استرخاء الجسد وأناقة الأظافر الكلاسيكية.',
-    tagline_en: 'A calm pairing of full-body relaxation massage and classic mani-pedi care.',
+    tagline_ar: 'مساج علاجي عميق 60 دقيقة + بدكير ومناكير كلاسيك في هدوء منزلك.',
+    tagline_en: 'Deep tissue therapy (60m) combined with complete classic mani-pedi care.',
   },
   {
-    id: 'rose-ritual',
-    name_ar: 'باقة طقوس الورد',
-    name_en: 'J Rose Ritual',
-    service_ids: ['hot-stone', 'french-tip'],
-    price: 379,
-    tagline_ar: 'دفء الأحجار البركانية مع نعومة الأطراف الفرنسية الكلاسيكية.',
-    tagline_en: 'Warm basalt stone therapy paired with timeless French-tip grooming.',
-  },
-  {
-    id: 'signature',
-    name_ar: 'باقة J المميزة',
-    name_en: 'J Signature',
-    service_ids: ['therapeutic', 'classic', 'gel-polish'],
-    price: 469,
-    tagline_ar: 'تجربة J Beauty المتكاملة من العناية العميقة إلى اللمسة النهائية.',
-    tagline_en: 'Our complete signature home experience from targeted relief to glossy gel.',
+    id: 'nail-care',
+    name_ar: 'باقة العناية بالأظافر',
+    name_en: 'Signature Nail Care',
+    service_ids: ['classic', 'french-gel'],
+    price: 259,
+    tagline_ar: 'بدكير ومناكير كلاسيك متكامل + فرنش جل زجاجي اللمعان وفائق الثبات.',
+    tagline_en: 'Full classic manicure and pedicure elevated with chip-free French gel.',
   },
 ];
 
@@ -522,12 +697,17 @@ export function openDatabase(dbPath) {
     CREATE TABLE IF NOT EXISTS group_requests(id TEXT PRIMARY KEY,reference TEXT UNIQUE NOT NULL,user_id TEXT,data TEXT NOT NULL,created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS gift_requests(id TEXT PRIMARY KEY,reference TEXT UNIQUE NOT NULL,user_id TEXT,data TEXT NOT NULL,created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS funnel_events(day TEXT NOT NULL,event TEXT NOT NULL,count INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(day,event));
+    CREATE TABLE IF NOT EXISTS coupons(id TEXT PRIMARY KEY, code TEXT UNIQUE NOT NULL, discount_type TEXT NOT NULL DEFAULT 'percent', discount_value REAL NOT NULL, min_spend REAL DEFAULT 0, valid_from TEXT, valid_until TEXT, max_uses INTEGER DEFAULT 0, used_count INTEGER DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS nail_shades(id TEXT PRIMARY KEY, name_ar TEXT NOT NULL, name_en TEXT NOT NULL, hex TEXT NOT NULL, finish TEXT DEFAULT 'gloss', active INTEGER NOT NULL DEFAULT 1, sort_order INTEGER DEFAULT 0, created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS staff_commissions(id TEXT PRIMARY KEY, staff_id TEXT NOT NULL, month TEXT NOT NULL, visits_count INTEGER DEFAULT 0, threshold INTEGER DEFAULT 50, commission_rate REAL DEFAULT 0.05, commission_amount REAL DEFAULT 0, updated_at TEXT NOT NULL, UNIQUE(staff_id, month));
+    CREATE TABLE IF NOT EXISTS referrals(id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, code TEXT UNIQUE NOT NULL, invitee_id TEXT, booking_id TEXT, status TEXT NOT NULL DEFAULT 'pending', bonus_petals INTEGER DEFAULT 50, created_at TEXT NOT NULL);
     CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
     CREATE INDEX IF NOT EXISTS idx_ledger_user ON ledger(user_id);
     CREATE INDEX IF NOT EXISTS idx_audit_created ON audit(created_at);
     CREATE INDEX IF NOT EXISTS idx_nail_styles_user ON nail_styles(user_id);
     CREATE INDEX IF NOT EXISTS idx_group_requests_user ON group_requests(user_id);
     CREATE INDEX IF NOT EXISTS idx_gift_requests_user ON gift_requests(user_id);
+    CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
   `);
 
   applyMigrations(db);
@@ -551,9 +731,29 @@ export function openDatabase(dbPath) {
     run('INSERT INTO config VALUES(1,?)', JSON.stringify(DEFAULT_SETTINGS));
   }
 
-  const hasServices = get('SELECT id FROM services LIMIT 1');
-  if (!hasServices) {
-    for (const s of SEED_SERVICES) {
+  const hasCoupons = get('SELECT id FROM coupons LIMIT 1');
+  if (!hasCoupons) {
+    for (const c of DEFAULT_COUPONS) {
+      run(
+        'INSERT OR IGNORE INTO coupons(id, code, discount_type, discount_value, min_spend, valid_from, valid_until, max_uses, used_count, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+        c.id,
+        c.code,
+        c.discount_type,
+        c.discount_value,
+        c.min_spend,
+        c.valid_from,
+        c.valid_until,
+        c.max_uses,
+        c.used_count,
+        c.active,
+        now(),
+      );
+    }
+  }
+
+  for (const s of SEED_SERVICES) {
+    const row = get('SELECT data FROM services WHERE id=?', s.id);
+    if (!row) {
       run(
         'INSERT INTO services VALUES(?,?)',
         s.id,
@@ -576,42 +776,45 @@ export function openDatabase(dbPath) {
           credentials_approved: false,
         }),
       );
-    }
-  } else {
-    // Non-destructive upgrade for existing databases still carrying the initial generic copy or blank images
-    for (const seed of SEED_SERVICES) {
-      const row = get('SELECT data FROM services WHERE id=?', seed.id);
-      if (!row) continue;
+    } else {
       const existing = JSON.parse(row.data);
       let changed = false;
+      if (existing.price_cents !== s.price * 100) {
+        existing.price_cents = s.price * 100;
+        changed = true;
+      }
+      if (existing.name_ar !== s.name_ar) {
+        existing.name_ar = s.name_ar;
+        changed = true;
+      }
+      if (existing.duration !== s.duration) {
+        existing.duration = s.duration;
+        changed = true;
+      }
       if (existing.description_ar === OLD_GENERIC_AR) {
-        existing.description_ar = seed.description_ar;
-        existing.description_en = seed.description_en;
+        existing.description_ar = s.description_ar;
+        existing.description_en = s.description_en;
         changed = true;
       }
       if (!existing.inclusions_ar) {
-        existing.inclusions_ar = seed.inclusions_ar;
-        existing.inclusions_en = seed.inclusions_en;
+        existing.inclusions_ar = s.inclusions_ar;
+        existing.inclusions_en = s.inclusions_en;
         changed = true;
       }
       if (!existing.precautions_ar) {
-        existing.precautions_ar = seed.precautions_ar;
-        existing.precautions_en = seed.precautions_en;
-        changed = true;
-      }
-      if (!existing.image) {
-        existing.image = seed.image;
+        existing.precautions_ar = s.precautions_ar;
+        existing.precautions_en = s.precautions_en;
         changed = true;
       }
       if (changed) {
-        run('UPDATE services SET data=? WHERE id=?', JSON.stringify(existing), seed.id);
+        run('UPDATE services SET data=? WHERE id=?', JSON.stringify(existing), s.id);
       }
     }
   }
 
-  const hasPackages = get('SELECT id FROM packages LIMIT 1');
-  if (!hasPackages) {
-    for (const p of SEED_PACKAGES) {
+  for (const p of SEED_PACKAGES) {
+    const row = get('SELECT data FROM packages WHERE id=?', p.id);
+    if (!row) {
       run(
         'INSERT INTO packages VALUES(?,?)',
         p.id,
@@ -626,16 +829,28 @@ export function openDatabase(dbPath) {
           active: true,
         }),
       );
-    }
-  } else {
-    for (const seed of SEED_PACKAGES) {
-      const row = get('SELECT data FROM packages WHERE id=?', seed.id);
-      if (!row) continue;
+    } else {
       const existing = JSON.parse(row.data);
-      if (!existing.tagline_ar) {
-        existing.tagline_ar = seed.tagline_ar;
-        existing.tagline_en = seed.tagline_en;
-        run('UPDATE packages SET data=? WHERE id=?', JSON.stringify(existing), seed.id);
+      let changed = false;
+      if (existing.price_cents !== p.price * 100) {
+        existing.price_cents = p.price * 100;
+        changed = true;
+      }
+      if (existing.name_ar !== p.name_ar) {
+        existing.name_ar = p.name_ar;
+        changed = true;
+      }
+      if (JSON.stringify(existing.service_ids) !== JSON.stringify(p.service_ids)) {
+        existing.service_ids = p.service_ids;
+        changed = true;
+      }
+      if (existing.tagline_ar !== p.tagline_ar) {
+        existing.tagline_ar = p.tagline_ar;
+        existing.tagline_en = p.tagline_en;
+        changed = true;
+      }
+      if (changed) {
+        run('UPDATE packages SET data=? WHERE id=?', JSON.stringify(existing), p.id);
       }
     }
   }

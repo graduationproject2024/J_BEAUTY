@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { now, uid } from './db.mjs';
+import { BOOKING_ADD_ONS, now, uid } from './db.mjs';
 import { fail, money, phone, text, whatsappUrl } from './validation.mjs';
 import { reconcileLoyalty } from './loyalty.mjs';
 import { hasCapability, requireCapability } from './authorization/permissions.mjs';
@@ -91,15 +91,23 @@ export function validateSchedule(helpers, booking, confirmed = false, enforceLea
 
 export function formatBookingResult(helpers, booking) {
   const notesLine = booking.notes ? `\nملاحظات: ${booking.notes}` : '';
+  const addOnsLine = booking.add_ons && booking.add_ons.length
+    ? `\nلمسات الدلال الإضافية: ${booking.add_ons.map((a) => a.name_ar).join(' + ')}`
+    : '';
+  const discountLine = booking.discount_amount
+    ? `\nكوبون الخصم (${booking.coupon_code}): -${booking.discount_amount} ر.س`
+    : '';
   const message =
-    `مرحباً J Beauty،\n` +
-    `أرغب في تقديم طلب حجز منزلي.\n` +
+    `مرحباً J Beauty Spa،\n` +
+    `أرغب في تقديم طلب حجز منزلي في المدينة المنورة.\n` +
     `رقم الطلب: ${booking.reference}\n` +
     `الاسم: ${booking.name}\n` +
-    `الخدمة: ${booking.items.map((i) => i.name_ar).join('، ')}\n` +
+    `الخدمة: ${booking.items.map((i) => i.name_ar).join('، ')}` +
+    `${addOnsLine}\n` +
     `التاريخ المفضل: ${booking.date}\n` +
     `الوقت المفضل: ${booking.time}\n` +
     `الحي: ${booking.neighborhood}\n` +
+    `${discountLine}\n` +
     `الإجمالي التقديري: ${booking.total} ر.س` +
     `${notesLine}\n` +
     `يرجى تأكيد توفر الموعد.`;
@@ -144,6 +152,50 @@ export function createBooking(db, helpers, user, sessionId, body) {
     fail('This service requires business credential approval before booking');
   }
 
+  // Parse optional add-ons:
+  const validAddOns = [];
+  if (Array.isArray(body.add_ons) && body.add_ons.length) {
+    for (const aId of body.add_ons) {
+      const found = BOOKING_ADD_ONS.find((a) => a.id === aId);
+      if (found) validAddOns.push(found);
+    }
+  }
+
+  const baseTotal = selectedPkg ? selectedPkg.price : items.reduce((sum, item) => sum + item.price, 0);
+  const baseDuration = items.reduce((sum, item) => sum + item.duration, 0);
+  const addOnsTotal = validAddOns.reduce((sum, a) => sum + a.price, 0);
+  const addOnsDuration = validAddOns.reduce((sum, a) => sum + a.duration, 0);
+  const subtotal = baseTotal + addOnsTotal;
+  const finalDuration = baseDuration + addOnsDuration;
+
+  // Parse optional coupon code:
+  let appliedCoupon = null;
+  let discountAmount = 0;
+  if (body.coupon_code) {
+    const code = String(body.coupon_code).trim().toUpperCase();
+    const c = db.get('SELECT * FROM coupons WHERE UPPER(code)=? AND active=1', code);
+    const today = new Date().toISOString().slice(0, 10);
+    if (
+      c &&
+      (!c.valid_from || c.valid_from <= today) &&
+      (!c.valid_until || c.valid_until >= today) &&
+      (!c.min_spend || subtotal >= c.min_spend) &&
+      (c.max_uses === 0 || c.used_count < c.max_uses)
+    ) {
+      appliedCoupon = c.code;
+      if (c.discount_type === 'percent') {
+        discountAmount = Math.round((subtotal * c.discount_value) / 100);
+      } else {
+        discountAmount = Math.min(subtotal, c.discount_value);
+      }
+      try {
+        db.run('UPDATE coupons SET used_count = used_count + 1 WHERE id=?', c.id);
+      } catch {}
+    }
+  }
+
+  const finalTotal = Math.max(0, subtotal - discountAmount);
+
   const booking = {
     id: uid(),
     reference: `J-${randomBytes(6).toString('hex').toUpperCase()}`,
@@ -161,9 +213,19 @@ export function createBooking(db, helpers, user, sessionId, body) {
       price,
       duration,
     })),
+    add_ons: validAddOns.map(({ id, name_ar, name_en, price, duration }) => ({
+      id,
+      name_ar,
+      name_en,
+      price,
+      duration,
+    })),
     package_id: selectedPkg?.id || null,
-    total: selectedPkg ? selectedPkg.price : items.reduce((sum, item) => sum + item.price, 0),
-    duration: items.reduce((sum, item) => sum + item.duration, 0),
+    subtotal,
+    coupon_code: appliedCoupon,
+    discount_amount: discountAmount,
+    total: finalTotal,
+    duration: finalDuration,
     status: 'pending_confirmation',
     paid_amount: 0,
     paid_cents: 0,

@@ -96,36 +96,74 @@ export function customersView(d) {
               <th>${t('الجوال المقنّع', 'Masked Phone')}</th>
               <th>${t('التوثيق', 'Verification')}</th>
               <th>${t('تاريخ الانضمام', 'Created')}</th>
+              <th>${t('تواصل العناية والاحتفاظ', 'Retention & Care')}</th>
             </tr>
           </thead>
           <tbody>
             ${customers
               .map(
-                (c) => `
-                  <tr>
-                    <td>${esc(c.name)}</td>
-                    <td><bdi>${esc(c.masked_phone)}</bdi></td>
-                    <td>
-                      ${c.verified ? `<span class="badge mfa-ok">${t('موثقة', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثقة', 'Unverified')}</span>`}
-                      ${c.has_pending_verification ? `<span class="badge">${t('رمز توثيق نشط', 'Active code')}</span>` : ''}
-                    </td>
-                    <td><bdi>${esc(String(c.created_at || '').slice(0, 10))}</bdi></td>
-                  </tr>
-                `,
+                (c) => {
+                  const rebookMsg = encodeURIComponent(
+                    `مرحباً بك ${c.name} من J Beauty Spa 🌸\n` +
+                    `مرت فترة منذ جلستك الأخيرة.. هل حان وقت تجديد الدلال والراحة؟\n` +
+                    `يسعدنا تقديم كود خصم خاص 10% لجلستك القادمة: [SPAWHEEL10] ✨\n` +
+                    `احجزي موعدك الآن بكل سهولة ونصلك في راحة بيتك.`
+                  );
+                  const birthdayMsg = encodeURIComponent(
+                    `كل عام وأنتِ بألف خير وتألق ${c.name}! 🎉🌸\n` +
+                    `أسرة J Beauty Spa تتمنى لك عاماً مليئاً بالجمال والسعادة.\n` +
+                    `يسعدنا إهداؤك خصم 15% بمناسبة يوم ميلادك بكود: [LUXURY15] 🎁✨\n` +
+                    `نتشرف دائماً بخدمتك.`
+                  );
+                  return `
+                    <tr>
+                      <td><strong>${esc(c.name)}</strong></td>
+                      <td><bdi>${esc(c.masked_phone)}</bdi></td>
+                      <td>
+                        ${c.verified ? `<span class="badge mfa-ok">${t('موثقة', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثقة', 'Unverified')}</span>`}
+                        ${c.has_pending_verification ? `<span class="badge">${t('رمز توثيق نشط', 'Active code')}</span>` : ''}
+                      </td>
+                      <td><bdi>${esc(String(c.created_at || '').slice(0, 10))}</bdi></td>
+                      <td>
+                        <div class="ops-chip-row">
+                          <a href="https://wa.me/?text=${rebookMsg}" target="_blank" rel="noopener noreferrer" class="btn small light" title="${t('إرسال تذكير إعادة الحجز عبر واتساب', 'Send Re-booking reminder')}">
+                            🔄 ${t('تذكير إعادة الحجز', 'Re-book')}
+                          </a>
+                          <a href="https://wa.me/?text=${birthdayMsg}" target="_blank" rel="noopener noreferrer" class="btn small" style="background:var(--rose-gold-light);color:var(--plum)" title="${t('إرسال معايدة وهدية يوم الميلاد', 'Send Birthday Gift')}">
+                            🎁 ${t('هدية الميلاد', 'Birthday')}
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                },
               )
-              .join('') || `<tr><td colspan="4" class="muted">${t('لا توجد حسابات مسجلة.', 'No customer accounts yet.')}</td></tr>`}
+              .join('') || `<tr><td colspan="5" class="muted">${t('لا توجد حسابات مسجلة.', 'No customer accounts yet.')}</td></tr>`}
           </tbody>
         </table>
       </div>
       <div class="ops-mobile-cards">
         ${customers
           .map(
-            (c) => `
-              <div class="ops-mobile-card">
-                <div class="ops-row"><strong>${esc(c.name)}</strong>${c.verified ? `<span class="badge mfa-ok">${t('موثقة', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثقة', 'Unverified')}</span>`}</div>
-                <div class="muted"><bdi>${esc(c.masked_phone)}</bdi> · <bdi>${esc(String(c.created_at || '').slice(0, 10))}</bdi></div>
-              </div>
-            `,
+            (c) => {
+              const rebookMsg = encodeURIComponent(
+                `مرحباً بك ${c.name} من J Beauty Spa 🌸\n` +
+                `مرت فترة منذ جلستك الأخيرة.. هل حان وقت تجديد الدلال والراحة؟ كود خصم خاص 10%: [SPAWHEEL10] ✨`
+              );
+              const birthdayMsg = encodeURIComponent(
+                `كل عام وأنتِ بخير ${c.name}! 🎉 هدية يوم ميلادك خصم 15% من J Beauty Spa بكود: [LUXURY15] 🎁`
+              );
+              return `
+                <div class="ops-mobile-card">
+                  <div class="ops-row"><strong>${esc(c.name)}</strong>${c.verified ? `<span class="badge mfa-ok">${t('موثقة', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثقة', 'Unverified')}</span>`}</div>
+                  <div class="muted"><bdi>${esc(c.masked_phone)}</bdi> · <bdi>${esc(String(c.created_at || '').slice(0, 10))}</bdi></div>
+                  <div class="ops-chip-row" style="margin-top:8px">
+                    <a href="https://wa.me/?text=${rebookMsg}" target="_blank" rel="noopener noreferrer" class="btn small light">🔄 ${t('تذكير إعادة الحجز', 'Re-book')}</a>
+                    <a href="https://wa.me/?text=${birthdayMsg}" target="_blank" rel="noopener noreferrer" class="btn small" style="background:var(--rose-gold-light);color:var(--plum)">🎁 ${t('هدية الميلاد', 'Birthday')}</a>
+                  </div>
+                </div>
+              `;
+            },
           )
           .join('')}
       </div>

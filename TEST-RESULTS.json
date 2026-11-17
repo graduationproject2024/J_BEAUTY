@@ -1,7 +1,7 @@
 {
-  "date": "2026-11-16T18:56:36.189Z",
+  "date": "2026-11-17T12:11:53.658Z",
   "passed": [
-    "Seed catalog: 13 services and 4 computed packages",
+    "Seed catalog: 17 services and 4 computed packages",
     "Guest persists pending request and WhatsApp handoff",
     "Duplicate guest submission does not create another booking",
     "Registration and pending verification cannot inherit guest history",

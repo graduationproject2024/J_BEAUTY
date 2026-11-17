@@ -86,15 +86,18 @@ writeFileSync(path.join(PAGES_DIR, 'app.js'), appCode);
 
 let compCode = rewriteAssetStrings(readFileSync(path.join(CUSTOMER_DIR, 'js', 'components.js'), 'utf8'));
 compCode = compCode.replace(
-  /t\(\s*'سبا نسائي منزلي في المدينة المنورة · مواعيد بتأكيد شخصي من فريقنا',\s*'WOMEN’S HOME SPA · AL MADINAH · PERSONALLY CONFIRMED APPOINTMENTS',?\s*\)/,
-  "t(\n        'معاينة تجريبية لـ J Beauty على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',\n        'J Beauty static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',\n      )",
+  /const annText = t\([\s\S]*?\);/,
+  `const annText = t(
+        'معاينة تجريبية لـ J Beauty Spa على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',
+        'J Beauty Spa static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',
+      );`,
 );
 if (!compCode.includes('static preview on GitHub Pages')) {
   throw new Error('Failed to inject GitHub Pages static preview disclosure into pages/js/components.js');
 }
 writeFileSync(path.join(PAGES_DIR, 'js', 'components.js'), compCode);
 
-for (const file of ['atelier.js', 'booking.js', 'experiences.js', 'motion.js', 'pages-public.js', 'account.js']) {
+for (const file of ['atelier.js', 'booking.js', 'experiences.js', 'motion.js', 'pages-public.js', 'account.js', 'wheel.js']) {
   writeFileSync(
     path.join(PAGES_DIR, 'js', file),
     rewriteAssetStrings(readFileSync(path.join(CUSTOMER_DIR, 'js', file), 'utf8')),

@@ -366,86 +366,86 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'index',
       root8: fingerRoots.index,
-      spreadDeg: 3.2,
-      bendDegs: [-4.0, -8.0, -11.0],
-      segLens: [2.50, 1.90, 1.75],
+      spreadDeg: 2.6,
+      bendDegs: [-5.0, -9.5, -13.0],
+      segLens: [2.15, 1.55, 1.35],
       radii: [
-        [0.74, 0.68],
-        [0.68, 0.62],
-        [0.69, 0.63],
-        [0.63, 0.58],
-        [0.63, 0.57],
-        [0.61, 0.54],
-        [0.59, 0.50],
-        [0.55, 0.46],
-        [0.44, 0.34],
+        [0.72, 0.66],
+        [0.66, 0.60],
+        [0.67, 0.61],
+        [0.61, 0.56],
+        [0.61, 0.55],
+        [0.59, 0.52],
+        [0.57, 0.48],
+        [0.53, 0.44],
+        [0.42, 0.32],
       ],
-      nailBedScaleW: 0.84,
-      nailBedLen: 1.26,
-      upRollDeg: 4,
+      nailBedScaleW: 0.78,
+      nailBedLen: 1.12,
+      upRollDeg: 3,
     },
     {
       id: 'middle',
       root8: fingerRoots.middle,
-      spreadDeg: 0.2,
-      bendDegs: [-3.5, -7.0, -10.0],
-      segLens: [2.80, 2.10, 1.90],
+      spreadDeg: 0.1,
+      bendDegs: [-4.5, -9.0, -12.5],
+      segLens: [2.35, 1.70, 1.45],
       radii: [
-        [0.78, 0.72],
-        [0.71, 0.65],
-        [0.72, 0.66],
-        [0.66, 0.60],
-        [0.66, 0.59],
-        [0.64, 0.56],
-        [0.62, 0.52],
-        [0.58, 0.47],
-        [0.46, 0.36],
+        [0.75, 0.69],
+        [0.68, 0.62],
+        [0.69, 0.63],
+        [0.63, 0.57],
+        [0.63, 0.56],
+        [0.61, 0.53],
+        [0.59, 0.49],
+        [0.55, 0.45],
+        [0.44, 0.34],
       ],
-      nailBedScaleW: 0.85,
-      nailBedLen: 1.38,
+      nailBedScaleW: 0.80,
+      nailBedLen: 1.20,
       upRollDeg: 1,
     },
     {
       id: 'ring',
       root8: fingerRoots.ring,
-      spreadDeg: -2.2,
-      bendDegs: [-4.0, -8.0, -11.5],
-      segLens: [2.60, 1.95, 1.80],
+      spreadDeg: -1.8,
+      bendDegs: [-5.0, -9.5, -13.0],
+      segLens: [2.20, 1.60, 1.38],
       radii: [
-        [0.73, 0.67],
-        [0.66, 0.60],
-        [0.67, 0.61],
-        [0.61, 0.55],
-        [0.61, 0.54],
-        [0.59, 0.51],
-        [0.57, 0.48],
-        [0.53, 0.44],
-        [0.42, 0.33],
+        [0.71, 0.65],
+        [0.64, 0.58],
+        [0.65, 0.59],
+        [0.59, 0.53],
+        [0.59, 0.52],
+        [0.57, 0.49],
+        [0.55, 0.46],
+        [0.51, 0.42],
+        [0.40, 0.31],
       ],
-      nailBedScaleW: 0.84,
-      nailBedLen: 1.28,
+      nailBedScaleW: 0.78,
+      nailBedLen: 1.15,
       upRollDeg: -2,
     },
     {
       id: 'pinky',
       root8: fingerRoots.pinky,
-      spreadDeg: -5.8,
-      bendDegs: [-5.5, -10.5, -14.0],
-      segLens: [1.95, 1.50, 1.45],
+      spreadDeg: -4.5,
+      bendDegs: [-6.5, -11.5, -15.0],
+      segLens: [1.70, 1.25, 1.15],
       radii: [
-        [0.64, 0.58],
-        [0.57, 0.51],
-        [0.58, 0.52],
-        [0.52, 0.46],
-        [0.52, 0.45],
+        [0.62, 0.56],
+        [0.55, 0.49],
+        [0.56, 0.50],
+        [0.50, 0.44],
         [0.50, 0.43],
-        [0.48, 0.40],
-        [0.44, 0.37],
-        [0.35, 0.28],
+        [0.48, 0.41],
+        [0.46, 0.38],
+        [0.42, 0.35],
+        [0.33, 0.26],
       ],
-      nailBedScaleW: 0.80,
-      nailBedLen: 1.04,
-      upRollDeg: -4,
+      nailBedScaleW: 0.75,
+      nailBedLen: 0.95,
+      upRollDeg: -3,
     },
   ];
 
@@ -579,15 +579,15 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
   const tUp2 = normVec({ x: 0.22, y: 0.97, z: -0.06 });
   const tf2 = makeFrame(tDir2, tUp2);
 
-  const tp1 = addVec(tStart, scaleVec(tf0.forward, 1.35));
-  const tpMCP = addVec(tp1, scaleVec(tf0.forward, 1.25));
-  const tpMid = addVec(tpMCP, scaleVec(tf1.forward, 1.15));
-  const tpIP = addVec(tpMCP, scaleVec(tf1.forward, 2.10));
-  const tpPreCuticle = addVec(tpIP, scaleVec(tf2.forward, 0.42));
-  const tpCuticle = addVec(tpIP, scaleVec(tf2.forward, 0.68));
-  const tpMidBed = addVec(tpIP, scaleVec(tf2.forward, 1.18));
-  const tpDistBed = addVec(tpIP, scaleVec(tf2.forward, 1.60));
-  const tpTip = addVec(tpIP, scaleVec(tf2.forward, 1.84));
+  const tp1 = addVec(tStart, scaleVec(tf0.forward, 1.15));
+  const tpMCP = addVec(tp1, scaleVec(tf0.forward, 1.05));
+  const tpMid = addVec(tpMCP, scaleVec(tf1.forward, 0.95));
+  const tpIP = addVec(tpMCP, scaleVec(tf1.forward, 1.75));
+  const tpPreCuticle = addVec(tpIP, scaleVec(tf2.forward, 0.35));
+  const tpCuticle = addVec(tpIP, scaleVec(tf2.forward, 0.55));
+  const tpMidBed = addVec(tpIP, scaleVec(tf2.forward, 0.95));
+  const tpDistBed = addVec(tpIP, scaleVec(tf2.forward, 1.30));
+  const tpTip = addVec(tpIP, scaleVec(tf2.forward, 1.48));
 
   const thumbRings = [
     addFingerRing(tp1, tf0, 0.98, 0.88, { aoBase: 0.94, warmthBase: 0.24 }),
@@ -614,9 +614,9 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     distBedRing: thumbRings[7],
     preCuticleRing: thumbRings[4],
     fallbackFrame: tf2,
-    bedScaleW: 0.68,
-    bedLength: 1.24,
-    radiusMidX: 0.80,
+    bedScaleW: 0.65,
+    bedLength: 1.10,
+    radiusMidX: 0.74,
     isThumb: true,
   };
 

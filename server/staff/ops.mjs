@@ -303,12 +303,91 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
     staff: staffList,
     audit: auditRows,
     analytics,
+    coupons: hasCapability(user, 'settings.manage') || hasCapability(user, 'services.manage')
+      ? db.all('SELECT * FROM coupons ORDER BY created_at DESC')
+      : [],
+    commissions: assignablePractitioners.map((p) => {
+      const monthPrefix = todayStr.slice(0, 7);
+      const visits = allBookingsRaw.filter(
+        (b) => b.assigned_staff_id === p.id && b.status === 'completed' && String(b.date || '').startsWith(monthPrefix),
+      );
+      const count = visits.length;
+      const threshold = 50;
+      const excess = Math.max(0, count - threshold);
+      const excessRevenue = visits.slice(threshold).reduce((acc, b) => acc + Number(b.total || 0), 0);
+      const commission = Math.round(excessRevenue * 0.05);
+      return {
+        staff_id: p.id,
+        name: p.name,
+        month: monthPrefix,
+        visits_count: count,
+        threshold,
+        excess_visits: excess,
+        commission_rate: 0.05,
+        commission_amount: commission,
+      };
+    }),
   };
 }
 
 export function handleOpsRoute({ db, helpers, user, route, query, body, checkRate, send, customerOrigin }) {
   if (route === '/api/ops/dashboard' && !body) {
     return send(getOpsDashboardPayload(db, helpers, user, query));
+  }
+
+  if (route === '/api/ops/coupons' && !body) {
+    return send({ coupons: db.all('SELECT * FROM coupons ORDER BY created_at DESC') });
+  }
+
+  if (route === '/api/ops/coupons' && body) {
+    requireCapability(user, 'settings.manage');
+    const code = String(body.code || '').trim().toUpperCase().replace(/\s+/g, '');
+    if (!code) fail('Invalid coupon code');
+    const existing = db.get('SELECT id FROM coupons WHERE code=?', code);
+    const id = existing ? existing.id : uid();
+    const c = {
+      id,
+      code,
+      discount_type: body.discount_type === 'fixed' ? 'fixed' : 'percent',
+      discount_value: Math.max(1, Number(body.discount_value) || 10),
+      min_spend: Math.max(0, Number(body.min_spend) || 0),
+      valid_from: body.valid_from || null,
+      valid_until: body.valid_until || null,
+      max_uses: Math.max(0, Number(body.max_uses) || 0),
+      used_count: 0,
+      active: body.active !== false ? 1 : 0,
+      created_at: now(),
+    };
+    db.run(
+      'INSERT OR REPLACE INTO coupons(id, code, discount_type, discount_value, min_spend, valid_from, valid_until, max_uses, used_count, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+      c.id,
+      c.code,
+      c.discount_type,
+      c.discount_value,
+      c.min_spend,
+      c.valid_from,
+      c.valid_until,
+      c.max_uses,
+      c.used_count,
+      c.active,
+      c.created_at,
+    );
+    helpers.audit(user, 'coupon.save', c.id, JSON.stringify(c));
+    return send({ coupon: c, ok: true });
+  }
+
+  if (/^\/api\/ops\/coupons\/[^/]+$/.test(route) && body) {
+    requireCapability(user, 'settings.manage');
+    const id = route.split('/').pop();
+    if (body.action === 'delete') {
+      db.run('DELETE FROM coupons WHERE id=?', id);
+      helpers.audit(user, 'coupon.delete', id);
+      return send({ ok: true, deleted: true });
+    }
+    const active = body.active === true || body.active === 1 ? 1 : 0;
+    db.run('UPDATE coupons SET active=? WHERE id=?', active, id);
+    helpers.audit(user, 'coupon.toggle', id, JSON.stringify({ active }));
+    return send({ ok: true, active });
   }
 
   if (/^\/api\/ops\/bookings\/[^/]+$/.test(route) && body) {

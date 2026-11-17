@@ -58,8 +58,8 @@ export const state = {
     neighborhood: '',
     notes: '',
     participants: [
-      { label: 'المستفيدة 1', service_ids: ['relaxation'] },
-      { label: 'المستفيدة 2', service_ids: ['classic'] },
+      { label: '', service_ids: ['relaxation'] },
+      { label: '', service_ids: ['classic'] },
     ],
   },
   occasionCatFilter: 'all',
@@ -68,6 +68,9 @@ export const state = {
   draft: {
     service_ids: [],
     package_id: null,
+    add_ons: [],
+    coupon: null,
+    coupon_code: '',
     date: '',
     time: '',
     name: '',

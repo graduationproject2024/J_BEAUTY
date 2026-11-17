@@ -14,6 +14,54 @@ import {
 import { field, head, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
 
+export const BOOKING_ADD_ONS = [
+  {
+    id: 'mask-hands',
+    price: 35,
+    duration: 15,
+    ar: 'ماسك ترطيب وتغذية اليدين',
+    en: 'Deep Hand Hydration Mask',
+    desc_ar: 'ماسك مغذٍ بزيوت طبيعية يمنح اليدين نعومة فائقة ونضارة حريرية.',
+    desc_en: 'Nutrient-rich natural oil mask for deep softness.',
+  },
+  {
+    id: 'mask-feet',
+    price: 40,
+    duration: 15,
+    ar: 'ماسك ترطيب وتنعيم القدمين',
+    en: 'Foot Nourishing Mask',
+    desc_ar: 'عناية مركزة بكعب وقدمين ناعمتين بمرطبات طبيعية عميقة.',
+    desc_en: 'Intensive nourishing foot treatment for silky softness.',
+  },
+  {
+    id: 'extend-massage',
+    price: 50,
+    duration: 15,
+    ar: 'تمديد وقت المساج ١٥ دقيقة',
+    en: '15-Min Massage Extension',
+    desc_ar: 'ربع ساعة إضافية من الاسترخاء والتركيز على مناطق الشد والتوتر.',
+    desc_en: 'Extra 15 minutes dedicated to deep muscle relaxation.',
+  },
+  {
+    id: 'scalp-oils',
+    price: 45,
+    duration: 15,
+    ar: 'زيوت عطرية ومساج فروة الرأس',
+    en: 'Scalp Ritual & Botanical Oils',
+    desc_ar: 'مساج استرخائي مخصص لفروة الرأس بزيوت عطرية مهدئة.',
+    desc_en: 'Calming scalp massage infused with botanical oils.',
+  },
+  {
+    id: 'heel-peel',
+    price: 35,
+    duration: 15,
+    ar: 'تقشير وتنعيم الكعبين',
+    en: 'Heel Polish & Softening Peel',
+    desc_ar: 'تقشير بحبيبات السكر وزبدة الشيا لنعومة كعبين فائقة.',
+    desc_en: 'Sugar polish and shea butter treatment for smooth heels.',
+  },
+];
+
 export function selectedSummary() {
   const pkg = state.catalog.packages.find((p) => p.id === state.draft.package_id);
   const items = pkg
@@ -22,18 +70,46 @@ export function selectedSummary() {
         .filter(Boolean)
     : state.catalog.services.filter((s) => state.draft.service_ids.map(String).includes(String(s.id)));
 
+  const selectedAddOnObjs = (state.draft.add_ons || [])
+    .map((aid) => BOOKING_ADD_ONS.find((a) => a.id === aid))
+    .filter(Boolean);
+
+  const basePrice = pkg ? pkg.price : items.reduce((sum, s) => sum + Number(s.price), 0);
+  const addOnsPrice = selectedAddOnObjs.reduce((sum, a) => sum + Number(a.price), 0);
+  const subtotal = basePrice + addOnsPrice;
+
+  const baseDuration = pkg ? pkg.duration : items.reduce((sum, s) => sum + Number(s.duration), 0);
+  const addOnsDuration = selectedAddOnObjs.reduce((sum, a) => sum + Number(a.duration), 0);
+  const duration = baseDuration + addOnsDuration;
+
+  let discount = 0;
+  if (state.draft.coupon) {
+    if (state.draft.coupon.discount_type === 'percent') {
+      discount = Math.round((subtotal * Number(state.draft.coupon.value)) / 100);
+    } else {
+      discount = Math.min(subtotal, Number(state.draft.coupon.value));
+    }
+  }
+  const total = Math.max(0, subtotal - discount);
+
   return {
     items,
     package: pkg || null,
-    total: pkg ? pkg.price : items.reduce((sum, s) => sum + Number(s.price), 0),
-    duration: pkg ? pkg.duration : items.reduce((sum, s) => sum + Number(s.duration), 0),
+    addOns: selectedAddOnObjs,
+    basePrice,
+    addOnsPrice,
+    subtotal,
+    discount,
+    coupon: state.draft.coupon || null,
+    total,
+    duration,
   };
 }
 
 function summaryBodyHtml() {
   const s = selectedSummary();
   return `
-    <span class="eyebrow" style="margin-bottom:8px">${t('لحظتكِ المختارة', 'YOUR CHOSEN MOMENT')}</span>
+    <span class="eyebrow" style="margin-bottom:8px">${t('لحظتك المختارة', 'YOUR CHOSEN MOMENT')}</span>
     <h3>${s.package ? esc(nameOf(s.package)) : t('ملخص الطلب', 'Request summary')}</h3>
     ${
       s.items.length
@@ -45,10 +121,30 @@ function summaryBodyHtml() {
             .join('')
         : `<p class="muted">${t('اختاري خدمة أو باقة للبدء.', 'Choose a ritual or package to begin.')}</p>`
     }
+    ${
+      s.addOns.length
+        ? s.addOns
+            .map(
+              (a) =>
+                `<div class="summary-line summary-addon-line" style="font-size:13.5px;color:var(--rose-gold-deep)"><span>✦ ${esc(t(a.ar, a.en))}</span><span>+${money(a.price)}</span></div>`,
+            )
+            .join('')
+        : ''
+    }
     <div class="summary-line">
       <span>${t('المدة التقديرية', 'Estimated duration')}</span>
       <span>${minutes(s.duration)}</span>
     </div>
+    ${
+      s.discount > 0
+        ? `
+          <div class="summary-line" style="color:var(--sage-deep);font-weight:600">
+            <span>${t('كود الخصم', 'Discount Code')} (${esc(s.coupon.code)})</span>
+            <span>-${money(s.discount)}</span>
+          </div>
+        `
+        : ''
+    }
     <div class="summary-line summary-total">
       <span>${t('الإجمالي التقديري', 'Estimated total')}</span>
       <span>${money(s.total)}</span>
@@ -67,7 +163,7 @@ function updateSelectionSummaryDOM() {
     : `${s.items.length} ${t('خدمات مختارة', 'selected')}`;
   const toggleBtn = $('#summary-toggle');
   if (toggleBtn) {
-    toggleBtn.innerHTML = `<span>${t('ملخص لحظتكِ', 'Summary')} (${countLabel})</span><strong>${money(s.total)}</strong>`;
+    toggleBtn.innerHTML = `<span>${t('ملخص لحظتك', 'Summary')} (${countLabel})</span><strong>${money(s.total)}</strong>`;
   }
   const body = $('#summary-body-content');
   if (body) body.innerHTML = summaryBodyHtml();
@@ -82,7 +178,7 @@ function renderSummary() {
   return `
     <aside class="summary">
       <button type="button" class="summary-toggle" id="summary-toggle" aria-expanded="${!state.summaryExpanded ? 'false' : 'true'}">
-        <span>${t('ملخص لحظتكِ', 'Summary')} (${countLabel})</span>
+        <span>${t('ملخص لحظتك', 'Summary')} (${countLabel})</span>
         <strong>${money(s.total)}</strong>
       </button>
       <div class="summary-body ${state.summaryExpanded ? '' : 'collapsed'}" id="summary-body-content">
@@ -137,7 +233,7 @@ function stepOneCategoryHtml() {
   ];
 
   return `
-    <h3>${t('اختاري فئة الخدمة المناسبة لكِ', 'Choose your service category')}</h3>
+    <h3>${t('اختاري فئة الخدمة المناسبة لك', 'Choose your service category')}</h3>
     ${
       lastBooking
         ? `<div class="card repeat-banner" style="background:var(--sage-tint);margin-bottom:18px;border-color:var(--sage-deep)">
@@ -241,6 +337,29 @@ function stepTwoServiceHtml() {
               .join('')}
           </div>`
     }
+
+    <div class="booking-addons-panel card" style="margin-top:24px;border:1.5px solid var(--border-gold);background:var(--cream);border-radius:var(--r-md);padding:20px">
+      <div class="row" style="margin-bottom:6px">
+        <strong style="font-size:16px;color:var(--plum)">${t('أضيفي لمسة من الدلال إلى حجزك 🌸', 'Add a Touch of Indulgence 🌸')}</strong>
+        <span class="badge" style="background:var(--blush-tint);color:var(--rose-gold-deep)">${t('خدمات إضافية', 'Add-ons')}</span>
+      </div>
+      <p class="muted" style="margin-bottom:16px;font-size:13.5px">${t('اختاري خدمات إضافية لتخصيص تجربتك والتمتع بأقصى درجات الراحة والعناية', 'Select optional add-ons to customize your experience.')}</p>
+      <div class="selection-list">
+        ${BOOKING_ADD_ONS.map((a) => {
+          const checked = (state.draft.add_ons || []).includes(a.id);
+          return `
+            <label class="selection addon-selection">
+              <input type="checkbox" data-addon-id="${esc(a.id)}" ${checked ? 'checked' : ''}>
+              <span class="selection-info">
+                <strong>${esc(t(a.ar, a.en))}</strong>
+                <small>${minutes(a.duration)} · ${esc(t(a.desc_ar, a.desc_en))}</small>
+              </span>
+              <span class="amount">+${money(a.price)}</span>
+            </label>
+          `;
+        }).join('')}
+      </div>
+    </div>
   `;
 }
 
@@ -350,6 +469,19 @@ function stepFourDetailsHtml() {
       ${t('ملاحظات اختيارية (يفضل تجنب التفاصيل الطبية الحساسة)', 'Optional notes')}
       <textarea name="notes" maxlength="1000" placeholder="${t('أي تفضيلات حول التوقيت أو التنسيق المنزلي...', 'Any helpful arrival or preference notes...')}">${esc(state.draft.notes)}</textarea>
     </label>
+
+    <div class="card coupon-input-card" style="margin-top:16px;background:var(--blush-tint);border:1px dashed var(--rose-gold);padding:16px 20px;border-radius:var(--r-md)">
+      <div class="row" style="margin-bottom:8px">
+        <strong style="color:var(--plum);font-size:15px">✦ ${t('هل لديكِ كود خصم أو كوبون؟', 'Have a promo or discount code?')}</strong>
+      </div>
+      <div class="row" style="gap:8px;align-items:center">
+        <input type="text" id="coupon-code-input" value="${esc(state.draft.coupon_code || '')}" placeholder="${t('مثال: SPAWHEEL10 أو LUXURY15', 'e.g. SPAWHEEL10')}" style="flex:1;text-transform:uppercase;padding:8px 12px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:#fff">
+        <button type="button" class="btn small" id="apply-coupon-btn" style="white-space:nowrap">${t('تطبيق الخصم', 'Apply')}</button>
+      </div>
+      <div id="coupon-feedback" style="margin-top:8px;font-size:13.5px">
+        ${state.draft.coupon ? `<span style="color:var(--sage-deep);font-weight:600">✓ ${t('تم تفعيل الكوبون:', 'Coupon active:')} ${esc(state.draft.coupon.code)} (${t('خصم', 'Save')} ${state.draft.coupon.discount_type === 'percent' ? state.draft.coupon.value + '%' : state.draft.coupon.value + ' ' + t('ريال', 'SAR')})</span>` : ''}
+      </div>
+    </div>
     ${
       !state.user
         ? `<div class="card booking-guest-loyalty-notice" style="background:var(--blush-tint);border:1.5px solid var(--rose-gold);padding:18px 20px;border-radius:var(--r-md);margin-top:14px">
@@ -358,7 +490,7 @@ function stepFourDetailsHtml() {
                <div style="flex:1">
                  <strong style="color:var(--plum);display:block;margin-bottom:6px;font-size:15px">${t('تنبيه هام حول نقاط الولاء (بتلات J Petals)', 'Important Notice About J Petals')}</strong>
                  <p style="margin:0 0 12px;color:var(--ink-muted);font-size:14px;line-height:1.6">${t(
-                   'عند إتمام الحجز كزائرة، لن يتم احتساب نقاط "بتلات J" في رصيدكِ لعدم وجود حساب مسجل مربوط برقمكِ. سجلي دخولكِ أو أنشئي حسابكِ الآن للاستفادة من المكافآت والخصومات.',
+                   'عند إتمام الحجز كزائرة، لن يتم احتساب نقاط "بتلات J" في رصيدك لعدم وجود حساب مسجل مربوط برقمك. سجلي دخولك أو أنشئي حسابك الآن للاستفادة من المكافآت والخصومات.',
                    'Booking as a guest means loyalty Petals cannot be credited without an account. Sign in or create an account to earn Petals and redeem luxury rewards.',
                  )}</p>
                  <div class="row" style="gap:10px;flex-wrap:wrap">
@@ -385,7 +517,9 @@ function stepFiveReviewHtml() {
       <p class="muted" style="margin-bottom:6px">${t('الموعد المفضل:', 'Preferred time:')} ${esc(state.draft.date)} · ${esc(state.draft.time)} (Asia/Riyadh)</p>
       <p class="muted" style="margin-bottom:6px">${t('الحي:', 'Neighborhood:')} ${esc(state.draft.neighborhood)}</p>
       <p class="muted" style="margin-bottom:6px">${t('المختار:', 'Selection:')} ${s.items.map((x) => esc(nameOf(x))).join(' + ')}</p>
+      ${s.addOns.length ? `<p class="muted" style="margin-bottom:6px">${t('الخدمات الإضافية:', 'Add-ons:')} ${s.addOns.map((a) => `${esc(t(a.ar, a.en))} (+${money(a.price)})`).join(' · ')}</p>` : ''}
       <p class="muted" style="margin-bottom:6px">${t('المدة التقديرية:', 'Estimated duration:')} ${minutes(s.duration)}</p>
+      ${s.discount > 0 ? `<p class="muted" style="margin-bottom:6px">${t('المجموع قبل الخصم:', 'Subtotal:')} ${money(s.subtotal)} · <span style="color:var(--sage-deep);font-weight:600">${t('الخصم:', 'Discount:')} -${money(s.discount)} (${esc(s.coupon.code)})</span></p>` : ''}
       <p style="margin-bottom:0"><strong>${t('الإجمالي التقديري:', 'Estimated total:')} ${money(s.total)}</strong></p>
       ${state.draft.notes ? `<p class="muted" style="margin-top:8px;margin-bottom:0">${t('ملاحظات:', 'Notes:')} ${esc(state.draft.notes)}</p>` : ''}
     </div>
@@ -393,7 +527,7 @@ function stepFiveReviewHtml() {
       !state.user
         ? `<div class="notice" style="border-color:var(--rose-gold);background:var(--blush-tint);margin-bottom:14px">
              <strong>${t('تنويه الزائرة:', 'Guest Notice:')}</strong> ${t(
-               'أنتِ بصدد إتمام الحجز كزائرة بدون حساب — لن تُحتسب نقاط بتلات J في رصيدكِ ما لم تسجلي دخولكِ.',
+               'أنت بصدد إتمام الحجز كزائرة بدون حساب — لن تُحتسب نقاط بتلات J في رصيدك ما لم تسجلي دخولك.',
                'You are booking as a guest — loyalty Petals will not be credited.',
              )}
            </div>`
@@ -421,7 +555,7 @@ export function bookingSuccess() {
       <div class="content">
         <div class="success">
           <div class="row" style="margin-bottom:10px">
-            <h2 style="margin:0;font-size:24px">${t('تم تسجيل طلبكِ، وسيتم تأكيد الموعد بعد مراجعته مع فريق J Beauty.', 'Your request is saved. J Beauty will review and personally confirm your appointment.')}</h2>
+            <h2 style="margin:0;font-size:24px">${t('تم تسجيل طلبك، وسيتم تأكيد الموعد بعد مراجعته مع فريق J Beauty.', 'Your request is saved. J Beauty will review and personally confirm your appointment.')}</h2>
             <span class="badge pending">${t('بانتظار التأكيد', 'Pending confirmation')}</span>
           </div>
           <p style="margin-bottom:0">${t('رقم الطلب المرجعي:', 'Booking Reference:')} <strong><bdi>${esc(r.booking?.reference)}</bdi></strong></p>
@@ -430,7 +564,7 @@ export function bookingSuccess() {
         <div class="card" style="margin-bottom:20px">
           <h3>${t('الخطوة التالية: إرسال الطلب عبر واتساب', 'Next Step: Send via WhatsApp')}</h3>
           <p class="muted">${t(
-            'بالضغط على زر فتح واتساب ستُفتح محادثة تحتوي على تفاصيل طلبكِ جاهزة. عليكِ الضغط على زر الإرسال داخل واتساب بنفسكِ. فتح الرابط لا يعني وصول الرسالة أو تأكيد الموعد.',
+            'بالضغط على زر فتح واتساب ستُفتح محادثة تحتوي على تفاصيل طلبك جاهزة. عليك الضغط على زر الإرسال داخل واتساب بنفسك. فتح الرابط لا يعني وصول الرسالة أو تأكيد الموعد.',
             'Clicking Open WhatsApp opens your chat app with a prepared message. You must press Send yourself inside WhatsApp. Opening the link does not send the message or confirm your booking.',
           )}</p>
           <div class="hero-actions">
@@ -438,7 +572,7 @@ export function bookingSuccess() {
               r.whatsapp_url
                 ? `<a class="btn sage" id="whatsapp-handoff-link" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener">${t('فتح واتساب', 'Open WhatsApp')}</a>`
                 : `<div class="notice" style="margin:0;width:100%">${t(
-                    'رقم واتساب التجاري غير مضاف بعد في إعدادات الموقع، لكن طلبكِ محفوظ بأمان في قاعدة البيانات ليراجعه الفريق.',
+                    'رقم واتساب التجاري غير مضاف بعد في إعدادات الموقع، لكن طلبك محفوظ بأمان في قاعدة البيانات ليراجعه الفريق.',
                     'The business WhatsApp number is not configured yet, but your request is safely saved for staff review.',
                   )}</div>`
             }
@@ -462,7 +596,7 @@ export function booking() {
     t('الفئة', 'Category'),
     t('الخدمة', 'Ritual'),
     t('الموعد', 'Time'),
-    t('بياناتكِ', 'Details'),
+    t('بياناتك', 'Details'),
     t('المراجعة', 'Review'),
   ];
 
@@ -611,6 +745,42 @@ export function bindBooking(renderFn) {
     };
   });
 
+  document.querySelectorAll('[data-addon-id]').forEach((input) => {
+    input.onchange = () => {
+      const aid = input.dataset.addonId;
+      const cur = new Set(state.draft.add_ons || []);
+      if (input.checked) cur.add(aid);
+      else cur.delete(aid);
+      state.draft.add_ons = Array.from(cur);
+      updateSelectionSummaryDOM();
+    };
+  });
+
+  $('#apply-coupon-btn')?.addEventListener('click', async () => {
+    const code = String($('#coupon-code-input')?.value || '').trim().toUpperCase();
+    const fb = $('#coupon-feedback');
+    if (!code) {
+      if (fb) fb.innerHTML = `<span style="color:var(--error-text)">${t('يرجى إدخال كود الكوبون.', 'Please enter a coupon code.')}</span>`;
+      return;
+    }
+    const s = selectedSummary();
+    try {
+      const res = await api('/coupons/validate', { code, total: s.subtotal });
+      state.draft.coupon = res.coupon;
+      state.draft.coupon_code = res.coupon.code;
+      if (fb) {
+        fb.innerHTML = `<span style="color:var(--sage-deep);font-weight:600">✓ ${t('تم تفعيل الكوبون بنجاح: خصم', 'Coupon applied: Save')} ${money(res.coupon.discount)} 🌸</span>`;
+      }
+      toast(t('تم تطبيق الخصم بنجاح 🌸', 'Coupon discount applied!'));
+      updateSelectionSummaryDOM();
+    } catch (err) {
+      state.draft.coupon = null;
+      state.draft.coupon_code = '';
+      if (fb) fb.innerHTML = `<span style="color:var(--error-text)">${esc(err.message)}</span>`;
+      updateSelectionSummaryDOM();
+    }
+  });
+
   document.querySelectorAll('[data-pick-date]').forEach((btn) => {
     btn.onclick = () => {
       saveDraft();
@@ -699,7 +869,7 @@ export function bindBooking(renderFn) {
       await navigator.clipboard.writeText(state.bookingResult?.message || '');
       toast(t('تم نسخ الرسالة', 'Copied'));
     } catch {
-      toast(t('يمكنكِ تحديد النص ونسخه يدوياً.', 'Select and copy the message manually.'));
+      toast(t('يمكنك تحديد النص ونسخه يدوياً.', 'Select and copy the message manually.'));
     }
   });
 
@@ -711,6 +881,9 @@ export function bindBooking(renderFn) {
     state.draft = {
       service_ids: [],
       package_id: null,
+      add_ons: [],
+      coupon: null,
+      coupon_code: '',
       date: '',
       time: '',
       name: '',

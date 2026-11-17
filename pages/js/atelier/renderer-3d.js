@@ -12,25 +12,25 @@ import {
 
 export const CAMERA_PRESETS = {
   editorial: {
-    pos: [5.4, 18.8, 18.4],
-    target: [0.35, -0.55, 3.25],
-    fov: 32,
-  },
-  overhead: {
-    pos: [0.35, 29.2, 2.8],
-    target: [0.35, -0.4, 2.3],
-    fov: 31,
-  },
-  closeup: {
-    // Cleanly frames ONLY the 4 main manicured fingers (-X panned) — zero cropped thumb sliver or tip clip!
-    pos: [-2.4, 15.0, 19.8],
-    target: [-1.95, -0.65, 5.35],
+    pos: [4.2, 17.5, 17.2],
+    target: [0.15, -0.45, 2.8],
     fov: 28,
   },
+  overhead: {
+    pos: [0.2, 26.5, 2.5],
+    target: [0.2, -0.3, 2.2],
+    fov: 28,
+  },
+  closeup: {
+    // Cleanly frames the manicured fingers with macro salon clarity
+    pos: [-1.8, 13.5, 17.5],
+    target: [-1.5, -0.55, 4.8],
+    fov: 26,
+  },
   profile: {
-    pos: [14.2, 4.8, 11.4],
-    target: [-0.25, -0.55, 5.45],
-    fov: 25,
+    pos: [13.0, 4.5, 10.5],
+    target: [-0.2, -0.5, 4.8],
+    fov: 24,
   },
 };
 

@@ -40,14 +40,14 @@ export function auth(mode = 'login') {
     <main id="main" class="wrap">
       <div class="auth-shell">
         <div class="auth">
-          <span class="eyebrow">J Beauty · ${t('جواز جمالكِ الخاص', 'BEAUTY PASSPORT')}</span>
+          <span class="eyebrow">J Beauty · ${t('جواز جمالك الخاص', 'BEAUTY PASSPORT')}</span>
           <h1 tabindex="-1">${mode === 'register'
       ? t('إنشاء حساب عميلة', 'Create your account')
       : mode === 'reset'
         ? t('تعيين كلمة مرور جديدة', 'Set a fresh password')
         : t('تسجيل الدخول', 'Welcome back')
     }</h1>
-          <p class="muted">${t('تابعي مواعيدكِ، تصاميم الأظافر، وبتلات نادي J من مكان واحد.', 'Manage appointments, saved Nail Atelier looks, and J Petals rewards in one calm journal.')}</p>
+          <p class="muted">${t('تابعي مواعيدك، تصاميم الأظافر، وبتلات برنامج J من مكان واحد.', 'Manage appointments, saved Nail Atelier looks, and J Petals rewards in one calm journal.')}</p>
           <form id="auth-form" data-mode="${mode}">
             <div id="form-error" role="alert"></div>
             ${mode === 'register' ? field(t('الاسم', 'Name'), 'name', 'text', '', 'required autocomplete="name"') : ''}
@@ -94,17 +94,17 @@ export function auth(mode = 'login') {
           <div class="auth-links muted">
             ${mode === 'login'
       ? `<a class="text-link" href="${href('register')}">${t('جديدة هنا؟ أنشئي حساباً', 'New here? Create an account')}</a>
-                   <a class="text-link auth-secondary-link" href="${href('recovery')}">${t('نسيتِ كلمة المرور؟', 'Forgot your password?')}</a>`
-      : `<a class="text-link" href="${href('login')}">${t('لديكِ حساب؟ سجلي الدخول', 'Already registered? Sign in')}</a>`
+                   <a class="text-link auth-secondary-link" href="${href('recovery')}">${t('نسيت كلمة المرور؟', 'Forgot your password?')}</a>`
+      : `<a class="text-link" href="${href('login')}">${t('لديك حساب؟ سجلي الدخول', 'Already registered? Sign in')}</a>`
     }
           </div>
         </div>
 
         <aside class="auth-aside card">
           <span class="eyebrow">${t('مزايا جواز الجمال', 'PASSPORT PRIVILEGES')}</span>
-          <h2>${t('ملف عناية شخصي في راحة بيتكِ', 'Your private home ritual journal')}</h2>
+          <h2>${t('ملف عناية شخصي في راحة بيتك', 'Your private home ritual journal')}</h2>
           <p class="muted">${t(
-      'صُمم جواز الجمال ليحفظ ذوقكِ في العناية وتصاميم الأظافر ويمنحكِ متابعة شفافة لزياراتكِ دون رسائل تسويقية مزعجة.',
+      'صُمم جواز الجمال ليحفظ ذوقك في العناية وتصاميم الأظافر ويمنحك متابعة شفافة لزياراتك دون رسائل تسويقية مزعجة.',
       'Your Beauty Passport keeps your nail looks, preferred care rituals, and verified J Petals balance in one discreet space.',
     )}</p>
           <ul class="inclusion-list">
@@ -141,7 +141,7 @@ export function bookingCard(b) {
           ${canReview
       ? existingReview
         ? `<button class="btn small light" data-review="${esc(b.id)}" data-edit-review="true" type="button">${t('تعديل التقييم', 'Edit review')}</button>`
-        : `<button class="btn small light" data-review="${esc(b.id)}" type="button">${t('قيّمي تجربتكِ معنا', 'Rate your experience')}</button>`
+        : `<button class="btn small light" data-review="${esc(b.id)}" type="button">${t('قيّمي تجربتك معنا', 'Rate your experience')}</button>`
       : ''
     }
         </div>
@@ -168,24 +168,24 @@ export function petalsContent() {
   const pendingReq = rewardsList.find((q) => q.status === 'pending') || null;
   const availableCount = hasLive ? rewards.filter((r) => balance >= r.points).length : 0;
   const statusCopy = !state.user
-    ? t('سجّلي الدخول لمشاهدة رصيدكِ الحقيقي من الزيارات المكتملة والمدفوعة.', 'Sign in to view your real balance earned from completed, verified visits.')
+    ? t('سجّلي الدخول لمشاهدة رصيدك الحقيقي من الزيارات المكتملة والمدفوعة.', 'Sign in to view your real balance earned from completed, verified visits.')
     : !verified
-      ? t('وثّقي رقم جوالكِ لعرض رصيدكِ ومكافآتكِ.', 'Verify your phone number to view your balance and rewards.')
+      ? t('وثّقي رقم جوالك لعرض رصيدك ومكافآتك.', 'Verify your phone number to view your balance and rewards.')
       : !rewards.length
         ? t('لم تُعتمد المكافآت بعد. ستظهر هنا فور إضافتها.', 'Rewards will appear when the program is configured.')
         : pendingReq
-          ? t('لديكِ طلب مكافأة قيد المراجعة الإدارية حالياً ولا يمكن إرسال طلب جديد حتى حسمه.', 'A reward request is pending team approval; duplicate requests are disabled until resolved.')
+          ? t('لديك طلب مكافأة قيد المراجعة الإدارية حالياً ولا يمكن إرسال طلب جديد حتى حسمه.', 'A reward request is pending team approval; duplicate requests are disabled until resolved.')
           : nextReward
             ? t(`متبقٍ ${num(nextReward.points - balance)} بتلة للمكافأة التالية.`, `${num(nextReward.points - balance)} Petals until your next reward.`)
-            : t('يمكنكِ طلب المكافآت المتاحة لرصيدكِ.', 'You may request rewards available for your balance.');
+            : t('يمكنك طلب المكافآت المتاحة لرصيدك.', 'You may request rewards available for your balance.');
 
   return `
     <section class='jb-rewards-dashboard' aria-labelledby='jb-rewards-heading'>
       <div class='jb-rewards-main'>
         <div class='jb-rewards-heading'>
           <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
-          <h2 id='jb-rewards-heading'>${t('نادي البتلات', 'Petals Rewards')}</h2>
-          <p>${t('نادي بتلات J هو تعبيرنا عن الامتنان لثقتكِ الدائمة. كل جلسة عناية مكتملة تقربكِ من مكافآت وتجارب استرخاء استثنائية.', 'Petals Club is our heartfelt appreciation for your trust. Every completed ritual brings you closer to exclusive treats and savings.')}</p>
+          <h2 id='jb-rewards-heading'>${t('برنامج بتلات J', 'J Petals Program')}</h2>
+          <p>${t('برنامج بتلات J هو تعبيرنا عن الامتنان لثقتك الدائمة. كل جلسة عناية مكتملة تقربك من مكافآت وتجارب استرخاء استثنائية (1 ريال = 1 بتلة).', 'J Petals is our heartfelt appreciation for your trust. Every completed ritual brings you closer to exclusive treats and savings.')}</p>
         </div>
         <div class='jb-points-display jb-points-hero' aria-live='polite'>
           <div>
@@ -198,12 +198,12 @@ export function petalsContent() {
                 <div class='jb-progress-label'><span>${t('التقدم للمكافأة التالية', 'Reward progress')}</span><strong dir='ltr'>${num(progressValue)} / ${num(targetValue)}</strong></div>
                 <progress max='${targetValue}' value='${progressValue}' aria-label="${t('التقدم نحو المكافأة', 'Progress toward reward')}"></progress>
               </div>` : ''}
-            ${availableCount && !pendingReq ? `<span class='jb-rewards-available'>${availableCount === 1 ? t('مكافأة واحدة متاحة وفق رصيدكِ', '1 reward option within your balance') : t(`${num(availableCount)} مكافآت متاحة وفق رصيدكِ`, `${num(availableCount)} reward options within your balance`)}</span>` : ''}
-            ${!state.user ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('register')}">${t('أنشئي حسابكِ', 'Create your account')}</a></div>` : !verified ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('account')}">${t('خطوات توثيق الحساب', 'Verify your account')}</a></div>` : ''}
+            ${availableCount && !pendingReq ? `<span class='jb-rewards-available'>${availableCount === 1 ? t('مكافأة واحدة متاحة وفق رصيدك', '1 reward option within your balance') : t(`${num(availableCount)} مكافآت متاحة وفق رصيدك`, `${num(availableCount)} reward options within your balance`)}</span>` : ''}
+            ${!state.user ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('register')}">${t('أنشئي حسابك', 'Create your account')}</a></div>` : !verified ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('account')}">${t('خطوات توثيق الحساب', 'Verify your account')}</a></div>` : ''}
           </div>
           <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(4, 8, true)}</div>
         </div>
-        ${state.account?.has_pending_entitlement && !verified ? `<div class='notice'>${t('قد توجد بتلات مستحقة معلّقة حتى اكتمال توثيق حسابكِ. تواصلي مع الفريق لإتمام التوثيق.', 'Eligible Petals may be pending until your account is verified. Contact the team to complete verification.')}</div>` : ''}
+        ${state.account?.has_pending_entitlement && !verified ? `<div class='notice'>${t('قد توجد بتلات مستحقة معلّقة حتى اكتمال توثيق حسابك. تواصلي مع الفريق لإتمام التوثيق.', 'Eligible Petals may be pending until your account is verified. Contact the team to complete verification.')}</div>` : ''}
       </div>
       <div class='jb-rewards-aside'>
         <span class='eyebrow'>${t('طريقة عمل البرنامج', 'HOW IT WORKS')}</span>
@@ -219,7 +219,7 @@ export function petalsContent() {
       <div class='section-head'><div><span class='eyebrow'>${t('المكافآت', 'REWARDS')}</span><h2 id='jb-rewards-catalog-title'>${t('مكافآت متاحة للطلب', 'Rewards you can request')}</h2></div></div>
       ${rewards.length ? `<div class='jb-reward-grid'>${rewards.map((r) => {
         const title = r.name_ar ? t(r.name_ar, r.name_en) : (r.value === 10 ? t('قسيمة خصم ترحيبية (10 ر.س)', 'Welcome Voucher (10 SAR)') : r.value === 30 ? t('مكافأة الدلال الفضي (30 ر.س)', 'Silver Reward (30 SAR)') : t(`مكافأة ${money(r.value)}`, `${money(r.value)} Reward`));
-        const desc = r.description_ar ? t(r.description_ar, r.description_en) : (r.value === 10 ? t('تُخصم مباشرة من قيمة جلستكِ القادمة عند تأكيد الموعد.', 'Deducted directly from your next appointment.') : r.value === 30 ? t('خصم يمنحكِ ترقية أو إضافة خدمة عناية خاصة لموعدكِ.', 'Upgrade or add treatments to your visit.') : t('خصم يُطبق على حجز مؤهل قبل الدفع.', 'Applied to an eligible booking before payment.'));
+        const desc = r.description_ar ? t(r.description_ar, r.description_en) : (r.value === 10 ? t('تُخصم مباشرة من قيمة جلستك القادمة عند تأكيد الموعد.', 'Deducted directly from your next appointment.') : r.value === 30 ? t('خصم يمنحك ترقية أو إضافة خدمة عناية خاصة لموعدك.', 'Upgrade or add treatments to your visit.') : t('خصم يُطبق على حجز مؤهل قبل الدفع.', 'Applied to an eligible booking before payment.'));
         return `
         <article class='jb-reward-card'>
           <div class='jb-reward-top'><span>${num(r.points)} ${t('بتلة', 'Petals')}</span><strong>${money(r.value)}</strong></div>
@@ -235,9 +235,9 @@ export function petalsPage() {
   return `
     <main id="main" class="wrap">
       ${head(
-    t('نادي بتلات J', 'J Petals Club'),
-    t('برنامج الولاء الداخلي لعميلات J Beauty في المدينة المنورة.', 'J Beauty’s internal loyalty club for verified customers in Madinah.'),
-    [[t('الرئيسية', 'Home'), 'home'], [t('نادي بتلات J', 'J Petals Club'), '']],
+    t('برنامج بتلات J', 'J Petals Program'),
+    t('برنامج الولاء الداخلي لعميلات J Beauty Spa في المدينة المنورة.', 'J Beauty Spa’s internal loyalty program for customers in Madinah.'),
+    [[t('الرئيسية', 'Home'), 'home'], [t('برنامج بتلات J', 'J Petals Program'), '']],
   )}
       ${petalsContent()}
     </main>
@@ -255,7 +255,7 @@ function passportJournalSection() {
     <section class="passport-grid">
       <div class="card">
         <div class="row" style="margin-bottom:12px">
-          <h3 style="margin:0">${t('خدماتكِ المفضلة', 'Favorite Rituals')}</h3>
+          <h3 style="margin:0">${t('خدماتك المفضلة', 'Favorite Rituals')}</h3>
           <a class="text-link" href="${href('services')}">${t('تصفحي المزيد', 'Browse')}</a>
         </div>
         ${favSvcs.length
@@ -309,13 +309,13 @@ function passportJournalSection() {
         )
         .join('')}
               </div>`
-      : `<p class="muted">${t('صمّمي شكل ولون أظافركِ في أتيليه J واحفظيه هنا.', 'Create your signature look in J Nail Atelier and save it here.')}</p>`
+      : `<p class="muted">${t('صمّمي شكل ولون أظافرك في أتيليه J واحفظيه هنا.', 'Create your signature look in J Nail Atelier and save it here.')}</p>`
     }
       </div>
 
       <form id="passport-prefs-form" class="card full">
-        <h3>${t('تفضيلات عنايتكِ الشخصية', 'Personal Care Preferences')}</h3>
-        <p class="muted">${t('محفوظة في حسابكِ الخاص فقط لتسهيل طلباتكِ القادمة.', 'Scoped privately to your account to tailor future bookings.')}</p>
+        <h3>${t('تفضيلات عنايتك الشخصية', 'Personal Care Preferences')}</h3>
+        <p class="muted">${t('محفوظة في حسابك الخاص فقط لتسهيل طلباتك القادمة.', 'Scoped privately to your account to tailor future bookings.')}</p>
         <div class="form-grid">
           <label class="field">
             ${t('الحي المفضل بالمدينة', 'Preferred Madinah neighborhood')}
@@ -367,10 +367,10 @@ export async function accountPage(section) {
 
   return `
     <main id="main" class="wrap">
-      ${head(t('جواز الجمال', 'Beauty Passport'), `${t('أهلاً بكِ، ', 'Welcome, ')}<bdi>${esc(state.user.name)}</bdi>`)}
+      ${head(t('جواز الجمال', 'Beauty Passport'), `${t('أهلاً بك، ', 'Welcome, ')}<bdi>${esc(state.user.name)}</bdi>`)}
       <div class="account-grid">
         <aside class="side-nav">
-          <h3 style="margin-bottom:2px">${t('حسابكِ', 'Your journal')}</h3>
+          <h3 style="margin-bottom:2px">${t('حسابك', 'Your journal')}</h3>
           <span class="muted" style="margin-bottom:10px"><bdi>${esc(state.user.phone)}</bdi></span>
           ${[
       ['account', 'جواز الجمال', 'Beauty Passport'],
@@ -389,14 +389,14 @@ export async function accountPage(section) {
       ? `<div class="notice">
                    <h3 style="margin-bottom:6px">${t('توثيق ملكية رقم الجوال عبر واتساب', 'Verify Your Phone Ownership via WhatsApp')}</h3>
                    <p>${t(
-        'لحماية خصوصية حجوزاتكِ ومنع ربط أي أرقام بالخطأ، نتحقق يدوياً من ملكية رقمكِ دون أي رسائل SMS مدفوعة:',
+        'لحماية خصوصية حجوزاتك ومنع ربط أي أرقام بالخطأ، نتحقق يدوياً من ملكية رقمك دون أي رسائل SMS مدفوعة:',
         'To protect your booking history and loyalty balance without paid SMS OTPs, staff verifies your number in 4 simple steps:',
       )}</p>
                    <div class="verify-steps">
                      <div class="verify-step">1. ${t('أنشئي مرجع التحقق المؤقت بالزر أدناه.', 'Generate your short-lived reference below.')}</div>
-                     <div class="verify-step">2. ${t('افتحي واتساب واضغطي إرسال بنفسكِ.', 'Open WhatsApp and press Send manually.')}</div>
-                     <div class="verify-step">3. ${t('تطابق الموظفة رقم المرسلة الفعلي مع حسابكِ.', 'Staff matches the actual WhatsApp sender.')}</div>
-                     <div class="verify-step">4. ${t('تُفتح حجوزاتكِ وبتلاتكِ فور الاعتماد.', 'Your rewards and reviews unlock immediately.')}</div>
+                     <div class="verify-step">2. ${t('افتحي واتساب واضغطي إرسال بنفسك.', 'Open WhatsApp and press Send manually.')}</div>
+                     <div class="verify-step">3. ${t('تطابق الموظفة رقم المرسلة الفعلي مع حسابك.', 'Staff matches the actual WhatsApp sender.')}</div>
+                     <div class="verify-step">4. ${t('تُفتح حجوزاتك وبتلاتك فور الاعتماد.', 'Your rewards and reviews unlock immediately.')}</div>
                    </div>
                    <button class="btn small" id="verify-request" type="button">${t('تأكيد رقم الجوال عبر واتساب', 'Verify number through WhatsApp')}</button>
                    <div id="verification-result"></div>
@@ -442,13 +442,13 @@ export async function accountPage(section) {
                     ${simpleTable(reqRows, ['id', 'status', 'points', 'value'])}`;
       })()
       : section === 'bookings'
-        ? `<h2>${t('حجوزاتكِ', 'Your bookings')}</h2>
+        ? `<h2>${t('حجوزاتك', 'Your bookings')}</h2>
                    ${bookings.length
           ? bookings.map(bookingCard).join('')
-          : `<div class="empty"><h3>${t('لحظتكِ الأولى تبدأ هنا', 'Your first moment starts here')}</h3><p class="muted">${t('لا توجد حجوزات مرتبطة بهذا الحساب بعد.', 'No bookings linked to this account yet.')}</p><a class="btn" href="${href('booking')}">${t('اطلبي موعدكِ الآن', 'Request an appointment')}</a></div>`
+          : `<div class="empty"><h3>${t('لحظتك الأولى تبدأ هنا', 'Your first moment starts here')}</h3><p class="muted">${t('لا توجد حجوزات مرتبطة بهذا الحساب بعد.', 'No bookings linked to this account yet.')}</p><a class="btn" href="${href('booking')}">${t('اطلبي موعدك الآن', 'Request an appointment')}</a></div>`
         }`
         : `${passportJournalSection()}
-                   <h2 style="margin-top:28px">${t('حجوزاتكِ الأخيرة', 'Recent Visits')}</h2>
+                   <h2 style="margin-top:28px">${t('حجوزاتك الأخيرة', 'Recent Visits')}</h2>
                    ${bookings.length
           ? bookings.slice(0, 3).map(bookingCard).join('')
           : `<div class="empty muted">${t('لا توجد حجوزات مرتبطة بهذا الحساب بعد. حجوزات الزائرات لا تُربط تلقائياً برقم الجوال.', 'No bookings linked yet. Guest bookings are never merged automatically by phone number.')}</div>`
@@ -601,7 +601,7 @@ export function bindAccount(goFn, renderFn) {
     try {
       await api('/passport/preferences', d);
       state.account = null;
-      toast(t('تم حفظ تفضيلاتكِ الشخصية', 'Preferences saved'));
+      toast(t('تم حفظ تفضيلاتك الشخصية', 'Preferences saved'));
       renderFn();
     } catch (err) {
       toast(err.message);

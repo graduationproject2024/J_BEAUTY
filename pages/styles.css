@@ -4372,3 +4372,137 @@ dialog::backdrop {
     transform: none !important
   }
 }
+
+/* ===== J BEAUTY SPA BRAND & WHEEL OF REWARDS EXTENSIONS ===== */
+.brand-official-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 8px rgba(212, 175, 124, 0.35));
+}
+
+@media (max-width: 640px) {
+  .brand-official-logo {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+.social-img-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.social-icon-btn:hover .social-img-icon,
+.header-social-btn:hover .social-img-icon {
+  transform: scale(1.15);
+}
+
+.wheel-floating-btn {
+  position: fixed;
+  bottom: 24px;
+  inset-inline-start: 24px;
+  z-index: 99;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #D4AF7C, #9E743F);
+  color: #FFFFFF;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgba(158, 116, 63, 0.38);
+  font-weight: 600;
+  font-size: 14.5px;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+
+.wheel-floating-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 14px 36px rgba(158, 116, 63, 0.5);
+}
+
+.wheel-btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+@media (max-width: 780px) {
+  .wheel-floating-btn {
+    bottom: 80px;
+    inset-inline-start: 16px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+  }
+}
+
+.booking-addons-panel .addon-selection {
+  border: 1px solid var(--border-gold);
+  background: var(--white);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: border-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+}
+
+.booking-addons-panel .addon-selection:hover {
+  border-color: var(--rose-gold);
+  box-shadow: 0 4px 14px rgba(212, 175, 124, 0.16);
+}
+
+.jb-petals-luxury-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jb-petals-card-wrap {
+  background: linear-gradient(135deg, rgba(250, 247, 245, 0.98), rgba(244, 236, 231, 0.95));
+  border: 1.5px solid var(--rose-gold);
+  border-radius: var(--r-lg);
+  padding: 24px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 12px 34px rgba(62, 41, 50, 0.18), inset 0 0 20px rgba(212, 175, 124, 0.08);
+  min-width: 220px;
+}
+
+.jb-petals-card-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 4px 10px rgba(212, 175, 124, 0.4));
+  margin-bottom: 4px;
+}
+
+.jb-petals-card-tier {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rose-gold-deep);
+  letter-spacing: 0.5px;
+}
+
+.jb-petals-card-tag {
+  font-size: 16px;
+  color: var(--plum);
+  font-weight: 700;
+}
+
+.jb-petals-card-rule {
+  font-size: 13px;
+  color: var(--ink-muted);
+  background: var(--blush-tint);
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-gold);
+}

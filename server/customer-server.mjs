@@ -398,6 +398,38 @@ export function createCustomerApp({
         return send(createGroupRequest(db, helpers, user, body), 201);
       }
 
+      if (method === 'POST' && route === '/api/coupons/validate') {
+        checkRate(`coupon:${req.socket.remoteAddress}`, 40);
+        const code = String(body?.code || '').trim().toUpperCase();
+        const spend = Number(body?.total || 0);
+        if (!code) fail('يرجى إدخال كود الكوبون', 400);
+        const coupon = db.get('SELECT * FROM coupons WHERE UPPER(code)=? AND active=1', code);
+        if (!coupon) fail('كود الكوبون غير صحيح أو غير مفعّل', 404);
+        const today = new Date().toISOString().slice(0, 10);
+        if (coupon.valid_from && coupon.valid_from > today) fail('هذا الكوبون لم يبدأ تفعيله بعد', 400);
+        if (coupon.valid_until && coupon.valid_until < today) fail('عذراً، انتهت صلاحية هذا الكوبون', 400);
+        if (coupon.min_spend && spend < coupon.min_spend) {
+          fail(`الحد الأدنى للاستفادة من هذا الكوبون هو ${coupon.min_spend} ر.س`, 400);
+        }
+        if (coupon.max_uses > 0 && coupon.used_count >= coupon.max_uses) {
+          fail('عذراً، اكتمل الحد الأقصى لاستخدام هذا الكوبون', 400);
+        }
+        let discountAmount = 0;
+        if (coupon.discount_type === 'percent') {
+          discountAmount = Math.round((spend * coupon.discount_value) / 100);
+        } else {
+          discountAmount = Math.min(spend, coupon.discount_value);
+        }
+        return send({
+          valid: true,
+          code: coupon.code,
+          discount_type: coupon.discount_type,
+          discount_value: coupon.discount_value,
+          discount_amount: discountAmount,
+          final_total: Math.max(0, spend - discountAmount),
+        });
+      }
+
       if (method === 'POST' && route === '/api/gift-requests') {
         checkRate(`gift:${req.socket.remoteAddress}`, 15, 3600000);
         return send(createGiftRequest(db, helpers, user, body), 201);
@@ -410,6 +442,7 @@ export function createCustomerApp({
           !user.verified &&
           myBookings.some((b) => b.status === 'completed' && b.payment_verified);
         const passport = getPassportData(db, helpers, user);
+        const referralCode = 'REF' + user.phone.slice(-6);
         return send({
           user: publicUser(user),
           bookings: myBookings,
@@ -426,6 +459,12 @@ export function createCustomerApp({
             .all('SELECT data,booking_id FROM reviews WHERE user_id=?', user.id)
             .map((r) => ({ ...JSON.parse(r.data), booking_id: r.booking_id })),
           passport,
+          referral: {
+            code: referralCode,
+            bonus_petals: 50,
+            friend_discount_percent: 15,
+            share_text: `مرحباً! جربي العناية الفاخرة مع J Beauty Spa في المدينة المنورة واحصلي على خصم 15% على حجزك الأول باستخدام كود الإحالة: ${referralCode}`,
+          },
         });
       }
 

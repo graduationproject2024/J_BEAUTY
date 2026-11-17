@@ -238,7 +238,7 @@ export function atelierMiniWidget() {
         <div class="atelier-stage atelier-stage-mini" id="mini-atelier-stage" role="region" aria-label="${t('معاينة ثلاثية الأبعاد لتصميم الأظافر', 'Interactive 3D nail design preview')}"></div>
         <div>
           <span class="eyebrow">${t('أتيليه J للأظافر · استوديو ثلاثي الأبعاد', 'J NAIL ATELIER · 3D INTERACTIVE STUDIO')}</span>
-          <h3>${t('صمّمي إطلالة أظافركِ قبل الحجز', 'Design and inspect your manicure in 3D before booking')}</h3>
+          <h3>${t('صمّمي إطلالة أظافرك قبل الحجز', 'Design and inspect your manicure in 3D before booking')}</h3>
           <p class="muted">${t(
             'جرّبي شكل الظفر واللون واللمعة على يد ثلاثية الأبعاد بوضوح استوديو حقيقي، واحفظي التصميم أو احجزي مباشرة.',
             'Explore shapes, shades, French styles, and finishes on an interactive 3D studio hand, then save or book your look.',
@@ -275,7 +275,7 @@ export function atelierPage() {
     <main id="main" class="wrap atelier-main">
       ${head(
         t('أتيليه J للأظافر', 'J Nail Atelier'),
-        t('عايني الشكل والطول واللون والفرنش بزاوية 360 درجة على نموذج يد ثلاثي الأبعاد قبل طلب موعدكِ.', 'Customize nail shape, length, polish shade, French tip, and finish on an interactive 3D manicure stage before booking.'),
+        t('عايني الشكل والطول واللون والفرنش بزاوية 360 درجة على نموذج يد ثلاثي الأبعاد قبل طلب موعدك.', 'Customize nail shape, length, polish shade, French tip, and finish on an interactive 3D manicure stage before booking.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('أتيليه الأظافر', 'J Nail Atelier'), '']],
       )}
 
@@ -313,7 +313,7 @@ export function atelierPage() {
             ${
               cfg.lastShareUrl
                 ? `<div class="success atelier-share-box">
-                     <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بكِ:', 'Your share link is ready:')}</strong></p>
+                     <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بك:', 'Your share link is ready:')}</strong></p>
                      <pre style="margin:0;padding:8px 10px" dir="ltr">${esc(cfg.lastShareUrl)}</pre>
                      <button type="button" class="btn small light" id="copy-style-url" style="margin-top:8px">${t('نسخ الرابط', 'Copy URL')}</button>
                    </div>`
@@ -581,7 +581,7 @@ export function bindAtelier(goFn, renderFn) {
         share: false,
       });
       state.account = null;
-      toast(t('تم حفظ التصميم في جواز جمالكِ', 'Style saved to your Beauty Passport'));
+      toast(t('تم حفظ التصميم في جواز جمالك', 'Style saved to your Beauty Passport'));
       trackFunnel('atelier_save');
       return saved;
     } catch (err) {
@@ -602,7 +602,7 @@ export function bindAtelier(goFn, renderFn) {
         box.hidden = false;
         box.innerHTML = `
           <div class="success atelier-share-box">
-            <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بكِ:', 'Your share link is ready:')}</strong></p>
+            <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بك:', 'Your share link is ready:')}</strong></p>
             <pre style="margin:0;padding:8px 10px" dir="ltr">${esc(state.atelier.lastShareUrl)}</pre>
             <button type="button" class="btn small light" id="copy-style-url" style="margin-top:8px">${t('نسخ الرابط', 'Copy URL')}</button>
           </div>

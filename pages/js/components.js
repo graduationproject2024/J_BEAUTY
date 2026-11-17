@@ -52,7 +52,7 @@ export function header() {
 
   const annActive = s.announcement_active !== false;
   const annText = t(
-    s.announcement_text_ar || 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستكِ في راحة بيتكِ',
+    s.announcement_text_ar || 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستك في راحة بيتك',
     s.announcement_text_en || 'Luxury Women’s Home Spa in Al Madinah ✦ Personally Confirmed Appointments ✦ 20% Off Curated Packages ✦ Book Your Home Sanctuary',
   );
   const annLink = s.announcement_link ? href(s.announcement_link.replace(/^\//, '')) : null;
@@ -72,18 +72,20 @@ export function header() {
     ? `<div class="announcement-ticker" role="region" aria-label="${t('شريط الإعلانات والعروض', 'Announcements & Offers')}">${annLink ? `<a href="${annLink}" class="ticker-link">${annInner}</a>` : annInner}</div>`
     : '';
 
-  const waDigits = String(s.business_phone || '').replace(/\D/g, '');
-  const waUrl = waDigits ? `https://wa.me/${esc(waDigits)}` : 'https://wa.me/966500000000';
-  const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://instagram.com/jbeauty.spa';
+  const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
+  const waUrl = `https://wa.me/${esc(waDigits)}`;
+  const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
+  const ttUrl = safeURL(s.tiktok) ? esc(s.tiktok) : 'https://www.tiktok.com/@j_beautyspa?_r=1&_t=ZS-9BGSeUNcuyj';
+  const scUrl = safeURL(s.snapchat) ? esc(s.snapchat) : 'https://snapchat.com/add/j_beautyspa';
 
   return `
     ${annHtml}
     <div class="header-shell">
       <header class="wrap header">
         <a class="brand" href="${href('home')}">
-          ${monogramSvg()}
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="46" height="46">
           <span class="brand-wordmark">
-            <strong>J Beauty</strong>
+            <strong>J Beauty Spa</strong>
             <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
           </span>
         </a>
@@ -95,15 +97,15 @@ export function header() {
             )
             .join('')}
           <div class="nav-mobile-cta">
-            <a class="btn" href="${href('booking')}">${t('احجزي موعدكِ الآن', 'Book your moment')}</a>
+            <a class="btn" href="${href('booking')}">${t('احجزي موعدك الآن', 'Book your moment')}</a>
           </div>
         </nav>
         <div class="header-tools">
           <a class="header-social-btn wa" href="${waUrl}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="${t('تواصلي معنا عبر واتساب', 'Chat on WhatsApp')}">
-            ${icon('whatsapp')}
+            <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
           </a>
           <a class="header-social-btn ig" href="${igUrl}" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="${t('حسابنا في انستغرام', 'Instagram')}">
-            ${icon('instagram')}
+            <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
           </a>
           <button class="lang" id="language" type="button" aria-label="${t('Switch to English', 'التبديل للعربية')}">
             ${t('EN', 'عربي')}
@@ -112,7 +114,7 @@ export function header() {
             ${icon('user')}
             <span>${state.user ? esc(state.user.name.split(' ')[0]) : t('جواز الجمال', 'Account')}</span>
           </a>
-          <a class="btn small header-book-btn" href="${href('booking')}">${t('احجزي موعدكِ', 'Book')}</a>
+          <a class="btn small header-book-btn" href="${href('booking')}">${t('احجزي موعدك', 'Book')}</a>
           <button class="menu" id="menu" type="button" aria-label="${t('فتح القائمة', 'Toggle menu')}" aria-expanded="false" aria-controls="nav">
             ${icon('menu')}
           </button>
@@ -124,11 +126,11 @@ export function header() {
 
 export function footer() {
   const s = state.catalog.settings || {};
-  const waDigits = String(s.business_phone || '').replace(/\D/g, '');
-  const waUrl = waDigits ? `https://wa.me/${esc(waDigits)}` : 'https://wa.me/966500000000';
-  const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://instagram.com/jbeauty.spa';
-  const ttUrl = safeURL(s.tiktok) ? esc(s.tiktok) : 'https://tiktok.com/@jbeauty.spa';
-  const scUrl = safeURL(s.snapchat) ? esc(s.snapchat) : 'https://snapchat.com/add/jbeauty.spa';
+  const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
+  const waUrl = `https://wa.me/${esc(waDigits)}`;
+  const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
+  const ttUrl = safeURL(s.tiktok) ? esc(s.tiktok) : 'https://www.tiktok.com/@j_beautyspa?_r=1&_t=ZS-9BGSeUNcuyj';
+  const scUrl = safeURL(s.snapchat) ? esc(s.snapchat) : 'https://snapchat.com/add/j_beautyspa';
 
   return `
     <footer class="footer">
@@ -136,39 +138,39 @@ export function footer() {
         <div class="footer-grid">
           <div>
             <a class="brand" href="${href('home')}">
-              ${monogramSvg()}
+              <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="46" height="46">
               <span class="brand-wordmark">
-                <strong>J Beauty</strong>
+                <strong>J Beauty Spa</strong>
                 <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
               </span>
             </a>
-            <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلكِ.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
+            <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلك.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
             <div class="footer-social-bar">
               <a href="${igUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn ig" aria-label="Instagram" title="Instagram">
-                ${icon('instagram')}
+                <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
               </a>
               <a href="${ttUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn tt" aria-label="TikTok" title="TikTok">
-                ${icon('tiktok')}
+                <img src="/assets/social/tiktok.png" alt="TikTok" class="social-img-icon">
               </a>
               <a href="${scUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn sc" aria-label="Snapchat" title="Snapchat">
-                ${icon('snapchat')}
+                <img src="/assets/social/snapchat.png" alt="Snapchat" class="social-img-icon">
               </a>
               <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn wa" aria-label="WhatsApp" title="WhatsApp">
-                ${icon('whatsapp')}
+                <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
               </a>
             </div>
           </div>
           <div class="footer-links">
             <strong>${t('التجارب والخدمات', 'Experiences')}</strong>
             ${[
-              ['services', 'جميع الخدمات (13)', 'All services (13)'],
-              ['packages', 'الباقات المتناغمة', 'Curated Packages'],
+              ['services', 'جميع الخدمات (17)', 'All services (17)'],
+              ['packages', 'الباقات المتناغمة (4)', 'Curated Packages (4)'],
               ['atelier', 'أتيليه J للأظافر', 'J Nail Atelier'],
               ['studio', 'استوديو اختيار الخدمات', 'J Ritual Studio'],
               ['lookbook', 'معرض الإطلالات', 'Beauty Lookbook'],
               ['occasions', 'تنسيق جلسات المناسبات', 'Occasion Experiences'],
               ['gifts', 'أهدي لحظة عناية', 'Gift a Ritual'],
-              ['petals', 'نادي بتلات J', 'J Petals Club'],
+              ['petals', 'برنامج بتلات J', 'J Petals'],
             ]
               .map(([r, ar, en]) => `<a href="${href(r)}">${t(ar, en)}</a>`)
               .join('')}
@@ -189,7 +191,7 @@ export function footer() {
           </div>
         </div>
         <div class="footer-bottom">
-          <span>© ${new Date().getFullYear()} J Beauty · ${t('المدينة المنورة، المملكة العربية السعودية', 'Al Madinah, Saudi Arabia')}</span>
+          <span>© ${new Date().getFullYear()} J Beauty Spa · ${t('المدينة المنورة، المملكة العربية السعودية', 'Al Madinah, Saudi Arabia')}</span>
           <span>${t('للسيدات فقط · التأكيد يتم يدوياً عبر الفريق', 'Women only · Manual staff confirmation')}</span>
         </div>
       </div>
@@ -208,7 +210,7 @@ export const head = (title, sub = '', crumbs = []) => `
                 : `<span>${esc(label)}</span>`,
             )
             .join(' ')}</nav>`
-        : `<span class="eyebrow">J Beauty · ${t('المدينة المنورة', 'MADINAH')}</span>`
+        : `<span class="eyebrow">J Beauty Spa · ${t('المدينة المنورة', 'MADINAH')}</span>`
     }
     <h1 tabindex="-1">${title}</h1>
     ${sub ? `<p class="muted">${sub}</p>` : ''}
@@ -219,7 +221,7 @@ export const provisional = () =>
   state.catalog.settings?.business_approved
     ? ''
     : `<div class="notice">${t(
-        'الأسعار والباقات والوصف الحالي تقديرية وقابلة للتعديل لحين اعتمادها النهائي من إدارة J Beauty. إرسال الطلب لا يعني تأكيد الموعد.',
+        'الأسعار والباقات والوصف الحالي تقديرية وقابلة للتعديل لحين اعتمادها النهائي من إدارة J Beauty Spa. إرسال الطلب لا يعني تأكيد الموعد.',
         'Current prices, packages, and service details are provisional pending business approval. Submitting a request does not confirm an appointment.',
       )}</div>`;
 
@@ -318,7 +320,7 @@ export function reviewsContent(reviews = [], fallbackAsTrust = false) {
           <div class="card">
             <span class="eyebrow">01</span>
             <h3>${t('خصوصية تامة للسيدات فقط', 'Women-Only Home Privacy')}</h3>
-            <p class="muted">${t('جميع جلساتنا المنزلية تُقدّم في راحة بيتكِ بواسطة أخصائيات نسائيات فقط في المدينة المنورة.', 'Delivered solely for women inside the comfort and privacy of your home in Madinah.')}</p>
+            <p class="muted">${t('جميع جلساتنا المنزلية تُقدّم في راحة بيتك بواسطة أخصائيات نسائيات فقط في المدينة المنورة.', 'Delivered solely for women inside the comfort and privacy of your home in Madinah.')}</p>
           </div>
           <div class="card">
             <span class="eyebrow">02</span>
@@ -335,7 +337,7 @@ export function reviewsContent(reviews = [], fallbackAsTrust = false) {
     }
     return `
       <div class="empty">
-        <h3>${t('نترك المساحة لتجربتكِ الحقيقية', 'A space for genuine experiences')}</h3>
+        <h3>${t('نترك المساحة لتجربتك الحقيقية', 'A space for genuine experiences')}</h3>
         <p class="muted">${t(
           'تُعرض هنا التقييمات المرتبطة بزيارات منزلية مكتملة بعد مراجعتها واعتمادها من الإدارة. لا توجد تقييمات منشورة حتى الآن.',
           'Verified customer reviews from completed home visits appear here after moderation. No reviews have been published yet.',
@@ -507,9 +509,9 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
   const svcs = state.catalog.services || [];
 
   openDialog(`
-    <h2>${existing ? t('تعديل تقييمكِ', 'Edit your review') : t('شاركينا انطباعكِ وتقييمكِ', 'Share Your Review & Rating')}</h2>
+    <h2>${existing ? t('تعديل تقييمك', 'Edit your review') : t('شاركينا انطباعك وتقييمك', 'Share Your Review & Rating')}</h2>
     <p class="muted" style="margin-bottom:14px">${t(
-      'يسعدنا سماع رأيكِ. تُراجع التقييمات من فريق J Beauty قبل نشرها لضمان المصداقية وحماية الخصوصية.',
+      'يسعدنا سماع رأيك. تُراجع التقييمات من فريق J Beauty قبل نشرها لضمان المصداقية وحماية الخصوصية.',
       'We value your feedback. All reviews are moderated before publication to protect privacy and authenticity.',
     )}</p>
     <form id="review-form" novalidate>
@@ -542,7 +544,7 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
       }
 
       <div class="control-group">
-        <span class="control-label" id="star-group-label">${t('تقييمكِ بالنجوم *', 'Your star rating *')}</span>
+        <span class="control-label" id="star-group-label">${t('تقييمك بالنجوم *', 'Your star rating *')}</span>
         <div class="star-picker" id="star-picker" role="radiogroup" aria-labelledby="star-group-label">
           ${[1, 2, 3, 4, 5]
             .map(
@@ -569,11 +571,11 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
         'maxlength="60" placeholder="' + t('مثال: سارة ع. أو زائرة', 'e.g. Sara A. or Guest') + '"',
       )}
       <label class="field">
-        ${t('تعليقكِ وانطباعكِ عن التجربة *', 'Your comments & feedback *')}
-        <textarea name="body" id="review-body-input" required maxlength="2000" placeholder="${t('صفي لنا تجربتكِ مع الأخصائية، جودة العناية والراحة في منزلكِ...', 'Tell us about the care quality, therapist attention, and comfort in your home...')}">${esc(existing?.body || '')}</textarea>
+        ${t('تعليقك وانطباعك عن التجربة *', 'Your comments & feedback *')}
+        <textarea name="body" id="review-body-input" required maxlength="2000" placeholder="${t('صفي لنا تجربتك مع الأخصائية، جودة العناية والراحة في منزلك...', 'Tell us about the care quality, therapist attention, and comfort in your home...')}">${esc(existing?.body || '')}</textarea>
       </label>
       <p class="muted" style="font-size:13px">${t(
-        'حفاظاً على خصوصيتكِ، يُرجى عدم كتابة رقم الجوال أو العنوان التفصيلي في التعليق.',
+        'حفاظاً على خصوصيتك، يُرجى عدم كتابة رقم الجوال أو العنوان التفصيلي في التعليق.',
         'For your privacy, please do not include phone numbers or sensitive addresses.',
       )}</p>
       <button class="btn" type="submit" id="submit-review-btn">${existing ? t('إرسال التعديل للمراجعة', 'Update & submit for review') : t('إرسال التقييم', 'Submit Review')}</button>
@@ -687,7 +689,7 @@ export function openReviewModal({ bookings = [], existingReviews = [], initialBo
       await api('/reviews', payload);
       $('#modal')?.close();
       state.account = null;
-      toast(t('تم استلام تقييمكِ بنجاح؛ بانتظار مراجعة الإدارة قبل النشر.', 'Thank you — your review is saved and pending moderation.'));
+      toast(t('تم استلام تقييمك بنجاح؛ بانتظار مراجعة الإدارة قبل النشر.', 'Thank you — your review is saved and pending moderation.'));
       if (onSaved) await onSaved();
     } catch (err) {
       errEl.innerHTML = `<div class="error">${esc(err.message)}</div>`;

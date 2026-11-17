@@ -32,7 +32,7 @@ export function studioPage() {
     <main id="main" class="wrap">
       ${head(
         t('استوديو اختيار الخدمات', 'J Ritual Studio'),
-        t('حدّدي تفضيلاتكِ الأربعة لنرشّح لكِ الأنسب من خدماتنا وباقاتنا المعتمدة بأسعارها ومددها الفعلية.', 'Share 4 preferences to view tailored, catalog-verified services and packages with transparent pricing.'),
+        t('حدّدي تفضيلاتك الأربعة لنرشّح لك الأنسب من خدماتنا وباقاتنا المعتمدة بأسعارها ومددها الفعلية.', 'Share 4 preferences to view tailored, catalog-verified services and packages with transparent pricing.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('استوديو الاختيار', 'J Ritual Studio'), '']],
       )}
       <div class="studio-layout split">
@@ -116,7 +116,7 @@ export function studioPage() {
                         <img class="studio-thumb" src="${esc(imgFor(r))}" alt="${esc(nameOf(item))}" loading="lazy">
                         <div class="studio-reco-body">
                           <div class="row" style="margin-bottom:4px">
-                            <span class="badge">${idx === 0 ? t('الأنسب لاختياركِ', 'Best Match') : r.kind === 'package' ? t('باقة', 'Package') : t('خدمة', 'Service')}</span>
+                            <span class="badge">${idx === 0 ? t('الأنسب لاختيارك', 'Best Match') : r.kind === 'package' ? t('باقة', 'Package') : t('خدمة', 'Service')}</span>
                             <strong><bdi>${money(item.price)}</bdi> · <bdi>${minutes(item.duration)}</bdi></strong>
                           </div>
                           <h3>${esc(nameOf(item))}</h3>
@@ -134,7 +134,7 @@ export function studioPage() {
                     .join('')}
                 </div>`
               : `<div class="card empty-compact muted">
-                   <p style="margin-bottom:10px">${t('جاري مطابقة خياراتكِ من كتالوج J Beauty المعتمد…', 'Matching your preferences against verified J Beauty services…')}</p>
+                   <p style="margin-bottom:10px">${t('جاري مطابقة خياراتك من كتالوج J Beauty المعتمد…', 'Matching your preferences against verified J Beauty services…')}</p>
                    <div class="hero-actions" style="gap:8px">
                      <a class="btn small light" href="${href('services')}">${t('تصفحي الخدمات (13)', 'Browse all services')}</a>
                      <a class="btn small light" href="${href('packages')}">${t('استعرضي الباقات', 'View packages')}</a>
@@ -253,7 +253,7 @@ const OCCASION_TYPES = [
 
 const customGuestName = (p) => {
   const raw = String(p?.label || '').trim();
-  if (!raw || /^(المستفيدة|Guest|Participant)\s*\d+$/i.test(raw)) {
+  if (!raw || /^(المستفيدة|Guest|Participant)\s*[\d\u0660-\u0669]+$/i.test(raw)) {
     return '';
   }
   return raw;
@@ -261,7 +261,7 @@ const customGuestName = (p) => {
 
 const displayGuestLabel = (p, idx) => {
   const raw = String(p?.label || '').trim();
-  if (!raw || /^(المستفيدة|Guest|Participant)\s*\d+$/i.test(raw)) {
+  if (!raw || /^(المستفيدة|Guest|Participant)\s*[\d\u0660-\u0669]+$/i.test(raw)) {
     return t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`);
   }
   return raw;
@@ -520,7 +520,7 @@ export function groupBookingPage() {
     <main id="main" class="wrap">
       ${head(
         t('تنسيق جلسات المناسبات', 'Occasion Experiences'),
-        t('نسّقي جلسات العناية والاسترخاء والأظافر لمنزلكِ في المدينة المنورة لاحتفالاتكِ ومناسباتكِ في خمس خطوات واضحة.', 'Arrange coordinated home spa and nail sessions in Madinah across 5 guided steps (2 to 5 participants).'),
+        t('نسّقي جلسات العناية والاسترخاء والأظافر لمنزلك في المدينة المنورة لاحتفالاتك ومناسباتك في خمس خطوات واضحة.', 'Arrange coordinated home spa and nail sessions in Madinah across 5 guided steps (2 to 5 participants).'),
         [[t('الرئيسية', 'Home'), 'home'], [t('تنسيق جلسات المناسبات', 'Occasion Experiences'), '']],
       )}
       <div class="progress five" role="navigation" aria-label="${t('خطوات تنسيق المناسبة', 'Occasion wizard steps')}">
@@ -593,7 +593,7 @@ export function giftsPage() {
             <h3>${t('بانتظار مراجعة الفريق وتوثيق الدفع اليدوي', 'Pending Staff Review & Manual Payment Verification')}</h3>
             <p>${t('مرجع الإهداء:', 'Gift Reference:')} <strong><bdi>${esc(r.gift_request.reference)}</bdi></strong></p>
           </div>
-          <p class="muted">${t('لا يُفعّل الإهداء كرصيد مدفوع إلا بعد تحقق الموظفة من السداد. يمكنكِ إرسال التفاصيل الآن عبر واتساب.', 'Gift cards are activated only after manual staff payment verification.')}</p>
+          <p class="muted">${t('لا يُفعّل الإهداء كرصيد مدفوع إلا بعد تحقق الموظفة من السداد. يمكنك إرسال التفاصيل الآن عبر واتساب.', 'Gift cards are activated only after manual staff payment verification.')}</p>
           ${r.whatsapp_url ? `<a class="btn sage" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener">${t('فتح واتساب لتنسيق الإهداء', 'Open WhatsApp')}</a>` : ''}
           <pre style="margin-top:14px">${esc(r.message)}</pre>
           <button type="button" class="btn light" id="new-gift-req">${t('إعداد إهداء آخر', 'Create another gift request')}</button>
@@ -616,8 +616,8 @@ export function giftsPage() {
       <form id="gift-form" class="card content">
         <div id="form-error" role="alert"></div>
         <div class="form-grid">
-          ${field(t('اسم المُهدِية', 'Your name'), 'sender_name', 'text', state.user?.name || '', 'required')}
-          ${field(t('جوالكِ السعودي', 'Your Saudi mobile'), 'sender_phone', 'tel', state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
+          ${field(t('اسم المُهدية', 'Your name'), 'sender_name', 'text', state.user?.name || '', 'required')}
+          ${field(t('جوالك السعودي', 'Your Saudi mobile'), 'sender_phone', 'tel', state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
         </div>
         ${field(t('اسم المُهدى إليها', 'Recipient name'), 'recipient_name', 'text', '', 'required')}
         <label class="field">
@@ -633,7 +633,7 @@ export function giftsPage() {
         </label>
         <label class="field">
           ${t('رسالة الإهداء الشخصية (اختياري)', 'Personal message (optional)')}
-          <textarea name="personal_message" maxlength="350" placeholder="${t('أتمنى لكِ لحظة هادئة ومليئة بالجمال...', 'Wishing you a calm and restorative moment...')}"></textarea>
+          <textarea name="personal_message" maxlength="350" placeholder="${t('أتمنى لك لحظة هادئة ومليئة بالجمال...', 'Wishing you a calm and restorative moment...')}"></textarea>
         </label>
         <label class="check">
           <input type="checkbox" name="terms" required>
@@ -708,7 +708,7 @@ export function bindExperiences(renderFn) {
       const boxes = [...f.querySelectorAll(`[data-guest-svc="${idx}"]`)];
       if (lbl) {
         const val = lbl.value.trim();
-        p.label = val || t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`);
+        p.label = val;
       }
       if (boxes.length) p.service_ids = boxes.filter((b) => b.checked).map((b) => b.value);
     });
@@ -718,7 +718,7 @@ export function bindExperiences(renderFn) {
     syncGroupDraft();
     if (state.groupDraft.participants.length < 5) {
       state.groupDraft.participants.push({
-        label: t(`المستفيدة ${state.groupDraft.participants.length + 1}`, `Guest ${state.groupDraft.participants.length + 1}`),
+        label: '',
         service_ids: ['relaxation'],
       });
       renderFn();

@@ -94,7 +94,7 @@ export function evaluateAtelierServiceMatch(cfg = {}) {
     length,
     prepAdvisoryAr: isSculptedLong
       ? 'في حال الحاجة لإطالة إضافية أو إزالة جل سابق، يُرجى إضافتهما في الملاحظات أو اختيار إزالة الجل أدناه.'
-      : 'إذا كانت لديكِ طبقة جل سابقة، يمكنكِ إرفاق خدمة إزالة الجل في خطوة الحجز.',
+      : 'إذا كانت لديك طبقة جل سابقة، يمكنك إرفاق خدمة إزالة الجل في خطوة الحجز.',
     prepAdvisoryEn: isSculptedLong
       ? 'If soft gel length building or soak-off removal is needed, include it cleanly in your booking note or add-on.'
       : 'Wearing existing gel? Easily toggle Gel Removal alongside this booking.',

@@ -89,10 +89,13 @@ try {
   let cat = await guest.call('/api/catalog');
   let bid;
   let reference;
-  await test('Seed catalog: 13 services and 4 computed packages', async () => {
-    assert.equal(cat.services.length, 13);
+  await test('Seed catalog: 17 services and 4 computed packages', async () => {
+    assert.equal(cat.services.length, 17);
     assert.equal(cat.packages.length, 4);
-    assert.equal(cat.packages.find((p) => p.price === 469).original_total, 525);
+    assert.equal(cat.packages.find((p) => p.price === 349).original_total, 389);
+    assert.equal(cat.packages.find((p) => p.price === 239).original_total, 268);
+    assert.equal(cat.packages.find((p) => p.price === 339).original_total, 379);
+    assert.equal(cat.packages.find((p) => p.price === 259).original_total, 289);
   });
 
   await owner.call('/api/ops/settings', {
@@ -204,7 +207,7 @@ try {
     const res = await fetch(custBase + '/ar/services/relaxation');
     const html = await res.text();
     assert.equal(res.status, 200);
-    assert.ok(html.includes('<h1>مساج استرخائي</h1>'));
+    assert.ok(html.includes('<h1>مساج الاسترخاء</h1>'));
 
     const admRes = await fetch(custBase + '/ar/admin');
     assert.equal(admRes.status, 404);

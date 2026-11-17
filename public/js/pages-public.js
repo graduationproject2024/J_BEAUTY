@@ -36,7 +36,7 @@ const MOODS = [
     id: 'nails',
     ar: 'أرغب في تجديد إطلالة أظافري',
     en: 'Refresh My Nails',
-    sub_ar: 'طلاء جل، فرنش كلاسيكي، أو أطراف ملونة بتصميمكِ.',
+    sub_ar: 'طلاء جل، فرنش كلاسيكي، أو أطراف ملونة بتصميمك.',
     sub_en: 'Glossy gel polish, classic French, or custom tips.',
     ids: ['gel-polish', 'french-gel'],
   },
@@ -44,7 +44,7 @@ const MOODS = [
     id: 'occasion',
     ar: 'أستعد لمناسبة خاصة',
     en: 'Special Occasion Prep',
-    sub_ar: 'إطلالة أظافر فرنسية متقنة مع عناية شاملة تليق بمناسبتكِ.',
+    sub_ar: 'إطلالة أظافر فرنسية متقنة مع عناية شاملة تليق بمناسبتك.',
     sub_en: 'French tip artistry paired with glowing hand and foot prep.',
     ids: ['french-tip', 'colored-french'],
   },
@@ -72,7 +72,7 @@ function moodPreviewHtml() {
       </div>
       <div class="row" style="margin-top:14px">
         <span class="muted">${esc(t(m.sub_ar, m.sub_en))}</span>
-        <a class="text-link" href="${href('studio')}">${t('اكتشفي الخدمات المناسبة لكِ ←', 'Discover suitable services →')}</a>
+        <a class="text-link" href="${href('studio')}">${t('اكتشفي الخدمات المناسبة لك ←', 'Discover suitable services →')}</a>
       </div>
     </div>
   `;
@@ -90,13 +90,13 @@ export function home() {
         <section class="hero">
           <div class="hero-copy">
             <span class="eyebrow">${t('للسيدات فقط · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</span>
-            <h1>${t('جمالكِ. طقوسكِ.<br>لحظتكِ الخاصة في بيتكِ.', 'Your Beauty.<br>Your Ritual. Your Moment.')}</h1>
+            <h1>${t('جمالك. طقوسك.<br>لحظتك الخاصة في بيتك.', 'Your Beauty.<br>Your Ritual. Your Moment.')}</h1>
             <p class="hero-lead">${t(
-              'عناية منزلية نسائية فاخرة من المساج إلى أتيليه الأظافر والجل — تصل إلى منزلكِ في المدينة المنورة بتفاصيل هادئة وتأكيد شخصي.',
+              'عناية منزلية نسائية فاخرة من المساج إلى أتيليه الأظافر والجل — تصل إلى منزلك في المدينة المنورة بتفاصيل هادئة وتأكيد شخصي.',
               'Quiet-luxury massage, nail artistry, and botanical home spa rituals delivered across Madinah with personal team confirmation.',
             )}</p>
             <div class="hero-actions">
-              <a class="btn" href="${href('booking')}">${t('احجزي موعدكِ', 'Book your moment')}</a>
+              <a class="btn" href="${href('booking')}">${t('احجزي موعدك', 'Book your moment')}</a>
               <a class="text-link" href="${href('services')}">${t('اكتشفي خدماتنا (13)', 'Explore all rituals')}</a>
             </div>
             <div class="hero-trust">
@@ -111,7 +111,7 @@ export function home() {
             </div>
             <div class="hero-seal">
               <strong>J Beauty · ${t('المدينة المنورة', 'AL MADINAH')}</strong>
-              <span>${t('لحظتكِ الخاصة… في راحة بيتكِ', 'Your Moment of Beauty, At Home.')}</span>
+              <span>${t('لحظتك الخاصة… في راحة بيتك', 'Your Moment of Beauty, At Home.')}</span>
             </div>
           </div>
         </section>
@@ -125,7 +125,7 @@ export function home() {
           </a>
           <a class='jb-path jb-path-reviews' href="${href('reviews')}">
             <span class='jb-path-icon' aria-hidden='true'>${icon('star')}</span>
-            <span class='jb-path-copy'><strong>${t('تجارب العميلات والتقييمات', 'Customer Reviews & Ratings')}</strong><small>${t('اطّلعي على التجارب الموثقة أو شاركي رأيكِ بعد الزيارة', 'Read verified reviews or rate your completed visit')}</small></span>
+            <span class='jb-path-copy'><strong>${t('تجارب العميلات والتقييمات', 'Customer Reviews & Ratings')}</strong><small>${t('اطّلعي على التجارب الموثقة أو شاركي رأيك بعد الزيارة', 'Read verified reviews or rate your completed visit')}</small></span>
             <span class='jb-path-arrow' aria-hidden='true'>←</span>
           </a>
         </section>
@@ -134,7 +134,7 @@ export function home() {
         <section class="section-tight mood-band" data-reveal>
           <div class="section-head" style="margin-bottom:20px">
             <div>
-              <span class="eyebrow">${t('اختيار سريع يناسبكِ', 'TAILORED DISCOVERY')}</span>
+              <span class="eyebrow">${t('اختيار سريع يناسبك', 'TAILORED DISCOVERY')}</span>
               <h2>${t('ما نوع العناية التي ترغبين بها اليوم؟', 'What kind of care would you like today?')}</h2>
             </div>
             <a class="text-link" href="${href('studio')}">${t('استوديو اختيار الخدمات', 'Open J Ritual Studio')}</a>
@@ -157,7 +157,7 @@ export function home() {
           <div class="section-head">
             <div>
               <span class="eyebrow">${t('مختارات J Beauty', 'FEATURED RITUALS')}</span>
-              <h2>${t('جلسات مختارة لراحتكِ', 'Curated moments of care')}</h2>
+              <h2>${t('جلسات مختارة لراحتك', 'Curated moments of care')}</h2>
             </div>
             <a class="text-link" href="${href('services')}">${t('استكشفي جميع الخدمات (13) ←', 'Browse all 13 services →')}</a>
           </div>
@@ -172,7 +172,7 @@ export function home() {
           <div class="section-head">
             <div>
               <span class="eyebrow">${t('مسار الزيارة المنزلية', 'THE J BEAUTY EXPERIENCE')}</span>
-              <h2>${t('من اختياركِ… حتى باب منزلكِ', 'From selection to calm home care')}</h2>
+              <h2>${t('من اختيارك… حتى باب منزلك', 'From selection to calm home care')}</h2>
             </div>
             <a class="text-link" href="${href('occasions')}">${t('تنسيق جلسات المناسبات', 'Occasion Experiences')}</a>
           </div>
@@ -180,8 +180,8 @@ export function home() {
             ${[
               ['01', 'calendar', t('تقديم الطلب', 'Request Online'), t('اختاري فئة الخدمة والموعد المفضل في المدينة المنورة.', 'Select your service category and preferred time in Madinah.')],
               ['02', 'user', t('تأكيد الفريق', 'Team Confirmation'), t('تتواصل الموظفة عبر واتساب لمراجعة السعة وتأكيد الموعد.', 'Our team checks neighborhood capacity and confirms via WhatsApp.')],
-              ['03', 'spark', t('تهيئة مستلزمات الزيارة', 'Calm Preparation'), t('نصل بمستلزمات نظيفة ومرتبة تلائم خصوصية منزلكِ.', 'Fresh linens and neatly prepared tools arrive at your home.')],
-              ['04', 'check', t('الخدمة واحتساب البتلات', 'Service & Petals'), t('تستمتعين بجلستكِ، وتُضاف البتلات تلقائياً بعد إتمام الزيارة والدفع.', 'Relax in complete privacy; Petals credit after completed payment.')],
+              ['03', 'spark', t('تهيئة مستلزمات الزيارة', 'Calm Preparation'), t('نصل بمستلزمات نظيفة ومرتبة تلائم خصوصية منزلك.', 'Fresh linens and neatly prepared tools arrive at your home.')],
+              ['04', 'check', t('الخدمة واحتساب البتلات', 'Service & Petals'), t('تستمتعين بجلستك، وتُضاف البتلات تلقائياً بعد إتمام الزيارة والدفع.', 'Relax in complete privacy; Petals credit after completed payment.')],
             ]
               .map(
                 ([num, ico, title, copy]) => `
@@ -209,21 +209,28 @@ export function home() {
         <!-- 6. J Beauty loyalty: Luxury bloom medallion + clear rewarding flow -->
         <section class='loyalty-band jb-loyalty-intro' data-reveal>
           <div class='loyalty-copy-col'>
-            <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
-            <h2>${t('بتلاتكِ… كل لحظة عناية تُهديكِ مزيداً من الدلال', 'Every moment of care brings you closer to luxury rewards.')}</h2>
-            <p>${t('برنامج "بتلات J" يمنحكِ نقاط وفاء تقديرية مع كل جلسة منزلية مكتملة. اجمعي البتلات واستبدليها بخصومات وترقيات راقية لجلساتكِ القادمة.', 'Earn reward Petals with each completed home sanctuary visit. Redeem your balance for exclusive savings and ritual upgrades.')}</p>
+            <span class='eyebrow'>J BEAUTY SPA · PETALS PROGRAM</span>
+            <h2>${t('بتلاتك… كل لحظة عناية تُهديك مزيداً من الدلال', 'Every moment of care brings you closer to luxury rewards.')}</h2>
+            <p>${t('برنامج "بتلات J" يمنحك نقاط وفاء تقديرية مع كل جلسة منزلية مكتملة (1 ريال = 1 بتلة). اجمعي البتلات واستبدليها بخصومات وترقيات راقية لجلساتك القادمة.', 'Earn reward Petals with each completed home sanctuary visit (1 SAR = 1 Petal). Redeem your balance for exclusive savings and ritual upgrades.')}</p>
             <div class='hero-actions' style='margin-top:22px'>
-              <a class='btn rose' href="${href('petals')}">${t('اكتشفي نادي البتلات', 'Explore Petals Rewards')}</a>
+              <a class='btn rose' href="${href('petals')}">${t('اكتشفي برنامج بتلات J', 'Explore Petals Rewards')}</a>
               <a class='btn jb-quiet-link' href="${href('reviews')}">${t('اطّلعي على تجارب العميلات', 'Customer reviews')}</a>
             </div>
           </div>
           <div class='jb-loyalty-side'>
             <div class='jb-loyalty-steps' aria-label="${t('كيف يعمل برنامج البتلات', 'How Petals works')}">
-              <div class='jb-loyalty-step'><span>01</span><div><strong>${t('احجزي واستمتعي بالخدمة', 'Book & enjoy your ritual')}</strong><p>${t('اختاري خدماتكِ واستقبلي أخصائياتنا في راحة منزلكِ.', 'Select your treatments and welcome our specialists home.')}</p></div></div>
-              <div class='jb-loyalty-step'><span>02</span><div><strong>${t('اجمعي البتلات تلقائياً', 'Earn Petals automatically')}</strong><p>${t('تُضاف بتلاتكِ إلى رصيدكِ مباشرة فور اكتمال الجلسة.', 'Petals are added directly to your account upon completion.')}</p></div></div>
-              <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتكِ ودلالكِ', 'Choose your reward')}</strong><p>${t('استبدلي رصيدكِ بخصومات مباشرة على حجوزاتكِ القادمة.', 'Redeem your balance for immediate discounts on upcoming visits.')}</p></div></div>
+              <div class='jb-loyalty-step'><span>01</span><div><strong>${t('احجزي واستمتعي بالخدمة', 'Book & enjoy your ritual')}</strong><p>${t('اختاري خدماتك واستقبلي أخصائياتنا في راحة منزلك.', 'Select your treatments and welcome our specialists home.')}</p></div></div>
+              <div class='jb-loyalty-step'><span>02</span><div><strong>${t('اجمعي البتلات تلقائياً', 'Earn Petals automatically')}</strong><p>${t('تُضاف بتلاتك إلى رصيدك مباشرة فور اكتمال الجلسة والدفع (1 ريال = 1 بتلة).', 'Petals are added directly upon completion and payment (1 SAR = 1 Petal).')}</p></div></div>
+              <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتك ودلالك', 'Choose your reward')}</strong><p>${t('استبدلي رصيدك بخصومات مباشرة على حجوزاتك القادمة.', 'Redeem your balance for immediate discounts on upcoming visits.')}</p></div></div>
             </div>
-            <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(4, 8, false)}</div>
+            <div class='jb-petals-luxury-badge'>
+              <div class='jb-petals-card-wrap'>
+                <img src='/assets/brand/official-logo.png' alt='J Beauty Spa' class='jb-petals-card-logo'>
+                <span class='jb-petals-card-tier'>برنامج بتلات J</span>
+                <strong class='jb-petals-card-tag'>عضوية الدلال الذهبي</strong>
+                <small class='jb-petals-card-rule'>١ ريال = ١ بتلة</small>
+              </div>
+            </div>
           </div>
         </section>
         <!-- 7. Genuine Beauty Stories / Verified Care Standards -->
@@ -231,18 +238,18 @@ export function home() {
           <div class="section-head">
             <div>
               <span class="eyebrow">${t('الشفافية والثقة', 'GENUINE BEAUTY STORIES')}</span>
-              <h2>${state.catalog.reviews?.length ? t('كلمات من تجارب حقيقية', 'Verified Customer Stories') : t('معايير عناية تُشعركِ بالطمأنينة', 'Standards built on honesty')}</h2>
+              <h2>${state.catalog.reviews?.length ? t('كلمات من تجارب حقيقية', 'Verified Customer Stories') : t('معايير عناية تُشعرك بالطمأنينة', 'Standards built on honesty')}</h2>
             </div>
-            <a class="btn small" href="${href('reviews')}">${t('اقرئي التقييمات أو قيّمي تجربتكِ', 'Read or Write a Review')}</a>
+            <a class="btn small" href="${href('reviews')}">${t('اقرئي التقييمات أو قيّمي تجربتك', 'Read or Write a Review')}</a>
           </div>
           ${reviewsContent(state.catalog.reviews, true)}
         </section>
 
         <!-- 8. Final Booking CTA -->
         <section class="cta-band" data-reveal>
-          <span class="eyebrow">${t('جاهزة للحظتكِ؟', 'YOUR MOMENT AWAITS')}</span>
-          <h2>${t('احجزي طقسكِ المنزلي اليوم', 'Reserve your calm moment at home')}</h2>
-          <p>${t('ابدئي باختيار فئة الخدمة، أو صممي إطلالة أظافركِ، أو دعي استوديو J يقترح عليكِ الأنسب.', 'Start your appointment request, explore J Nail Atelier, or get tailored studio suggestions.')}</p>
+          <span class="eyebrow">${t('جاهزة للحظتك؟', 'YOUR MOMENT AWAITS')}</span>
+          <h2>${t('احجزي طقسك المنزلي اليوم', 'Reserve your calm moment at home')}</h2>
+          <p>${t('ابدئي باختيار فئة الخدمة، أو صممي إطلالة أظافرك، أو دعي استوديو J يقترح عليك الأنسب.', 'Start your appointment request, explore J Nail Atelier, or get tailored studio suggestions.')}</p>
           <div class="hero-actions" style="justify-content:center">
             <a class="btn" href="${href('booking')}">${t('ابدئي طلب الحجز الآن', 'Request your appointment')}</a>
             <a class="btn light" href="${href('lookbook')}">${t('تصفحي معرض الإطلالات', 'Browse Lookbook')}</a>
@@ -359,7 +366,7 @@ export function detail(id) {
       </div>
       <section class="section">
         <div class="section-head">
-          <h2>${t('خدمات مقاربة قد تعجبكِ', 'Related rituals')}</h2>
+          <h2>${t('خدمات مقاربة قد تعجبك', 'Related rituals')}</h2>
         </div>
         <div class="grid">${related.map(serviceCard).join('')}</div>
       </section>
@@ -395,20 +402,20 @@ export function reviewsPage() {
 
       <div class="card reviews-cta-card">
         <div>
-          <span class="eyebrow">${t('شاركينا انطباعكِ', 'SHARE YOUR IMPRESSION')}</span>
-          <h2 style="margin:4px 0 8px">${t('هل جربتِ خدماتنا؟ رأيكِ يهمنا', 'Experienced our rituals? Share your thoughts')}</h2>
+          <span class="eyebrow">${t('شاركينا انطباعك', 'SHARE YOUR IMPRESSION')}</span>
+          <h2 style="margin:4px 0 8px">${t('هل جربت خدماتنا؟ رأيك يهمنا', 'Experienced our rituals? Share your thoughts')}</h2>
           <p class="muted" style="margin:0">${t(
             'نرحب بآراء وتقييمات عميلاتنا وزائراتنا الكرام. تُراجع التقييمات من فريقنا بعناية لضمان المصداقية وحماية الخصوصية.',
             'We welcome reviews from our cherished clients and guests. All feedback is reviewed to preserve authenticity and privacy.',
           )}</p>
         </div>
-        <button type="button" class="btn" id="open-review-cta">${t('قيّمي تجربتكِ معنا', 'Rate Your Experience')}</button>
+        <button type="button" class="btn" id="open-review-cta">${t('قيّمي تجربتك معنا', 'Rate Your Experience')}</button>
       </div>
 
       ${
         myReviews.length
           ? `<section class="section-tight" style="padding-top:0">
-               <h3>${t('تقييماتكِ المرسلة', 'Your Submitted Reviews')}</h3>
+               <h3>${t('تقييماتك المرسلة', 'Your Submitted Reviews')}</h3>
                <div class="grid two">
                  ${myReviews
                    .map(
@@ -443,7 +450,7 @@ export function reviewsPage() {
 export function contentPage(p) {
   const pages = {
     about: [
-      t('عن J Beauty — لحظتكِ في راحة بيتكِ', 'About J Beauty — Care that feels like you'),
+      t('عن J Beauty — لحظتك في راحة بيتك', 'About J Beauty — Care that feels like you'),
       t(
         'J Beauty منصة سبا نسائي منزلي في المدينة المنورة، صُممت لتمنح كل سيدة مساحة من السكينة والعناية الراقية دون الحاجة للخروج من منزلها.',
         'J Beauty is a women’s home spa platform serving Al Madinah Al Munawwarah, designed to bring serene wellness and nail rituals into the privacy of your own home.',
@@ -467,11 +474,11 @@ export function contentPage(p) {
     privacy: [
       t('سياسة الخصوصية وحماية البيانات', 'Privacy Policy'),
       t(
-        'نجمع فقط المعلومات الضرورية لتنسيق الزيارات المنزلية وإدارة حسابكِ وبرنامج بتلات J (الاسم، رقم الجوال السعودي، الحي، وملاحظاتكِ الاختيارية). لا تُنشر أرقام الجوال أو العناوين أو تفاصيل الحجز للعامة مطلقاً.',
+        'نجمع فقط المعلومات الضرورية لتنسيق الزيارات المنزلية وإدارة حسابك وبرنامج بتلات J (الاسم، رقم الجوال السعودي، الحي، وملاحظاتك الاختيارية). لا تُنشر أرقام الجوال أو العناوين أو تفاصيل الحجز للعامة مطلقاً.',
         'We collect only the details needed to coordinate home services and manage your account and J Petals Club (name, Saudi mobile number, neighborhood, and optional notes). Phone numbers, addresses, and booking details are never shown publicly.',
       ),
       t(
-        'تُحفظ كلمات المرور بصيغة مشفّرة أحادية الاتجاه (Argon2id) ولا يملك أي موظف صلاحية قراءتها. عند اختياركِ الانتقال إلى واتساب لإرسال رسالة الطلب أو التوثيق، تخضع المحادثة لسياسات واتساب.',
+        'تُحفظ كلمات المرور بصيغة مشفّرة أحادية الاتجاه (Argon2id) ولا يملك أي موظف صلاحية قراءتها. عند اختيارك الانتقال إلى واتساب لإرسال رسالة الطلب أو التوثيق، تخضع المحادثة لسياسات واتساب.',
         'Passwords are stored using strong one-way Argon2id derivation and cannot be read by staff. When you choose to open WhatsApp to send a request or verification reference, WhatsApp’s own terms apply.',
       ),
       t(
@@ -537,7 +544,7 @@ export function contact() {
             waDigits
               ? `<a class="btn sage" href="https://wa.me/${esc(waDigits)}" target="_blank" rel="noopener">${t('تواصلي عبر واتساب', 'Chat on WhatsApp')}</a>`
               : `<div class="notice">${t(
-                  'لم تضف الإدارة رقم واتساب بعد في الإعدادات. يمكنكِ إرسال طلب حجز وسيظهر للفريق في لوحة الإدارة.',
+                  'لم تضف الإدارة رقم واتساب بعد في الإعدادات. يمكنك إرسال طلب حجز وسيظهر للفريق في لوحة الإدارة.',
                   'The business WhatsApp number is not yet configured. You can still submit an appointment request directly.',
                 )}</div>`
           }
@@ -572,23 +579,23 @@ export function faq() {
   const items = [
     [
       t('هل يتم تأكيد الحجز مباشرة بعد إرسال النموذج؟', 'Is my booking confirmed immediately after submitting?'),
-      t('لا. يُحفظ الطلب بحالة "بانتظار التأكيد"، ثم يراجع الفريق الوقت والحي والطاقة الاستيعابية ويؤكد الموعد معكِ شخصياً.', 'No. Your request is saved as pending confirmation, and our team personally verifies availability before confirming.'),
+      t('لا. يُحفظ الطلب بحالة "بانتظار التأكيد"، ثم يراجع الفريق الوقت والحي والطاقة الاستيعابية ويؤكد الموعد معك شخصياً.', 'No. Your request is saved as pending confirmation, and our team personally verifies availability before confirming.'),
     ],
     [
       t('هل أحتاج إنشاء حساب قبل الحجز؟', 'Do I need an account to book?'),
-      t('يمكنكِ الحجز كزائرة بسهولة. أما إنشاء حساب وتوثيقه فيتيح لكِ متابعة حجوزاتكِ وجمع بتلات نادي J.', 'Guest booking is always welcome. Creating and verifying an account lets you track your bookings and collect J Petals rewards.'),
+      t('يمكنك الحجز كزائرة بسهولة. أما إنشاء حساب وتوثيقه فيتيح لك متابعة حجوزاتك وجمع بتلات نادي J.', 'Guest booking is always welcome. Creating and verifying an account lets you track your bookings and collect J Petals rewards.'),
     ],
     [
       t('كيف يعمل زر واتساب بعد تسجيل الطلب؟', 'Does WhatsApp send my booking message automatically?'),
-      t('يفتح التطبيق رابط واتساب عادي مع رسالة عربية جاهزة؛ يجب عليكِ الضغط على إرسال داخل واتساب بنفسكِ. لا نستخدم أي إرسال تلقائي.', 'No. It opens a standard WhatsApp link with a prepared message; you must press Send manually inside WhatsApp.'),
+      t('يفتح التطبيق رابط واتساب عادي مع رسالة عربية جاهزة؛ يجب عليك الضغط على إرسال داخل واتساب بنفسك. لا نستخدم أي إرسال تلقائي.', 'No. It opens a standard WhatsApp link with a prepared message; you must press Send manually inside WhatsApp.'),
     ],
     [
       t('متى تضاف نقاط نادي بتلات J إلى رصيدي؟', 'When are J Petals Club points added?'),
-      t('بعد اكتمال الخدمة والتحقق من استلام الدفع من الموظفة وتوثيق ملكية رقم جوالكِ. تأكيد الموعد وحده لا يضيف نقاطاً.', 'Only after your service is completed, staff verifies payment receipt, and your account phone ownership is verified.'),
+      t('بعد اكتمال الخدمة والتحقق من استلام الدفع من الموظفة وتوثيق ملكية رقم جوالك. تأكيد الموعد وحده لا يضيف نقاطاً.', 'Only after your service is completed, staff verifies payment receipt, and your account phone ownership is verified.'),
     ],
     [
       t('كيف أستعيد كلمة المرور إذا نسيتها؟', 'How do I recover a forgotten password?'),
-      t('تواصلي مع الفريق عبر رقم واتساب المرتبط بحسابكِ. بعد التحقق من هويتكِ يرسل لكِ الفريق رابط استعادة مؤقتاً يُستخدم مرة واحدة.', 'Contact our team from the WhatsApp number linked to your account. After verification, staff can issue a short-lived, single-use recovery link.'),
+      t('تواصلي مع الفريق عبر رقم واتساب المرتبط بحسابك. بعد التحقق من هويتك يرسل لك الفريق رابط استعادة مؤقتاً يُستخدم مرة واحدة.', 'Contact our team from the WhatsApp number linked to your account. After verification, staff can issue a short-lived, single-use recovery link.'),
     ],
   ];
   return `
@@ -616,10 +623,10 @@ export function recovery() {
       ${head(t('استعادة الحساب بمساعدة الفريق', 'Staff-Assisted Account Recovery'))}
       <div class="content card">
         <p>${t(
-          'للحفاظ على خصوصية حسابكِ بدون خدمات رسائل مدفوعة، تواصلي مع فريق J Beauty من نفس محادثة واتساب المسجلة لدينا. بعد التحقق من رقمكِ ينشئ الفريق لكِ رابط استعادة قصير الصلاحية للاستخدام مرة واحدة.',
+          'للحفاظ على خصوصية حسابك بدون خدمات رسائل مدفوعة، تواصلي مع فريق J Beauty من نفس محادثة واتساب المسجلة لدينا. بعد التحقق من رقمك ينشئ الفريق لك رابط استعادة قصير الصلاحية للاستخدام مرة واحدة.',
           'To keep recovery secure without paid SMS services, contact J Beauty from the WhatsApp number linked to your account. Once verified, staff can generate a short-lived single-use reset link.',
         )}</p>
-        <p class="muted">${t('لا تشاركي كلمة مروركِ السابقة مع أي شخص أبداً.', 'Never share your current password with anyone.')}</p>
+        <p class="muted">${t('لا تشاركي كلمة مرورك السابقة مع أي شخص أبداً.', 'Never share your current password with anyone.')}</p>
         <div class="hero-actions" style="margin-top:20px">
           <a class="btn" href="${href('contact')}">${t('تواصلي مع الفريق', 'Contact the team')}</a>
           <a class="btn light" href="${href('reset')}">${t('لديّ رمز استعادة بالفعل', 'I already have a reset token')}</a>
@@ -710,7 +717,7 @@ export function bindPublicInteractions(goFn, renderFn) {
       e.preventDefault();
       e.stopPropagation();
       if (!state.user) {
-        toast(t('سجلي الدخول لحفظ خدماتكِ المفضلة في جواز الجمال', 'Sign in to save favorites to your Beauty Passport'));
+        toast(t('سجلي الدخول لحفظ خدماتك المفضلة في جواز الجمال', 'Sign in to save favorites to your Beauty Passport'));
         goFn('login');
         return;
       }

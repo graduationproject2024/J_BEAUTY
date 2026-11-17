@@ -24,6 +24,7 @@ import {
 } from './js/pages-public.js';
 import { bindBooking, booking } from './js/booking.js';
 import { accountPage, auth, bindAccount, petalsPage } from './js/account.js';
+import { initWheelFloatingButton } from './js/wheel.js';
 
 let lastBeaconRoute = '';
 let loadedSharedCode = '';
@@ -56,7 +57,7 @@ function updateMobileBar(cur) {
   document.body.classList.toggle('has-mobile-bar', show);
   if (show) {
     btn.href = href('booking');
-    btn.textContent = t('احجزي موعدكِ الآن', 'Book your moment');
+    btn.textContent = t('احجزي موعدك الآن', 'Book your moment');
   }
 }
 
@@ -149,7 +150,7 @@ export async function render() {
     gifts: t('أهدي لحظة عناية', 'Gift a Ritual'),
     account: t('جواز الجمال وحسابي', 'Beauty Passport & Account'),
   };
-  document.title = 'J Beauty | ' + (titleMap[cur] || cur.replaceAll('-', ' '));
+  document.title = 'J Beauty Spa | ' + (titleMap[cur] || cur.replaceAll('-', ' '));
 
   updateMobileBar(cur);
   initScrollReveals();
@@ -232,7 +233,8 @@ window.addEventListener('keydown', (e) => {
     await refreshSession();
     state.catalog = await api('/catalog');
     await render();
+    initWheelFloatingButton();
   } catch (err) {
-    $('#app').innerHTML = `<main class="wrap">${head('J Beauty')}<div class="error">${esc(err.message)}</div><p>${t('تعذر الاتصال بالخادم. أعيدي تحميل الصفحة.', 'Unable to connect to the server. Please reload.')}</p></main>`;
+    $('#app').innerHTML = `<main class="wrap">${head('J Beauty Spa')}<div class="error">${esc(err.message)}</div><p>${t('تعذر الاتصال بالخادم. أعيدي تحميل الصفحة.', 'Unable to connect to the server. Please reload.')}</p></main>`;
   }
 })();
