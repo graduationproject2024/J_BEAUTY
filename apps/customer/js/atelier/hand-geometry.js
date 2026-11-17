@@ -361,22 +361,22 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
 
   const nailAnchors = {};
 
-  // Slender, graceful feminine hand proportions with natural relaxed cascade
+  // Slender, graceful feminine hand proportions with natural relaxed cascade and distinct knuckle anatomy
   const fingerDefs = [
     {
       id: 'index',
       root8: fingerRoots.index,
-      spreadDeg: 2.6,
-      bendDegs: [-5.0, -9.5, -13.0],
+      spreadDeg: 4.2,
+      bendDegs: [-4.0, -8.5, -11.5],
       segLens: [2.15, 1.55, 1.35],
       radii: [
-        [0.72, 0.66],
-        [0.66, 0.60],
-        [0.67, 0.61],
-        [0.61, 0.56],
-        [0.61, 0.55],
-        [0.59, 0.52],
-        [0.57, 0.48],
+        [0.72, 0.65],
+        [0.65, 0.58], // proximal shaft taper
+        [0.69, 0.62], // PIP knuckle
+        [0.62, 0.55], // middle phalanx shaft
+        [0.60, 0.53],
+        [0.63, 0.56], // DIP knuckle
+        [0.57, 0.49],
         [0.53, 0.44],
         [0.42, 0.32],
       ],
@@ -387,17 +387,17 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'middle',
       root8: fingerRoots.middle,
-      spreadDeg: 0.1,
-      bendDegs: [-4.5, -9.0, -12.5],
+      spreadDeg: 0.0,
+      bendDegs: [-3.5, -7.5, -10.5],
       segLens: [2.35, 1.70, 1.45],
       radii: [
-        [0.75, 0.69],
-        [0.68, 0.62],
-        [0.69, 0.63],
-        [0.63, 0.57],
-        [0.63, 0.56],
-        [0.61, 0.53],
-        [0.59, 0.49],
+        [0.76, 0.68],
+        [0.67, 0.60], // proximal shaft taper
+        [0.72, 0.64], // PIP knuckle
+        [0.64, 0.57], // middle phalanx shaft
+        [0.62, 0.55],
+        [0.65, 0.58], // DIP knuckle
+        [0.59, 0.50],
         [0.55, 0.45],
         [0.44, 0.34],
       ],
@@ -408,17 +408,17 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'ring',
       root8: fingerRoots.ring,
-      spreadDeg: -1.8,
-      bendDegs: [-5.0, -9.5, -13.0],
+      spreadDeg: -3.5,
+      bendDegs: [-4.0, -8.5, -11.5],
       segLens: [2.20, 1.60, 1.38],
       radii: [
-        [0.71, 0.65],
-        [0.64, 0.58],
-        [0.65, 0.59],
-        [0.59, 0.53],
-        [0.59, 0.52],
-        [0.57, 0.49],
-        [0.55, 0.46],
+        [0.71, 0.64],
+        [0.63, 0.56], // proximal shaft taper
+        [0.68, 0.61], // PIP knuckle
+        [0.60, 0.53], // middle phalanx shaft
+        [0.58, 0.51],
+        [0.62, 0.55], // DIP knuckle
+        [0.55, 0.47],
         [0.51, 0.42],
         [0.40, 0.31],
       ],
@@ -429,17 +429,17 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'pinky',
       root8: fingerRoots.pinky,
-      spreadDeg: -4.5,
-      bendDegs: [-6.5, -11.5, -15.0],
+      spreadDeg: -7.2,
+      bendDegs: [-5.5, -10.5, -13.5],
       segLens: [1.70, 1.25, 1.15],
       radii: [
-        [0.62, 0.56],
-        [0.55, 0.49],
-        [0.56, 0.50],
-        [0.50, 0.44],
-        [0.50, 0.43],
-        [0.48, 0.41],
-        [0.46, 0.38],
+        [0.62, 0.55],
+        [0.54, 0.47], // proximal shaft taper
+        [0.58, 0.51], // PIP knuckle
+        [0.51, 0.44], // middle phalanx shaft
+        [0.49, 0.42],
+        [0.52, 0.45], // DIP knuckle
+        [0.46, 0.39],
         [0.42, 0.35],
         [0.33, 0.26],
       ],

@@ -3992,24 +3992,29 @@ dialog::backdrop {
 }
 
 .jb-rewards-main {
-  background: var(--plum);
-  color: var(--ivory);
+  background: linear-gradient(135deg, #FAF4F0 0%, #F5EAE6 45%, #EBE0DC 100%);
+  color: var(--charcoal);
+  border: 1.5px solid rgba(212, 175, 124, 0.45);
+  box-shadow: 0 12px 40px rgba(212, 175, 124, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   padding: clamp(24px, 4vw, 44px);
   border-radius: var(--r-xl);
   min-width: 0;
 }
 
 .jb-rewards-heading h2 {
-  color: var(--ivory);
+  color: var(--plum);
+  font-family: var(--font-display);
   margin: 8px 0;
 }
 
 .jb-rewards-heading .eyebrow {
-  color: #F0D9AD;
+  color: var(--rose-gold-deep);
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 .jb-rewards-heading p {
-  color: #F5EAF0;
+  color: #5A444E;
   max-width: 520px;
   line-height: 1.8;
 }
@@ -4023,10 +4028,11 @@ dialog::backdrop {
 
 .jb-points-display {
   margin-top: 24px;
-  background: rgba(255, 255, 255, .095);
-  padding: 22px;
-  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 24px;
+  border: 1.5px solid rgba(212, 175, 124, 0.35);
   border-radius: var(--r-lg);
+  box-shadow: 0 6px 24px rgba(212, 175, 124, 0.1);
   min-width: 0;
 }
 
@@ -4043,21 +4049,23 @@ dialog::backdrop {
 }
 
 .jb-rewards-main .notice {
-  background: rgba(251, 247, 244, .12);
-  border-color: rgba(212, 175, 124, .55);
-  color: #FAF2EE;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(212, 175, 124, 0.65);
+  color: var(--plum);
 }
 
 .jb-points-label,
 .jb-points-unit {
   display: block;
-  color: #F7EEF2;
+  color: var(--rose-gold-deep);
+  font-weight: 600;
   font-size: 15px;
 }
 
 .jb-points-total {
   display: block;
   font-family: var(--font-en-display);
+  color: var(--plum);
   font-size: clamp(62px, 8vw, 94px);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
@@ -4067,11 +4075,11 @@ dialog::backdrop {
   font-size: clamp(26px, 3.4vw, 34px);
   line-height: 1.25;
   margin-block: 4px 2px;
-  color: rgba(249, 223, 163, 0.85);
+  color: var(--plum);
 }
 
 .jb-points-note {
-  color: #F3E7EC;
+  color: #6C5560;
   font-size: 15px;
   line-height: 1.7;
   margin: 12px 0 0;
@@ -4088,6 +4096,7 @@ dialog::backdrop {
   justify-content: space-between;
   font-size: 14px;
   margin-bottom: 8px;
+  color: var(--charcoal);
 }
 
 .jb-progress-box progress {
@@ -4100,12 +4109,12 @@ dialog::backdrop {
 }
 
 .jb-progress-box progress::-webkit-progress-bar {
-  background: rgba(255, 255, 255, .2);
+  background: rgba(212, 175, 124, 0.2);
   border-radius: 99px;
 }
 
 .jb-progress-box progress::-webkit-progress-value {
-  background: var(--rose-gold);
+  background: linear-gradient(90deg, var(--rose-gold), var(--rose-gold-deep));
   border-radius: 99px;
 }
 
@@ -4114,7 +4123,7 @@ dialog::backdrop {
   margin-top: 15px;
   font-size: 14px;
   font-weight: 600;
-  color: #F9DFA3;
+  color: var(--rose-gold-deep);
 }
 
 .jb-rewards-main>.btn,
@@ -4400,7 +4409,9 @@ dialog::backdrop {
   object-fit: contain;
   flex-shrink: 0;
   border-radius: 50%;
-  filter: drop-shadow(0 2px 8px rgba(212, 175, 124, 0.35));
+  background: transparent !important;
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0 2px 6px rgba(212, 175, 124, 0.28));
 }
 
 @media (max-width: 640px) {
@@ -4501,7 +4512,9 @@ dialog::backdrop {
   height: 64px;
   object-fit: contain;
   border-radius: 50%;
-  filter: drop-shadow(0 4px 10px rgba(212, 175, 124, 0.4));
+  background: transparent !important;
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0 4px 10px rgba(212, 175, 124, 0.3));
   margin-bottom: 4px;
 }
 

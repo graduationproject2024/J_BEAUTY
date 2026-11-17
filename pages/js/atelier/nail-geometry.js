@@ -213,42 +213,40 @@ export function buildSculptedNailGeometry(anchor, shape = 'almond', length = 'me
     }
   }
 
-  // Continuous closed manifold perimeter wall strip (shared vertices along rim -> silky smooth normals, zero creases or tip slits)
-  const topLoop = [];
-  const botLoop = [];
+  // Continuous closed manifold perimeter wall strip (shared indexed vertices along rim -> silky smooth normals, zero creases, and outward-facing quads)
+  const wallTopIdx = [];
+  const wallBotIdx = [];
 
   // 1. Cuticle edge: iv = 0 .. vSteps - 1 (iu = 0)
   for (let iv = 0; iv < vSteps; iv++) {
-    topLoop.push(topGrid[0][iv]);
-    botLoop.push(botGrid[0][iv]);
+    wallTopIdx.push(topIdx[0][iv]);
+    wallBotIdx.push(botIdx[0][iv]);
   }
   // 2. Right lateral edge: iu = 0 .. uSteps - 1 (iv = vSteps)
   for (let iu = 0; iu < uSteps; iu++) {
-    topLoop.push(topGrid[iu][vSteps]);
-    botLoop.push(botGrid[iu][vSteps]);
+    wallTopIdx.push(topIdx[iu][vSteps]);
+    wallBotIdx.push(botIdx[iu][vSteps]);
   }
   // 3. Distal free-edge tip: iv = vSteps down to 1 (iu = uSteps)
   for (let iv = vSteps; iv > 0; iv--) {
-    topLoop.push(topGrid[uSteps][iv]);
-    botLoop.push(botGrid[uSteps][iv]);
+    wallTopIdx.push(topIdx[uSteps][iv]);
+    wallBotIdx.push(botIdx[uSteps][iv]);
   }
   // 4. Left lateral edge: iu = uSteps down to 1 (iv = 0)
   for (let iu = uSteps; iu > 0; iu--) {
-    topLoop.push(topGrid[iu][0]);
-    botLoop.push(botGrid[iu][0]);
+    wallTopIdx.push(topIdx[iu][0]);
+    wallBotIdx.push(botIdx[iu][0]);
   }
 
-  const loopLen = topLoop.length;
-  const wallTopIdx = topLoop.map(pushUniqueVertex);
-  const wallBotIdx = botLoop.map(pushUniqueVertex);
-
+  const loopLen = wallTopIdx.length;
   for (let i = 0; i < loopLen; i++) {
     const next = (i + 1) % loopLen;
     const t0 = wallTopIdx[i];
     const t1 = wallTopIdx[next];
     const b0 = wallBotIdx[i];
     const b1 = wallBotIdx[next];
-    indices.push(t0, b0, b1, t0, b1, t1);
+    // Outward-facing counter-clockwise triangles: zero inverted normals or apex split
+    indices.push(t0, t1, b1, t0, b1, b0);
   }
 
   // Compute clean pearl / botanical accent seat directly on curved dorsal apex near u=0.24

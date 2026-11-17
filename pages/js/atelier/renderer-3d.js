@@ -17,9 +17,9 @@ export const CAMERA_PRESETS = {
     fov: 28,
   },
   overhead: {
-    pos: [0.2, 26.5, 2.5],
-    target: [0.2, -0.3, 2.2],
-    fov: 28,
+    pos: [0.5, 29.5, 1.2],
+    target: [0.4, -0.35, 1.0],
+    fov: 30,
   },
   closeup: {
     // Cleanly frames the manicured fingers with macro salon clarity

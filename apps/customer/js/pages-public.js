@@ -497,8 +497,8 @@ export function contentPage(p) {
         'J Petals Club points are issued strictly after completed service, verified payment, and verified phone ownership. Rewards are single-use discounts with no cash value and are adjusted upon refunds.',
       ),
       t(
-        'تخضع جميع البنود والاحتياطات المهنية وشروط الإلغاء النهائية لاعتماد الإدارة قبل التشغيل الرسمي.',
-        'Final operating terms, cancellation rules, and service precautions remain provisional pending business approval.',
+        'يلتزم فريق J Beauty Spa بأعلى معايير النظافة والتعقيم وخصوصية العميلات التامة في كافة الزيارات المنزلية.',
+        'J Beauty Spa upholds the highest hygiene, sterilization, and privacy standards across all home sanctuary appointments.',
       ),
     ],
   };
