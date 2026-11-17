@@ -24,8 +24,9 @@ function getPlatform() {
           try {
             const probeDb = openDatabase(dbPath);
             const hasOwner = probeDb.get("SELECT id FROM users WHERE role='owner'");
+            const svcCount = probeDb.get("SELECT COUNT(*) as count FROM services")?.count || 0;
             probeDb.close();
-            if (!hasOwner) needSync = true;
+            if (!hasOwner || svcCount !== 17) needSync = true;
           } catch {
             needSync = true;
           }
