@@ -20,6 +20,10 @@ mkdirSync(path.join(PAGES_DIR, 'shared'), { recursive: true });
 mkdirSync(path.join(PAGES_DIR, 'data'), { recursive: true });
 writeFileSync(path.join(ROOT, '.nojekyll'), '');
 cpSync(path.join(SHARED_DIR, 'tokens.css'), path.join(PAGES_DIR, 'shared', 'tokens.css'));
+cpSync(path.join(CUSTOMER_DIR, 'assets'), path.join(PAGES_DIR, 'assets'), { recursive: true });
+cpSync(path.join(CUSTOMER_DIR, 'fonts'), path.join(PAGES_DIR, 'fonts'), { recursive: true });
+cpSync(path.join(CUSTOMER_DIR, 'index.html'), path.join(PAGES_DIR, 'index.html'));
+cpSync(path.join(ROOT, 'apps', 'staff'), path.join(PAGES_DIR, 'ops'), { recursive: true });
 
 // Export catalog data directly from canonical SQLite seed schema
 const db = openDatabase(':memory:');

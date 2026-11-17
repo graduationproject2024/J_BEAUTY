@@ -24,6 +24,7 @@ import { bindReviews, reviewsView } from './views/reviews.js';
 import { bindOccasions, occasionsView } from './views/occasions.js';
 import { bindCatalog, catalogView } from './views/catalog.js';
 import { bindStaff, staffView } from './views/staff.js';
+import { bindCoupons, couponsView } from './views/coupons.js';
 import { auditView, bindAudit } from './views/audit.js';
 import { bindSettings, settingsView } from './views/settings.js';
 
@@ -35,11 +36,12 @@ function navItems(d) {
     { id: 'calendar', ar: 'التقويم والسعة', en: 'Calendar', show: canAny('calendar.read', 'calendar.read_assigned'), badge: 0 },
     { id: 'customers', ar: 'العميلات والتوثيق', en: 'Customers', show: canAny('customers.read_limited', 'customers.verify_identity'), badge: (d?.verifications || []).length },
     { id: 'payments', ar: 'المدفوعات والاسترداد', en: 'Payments & Refunds', show: canAny('payments.read', 'payments.verify', 'refunds.request', 'refunds.approve'), badge: ov.pending_refunds || 0 },
-    { id: 'petals', ar: 'بتلات J والمكافآت', en: 'J Petals', show: canAny('loyalty.read', 'loyalty.redeem', 'loyalty.adjust'), badge: ov.pending_rewards || 0 },
+    { id: 'petals', ar: 'برنامج البتلات والمكافآت', en: 'J Petals', show: canAny('loyalty.read', 'loyalty.redeem', 'loyalty.adjust'), badge: ov.pending_rewards || 0 },
     { id: 'reviews', ar: 'تقييمات العميلات', en: 'Reviews', show: can('reviews.moderate'), badge: (d?.reviews || []).filter((r) => !r.approved).length },
     { id: 'occasions', ar: 'المناسبات والهدايا', en: 'Occasions & Gifts', show: canAny('occasions.read', 'occasions.manage', 'gifts.verify_payment'), badge: ov.pending_occasions || 0 },
     { id: 'catalog', ar: 'الخدمات والباقات', en: 'Catalog', show: canAny('services.manage', 'packages.manage'), badge: 0 },
-    { id: 'staff', ar: 'الفريق والصلاحيات', en: 'Team & Roles', show: can('staff.manage'), badge: 0 },
+    { id: 'coupons', ar: 'كوبونات الخصم', en: 'Coupons', show: canAny('settings.manage', 'services.manage'), badge: (d?.coupons || []).filter((c) => c.active).length },
+    { id: 'staff', ar: 'الفريق والعمولات', en: 'Team & Commissions', show: can('staff.manage'), badge: 0 },
     { id: 'audit', ar: 'سجل التدقيق', en: 'Audit Log', show: can('audit.read'), badge: 0 },
     { id: 'settings', ar: 'إعدادات المنصة', en: 'Settings', show: can('settings.manage'), badge: 0 },
   ].filter((x) => x.show);
@@ -55,6 +57,7 @@ function renderActiveTab(tab, d) {
   if (tab === 'reviews') return reviewsView(d);
   if (tab === 'occasions') return occasionsView(d);
   if (tab === 'catalog') return catalogView(d);
+  if (tab === 'coupons') return couponsView(d);
   if (tab === 'staff') return staffView(d);
   if (tab === 'audit') return auditView(d);
   if (tab === 'settings') return settingsView(d);
@@ -96,9 +99,9 @@ function render() {
       <aside class="ops-sidebar ${opsState.drawerOpen ? 'open' : ''}" id="ops-sidebar" aria-label="${t('قائمة العمليات', 'Operations Navigation')}">
         <div class="ops-sidebar-brand">
           <div class="brand-pair">
-            ${monogramSvg()}
+            <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" style="width:38px;height:38px;border-radius:50%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(212,175,124,0.35))">
             <div>
-              <strong>J Beauty Ops</strong>
+              <strong>J Beauty Spa Ops</strong>
               <small>${t('بوابة العمليات', 'Operations Portal')}</small>
             </div>
           </div>
@@ -221,6 +224,7 @@ function bindWorkspaceChrome(d) {
   else if (opsState.tab === 'reviews') bindReviews(render);
   else if (opsState.tab === 'occasions') bindOccasions(render);
   else if (opsState.tab === 'catalog') bindCatalog(d, render);
+  else if (opsState.tab === 'coupons') bindCoupons(render);
   else if (opsState.tab === 'staff') bindStaff(render);
   else if (opsState.tab === 'audit') bindAudit(render);
   else if (opsState.tab === 'settings') bindSettings(render);

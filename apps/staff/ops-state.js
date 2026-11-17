@@ -84,8 +84,14 @@ export function opsToast(msg) {
   }, 2400);
 }
 
-export async function opsApi(path, body) {
-  const res = await fetch('/api/ops' + path, {
+export async function opsApi(path, body, isRetry = false) {
+  const p = path.startsWith('/api/ops') ? path : `/api/ops${path}`;
+  if (body !== undefined && !opsState.csrf && path !== '/session' && !path.endsWith('/session')) {
+    try {
+      await refreshOpsSession();
+    } catch {}
+  }
+  const res = await fetch(p, {
     method: body === undefined ? 'GET' : 'POST',
     headers:
       body === undefined
@@ -93,8 +99,12 @@ export async function opsApi(path, body) {
         : { 'Content-Type': 'application/json', 'X-CSRF-Token': opsState.csrf },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 403 && data.error === 'Invalid CSRF token' && !isRetry) {
+      await refreshOpsSession();
+      return opsApi(path, body, true);
+    }
     const err = new Error(data.error || t('تعذر تنفيذ العملية', 'Request failed'));
     err.status = res.status;
     throw err;

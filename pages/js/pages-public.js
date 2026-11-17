@@ -107,7 +107,7 @@ export function home() {
           </div>
           <div class="hero-visual">
             <div class="hero-arch">
-              <img src="/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
+              <img src="/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
             </div>
             <div class="hero-seal">
               <strong>J Beauty · ${t('المدينة المنورة', 'AL MADINAH')}</strong>
@@ -211,7 +211,7 @@ export function home() {
           <div class='loyalty-copy-col'>
             <span class='eyebrow'>J BEAUTY SPA · PETALS PROGRAM</span>
             <h2>${t('بتلاتك… كل لحظة عناية تُهديك مزيداً من الدلال', 'Every moment of care brings you closer to luxury rewards.')}</h2>
-            <p>${t('برنامج "بتلات J" يمنحك نقاط وفاء تقديرية مع كل جلسة منزلية مكتملة (1 ريال = 1 بتلة). اجمعي البتلات واستبدليها بخصومات وترقيات راقية لجلساتك القادمة.', 'Earn reward Petals with each completed home sanctuary visit (1 SAR = 1 Petal). Redeem your balance for exclusive savings and ritual upgrades.')}</p>
+            <p>${t('برنامج "بتلات J" يمنحك نقاط مكافآت راقية مع كل جلسة منزلية مكتملة (1 ريال = 1 بتلة). اجمعي البتلات واستبدليها بخصومات وترقيات فاخرة لجلساتك القادمة.', 'Earn reward Petals with each completed home sanctuary visit (1 SAR = 1 Petal). Redeem your balance for exclusive savings and ritual upgrades.')}</p>
             <div class='hero-actions' style='margin-top:22px'>
               <a class='btn rose' href="${href('petals')}">${t('اكتشفي برنامج بتلات J', 'Explore Petals Rewards')}</a>
               <a class='btn jb-quiet-link' href="${href('reviews')}">${t('اطّلعي على تجارب العميلات', 'Customer reviews')}</a>
@@ -225,7 +225,7 @@ export function home() {
             </div>
             <div class='jb-petals-luxury-badge'>
               <div class='jb-petals-card-wrap'>
-                <img src='/assets/brand/official-logo.png' alt='J Beauty Spa' class='jb-petals-card-logo'>
+                <img src='/J_BEAUTY/apps/customer/assets/brand/official-logo.png' alt='J Beauty Spa' class='jb-petals-card-logo'>
                 <span class='jb-petals-card-tier'>برنامج بتلات J</span>
                 <strong class='jb-petals-card-tag'>عضوية الدلال الذهبي</strong>
                 <small class='jb-petals-card-rule'>١ ريال = ١ بتلة</small>
@@ -467,8 +467,8 @@ export function contentPage(p) {
         'Submitting the website booking form creates a pending appointment request and never automatically confirms a slot. Our team reviews your neighborhood, schedule, and capacity before confirming personally.',
       ),
       t(
-        'الأسعار والباقات والمدد المعلنة حالياً تقديرية حتى اعتماد الإدارة النهائي. لتعديل أو إلغاء موعد قائم، يرجى التواصل مع الفريق قبل وقت كافٍ عبر واتساب.',
-        'Listed prices, packages, and durations are provisional pending final business approval. To reschedule or cancel, please contact our team in advance through WhatsApp.',
+        'لتعديل أو إلغاء موعد قائم، يرجى التواصل مع الفريق عبر واتساب قبل وقت كافٍ من الموعد المحدد.',
+        'To reschedule or cancel an existing appointment, please contact our team via WhatsApp well ahead of time.',
       ),
     ],
     privacy: [

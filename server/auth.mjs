@@ -2,11 +2,49 @@ import * as crypto from 'node:crypto';
 import { fail, maskPhone } from './validation.mjs';
 import { resolveUserCapabilities } from './authorization/permissions.mjs';
 
-const { createHash, randomBytes, scryptSync, timingSafeEqual } = crypto;
+const { createHash, createHmac, randomBytes, scryptSync, timingSafeEqual } = crypto;
 const argon2Sync = typeof crypto.argon2Sync === 'function' ? crypto.argon2Sync : null;
 
 export const token = () => randomBytes(32).toString('hex');
 export const hash = (value) => createHash('sha256').update(value).digest('hex');
+
+const CSRF_SECRET = process.env.SESSION_SECRET || 'jbeauty_spa_madinah_secret_csrf_2026';
+
+export function generateCsrfToken(sessionId) {
+  const ts = Date.now().toString(36);
+  const nonce = randomBytes(16).toString('hex');
+  const payload = `${sessionId || 'anon'}:${ts}:${nonce}`;
+  const sig = createHmac('sha256', CSRF_SECRET).update(payload).digest('hex');
+  return `${payload}.${sig}`;
+}
+
+export function verifyCsrfToken(token, sessionId) {
+  if (typeof token !== 'string' || !token.includes('.')) return false;
+  const dotIdx = token.lastIndexOf('.');
+  const payload = token.slice(0, dotIdx);
+  const sig = token.slice(dotIdx + 1);
+  if (!payload || !sig) return false;
+  try {
+    const expectedSig = createHmac('sha256', CSRF_SECRET).update(payload).digest('hex');
+    const bufSig = Buffer.from(sig, 'hex');
+    const bufExp = Buffer.from(expectedSig, 'hex');
+    if (bufSig.length !== bufExp.length || !timingSafeEqual(bufSig, bufExp)) {
+      return false;
+    }
+    const parts = payload.split(':');
+    if (parts.length !== 3) return false;
+    const [tokenSid, ts] = parts;
+    const time = parseInt(ts, 36);
+    // Valid for 24 hours
+    if (isNaN(time) || Date.now() - time > 86400000 || time > Date.now() + 60000) return false;
+    if (sessionId && tokenSid !== 'anon' && tokenSid !== sessionId) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const ARGON_OPTS = {
   parallelism: 1,
@@ -118,12 +156,15 @@ export function sessionCookieName(scope, secure) {
 }
 
 export function readScopedSessionCookie(req, scope, secure) {
-  const name = sessionCookieName(scope, secure);
+  const base = scope === 'ops' ? 'jb_ops_session' : 'jb_customer_session';
   const cookies = String(req.headers.cookie || '')
     .split(';')
     .map((v) => v.trim());
-  const match = cookies.find((v) => v.startsWith(`${name}=`));
-  return match ? match.slice(name.length + 1) : '';
+  const hostMatch = cookies.find((v) => v.startsWith(`__Host-${base}=`));
+  if (hostMatch) return hostMatch.slice(`__Host-${base}=`.length);
+  const plainMatch = cookies.find((v) => v.startsWith(`${base}=`));
+  if (plainMatch) return plainMatch.slice(`${base}=`.length);
+  return '';
 }
 
 export function setScopedSessionCookie(res, scope, sessionId, maxAgeSeconds, secure) {

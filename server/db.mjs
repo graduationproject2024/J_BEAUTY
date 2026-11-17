@@ -154,6 +154,18 @@ export const DEFAULT_COUPONS = [
 const OLD_GENERIC_AR =
   'لحظة عناية هادئة في راحة منزلك. يناقش الفريق التفاصيل والاحتياطات معك قبل تأكيد الموعد.';
 
+export const DEFAULT_SHADES = [
+  { id: 'shade-blush', name_ar: 'وردي بتلات ناعم', name_en: 'Soft Blush Petal', hex: '#F3DCE1', finish: 'gloss', sort_order: 1 },
+  { id: 'shade-rosegold', name_ar: 'روز جولد ميتاليك', name_en: 'Metallic Rose Gold', hex: '#D4AF7C', finish: 'pearl', sort_order: 2 },
+  { id: 'shade-cherry', name_ar: 'كرزي ملكي دافئ', name_en: 'Royal Deep Cherry', hex: '#5E1E2C', finish: 'gloss', sort_order: 3 },
+  { id: 'shade-mauve', name_ar: 'موف ناعم كلاسيكي', name_en: 'Classic Mauve Pink', hex: '#C9AEB6', finish: 'gloss', sort_order: 4 },
+  { id: 'shade-pearl', name_ar: 'عاجي لؤلؤي فاخر', name_en: 'Luminous Pearl Ivory', hex: '#F8F3ED', finish: 'pearl', sort_order: 5 },
+  { id: 'shade-sage', name_ar: 'ميرمية هادئ', name_en: 'Calm Sage Green', hex: '#A7B79F', finish: 'gloss', sort_order: 6 },
+  { id: 'shade-dustypink', name_ar: 'وردي مغبر فاخر', name_en: 'Dusty Pink Luxury', hex: '#D9B7C0', finish: 'gloss', sort_order: 7 },
+  { id: 'shade-coral', name_ar: 'مرجاني هادئ', name_en: 'Subtle Coral Glow', hex: '#E08E79', finish: 'gloss', sort_order: 8 },
+  { id: 'shade-frenchwhite', name_ar: 'أبيض فرنسي ناصع', name_en: 'Pure French White', hex: '#FFFFFF', finish: 'gloss', sort_order: 9 },
+];
+
 export const SEED_SERVICES = [
   {
     id: 'relaxation',
@@ -701,6 +713,8 @@ export function openDatabase(dbPath) {
     CREATE TABLE IF NOT EXISTS nail_shades(id TEXT PRIMARY KEY, name_ar TEXT NOT NULL, name_en TEXT NOT NULL, hex TEXT NOT NULL, finish TEXT DEFAULT 'gloss', active INTEGER NOT NULL DEFAULT 1, sort_order INTEGER DEFAULT 0, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS staff_commissions(id TEXT PRIMARY KEY, staff_id TEXT NOT NULL, month TEXT NOT NULL, visits_count INTEGER DEFAULT 0, threshold INTEGER DEFAULT 50, commission_rate REAL DEFAULT 0.05, commission_amount REAL DEFAULT 0, updated_at TEXT NOT NULL, UNIQUE(staff_id, month));
     CREATE TABLE IF NOT EXISTS referrals(id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, code TEXT UNIQUE NOT NULL, invitee_id TEXT, booking_id TEXT, status TEXT NOT NULL DEFAULT 'pending', bonus_petals INTEGER DEFAULT 50, created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS coupon_redemptions(id TEXT PRIMARY KEY, coupon_id TEXT NOT NULL, coupon_code TEXT NOT NULL, user_id TEXT, phone TEXT NOT NULL, booking_id TEXT, created_at TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_phone ON coupon_redemptions(phone, coupon_code);
     CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
     CREATE INDEX IF NOT EXISTS idx_ledger_user ON ledger(user_id);
     CREATE INDEX IF NOT EXISTS idx_audit_created ON audit(created_at);
@@ -746,6 +760,23 @@ export function openDatabase(dbPath) {
         c.max_uses,
         c.used_count,
         c.active,
+        now(),
+      );
+    }
+  }
+
+  const hasShades = get('SELECT id FROM nail_shades LIMIT 1');
+  if (!hasShades) {
+    for (const s of DEFAULT_SHADES) {
+      run(
+        'INSERT OR IGNORE INTO nail_shades(id, name_ar, name_en, hex, finish, active, sort_order, created_at) VALUES(?,?,?,?,?,?,?,?)',
+        s.id,
+        s.name_ar,
+        s.name_en,
+        s.hex,
+        s.finish,
+        1,
+        s.sort_order,
         now(),
       );
     }
@@ -964,6 +995,7 @@ export function createHelpers(db) {
     balance,
     audit,
     recordLedger,
+    nailShades: () => db.all('SELECT * FROM nail_shades ORDER BY sort_order ASC, created_at DESC'),
   };
 }
 

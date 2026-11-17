@@ -120,7 +120,7 @@ export function formatBookingResult(helpers, booking) {
 
 export function createBooking(db, helpers, user, sessionId, body) {
   if (body.terms !== true) fail('Accept booking terms');
-  const idempotencyKey = text(body.idempotency_key, 100);
+  const idempotencyKey = text(body.idempotency_key || uid(), 100);
   const scope = user?.id || sessionId;
 
   const existing = db.get('SELECT id FROM bookings WHERE scope=? AND idempotency=?', scope, idempotencyKey);
@@ -168,6 +168,8 @@ export function createBooking(db, helpers, user, sessionId, body) {
   const subtotal = baseTotal + addOnsTotal;
   const finalDuration = baseDuration + addOnsDuration;
 
+  const clientPhone = phone(body.phone);
+
   // Parse optional coupon code:
   let appliedCoupon = null;
   let discountAmount = 0;
@@ -175,23 +177,40 @@ export function createBooking(db, helpers, user, sessionId, body) {
     const code = String(body.coupon_code).trim().toUpperCase();
     const c = db.get('SELECT * FROM coupons WHERE UPPER(code)=? AND active=1', code);
     const today = new Date().toISOString().slice(0, 10);
-    if (
-      c &&
-      (!c.valid_from || c.valid_from <= today) &&
-      (!c.valid_until || c.valid_until >= today) &&
-      (!c.min_spend || subtotal >= c.min_spend) &&
-      (c.max_uses === 0 || c.used_count < c.max_uses)
-    ) {
-      appliedCoupon = c.code;
-      if (c.discount_type === 'percent') {
-        discountAmount = Math.round((subtotal * c.discount_value) / 100);
-      } else {
-        discountAmount = Math.min(subtotal, c.discount_value);
-      }
-      try {
-        db.run('UPDATE coupons SET used_count = used_count + 1 WHERE id=?', c.id);
-      } catch {}
+    if (!c) {
+      fail('كود الخصم المدخل غير صالح أو غير مفعّل', 400);
     }
+    if (c.valid_from && c.valid_from > today) fail('هذا الكوبون لم يبدأ تفعيله بعد', 400);
+    if (c.valid_until && c.valid_until < today) fail('عذراً، انتهت صلاحية هذا الكوبون', 400);
+    if (c.min_spend && subtotal < c.min_spend) {
+      fail(`الحد الأدنى للاستفادة من هذا الكوبون هو ${c.min_spend} ر.س`, 400);
+    }
+    if (c.max_uses > 0 && c.used_count >= c.max_uses) {
+      fail('عذراً، اكتمل الحد الأقصى لاستخدام هذا الكوبون', 400);
+    }
+
+    // Enforce single-use per customer (phone or user_id)
+    const altPhone = clientPhone.startsWith('966') ? '0' + clientPhone.slice(3) : clientPhone;
+    const alreadyRedeemed = db.get(
+      'SELECT id FROM coupon_redemptions WHERE UPPER(coupon_code)=? AND (phone=? OR phone=? OR (user_id IS NOT NULL AND user_id=?))',
+      c.code,
+      clientPhone,
+      altPhone,
+      user?.id || null,
+    );
+    if (alreadyRedeemed) {
+      fail('تم استخدام كود الخصم هذا مسبقاً لهذا الرقم. الكوبون متاح للاستخدام لمرة واحدة فقط لكل عميلة.', 400);
+    }
+
+    appliedCoupon = c.code;
+    if (c.discount_type === 'percent') {
+      discountAmount = Math.round((subtotal * c.discount_value) / 100);
+    } else {
+      discountAmount = Math.min(subtotal, c.discount_value);
+    }
+    try {
+      db.run('UPDATE coupons SET used_count = used_count + 1 WHERE id=?', c.id);
+    } catch {}
   }
 
   const finalTotal = Math.max(0, subtotal - discountAmount);
@@ -201,7 +220,7 @@ export function createBooking(db, helpers, user, sessionId, body) {
     reference: `J-${randomBytes(6).toString('hex').toUpperCase()}`,
     user_id: user?.role === 'customer' ? user.id : null,
     name: text(body.name, 100),
-    phone: phone(body.phone),
+    phone: clientPhone,
     neighborhood: text(body.neighborhood, 150),
     notes: typeof body.notes === 'string' ? body.notes.slice(0, 2000) : '',
     date: body.date,
@@ -257,6 +276,20 @@ export function createBooking(db, helpers, user, sessionId, body) {
       JSON.stringify(booking),
       null,
     );
+    if (appliedCoupon) {
+      try {
+        db.run(
+          'INSERT INTO coupon_redemptions(id, coupon_id, coupon_code, user_id, phone, booking_id, created_at) VALUES(?,?,?,?,?,?,?)',
+          uid(),
+          appliedCoupon,
+          appliedCoupon,
+          user?.id || null,
+          clientPhone,
+          booking.id,
+          now(),
+        );
+      } catch {}
+    }
     helpers.audit(user, 'booking.request', booking.id);
   });
 

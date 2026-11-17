@@ -661,7 +661,7 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     const postSpanW = Math.hypot(spanVec.x, spanVec.y, spanVec.z);
     const exactBedLen =
       Math.hypot(distCenter.x - cutCenter.x, distCenter.y - cutCenter.y, distCenter.z - cutCenter.z) *
-      (ref.isThumb ? 1.30 : 1.48);
+      (ref.isThumb ? 1.15 : 1.18);
 
     if (ref.isThumb) {
       // Thumb nail aligned 100% symmetrically along bone axis tf2 (zero asymmetric wedge slant on coffin/square!)
@@ -671,17 +671,17 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
         frame: { right: f.right, up: f.up, forward: f.forward },
         bedWidth: Math.min(postSpanW * 0.68, ref.radiusMidX * 2 * ref.bedScaleW),
         bedLength: exactBedLen,
-        archDrop: 0.12,
-        baseThickness: 0.046,
+        archDrop: 0.095,
+        baseThickness: 0.034,
       };
     } else {
       nailAnchors[fid] = {
-        origin: subVec(addVec(cutCenter, scaleVec(upAxis, 0.026)), scaleVec(actualFwd, 0.012)),
+        origin: subVec(addVec(cutCenter, scaleVec(upAxis, 0.024)), scaleVec(actualFwd, 0.010)),
         frame: { right: rightOrtho, up: upAxis, forward: actualFwd },
         bedWidth: Math.min(postSpanW * 0.74, ref.radiusMidX * 2 * ref.bedScaleW),
         bedLength: exactBedLen,
-        archDrop: 0.11,
-        baseThickness: 0.044,
+        archDrop: 0.088,
+        baseThickness: 0.032,
       };
     }
   }

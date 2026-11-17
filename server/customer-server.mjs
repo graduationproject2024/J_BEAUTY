@@ -7,12 +7,14 @@ import { isKnownAppRoute, pageMetadata, publicOrigin, publicRoutes } from '../se
 import { createHelpers, now, openDatabase, uid } from './db.mjs';
 import {
   checkRateLimit,
+  generateCsrfToken,
   hash,
   hashPassword,
   publicUser,
   readScopedSessionCookie,
   setScopedSessionCookie,
   token,
+  verifyCsrfToken,
   verifyPassword,
 } from './auth.mjs';
 import { fail, optionalText, phone, text, whatsappUrl } from './validation.mjs';
@@ -161,13 +163,44 @@ export function createCustomerApp({
       let sid = readScopedSessionCookie(req, 'customer', secure);
       let session =
         sid && db.get("SELECT * FROM sessions WHERE id=? AND app_scope='customer' AND expires>?", hash(sid), Date.now());
+
+      // If session is absent from local DB (e.g. fresh lambda container in multi-instance serverless),
+      // reconstitute it if the client provides an HMAC-valid CSRF token:
+      if (!session && sid) {
+        const clientCsrf = req.headers['x-csrf-token'];
+        if (clientCsrf && verifyCsrfToken(clientCsrf, sid)) {
+          const nowMs = Date.now();
+          session = {
+            id: hash(sid),
+            user_id: null,
+            csrf: clientCsrf,
+            expires: nowMs + 12 * 3600000,
+            app_scope: 'customer',
+            last_seen_at: nowMs,
+            mfa_verified: 0,
+          };
+          try {
+            db.run(
+              'INSERT OR REPLACE INTO sessions(id,user_id,csrf,expires,app_scope,last_seen_at,mfa_verified) VALUES(?,?,?,?,?,?,?)',
+              session.id,
+              null,
+              session.csrf,
+              session.expires,
+              'customer',
+              nowMs,
+              0,
+            );
+          } catch {}
+        }
+      }
+
       if (!session) {
         sid = token();
         const nowMs = Date.now();
         session = {
           id: hash(sid),
           user_id: null,
-          csrf: token(),
+          csrf: generateCsrfToken(sid),
           expires: nowMs + 12 * 3600000,
           app_scope: 'customer',
           last_seen_at: nowMs,
@@ -200,11 +233,12 @@ export function createCustomerApp({
       let body;
       if (!['GET', 'HEAD'].includes(method)) {
         const expectedOrigin = `${secure ? 'https' : 'http'}://${req.headers.host}`;
-        body = await parseMutationRequest(req, session.csrf, [
-          expectedOrigin,
-          process.env.CUSTOMER_ORIGIN,
-          process.env.PUBLIC_ORIGIN,
-        ]);
+        body = await parseMutationRequest(
+          req,
+          session.csrf,
+          [expectedOrigin, process.env.CUSTOMER_ORIGIN, process.env.PUBLIC_ORIGIN],
+          sid,
+        );
       }
 
       const rotateCustomerSession = (u) => {
@@ -214,7 +248,7 @@ export function createCustomerApp({
         session = {
           id: hash(sid),
           user_id: u.id,
-          csrf: token(),
+          csrf: generateCsrfToken(sid),
           expires: nowMs + 12 * 3600000,
           app_scope: 'customer',
           last_seen_at: nowMs,
@@ -241,10 +275,12 @@ export function createCustomerApp({
       }
 
       if (method === 'GET' && route === '/api/catalog') {
+        const nailShades = helpers.nailShades ? helpers.nailShades().filter((s) => s.active) : [];
         return send({
           services: helpers.services().filter((s) => s.active),
           packages: helpers.packages().filter((p) => p.active),
           settings: helpers.settings(),
+          nail_shades: nailShades,
           reviews: db
             .all('SELECT data FROM reviews')
             .map((r) => JSON.parse(r.data))
@@ -256,6 +292,10 @@ export function createCustomerApp({
               created_at,
             })),
         });
+      }
+
+      if (method === 'GET' && route === '/api/atelier/colors') {
+        return send({ colors: db.all('SELECT * FROM nail_shades WHERE active=1 ORDER BY sort_order ASC, created_at DESC') });
       }
 
       if (method === 'POST' && route === '/api/telemetry/event') {
@@ -401,7 +441,7 @@ export function createCustomerApp({
       if (method === 'POST' && route === '/api/coupons/validate') {
         checkRate(`coupon:${req.socket.remoteAddress}`, 40);
         const code = String(body?.code || '').trim().toUpperCase();
-        const spend = Number(body?.total || 0);
+        const spend = Number(body?.total || body?.subtotal || 0);
         if (!code) fail('يرجى إدخال كود الكوبون', 400);
         const coupon = db.get('SELECT * FROM coupons WHERE UPPER(code)=? AND active=1', code);
         if (!coupon) fail('كود الكوبون غير صحيح أو غير مفعّل', 404);
@@ -414,6 +454,33 @@ export function createCustomerApp({
         if (coupon.max_uses > 0 && coupon.used_count >= coupon.max_uses) {
           fail('عذراً، اكتمل الحد الأقصى لاستخدام هذا الكوبون', 400);
         }
+
+        // Single-use check per customer (enforced by normalized phone or user_id)
+        let clientPhone = '';
+        let altPhone = '';
+        if (body?.phone || user?.phone) {
+          const raw = String(body?.phone || user?.phone || '').trim();
+          try {
+            clientPhone = phone(raw);
+            altPhone = clientPhone.startsWith('966') ? '0' + clientPhone.slice(3) : clientPhone;
+          } catch {
+            clientPhone = raw;
+            altPhone = raw;
+          }
+        }
+        if (clientPhone) {
+          const used = db.get(
+            'SELECT id FROM coupon_redemptions WHERE UPPER(coupon_code)=? AND (phone=? OR phone=? OR (user_id IS NOT NULL AND user_id=?))',
+            coupon.code,
+            clientPhone,
+            altPhone,
+            user?.id || null,
+          );
+          if (used) {
+            fail('تم استخدام كود الخصم هذا مسبقاً لهذا الرقم. الكوبون صالح للاستخدام مرة واحدة فقط لكل عميلة.', 400);
+          }
+        }
+
         let discountAmount = 0;
         if (coupon.discount_type === 'percent') {
           discountAmount = Math.round((spend * coupon.discount_value) / 100);
@@ -422,6 +489,13 @@ export function createCustomerApp({
         }
         return send({
           valid: true,
+          coupon: {
+            code: coupon.code,
+            discount_type: coupon.discount_type,
+            discount_value: coupon.discount_value,
+            value: coupon.discount_value,
+            min_spend: coupon.min_spend,
+          },
           code: coupon.code,
           discount_type: coupon.discount_type,
           discount_value: coupon.discount_value,

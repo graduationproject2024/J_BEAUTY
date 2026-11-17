@@ -43,12 +43,12 @@ function createStudioEnvironment(renderer) {
   c.height = h;
   const ctx = c.getContext('2d');
 
-  // Warm champagne studio surround so gold leaf & tilted gloss never reflect black/dark brown
+  // Deep luxurious salon charcoal shadow surround so dark gloss stays rich & saturated
   const bg = ctx.createLinearGradient(0, 0, 0, h);
-  bg.addColorStop(0.0, '#6a555b');
-  bg.addColorStop(0.45, '#5b484d');
-  bg.addColorStop(0.55, '#8c7772');
-  bg.addColorStop(1.0, '#ead9ca'); // luminous silk tabletop bounce from below!
+  bg.addColorStop(0.0, '#3a2d31');
+  bg.addColorStop(0.45, '#251c20');
+  bg.addColorStop(0.55, '#423539');
+  bg.addColorStop(1.0, '#cbb7aa'); // warm silk tabletop bounce from below!
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
 
@@ -69,11 +69,10 @@ function createStudioEnvironment(renderer) {
   };
 
   // Main upper architectural softbox with crisp bright specular core for wet-glass gel brilliance!
-  drawSoftbox(w * 0.42, h * 0.19, 136, 48, 'rgba(255,254,252,1.0)', 'rgba(255,244,235,0.72)');
-  drawSoftbox(w * 0.42, h * 0.18, 48, 18, 'rgba(255,255,255,1.0)', 'rgba(255,255,255,0.88)');
-  // Soft warm golden fill bounces on both lateral flanks so ring & thumb metallics always gleam golden!
-  drawSoftbox(w * 0.78, h * 0.44, 88, 44, 'rgba(255,232,208,0.76)', 'rgba(246,216,192,0.28)');
-  drawSoftbox(w * 0.16, h * 0.50, 82, 42, 'rgba(255,234,212,0.68)', 'rgba(246,218,195,0.22)');
+  drawSoftbox(w * 0.42, h * 0.19, 132, 46, 'rgba(255,254,252,1.0)', 'rgba(255,244,235,0.68)');
+  drawSoftbox(w * 0.42, h * 0.18, 48, 18, 'rgba(255,255,255,1.0)', 'rgba(255,255,255,0.85)');
+  // Soft warm golden fill bounce on side
+  drawSoftbox(w * 0.78, h * 0.42, 76, 36, 'rgba(250,224,204,0.68)', 'rgba(240,210,190,0.20)');
 
   const eqTex = new THREE.CanvasTexture(c);
   eqTex.mapping = THREE.EquirectangularReflectionMapping;
@@ -95,7 +94,7 @@ function createLinenPlinthMaps(size = 512) {
   const ctx = albedoC.getContext('2d');
   const nCtx = normC.getContext('2d');
 
-  // Organic raw woven ivory flax linen slub texture (subtle organic irregularities, never waffle-grid synthetic)
+  // Rich tactile woven raw ivory linen slub texture + matching tangent-space normal map!
   ctx.fillStyle = '#ebe0d4';
   ctx.fillRect(0, 0, size, size);
   const hBuf = new Float32Array(size * size);
@@ -105,21 +104,16 @@ function createLinenPlinthMaps(size = 512) {
     return (seed - 1) / 2147483646;
   };
   const tau = Math.PI * 2;
-  const rowJitter = new Float32Array(size);
-  const colJitter = new Float32Array(size);
-  for (let i = 0; i < size; i++) {
-    rowJitter[i] = (rnd() - 0.5) * 0.36;
-    colJitter[i] = (rnd() - 0.5) * 0.36;
-  }
   const img = ctx.getImageData(0, 0, size, size);
   for (let y = 0; y < size; y++) {
-    const wy = Math.sin((y / size) * tau * 64 + rowJitter[y] * 0.4);
+    const wy = Math.sin((y / size) * tau * 42);
+    const slubY = (rnd() - 0.5) * 0.25;
     for (let x = 0; x < size; x++) {
-      const wx = Math.sin((x / size) * tau * 64 + colJitter[x] * 0.4);
-      const weave = wx * 0.09 + wy * 0.09 + rowJitter[y] * 0.25 + colJitter[x] * 0.25 + (rnd() - 0.5) * 0.16;
-      hBuf[y * size + x] = 0.5 + weave * 0.25;
+      const wx = Math.sin((x / size) * tau * 42);
+      const weave = wx * 0.28 + wy * 0.28 + ((x + y) % 4 === 0 ? 0.08 : -0.08) + slubY + (rnd() - 0.5) * 0.14;
+      hBuf[y * size + x] = 0.5 + weave * 0.4;
       const idx = (y * size + x) * 4;
-      const delta = weave * 6.5;
+      const delta = weave * 11;
       img.data[idx] = Math.max(0, Math.min(255, 236 + delta));
       img.data[idx + 1] = Math.max(0, Math.min(255, 224 + delta * 0.95));
       img.data[idx + 2] = Math.max(0, Math.min(255, 212 + delta * 0.88));
@@ -135,8 +129,8 @@ function createLinenPlinthMaps(size = 512) {
     for (let x = 0; x < size; x++) {
       const xm = (x - 1 + size) % size;
       const xp = (x + 1) % size;
-      const dx = (hBuf[y * size + xp] - hBuf[y * size + xm]) * 1.4;
-      const dy = (hBuf[yp * size + x] - hBuf[ym * size + x]) * 1.4;
+      const dx = (hBuf[y * size + xp] - hBuf[y * size + xm]) * 3.0;
+      const dy = (hBuf[yp * size + x] - hBuf[ym * size + x]) * 3.0;
       const inv = 1 / Math.hypot(dx, dy, 1.0);
       const idx = (y * size + x) * 4;
       nImg.data[idx] = Math.round((-dx * inv * 0.5 + 0.5) * 255);
@@ -149,12 +143,12 @@ function createLinenPlinthMaps(size = 512) {
 
   const tex = new THREE.CanvasTexture(albedoC);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(7, 7);
+  tex.repeat.set(9, 9);
   tex.colorSpace = THREE.SRGBColorSpace;
 
   const normalTex = new THREE.CanvasTexture(normC);
   normalTex.wrapS = normalTex.wrapT = THREE.RepeatWrapping;
-  normalTex.repeat.set(7, 7);
+  normalTex.repeat.set(9, 9);
   return { tex, normalTex };
 }
 
@@ -195,10 +189,6 @@ export class Atelier3DRenderer {
     this.canvas = this.renderer.domElement;
     this.canvas.className = 'atelier-3d-canvas';
     this.canvas.setAttribute('role', 'img');
-    this.canvas.setAttribute(
-      'aria-label',
-      this.container.getAttribute('aria-label') || 'Interactive 3D nail design stage',
-    );
     this.container.appendChild(this.canvas);
 
     this.scene = new THREE.Scene();
@@ -273,11 +263,11 @@ export class Atelier3DRenderer {
     this.plinthMat = new THREE.MeshStandardMaterial({
       map: this.plinthTex,
       normalMap: this.plinthNormalTex,
-      normalScale: new THREE.Vector2(0.22, 0.22),
+      normalScale: new THREE.Vector2(0.55, 0.55),
       color: '#ede3d7',
-      roughness: 0.94,
+      roughness: 0.92,
       metalness: 0.0,
-      envMapIntensity: 0.28,
+      envMapIntensity: 0.32,
     });
     this.plinth = new THREE.Mesh(plinthGeo, this.plinthMat);
     this.plinth.rotation.x = -Math.PI * 0.5;
@@ -650,10 +640,10 @@ export class Atelier3DRenderer {
     const accentMaps =
       accent !== 'none' && accent !== 'pearl_dot'
         ? renderNailMaps(cfg, {
-            albedoCanvas: this.nailAlbedoAccent.image,
-            metalCanvas: this.nailMetalTex.image,
-            bumpCanvas: this.nailBumpTex.image,
-          })
+          albedoCanvas: this.nailAlbedoAccent.image,
+          metalCanvas: this.nailMetalTex.image,
+          bumpCanvas: this.nailBumpTex.image,
+        })
         : plainMaps;
 
     this.nailAlbedoAccent.image = accentMaps.albedoCanvas;

@@ -1,14 +1,36 @@
 {
   "phase": "before",
-  "timestamp": "2026-11-17T12:09:51.123Z",
+  "timestamp": "2026-11-17T13:40:46.557Z",
   "a11y": [
     {
       "route": "/ar/",
-      "violations": []
+      "violations": [
+        {
+          "id": "role-img-alt",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "canvas"
+            ]
+          ]
+        }
+      ]
     },
     {
       "route": "/en/",
-      "violations": []
+      "violations": [
+        {
+          "id": "role-img-alt",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "canvas"
+            ]
+          ]
+        }
+      ]
     },
     {
       "route": "/ar/services",
@@ -28,7 +50,18 @@
     },
     {
       "route": "/ar/atelier",
-      "violations": []
+      "violations": [
+        {
+          "id": "role-img-alt",
+          "impact": "serious",
+          "nodes": 1,
+          "targets": [
+            [
+              "canvas"
+            ]
+          ]
+        }
+      ]
     },
     {
       "route": "/ar/lookbook",
@@ -110,11 +143,11 @@
   "performance": [
     {
       "route": "/ar/",
-      "dcl": 178,
-      "load": 184,
-      "fcp": 180,
-      "lcp": 3348,
-      "cls": 0.0007,
+      "dcl": 206,
+      "load": 206,
+      "fcp": 124,
+      "lcp": 4036,
+      "cls": 0.0006,
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
       "h1FontSize": 54,
@@ -122,10 +155,10 @@
     },
     {
       "route": "/en/",
-      "dcl": 132,
-      "load": 132,
-      "fcp": 76,
-      "lcp": 3000,
+      "dcl": 207,
+      "load": 207,
+      "fcp": 96,
+      "lcp": 4112,
       "cls": 0,
       "bodyFontSize": 15.5,
       "bodyLineHeight": 26.35,
@@ -134,10 +167,10 @@
     },
     {
       "route": "/ar/services",
-      "dcl": 134,
-      "load": 134,
-      "fcp": 84,
-      "lcp": 224,
+      "dcl": 167,
+      "load": 167,
+      "fcp": 88,
+      "lcp": 280,
       "cls": 0,
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
@@ -146,10 +179,10 @@
     },
     {
       "route": "/ar/services/gel-removal",
-      "dcl": 127,
-      "load": 128,
-      "fcp": 52,
-      "lcp": 208,
+      "dcl": 137,
+      "load": 137,
+      "fcp": 56,
+      "lcp": 240,
       "cls": 0,
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
@@ -158,10 +191,10 @@
     },
     {
       "route": "/ar/packages",
-      "dcl": 118,
-      "load": 118,
-      "fcp": 52,
-      "lcp": 52,
+      "dcl": 159,
+      "load": 159,
+      "fcp": 80,
+      "lcp": 80,
       "cls": 0,
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
@@ -170,8 +203,20 @@
     },
     {
       "route": "/ar/studio",
-      "dcl": 146,
-      "load": 146,
+      "dcl": 183,
+      "load": 183,
+      "fcp": 72,
+      "lcp": 72,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/atelier",
+      "dcl": 175,
+      "load": 175,
       "fcp": 52,
       "lcp": 52,
       "cls": 0,
@@ -181,9 +226,105 @@
       "dir": "rtl"
     },
     {
-      "route": "/ar/atelier",
-      "dcl": 135,
-      "load": 135,
+      "route": "/ar/lookbook",
+      "dcl": 519,
+      "load": 520,
+      "fcp": 364,
+      "lcp": 680,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/occasions",
+      "dcl": 236,
+      "load": 236,
+      "fcp": 84,
+      "lcp": 84,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/gifts",
+      "dcl": 213,
+      "load": 213,
+      "fcp": 68,
+      "lcp": 68,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/booking",
+      "dcl": 153,
+      "load": 153,
+      "fcp": 244,
+      "lcp": 244,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/account",
+      "dcl": 170,
+      "load": 170,
+      "fcp": 272,
+      "lcp": 272,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 34,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/petals",
+      "dcl": 150,
+      "load": 151,
+      "fcp": 52,
+      "lcp": 52,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/reviews",
+      "dcl": 148,
+      "load": 148,
+      "fcp": 48,
+      "lcp": 48,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/policies",
+      "dcl": 154,
+      "load": 154,
+      "fcp": 52,
+      "lcp": 52,
+      "cls": 0,
+      "bodyFontSize": 15.5,
+      "bodyLineHeight": 28.675,
+      "h1FontSize": 54,
+      "dir": "rtl"
+    },
+    {
+      "route": "/ar/privacy",
+      "dcl": 162,
+      "load": 162,
       "fcp": 56,
       "lcp": 56,
       "cls": 0,
@@ -193,119 +334,11 @@
       "dir": "rtl"
     },
     {
-      "route": "/ar/lookbook",
-      "dcl": 130,
-      "load": 130,
-      "fcp": 56,
-      "lcp": 268,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/occasions",
-      "dcl": 116,
-      "load": 117,
-      "fcp": 44,
-      "lcp": 44,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/gifts",
-      "dcl": 119,
-      "load": 119,
-      "fcp": 44,
-      "lcp": 44,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/booking",
-      "dcl": 106,
-      "load": 106,
-      "fcp": 184,
-      "lcp": 184,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/account",
-      "dcl": 108,
-      "load": 108,
-      "fcp": 172,
-      "lcp": 172,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 34,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/petals",
-      "dcl": 119,
-      "load": 119,
-      "fcp": 36,
-      "lcp": 36,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/reviews",
-      "dcl": 119,
-      "load": 119,
-      "fcp": 40,
-      "lcp": 40,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/policies",
-      "dcl": 107,
-      "load": 107,
-      "fcp": 40,
-      "lcp": 40,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
-      "route": "/ar/privacy",
-      "dcl": 115,
-      "load": 115,
-      "fcp": 44,
-      "lcp": 44,
-      "cls": 0,
-      "bodyFontSize": 15.5,
-      "bodyLineHeight": 28.675,
-      "h1FontSize": 54,
-      "dir": "rtl"
-    },
-    {
       "route": "/ar/terms",
-      "dcl": 113,
-      "load": 114,
-      "fcp": 40,
-      "lcp": 216,
+      "dcl": 171,
+      "load": 171,
+      "fcp": 56,
+      "lcp": 252,
       "cls": 0,
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,
@@ -314,10 +347,10 @@
     },
     {
       "route": "/ar/contact",
-      "dcl": 123,
-      "load": 123,
-      "fcp": 40,
-      "lcp": 40,
+      "dcl": 156,
+      "load": 156,
+      "fcp": 48,
+      "lcp": 48,
       "cls": 0,
       "bodyFontSize": 15.5,
       "bodyLineHeight": 28.675,

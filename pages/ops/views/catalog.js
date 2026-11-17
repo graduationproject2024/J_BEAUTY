@@ -128,6 +128,59 @@ export function catalogView(d) {
         `
         : ''
     }
+
+    ${
+      can('services.manage') || can('settings.manage')
+        ? `
+          <div class="ops-card">
+            <h2>${t('إدارة ألوان استوديو الأظافر (Nail Atelier)', 'Nail Atelier Shades Management')}</h2>
+            <p class="muted">${t('التحكم في لوحة الألوان المتاحة للعميلات في محاكي الأظافر ثلاثي الأبعاد.', 'Manage color swatches available in the 3D nail atelier simulator.')}</p>
+            <form id="ops-shade-form" style="margin-bottom:16px;padding:14px;background:var(--ivory);border-radius:var(--r-sm);border:1px solid var(--border)">
+              <div class="form-grid">
+                <label class="field">${t('اسم اللون (عربي)', 'Color Name AR')}<input type="text" name="name_ar" placeholder="مثال: لافندر ملكي" required></label>
+                <label class="field">${t('اسم اللون (إنجليزي)', 'Color Name EN')}<input type="text" name="name_en" placeholder="e.g. Royal Lavender" required></label>
+                <label class="field">${t('رمز اللون (Hex)', 'Hex Color')}<input type="text" name="hex" placeholder="#E6E6FA" required></label>
+                <label class="field">${t('اللمسة النهائية', 'Finish')}
+                  <select name="finish">
+                    <option value="gloss">${t('لامع (Glossy)', 'Glossy')}</option>
+                    <option value="matte">${t('مات مخملي (Matte)', 'Velvet Matte')}</option>
+                    <option value="pearl">${t('لؤلؤي (Pearlescent)', 'Pearlescent')}</option>
+                    <option value="shimmer">${t('بريق ناعم (Shimmer)', 'Fine Shimmer')}</option>
+                  </select>
+                </label>
+              </div>
+              <div class="ops-row">
+                <label class="ops-check"><input type="checkbox" name="active" checked><span>${t('مفعل في استوديو الأظافر', 'Active')}</span></label>
+                <button type="submit" class="btn small">${t('إضافة لون جديد', 'Add New Shade')}</button>
+              </div>
+            </form>
+
+            <div class="ops-table-wrap">
+              <table class="ops-table">
+                <thead>
+                  <tr><th>${t('اللون', 'Swatch')}</th><th>${t('الاسم', 'Name')}</th><th>${t('الرمز', 'Hex')}</th><th>${t('اللمسة', 'Finish')}</th><th>${t('الحالة', 'Status')}</th><th>${t('إجراء', 'Action')}</th></tr>
+                </thead>
+                <tbody>
+                  ${(d.atelier_colors || []).map(c => `
+                    <tr>
+                      <td><span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:${esc(c.hex)};border:1.5px solid rgba(0,0,0,0.15);box-shadow:0 2px 5px rgba(0,0,0,0.1)"></span></td>
+                      <td><strong>${esc(c.name_ar)}</strong><div class="muted">${esc(c.name_en)}</div></td>
+                      <td><code>${esc(c.hex)}</code></td>
+                      <td>${esc(c.finish || 'gloss')}</td>
+                      <td><span class="badge ${c.active ? 'confirmed' : 'cancelled'}">${c.active ? t('نشط', 'Active') : t('معطل', 'Disabled')}</span></td>
+                      <td>
+                        <button type="button" class="btn small light" data-toggle-shade="${esc(c.id)}" data-active="${c.active ? '0' : '1'}">${c.active ? t('تعطيل', 'Disable') : t('تفعيل', 'Enable')}</button>
+                        <button type="button" class="btn small light" style="color:var(--burgundy-deep,#8B1E3F)" data-delete-shade="${esc(c.id)}">${t('حذف', 'Delete')}</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `
+        : ''
+    }
   `;
 }
 
@@ -243,6 +296,63 @@ export function bindCatalog(d, renderFn) {
         await opsApi('/packages', { id: btn.dataset.removePkg, remove: true });
         await loadDashboard();
         opsToast(t('تم حذف الباقة', 'Package removed'));
+        renderFn();
+      } catch (err) {
+        opsToast(err.message);
+        btn.disabled = false;
+      }
+    };
+  });
+
+  $ops('#ops-shade-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target;
+    const fd = new FormData(f);
+    e.submitter.disabled = true;
+    try {
+      await opsApi('/atelier/colors', {
+        name_ar: fd.get('name_ar'),
+        name_en: fd.get('name_en'),
+        hex: fd.get('hex'),
+        finish: fd.get('finish'),
+        active: f.elements.active.checked,
+      });
+      await loadDashboard();
+      opsToast(t('تمت إضافة اللون بنجاح', 'Color added successfully'));
+      renderFn();
+    } catch (err) {
+      opsToast(err.message);
+      e.submitter.disabled = false;
+    }
+  });
+
+  document.querySelectorAll('[data-toggle-shade]').forEach((btn) => {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      try {
+        await opsApi(`/atelier/colors/${btn.dataset.toggleShade}`, {
+          active: btn.dataset.active === '1',
+        });
+        await loadDashboard();
+        opsToast(t('تم تحديث حالة اللون', 'Color status updated'));
+        renderFn();
+      } catch (err) {
+        opsToast(err.message);
+        btn.disabled = false;
+      }
+    };
+  });
+
+  document.querySelectorAll('[data-delete-shade]').forEach((btn) => {
+    btn.onclick = async () => {
+      if (!confirm(t('هل أنتِ متأكدة من حذف هذا اللون؟', 'Are you sure you want to delete this shade?'))) return;
+      btn.disabled = true;
+      try {
+        await opsApi(`/atelier/colors/${btn.dataset.deleteShade}`, {
+          action: 'delete',
+        });
+        await loadDashboard();
+        opsToast(t('تم حذف اللون', 'Color deleted'));
         renderFn();
       } catch (err) {
         opsToast(err.message);

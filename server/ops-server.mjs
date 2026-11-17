@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { createHelpers, now, openDatabase, uid } from './db.mjs';
 import {
   checkRateLimit,
+  generateCsrfToken,
   hash,
   hashPassword,
   publicUser,
@@ -13,6 +14,7 @@ import {
   setScopedSessionCookie,
   staffPublicUser,
   token,
+  verifyCsrfToken,
   verifyPassword,
 } from './auth.mjs';
 import {
@@ -165,12 +167,39 @@ export function createOpsApp({
         session = null;
       }
 
+      if (!session && sid) {
+        const clientCsrf = req.headers['x-csrf-token'];
+        if (clientCsrf && verifyCsrfToken(clientCsrf, sid)) {
+          session = {
+            id: hash(sid),
+            user_id: null,
+            csrf: clientCsrf,
+            expires: nowMs + 8 * 3600000,
+            app_scope: 'ops',
+            last_seen_at: nowMs,
+            mfa_verified: 0,
+          };
+          try {
+            db.run(
+              'INSERT OR REPLACE INTO sessions(id,user_id,csrf,expires,app_scope,last_seen_at,mfa_verified) VALUES(?,?,?,?,?,?,?)',
+              session.id,
+              null,
+              session.csrf,
+              session.expires,
+              'ops',
+              nowMs,
+              0,
+            );
+          } catch {}
+        }
+      }
+
       if (!session) {
         sid = token();
         session = {
           id: hash(sid),
           user_id: null,
-          csrf: token(),
+          csrf: generateCsrfToken(sid),
           expires: nowMs + 8 * 3600000,
           app_scope: 'ops',
           last_seen_at: nowMs,
@@ -200,7 +229,7 @@ export function createOpsApp({
       let body;
       if (!['GET', 'HEAD'].includes(method)) {
         const expectedOrigin = `${secure ? 'https' : 'http'}://${req.headers.host}`;
-        body = await parseMutationRequest(req, session.csrf, [expectedOrigin, process.env.OPS_ORIGIN]);
+        body = await parseMutationRequest(req, session.csrf, [expectedOrigin, process.env.OPS_ORIGIN], sid);
       }
 
       const checkRate = (key, max, windowMs) => checkRateLimit(db, key, max, windowMs);
@@ -224,7 +253,7 @@ export function createOpsApp({
         session = {
           id: hash(sid),
           user_id: u.id,
-          csrf: token(),
+          csrf: generateCsrfToken(sid),
           expires: t + 8 * 3600000,
           app_scope: 'ops',
           last_seen_at: t,

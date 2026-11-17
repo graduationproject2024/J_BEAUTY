@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fail } from './validation.mjs';
+import { verifyCsrfToken } from './auth.mjs';
 
 export const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -66,7 +67,7 @@ export function serveFileResponse(res, method, filePath, { noStore = false } = {
   return true;
 }
 
-export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = []) {
+export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [], sessionId = '') {
   const origin = req.headers.origin;
   const allowed = new Set(allowedOrigins.filter(Boolean));
   if (origin && !allowed.has(origin)) {
@@ -75,7 +76,10 @@ export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [
   if (req.headers['sec-fetch-site'] === 'cross-site') {
     fail('Cross-site request rejected', 403);
   }
-  if (req.headers['x-csrf-token'] !== expectedCsrf) {
+  const clientCsrf = req.headers['x-csrf-token'];
+  const isDirect = clientCsrf && expectedCsrf && clientCsrf === expectedCsrf;
+  const isHmac = clientCsrf && verifyCsrfToken(clientCsrf, sessionId);
+  if (!isDirect && !isHmac) {
     fail('Invalid CSRF token', 403);
   }
   if (!String(req.headers['content-type'] || '').startsWith('application/json')) {

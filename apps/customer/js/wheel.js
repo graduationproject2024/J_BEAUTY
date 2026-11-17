@@ -266,10 +266,11 @@ export function openRewardsWheelDialog() {
     setupPrizeActions(savedPrize);
   }
 
-  spinBtn?.addEventListener('click', () => {
+  const startSpin = () => {
     if (isSpinning) return;
     isSpinning = true;
-    spinBtn.disabled = true;
+    const currentBtn = document.querySelector('#spin-wheel-btn');
+    if (currentBtn) currentBtn.disabled = true;
 
     // Pick random prize
     const prizeIndex = Math.floor(Math.random() * WHEEL_PRIZES.length);
@@ -278,20 +279,17 @@ export function openRewardsWheelDialog() {
     const numSlices = WHEEL_PRIZES.length;
     const arcSize = (Math.PI * 2) / numSlices;
 
-    // Pointer is at -PI/2 (top). Slice center should align with -PI/2.
-    // slice i range: [i*arcSize, (i+1)*arcSize]. Center: (i + 0.5) * arcSize.
-    // (angle + (i + 0.5)*arcSize) % 2PI = 3PI/2.
+    // Pointer is at top (3*PI/2 in canvas coordinate system)
     const targetSliceCenter = (prizeIndex + 0.5) * arcSize;
     const desiredFinalAngle = (Math.PI * 1.5) - targetSliceCenter;
     const extraRotations = (5 + Math.floor(Math.random() * 3)) * (Math.PI * 2);
 
-    const startAngle = currentRotation % (Math.PI * 2);
+    const initialRotation = currentRotation;
+    const startAngle = initialRotation % (Math.PI * 2);
     const totalRotationNeeded = extraRotations + (desiredFinalAngle - startAngle);
-    const finalAngle = currentRotation + totalRotationNeeded;
 
-    const duration = 4000;
+    const duration = 4200;
     const startTime = performance.now();
-
     const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
 
     const animateSpin = (now) => {
@@ -299,7 +297,7 @@ export function openRewardsWheelDialog() {
       const progress = Math.min(1, elapsed / duration);
       const eased = easeOutCubic(progress);
 
-      currentRotation = currentRotation + totalRotationNeeded * (eased - easeOutCubic(Math.max(0, (elapsed - 16) / duration)));
+      currentRotation = initialRotation + totalRotationNeeded * eased;
       drawWheel(canvas, currentRotation);
 
       if (progress < 1) {
@@ -324,12 +322,15 @@ export function openRewardsWheelDialog() {
             <button type="button" class="btn light small" id="spin-wheel-btn">${t('تدوير العجلة مجدداً ↻', 'Spin Again ↻')}</button>
           `;
           setupPrizeActions(winningPrize);
+          document.querySelector('#spin-wheel-btn')?.addEventListener('click', startSpin);
         }
       }
     };
 
     requestAnimationFrame(animateSpin);
-  });
+  };
+
+  document.querySelector('#spin-wheel-btn')?.addEventListener('click', startSpin);
 }
 
 export function initWheelFloatingButton() {

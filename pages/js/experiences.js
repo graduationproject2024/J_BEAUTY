@@ -9,9 +9,9 @@ export function studioPage() {
   const imgFor = (rec) => {
     if (rec.kind === 'package') {
       const first = allSvcs.find((sv) => sv.id === rec.item.service_ids?.[0]);
-      return first?.image || '/assets/images/hero-sanctuary.webp';
+      return first?.image || '/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp';
     }
-    return rec.item?.image || `/assets/images/services/${rec.item?.id}.webp`;
+    return rec.item?.image || `/J_BEAUTY/apps/customer/assets/images/services/${rec.item?.id}.webp`;
   };
 
   const moodOpts = [
@@ -152,7 +152,7 @@ export function lookbookPage() {
   const entries = [
     {
       cat: 'massage',
-      img: '/assets/images/services/hot-stone.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/hot-stone.webp',
       ar: 'سكينة الأحجار الدافئة',
       en: 'Warm Basalt Sanctuary',
       sub_ar: 'مساج الأحجار الساخنة · 60 دقيقة · 265 ر.س',
@@ -161,7 +161,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/assets/images/services/french-tip.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/french-tip.webp',
       ar: 'فرنش كلاسيكي ناعم',
       en: 'Timeless Ivory French Tip',
       sub_ar: 'منيكير فرنش تيب · قاعدة وردية شفافة',
@@ -170,7 +170,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/assets/images/services/colored-french.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/colored-french.webp',
       ar: 'أطراف مريمية عصرية',
       en: 'Sage Micro-French Gel',
       sub_ar: 'جل فرنسي بأطراف ملونة · 60 دقيقة',
@@ -179,7 +179,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/assets/images/services/pedicure.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/pedicure.webp',
       ar: 'طقوس العناية بالقدمين',
       en: 'Rose-Petal Foot Sanctuary',
       sub_ar: 'بديكير دافئ ببتلات الورد · 45 دقيقة',
@@ -188,7 +188,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/assets/images/services/french-gel.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/french-gel.webp',
       ar: 'لمعان الفرنش الزجاجي',
       en: 'Glass-Shine French Gel',
       sub_ar: 'جل فرنسي ثابت · مثالي للمناسبات',
@@ -197,7 +197,7 @@ export function lookbookPage() {
     },
     {
       cat: 'massage',
-      img: '/assets/images/services/lymphatic.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/lymphatic.webp',
       ar: 'جلسة الخفة والانتعاش',
       en: 'Rose Quartz & Calm Flow',
       sub_ar: 'التصريف اللمفاوي · يتطلب اعتماد المؤهلات',
@@ -363,14 +363,29 @@ export function groupBookingPage() {
         ${g.participants
           .map(
             (p, idx) => `
-              <div class="card occasion-guest-card">
-                <div class="row" style="margin-bottom:8px">
-                  <strong>${t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`)}</strong>
+              <div class="card occasion-guest-card" style="border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px;background:var(--card-bg)">
+                <div class="row" style="margin-bottom:10px">
+                  <strong style="color:var(--plum);font-size:15.5px">${t(`المستفيدة ${num(idx + 1)}`, `Participant ${num(idx + 1)}`)}</strong>
                   ${g.participants.length > 2 ? `<button type="button" class="btn small light" data-remove-guest="${idx}">${t('إزالة', 'Remove')}</button>` : ''}
                 </div>
+                <div class="occasion-quick-roles" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px">
+                  ${[
+                    ['العروس', 'Bride'],
+                    ['أخت العروس', 'Sister of Bride'],
+                    ['والدة العروس', 'Mother of Bride'],
+                    ['وصيفة', 'Bridesmaid'],
+                    ['صديقة', 'Friend'],
+                    ['قريبة', 'Relative'],
+                  ]
+                    .map(([arRole, enRole]) => {
+                      const isSel = customGuestName(p) === arRole || customGuestName(p) === enRole;
+                      return `<button type="button" class="mini-chip quick-role-btn ${isSel ? 'active' : ''}" data-guest-idx="${idx}" data-role-ar="${arRole}" data-role-en="${enRole}">${t(arRole, enRole)}</button>`;
+                    })
+                    .join('')}
+                </div>
                 <label class="field" style="margin-bottom:0">
-                  ${t('الاسم أو الصفة (مثلاً: العروس، أختي، والدتي)', 'Name or role (e.g. Bride, Sister, Mom)')}
-                  <input type="text" data-guest-label="${idx}" value="${esc(customGuestName(p))}" placeholder="${t('مثال: العروس، أختي، والدتي، أو اكتبي الاسم...', 'e.g. Bride, Sister, Mom, or enter name...')}" maxlength="60">
+                  <span style="font-size:13px;color:var(--ink-muted)">${t('الاسم أو الصفة المخصصة:', 'Custom Name / Role:')}</span>
+                  <input type="text" data-guest-label="${idx}" value="${esc(customGuestName(p))}" placeholder="${t('مثال: العروس، نورة، أختي...', 'e.g. Bride, Nora, Sister...')}" maxlength="60">
                 </label>
               </div>
             `,
@@ -740,6 +755,17 @@ export function bindExperiences(renderFn) {
       syncGroupDraft();
       state.groupDraft.occasion_type = b.dataset.occType;
       renderFn();
+    };
+  });
+
+  document.querySelectorAll('.quick-role-btn').forEach((btn) => {
+    btn.onclick = () => {
+      syncGroupDraft();
+      const gIdx = Number(btn.dataset.guestIdx);
+      if (state.groupDraft?.participants?.[gIdx]) {
+        state.groupDraft.participants[gIdx].label = state.lang === 'en' ? btn.dataset.roleEn : btn.dataset.roleAr;
+        renderFn();
+      }
     };
   });
 

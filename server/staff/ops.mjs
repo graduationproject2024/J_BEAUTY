@@ -289,6 +289,7 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
     gift_requests: allGifts,
     services: hasCapability(user, 'services.manage') || hasCapability(user, 'bookings.read') ? allServices : [],
     packages: hasCapability(user, 'packages.manage') || hasCapability(user, 'bookings.read') ? allPackages : [],
+    atelier_colors: hasCapability(user, 'settings.manage') || hasCapability(user, 'services.manage') ? db.all('SELECT * FROM nail_shades ORDER BY sort_order ASC, created_at DESC') : [],
     schedule_config: {
       capacity: currentSettings.capacity,
       working_days: currentSettings.working_days,
@@ -388,6 +389,62 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
     db.run('UPDATE coupons SET active=? WHERE id=?', active, id);
     helpers.audit(user, 'coupon.toggle', id, JSON.stringify({ active }));
     return send({ ok: true, active });
+  }
+
+  if (route === '/api/ops/atelier/colors' && !body) {
+    return send({ colors: db.all('SELECT * FROM nail_shades ORDER BY sort_order ASC, created_at DESC') });
+  }
+
+  if (route === '/api/ops/atelier/colors' && body) {
+    requireCapability(user, 'settings.manage');
+    const nameAr = String(body.name_ar || '').trim();
+    const nameEn = String(body.name_en || nameAr).trim();
+    const hex = String(body.hex || '').trim().toUpperCase();
+    if (!nameAr || !hex) fail('بيانات لون المناكير غير مكتملة');
+    const id = uid();
+    const shade = {
+      id,
+      name_ar: nameAr,
+      name_en: nameEn,
+      hex: hex.startsWith('#') ? hex : `#${hex}`,
+      finish: body.finish || 'gloss',
+      active: body.active !== false ? 1 : 0,
+      sort_order: Number(body.sort_order) || 0,
+      created_at: now(),
+    };
+    db.run(
+      'INSERT INTO nail_shades(id, name_ar, name_en, hex, finish, active, sort_order, created_at) VALUES(?,?,?,?,?,?,?,?)',
+      shade.id,
+      shade.name_ar,
+      shade.name_en,
+      shade.hex,
+      shade.finish,
+      shade.active,
+      shade.sort_order,
+      shade.created_at,
+    );
+    helpers.audit(user, 'atelier_color.create', shade.id, JSON.stringify(shade));
+    return send({ color: shade, ok: true });
+  }
+
+  if (/^\/api\/ops\/atelier\/colors\/[^/]+$/.test(route) && body) {
+    requireCapability(user, 'settings.manage');
+    const id = route.split('/').pop();
+    if (body.action === 'delete') {
+      db.run('DELETE FROM nail_shades WHERE id=?', id);
+      helpers.audit(user, 'atelier_color.delete', id);
+      return send({ ok: true, deleted: true });
+    }
+    if (body.active !== undefined) {
+      const active = body.active === true || body.active === 1 ? 1 : 0;
+      db.run('UPDATE nail_shades SET active=? WHERE id=?', active, id);
+    }
+    if (body.hex) {
+      const hex = String(body.hex).trim().toUpperCase();
+      db.run('UPDATE nail_shades SET hex=? WHERE id=?', hex.startsWith('#') ? hex : `#${hex}`, id);
+    }
+    helpers.audit(user, 'atelier_color.update', id, JSON.stringify(body));
+    return send({ ok: true });
   }
 
   if (/^\/api\/ops\/bookings\/[^/]+$/.test(route) && body) {

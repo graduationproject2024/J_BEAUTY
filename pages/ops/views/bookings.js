@@ -31,6 +31,36 @@ export function bookingsView(d) {
       ].filter(Boolean),
     }[b.status] || [];
 
+    const clientPhoneDigits = String(b.phone || '').replace(/\D/g, '');
+    const normalizedPhone = clientPhoneDigits.startsWith('05') ? '966' + clientPhoneDigits.slice(1) : clientPhoneDigits;
+    const servicesList = (b.items || []).map((i) => i.name_ar || i.name).join(' + ');
+    const addOnsList = b.add_ons && b.add_ons.length ? `\n- الإضافات: ${b.add_ons.map((a) => a.name_ar).join(' + ')}` : '';
+    const couponLine = b.discount_amount ? `\n- الخصم (${b.coupon_code || ''}): -${b.discount_amount} ر.س` : '';
+    const detailsMsg = encodeURIComponent(
+      `مرحباً بك ${b.name} في J Beauty Spa 🌸\n` +
+      `يسعدنا استلام طلب حجزك المنزلي في المدينة المنورة:\n` +
+      `- رقم الحجز: ${b.reference}\n` +
+      `- الموعد: ${b.date} في تمام الساعة ${b.time}\n` +
+      `- الحي: ${b.neighborhood}\n` +
+      `- الخدمات: ${servicesList}${addOnsList}\n` +
+      `${couponLine}\n` +
+      `- الإجمالي: ${b.total} ر.س\n\n` +
+      `لطفاً إتمام الدفع أو التحويل لتأكيد الموعد عبر الحساب البنكي التالي:\n` +
+      `IBAN: SA0380000000000000000000\n` +
+      `بنك الراجحي - مؤسسة J Beauty Spa\n\n` +
+      `شاكرين ثقتك بنا ونرحب بك دائماً ✨`
+    );
+    const waDetailsUrl = normalizedPhone ? `https://wa.me/${normalizedPhone}?text=${detailsMsg}` : '#';
+
+    const confirmMsg = encodeURIComponent(
+      `تم تأكيد حجزك ودفعك بنجاح في J Beauty Spa! 🌸\n` +
+      `- رقم الحجز: ${b.reference}\n` +
+      `- الموعد: ${b.date} الساعة ${b.time}\n` +
+      `- الأخصائية: ${b.assigned_staff_name || 'فريق مختصات J Beauty Spa'}\n\n` +
+      `المختصة ستصل إلى موقعك في الموعد المحدد بكل ما يلزم من أدوات معقمة فردياً. نتمنى لك تجربة استرخاء ودلال استثنائية ✨`
+    );
+    const waConfirmUrl = normalizedPhone ? `https://wa.me/${normalizedPhone}?text=${confirmMsg}` : '#';
+
     return `
       <div class="ops-chip-row" style="margin-top:6px">
         ${transitions
@@ -39,6 +69,18 @@ export function bookingsView(d) {
               `<button type="button" class="btn small ${nextSt === 'confirmed' || nextSt === 'completed' ? 'sage' : nextSt === 'cancelled' || nextSt === 'no_show' ? 'light' : ''}" data-bk-transition="${esc(b.id)}" data-next-status="${nextSt}">${t(ar, en)}</button>`,
           )
           .join('')}
+        ${
+          normalizedPhone
+            ? `
+              <a href="${waDetailsUrl}" target="_blank" rel="noopener noreferrer" class="btn small" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:4px">
+                <span>💬</span> ${t('إرسال تفاصيل الحجز والدفع', 'Send Details WA')}
+              </a>
+              <a href="${waConfirmUrl}" target="_blank" rel="noopener noreferrer" class="btn small" style="background:#128C7E;color:#fff;display:inline-flex;align-items:center;gap:4px">
+                <span>✓</span> ${t('تأكيد الموعد والدفع', 'Confirm WA')}
+              </a>
+            `
+            : ''
+        }
         ${
           canAny('bookings.assign', 'bookings.update', 'payments.verify') || canNotes
             ? `<button type="button" class="btn small light" data-bk-expand="${esc(b.id)}">${isExpanded ? t('إغلاق التفاصيل', 'Hide details') : t('إدارة / تعيين', 'Manage / Assign')}</button>`

@@ -217,13 +217,7 @@ export const head = (title, sub = '', crumbs = []) => `
   </div>
 `;
 
-export const provisional = () =>
-  state.catalog.settings?.business_approved
-    ? ''
-    : `<div class="notice">${t(
-        'الأسعار والباقات والوصف الحالي تقديرية وقابلة للتعديل لحين اعتمادها النهائي من إدارة J Beauty Spa. إرسال الطلب لا يعني تأكيد الموعد.',
-        'Current prices, packages, and service details are provisional pending business approval. Submitting a request does not confirm an appointment.',
-      )}</div>`;
+export const provisional = () => '';
 
 export function serviceArt(s, cls = '') {
   const src =

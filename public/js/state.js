@@ -119,7 +119,12 @@ export function toast(msg) {
   }, 4200);
 }
 
-export async function api(path, body) {
+export async function api(path, body, isRetry = false) {
+  if (body !== undefined && !state.csrf && path !== '/session') {
+    try {
+      await refreshSession();
+    } catch {}
+  }
   const res = await fetch('/api' + path, {
     method: body === undefined ? 'GET' : 'POST',
     headers:
@@ -128,8 +133,14 @@ export async function api(path, body) {
         : { 'Content-Type': 'application/json', 'X-CSRF-Token': state.csrf },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || t('تعذر إتمام الطلب', 'Request failed'));
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 403 && data.error === 'Invalid CSRF token' && !isRetry) {
+      await refreshSession();
+      return api(path, body, true);
+    }
+    throw new Error(data.error || t('تعذر إتمام الطلب', 'Request failed'));
+  }
   return data;
 }
 

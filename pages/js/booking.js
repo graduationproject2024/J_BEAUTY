@@ -200,7 +200,7 @@ function stepOneCategoryHtml() {
       en: 'Massage Therapy',
       sub_ar: 'استرخائي، علاجي، الأحجار الساخنة، التصريف اللمفاوي',
       sub_en: 'Relaxation, therapeutic, hot stone, lymphatic drainage',
-      img: '/assets/images/services/hot-stone.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/hot-stone.webp',
       count: svcs.filter((x) => x.category === 'massage').length,
     },
     {
@@ -209,7 +209,7 @@ function stepOneCategoryHtml() {
       en: 'Nail Care',
       sub_ar: 'منيكير وبديكير كلاسيك، بديكير، فرنش تيب وطلاء فرنسي',
       sub_en: 'Classic mani-pedi, pedicure, French tip, French polish',
-      img: '/assets/images/services/classic.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/classic.webp',
       count: svcs.filter((x) => x.category === 'nails').length,
     },
     {
@@ -218,7 +218,7 @@ function stepOneCategoryHtml() {
       en: 'Gel Services',
       sub_ar: 'طلاء جل، جل فرنسي، أطراف ملونة، إزالة وإعادة تطبيق',
       sub_en: 'Gel polish, French gel, colored micro-tips, removal',
-      img: '/assets/images/services/french-gel.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/french-gel.webp',
       count: svcs.filter((x) => x.category === 'gel').length,
     },
     {
@@ -227,7 +227,7 @@ function stepOneCategoryHtml() {
       en: 'Curated Packages',
       sub_ar: 'إشراقة J، لحظة هدوء، طقوس الورد، وباقة J المميزة',
       sub_en: 'J Nail Glow, J Serenity, J Rose Ritual, J Signature',
-      img: '/assets/images/hero-sanctuary.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp',
       count: pkgs.length,
     },
   ];
@@ -300,7 +300,7 @@ function stepTwoServiceHtml() {
                 const imgSrc =
                   s.image && /^(\/[^/]|https:\/\/)/.test(s.image)
                     ? s.image
-                    : `/assets/images/services/${s.id}.webp`;
+                    : `/J_BEAUTY/apps/customer/assets/images/services/${s.id}.webp`;
                 return `
                 <label class="selection">
                   <input type="checkbox" name="service" value="${esc(s.id)}" ${checked ? 'checked' : ''}>
@@ -764,12 +764,18 @@ export function bindBooking(renderFn) {
       return;
     }
     const s = selectedSummary();
+    const phoneVal = String(document.querySelector('#booking-form [name="phone"]')?.value || state.draft.phone || '').trim();
     try {
-      const res = await api('/coupons/validate', { code, total: s.subtotal });
-      state.draft.coupon = res.coupon;
-      state.draft.coupon_code = res.coupon.code;
+      const res = await api('/coupons/validate', { code, total: s.subtotal, phone: phoneVal });
+      state.draft.coupon = res.coupon || {
+        code: res.code,
+        discount_type: res.discount_type,
+        value: res.discount_value,
+      };
+      state.draft.coupon_code = res.code || (res.coupon && res.coupon.code) || code;
+      const discountDisplay = res.discount_amount ? money(res.discount_amount) : (res.discount_type === 'percent' ? `${res.discount_value}%` : money(res.discount_value));
       if (fb) {
-        fb.innerHTML = `<span style="color:var(--sage-deep);font-weight:600">✓ ${t('تم تفعيل الكوبون بنجاح: خصم', 'Coupon applied: Save')} ${money(res.coupon.discount)} 🌸</span>`;
+        fb.innerHTML = `<span style="color:var(--sage-deep);font-weight:600">✓ ${t('تم تفعيل الكوبون بنجاح: خصم', 'Coupon applied: Save')} ${discountDisplay} 🌸</span>`;
       }
       toast(t('تم تطبيق الخصم بنجاح 🌸', 'Coupon discount applied!'));
       updateSelectionSummaryDOM();

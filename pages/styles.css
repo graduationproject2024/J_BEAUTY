@@ -6,7 +6,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/plex-arabic-400.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/plex-arabic-400.woff2') format('woff2');
 }
 
 @font-face {
@@ -14,7 +14,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/plex-arabic-500.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/plex-arabic-500.woff2') format('woff2');
 }
 
 @font-face {
@@ -22,7 +22,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/plex-arabic-600.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/plex-arabic-600.woff2') format('woff2');
 }
 
 @font-face {
@@ -30,7 +30,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/plex-sans-400.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/plex-sans-400.woff2') format('woff2');
 }
 
 @font-face {
@@ -38,7 +38,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/plex-sans-600.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/plex-sans-600.woff2') format('woff2');
 }
 
 @font-face {
@@ -46,7 +46,7 @@
   font-style: normal;
   font-weight: 300 600;
   font-display: swap;
-  src: url('/fonts/newsreader-roman.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/newsreader-roman.woff2') format('woff2');
 }
 
 @font-face {
@@ -54,7 +54,7 @@
   font-style: italic;
   font-weight: 300 600;
   font-display: swap;
-  src: url('/fonts/newsreader-italic.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/newsreader-italic.woff2') format('woff2');
 }
 
 @font-face {
@@ -62,7 +62,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/fonts/noto-naskh-arabic-600.woff2') format('woff2');
+  src: url('/J_BEAUTY/apps/customer/fonts/noto-naskh-arabic-600.woff2') format('woff2');
 }
 
 /* ===== RESET & BASE ===== */
@@ -1148,37 +1148,44 @@ button:disabled.btn {
 
 /* ===== J PETALS CLUB BAND & MUSEUM ARCHIVAL CAMEO ===== */
 .loyalty-band {
-  background: var(--plum);
-  color: var(--ivory);
+  background: linear-gradient(135deg, #FAF4F0 0%, #F5EAE6 45%, #EBE0DC 100%);
+  color: var(--charcoal);
   display: grid;
-  grid-template-columns: 0.92fr 1.08fr;
+  grid-template-columns: 0.95fr 1.05fr;
   align-items: center;
   gap: clamp(24px, 4vw, 48px);
-  padding: clamp(28px, 4.5vw, 52px);
+  padding: clamp(32px, 5vw, 56px);
   border-radius: var(--r-xl);
+  border: 1.5px solid rgba(212, 175, 124, 0.45);
+  box-shadow: 0 12px 40px rgba(212, 175, 124, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   position: relative;
   overflow: hidden;
 }
 
 .loyalty-band.is-petals-hero {
-  background: var(--plum);
+  background: linear-gradient(135deg, #FAF4F0 0%, #F5EAE6 45%, #EBE0DC 100%);
+  border: 1.5px solid rgba(212, 175, 124, 0.45);
 }
 
 .loyalty-band h2,
 .loyalty-band h3 {
-  color: var(--ivory);
+  color: var(--plum);
+  font-family: var(--font-display);
 }
 
 .loyalty-band p {
-  color: #E8DDE1;
+  color: #5A444E;
+  line-height: 1.7;
 }
 
 .loyalty-band .eyebrow {
-  color: #EED8B8;
+  color: var(--rose-gold-deep);
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 .loyalty-band .text-link {
-  color: var(--ivory);
+  color: var(--plum);
   border-color: var(--rose-gold);
 }
 
@@ -1187,10 +1194,11 @@ button:disabled.btn {
   grid-template-columns: 1.12fr 0.88fr;
   gap: 24px;
   align-items: center;
-  background: rgba(251, 247, 244, 0.08);
-  border: 1px solid rgba(212, 175, 124, 0.42);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid rgba(212, 175, 124, 0.45);
   border-radius: var(--r-lg);
   padding: 26px;
+  box-shadow: 0 8px 24px rgba(80, 60, 69, 0.06);
 }
 
 .loyalty-gallery-card.is-ivory-card {
@@ -1247,7 +1255,7 @@ button:disabled.btn {
 .loyalty-balance-num {
   font-family: var(--font-en-display);
   font-size: clamp(44px, 5vw, 60px);
-  color: var(--ivory);
+  color: var(--plum);
   line-height: 1.05;
   margin: 4px 0 6px;
 }
@@ -1256,19 +1264,19 @@ button:disabled.btn {
   margin: 0 0 6px;
   font-size: 17px;
   font-weight: 600;
-  color: #F4E4EA;
+  color: var(--plum);
 }
 
 .loyalty-next-copy {
   margin: 0 0 14px;
   font-size: 14px;
-  color: #E2D5DA;
+  color: #6E5C64;
 }
 
 .loyalty-rate-note {
   margin: 12px 0 0;
   font-size: 13px;
-  color: #D8C8CE;
+  color: #7A6870;
 }
 
 .petal-progress-wrap {
@@ -1711,27 +1719,31 @@ input[type="time"]::-webkit-datetime-edit {
 }
 
 .progress span {
-  border-top: 3px solid var(--border);
+  border-top: 3px solid rgba(212, 175, 124, 0.3);
   padding-top: 10px;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--ink-muted);
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  transition: all var(--dur) var(--ease-out);
 }
 
 .progress span b {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 1px solid var(--border-strong);
+  border: 1px solid rgba(212, 175, 124, 0.5);
   font-size: 13px;
   font-weight: 600;
   flex-shrink: 0;
+  background: var(--white);
+  color: var(--plum);
+  transition: all var(--dur) var(--ease-out);
 }
 
 .progress span em {
@@ -1740,14 +1752,15 @@ input[type="time"]::-webkit-datetime-edit {
 
 .progress .current {
   border-color: var(--plum);
-  color: var(--charcoal);
-  font-weight: 600;
+  color: var(--plum);
+  font-weight: 700;
 }
 
 .progress .current b {
-  background: var(--plum);
+  background: linear-gradient(135deg, var(--plum), #442a34);
   border-color: var(--plum);
   color: var(--white);
+  box-shadow: 0 2px 8px rgba(80, 60, 69, 0.25);
 }
 
 .tabs {
@@ -1782,15 +1795,16 @@ input[type="time"]::-webkit-datetime-edit {
 
 .selection {
   display: grid;
-  grid-template-columns: auto 60px 1fr auto;
+  grid-template-columns: auto 64px 1fr auto;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  gap: 16px;
+  padding: 16px 18px;
   background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
+  border: 1.5px solid rgba(80, 60, 69, 0.1);
+  border-radius: var(--r-lg);
   cursor: pointer;
-  transition: border-color var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out);
+  box-shadow: 0 2px 6px rgba(80, 60, 69, 0.02);
+  transition: all var(--dur) var(--ease-out);
 }
 
 .selection.pkg-selection {
@@ -1798,12 +1812,15 @@ input[type="time"]::-webkit-datetime-edit {
 }
 
 .selection:hover {
-  border-color: var(--sage-deep);
+  border-color: var(--rose-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(212, 175, 124, 0.12);
 }
 
 .selection:has(input:checked) {
-  background: var(--sage-tint);
-  border-color: var(--sage-deep);
+  background: linear-gradient(135deg, #FAF4F0 0%, #F5ECE8 100%);
+  border-color: var(--rose-gold);
+  box-shadow: 0 6px 20px rgba(212, 175, 124, 0.18);
 }
 
 .selection input {
@@ -1866,12 +1883,12 @@ input[type="time"]::-webkit-datetime-edit {
 
 .summary {
   padding: 26px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, #FAF4F0 0%, #FFFFFF 100%);
+  border: 1.5px solid rgba(212, 175, 124, 0.4);
+  border-radius: var(--r-xl);
   position: sticky;
   top: 96px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 10px 32px rgba(80, 60, 69, 0.08);
 }
 
 .summary-toggle {
@@ -1995,11 +2012,12 @@ input[type="time"]::-webkit-datetime-edit {
 }
 
 .booking-card {
-  padding: 22px;
+  padding: 24px;
   background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  margin-bottom: 14px;
+  border: 1.5px solid rgba(212, 175, 124, 0.35);
+  border-radius: var(--r-xl);
+  margin-bottom: 16px;
+  box-shadow: 0 6px 24px rgba(80, 60, 69, 0.04);
 }
 
 .row {
@@ -3924,9 +3942,10 @@ dialog::backdrop {
 
 .jb-loyalty-steps {
   padding: 22px;
-  border: 1px solid rgba(251, 247, 244, .24);
+  border: 1.5px solid rgba(212, 175, 124, 0.45);
   border-radius: var(--r-lg);
-  background: rgba(251, 247, 244, .07);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 24px rgba(80, 60, 69, 0.06);
   display: grid;
   gap: 13px;
 }
@@ -3935,7 +3954,7 @@ dialog::backdrop {
   display: flex;
   align-items: start;
   gap: 16px;
-  border-bottom: 1px solid rgba(251, 247, 244, .16);
+  border-bottom: 1px solid rgba(212, 175, 124, 0.25);
   padding-bottom: 13px;
 }
 
@@ -3947,14 +3966,14 @@ dialog::backdrop {
 .jb-loyalty-step>span {
   font-family: var(--font-en-display);
   font-size: 29px;
-  color: var(--rose-gold);
+  color: var(--rose-gold-deep);
   line-height: 1;
 }
 
 .jb-loyalty-step strong {
   display: block;
-  font-size: 17px;
-  color: var(--ivory);
+  font-size: 16.5px;
+  color: var(--plum);
   margin-bottom: 5px;
 }
 
@@ -3962,6 +3981,7 @@ dialog::backdrop {
   margin: 0;
   font-size: 14px;
   line-height: 1.6;
+  color: #5A444E;
 }
 
 .jb-rewards-dashboard {

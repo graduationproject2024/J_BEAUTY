@@ -4,7 +4,7 @@
 let cachedStudioImg = null;
 let cachedSkinMask = null;
 
-function loadStudioHand(src = '/assets/images/atelier-hand-base.webp') {
+function loadStudioHand(src = '/J_BEAUTY/apps/customer/assets/images/atelier-hand-base.webp') {
   if (cachedStudioImg) return cachedStudioImg;
   cachedStudioImg = new Promise((resolve) => {
     const img = new Image();

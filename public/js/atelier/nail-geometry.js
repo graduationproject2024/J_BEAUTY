@@ -2,9 +2,9 @@
 // Builds closed curved dorsal surface + side/tip thickness bevel + natural keratin underside.
 
 export const LENGTH_SCALES = {
-  short: { totalMult: 1.10, overhangFraction: 0.10, tipCurl: 0.02 },
-  medium: { totalMult: 1.24, overhangFraction: 0.22, tipCurl: 0.045 },
-  long: { totalMult: 1.40, overhangFraction: 0.35, tipCurl: 0.08 },
+  short: { totalMult: 1.06, overhangFraction: 0.08, tipCurl: 0.012 },
+  medium: { totalMult: 1.16, overhangFraction: 0.15, tipCurl: 0.024 },
+  long: { totalMult: 1.28, overhangFraction: 0.24, tipCurl: 0.040 },
 };
 
 // Polar-smooth parametric nail plate coordinates (wHalfScale, zNormalized)
@@ -91,12 +91,12 @@ export function evaluateNailPoint(shape, length, u) {
 export function evaluateTipForwardContour(shape, length, vAbs) {
   const lenCfg = LENGTH_SCALES[length] || LENGTH_SCALES.medium;
   const freeExt = lenCfg.totalMult - 1.0;
-  // Continuous C1-smooth organic rounding on perimeter; eliminates blunt notches & preserves crisp shape definitions
-  if (shape === 'squoval') return -0.04 * freeExt * Math.pow(vAbs, 3.0);
-  if (shape === 'oval') return -0.025 * freeExt * (vAbs * vAbs);
+  // Continuous C2-smooth organic rounding on perimeter; eliminates blunt notches & preserves crisp shape definitions
+  if (shape === 'squoval') return -0.028 * freeExt * Math.pow(vAbs, 2.6);
+  if (shape === 'oval') return -0.020 * freeExt * (vAbs * vAbs);
   if (shape === 'almond') {
-    // Elegant organic petal dome: continuous smooth rounding across tip apex without flat truncation or indented notch
-    return -0.032 * freeExt * Math.pow(vAbs, 1.80);
+    // Elegant organic petal dome: continuous smooth parabolic curve across tip apex (dz/dv = 0 at center)
+    return -0.022 * freeExt * (vAbs * vAbs);
   }
   return 0;
 }
@@ -213,22 +213,42 @@ export function buildSculptedNailGeometry(anchor, shape = 'almond', length = 'me
     }
   }
 
-  // Separate crisp side/tip bevel strip vertices so sharp free-edge rim doesn't crease smooth dorsal normals
-  const pushWallQuad = (t0, t1, b1, b0) => {
-    const i0 = pushUniqueVertex(t0);
-    const i1 = pushUniqueVertex(t1);
-    const i2 = pushUniqueVertex(b1);
-    const i3 = pushUniqueVertex(b0);
-    indices.push(i0, i3, i2, i0, i2, i1);
-  };
+  // Continuous closed manifold perimeter wall strip (shared vertices along rim -> silky smooth normals, zero creases or tip slits)
+  const topLoop = [];
+  const botLoop = [];
 
+  // 1. Cuticle edge: iv = 0 .. vSteps - 1 (iu = 0)
   for (let iv = 0; iv < vSteps; iv++) {
-    pushWallQuad(topGrid[uSteps][iv], topGrid[uSteps][iv + 1], botGrid[uSteps][iv + 1], botGrid[uSteps][iv]);
-    pushWallQuad(topGrid[0][iv + 1], topGrid[0][iv], botGrid[0][iv], botGrid[0][iv + 1]);
+    topLoop.push(topGrid[0][iv]);
+    botLoop.push(botGrid[0][iv]);
   }
+  // 2. Right lateral edge: iu = 0 .. uSteps - 1 (iv = vSteps)
   for (let iu = 0; iu < uSteps; iu++) {
-    pushWallQuad(topGrid[iu][0], topGrid[iu + 1][0], botGrid[iu + 1][0], botGrid[iu][0]);
-    pushWallQuad(topGrid[iu + 1][vSteps], topGrid[iu][vSteps], botGrid[iu][vSteps], botGrid[iu + 1][vSteps]);
+    topLoop.push(topGrid[iu][vSteps]);
+    botLoop.push(botGrid[iu][vSteps]);
+  }
+  // 3. Distal free-edge tip: iv = vSteps down to 1 (iu = uSteps)
+  for (let iv = vSteps; iv > 0; iv--) {
+    topLoop.push(topGrid[uSteps][iv]);
+    botLoop.push(botGrid[uSteps][iv]);
+  }
+  // 4. Left lateral edge: iu = uSteps down to 1 (iv = 0)
+  for (let iu = uSteps; iu > 0; iu--) {
+    topLoop.push(topGrid[iu][0]);
+    botLoop.push(botGrid[iu][0]);
+  }
+
+  const loopLen = topLoop.length;
+  const wallTopIdx = topLoop.map(pushUniqueVertex);
+  const wallBotIdx = botLoop.map(pushUniqueVertex);
+
+  for (let i = 0; i < loopLen; i++) {
+    const next = (i + 1) % loopLen;
+    const t0 = wallTopIdx[i];
+    const t1 = wallTopIdx[next];
+    const b0 = wallBotIdx[i];
+    const b1 = wallBotIdx[next];
+    indices.push(t0, b0, b1, t0, b1, t1);
   }
 
   // Compute clean pearl / botanical accent seat directly on curved dorsal apex near u=0.24
