@@ -415,12 +415,6 @@ function stepThreeTimeHtml() {
 
   return `
     <h3>${t('متى وأين تفضلين زيارتنا؟', 'When and where should we visit?')}</h3>
-    <div class="notice">
-      ${t(
-        'المواعيد المختارة هنا طلبات مفضلة بانتظار تأكيد الموظفة وليست مواعيد مؤكدة آلياً. التوقيت المعتمد: الرياض (Asia/Riyadh).',
-        'Chosen dates and times are preferred requests awaiting staff confirmation, not guaranteed live slots. Timezone: Asia/Riyadh.',
-      )}
-    </div>
     <div class="time-chips" aria-label="${t('أيام قريبة مقترحة', 'Upcoming valid days')}">
       ${nextDays
         .map(
@@ -654,12 +648,7 @@ export function bookingSuccess() {
             <div class="hero-actions" style="margin-top:20px;gap:10px;flex-wrap:wrap">
               ${
                 r.whatsapp_url
-                  ? `<a class="btn shimmer-btn" id="whatsapp-handoff-link" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;flex:1;justify-content:center">💬 ${t('متابعة التأكيد عبر واتساب', 'Continue on WhatsApp')}</a>`
-                  : ''
-              }
-              ${
-                r.invoice_pdf_url
-                  ? `<a class="btn light" href="${esc(r.invoice_pdf_url)}" target="_blank" rel="noopener noreferrer">📄 ${t('تحميل الفاتورة PDF', 'Download PDF Invoice')}</a>`
+                  ? `<a class="btn shimmer-btn" id="whatsapp-handoff-link" href="${esc(r.whatsapp_url)}" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;flex:1;justify-content:center">💬 ${t('متابعة التأكيد عبر واتساب', 'Continue on WhatsApp')}</a>`
                   : ''
               }
             </div>
@@ -673,9 +662,18 @@ export function bookingSuccess() {
               'After completing your bank transfer, upload your receipt image or PDF here for instant finance verification in our portal.',
             )}</p>
             <div class="bank-mini-box">
-              <div><strong>${t('البنك:', 'Bank:')}</strong> ${esc(s.bank_name || 'مصرف الراجحي')}</div>
+              <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                <span><strong>${t('البنك:', 'Bank:')}</strong> ${esc(s.bank_name || 'مصرف الراجحي')}</span>
+                <span class="muted" style="font-size:12px">✦ ${t('تحويل بنكي فوري', 'Bank Transfer')}</span>
+              </div>
               <div><strong>${t('المستفيد:', 'Account:')}</strong> ${esc(s.bank_account_holder || 'مؤسسة J Beauty Spa')}</div>
-              <div><strong>IBAN:</strong> <bdi class="mono">${esc(s.bank_iban || 'SA0380000000000000000000')}</bdi></div>
+              <div class="row" style="justify-content:space-between;align-items:center;background:#fff;padding:8px 12px;border-radius:var(--r-sm);border:1px dashed var(--rose-gold);margin-top:4px;gap:8px">
+                <div>
+                  <span style="font-size:12px;display:block;color:var(--text-dark)">IBAN:</span>
+                  <bdi dir="ltr" class="mono" style="font-weight:700;letter-spacing:0.04em;color:var(--plum)" id="booking-iban-text">${esc(s.bank_iban || 'SA0380000000000000000000')}</bdi>
+                </div>
+                <button type="button" class="btn small light" id="copy-iban-btn" style="padding:4px 10px;font-size:12px;white-space:nowrap">📋 ${t('نسخ الآيبان', 'Copy IBAN')}</button>
+              </div>
             </div>
             ${
               receiptDone
@@ -694,10 +692,15 @@ export function bookingSuccess() {
                       ${t('رقم العملية المرجعي (اختياري)', 'Transfer Reference (optional)')}
                       <input type="text" name="transfer_ref" placeholder="${t('مثال: TRF-982341', 'e.g. TRF-982341')}" maxlength="80">
                     </label>
-                    <label class="field" style="margin:0">
-                      ${t('صورة الإيصال أو ملف PDF (حتى 2 ميجابايت)', 'Receipt Image or PDF (max 2MB)')}
-                      <input type="file" name="receipt_file" accept="image/png,image/jpeg,image/webp,application/pdf" required>
-                    </label>
+                    <div class="field" style="margin:0">
+                      <label style="display:block;font-size:13.5px;font-weight:600;margin-bottom:6px">${t('صورة الإيصال أو ملف PDF (حتى 2 ميجابايت)', 'Receipt Image or PDF (max 2MB)')}</label>
+                      <label class="receipt-dropzone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 12px;border:1.5px dashed var(--rose-gold);border-radius:var(--r-md);background:var(--cream-bg);cursor:pointer;text-align:center;transition:all .2s ease;position:relative">
+                        <span style="font-size:24px;margin-bottom:4px">🧾</span>
+                        <strong id="receipt-file-label" style="font-size:13px;color:var(--plum)">${t('اضغطي هنا لاختيار صورة الإيصال أو ملف PDF', 'Click here to choose receipt image or PDF')}</strong>
+                        <small class="muted" style="font-size:11.5px;margin-top:4px">${t('يدعم JPG, PNG, WEBP, PDF بحد أقصى 2MB', 'Supports JPG, PNG, WEBP, PDF up to 2MB')}</small>
+                        <input type="file" id="booking-receipt-file-input" name="receipt_file" accept="image/png,image/jpeg,image/webp,application/pdf" required style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+                      </label>
+                    </div>
                     <button type="submit" class="btn sage" style="width:100%">📤 ${t('إرسال إيصال الدفع للإدارة', 'Submit Payment Receipt')}</button>
                   </form>
                 `
@@ -997,15 +1000,18 @@ export function bindBooking(renderFn) {
       state.bookingResult = res;
       state.bookingReceiptDone = false;
       state.account = null;
-      // Direct immediate WhatsApp handoff — zero extra clicks!
+      renderFn();
+      window.scrollTo(0, 0);
+
+      // Direct immediate WhatsApp handoff — zero popup blockers, zero extra clicks!
       if (res.whatsapp_url) {
         trackFunnel('whatsapp_handoff_click');
         try {
-          window.open(res.whatsapp_url, '_blank', 'noopener,noreferrer');
-        } catch {}
+          window.location.href = res.whatsapp_url;
+        } catch {
+          window.open(res.whatsapp_url, '_blank');
+        }
       }
-      renderFn();
-      window.scrollTo(0, 0);
     } catch (err) {
       errBox.innerHTML = `<div class="error">${esc(err.message)}</div>`;
       submitBtn.disabled = false;
@@ -1056,6 +1062,27 @@ export function bindBooking(renderFn) {
 
   $('#whatsapp-handoff-link')?.addEventListener('click', () => {
     trackFunnel('whatsapp_handoff_click');
+  });
+
+  $('#booking-receipt-file-input')?.addEventListener('change', (e) => {
+    const fn = e.target.files?.[0]?.name;
+    const lbl = $('#receipt-file-label');
+    if (lbl && fn) {
+      lbl.textContent = `✓ تم اختيار: ${fn}`;
+      lbl.style.color = 'var(--sage-deep)';
+    }
+  });
+
+  $('#copy-iban-btn')?.addEventListener('click', async () => {
+    const iban = $('#booking-iban-text')?.textContent || '';
+    if (iban) {
+      try {
+        await navigator.clipboard.writeText(iban);
+        toast(t('تم نسخ الآيبان بنجاح 📋', 'IBAN copied to clipboard 📋'));
+      } catch {
+        toast(iban);
+      }
+    }
   });
 
   $('#new-booking')?.addEventListener('click', () => {

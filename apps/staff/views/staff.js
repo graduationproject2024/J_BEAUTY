@@ -105,7 +105,7 @@ export function staffView(d) {
       <form id="ops-create-staff-form" class="form-grid" style="align-items:end">
         <label class="field">${t('الاسم الكامل', 'Full Name')}<input type="text" name="name" required></label>
         <label class="field">${t('رقم الجوال السعودي', 'Saudi Mobile')}<input type="tel" name="phone" required placeholder="05xxxxxxxx"></label>
-        <label class="field">${t('كلمة المرور المبدئية (12+ خانة)', 'Initial Password (12+ chars)')}<input type="password" name="password" minlength="12" required></label>
+        <label class="field">${t('كلمة المرور المبدئية (8+ خانات)', 'Initial Password (8+ chars)')}<input type="password" name="password" minlength="8" required></label>
         <label class="field">${t('الدور التشغيلي', 'Operational Role')}
           <select name="role" required>
             ${ASSIGNABLE_ROLE_LIST.map(([id, ar, en]) => `<option value="${id}">${t(ar, en)}</option>`).join('')}

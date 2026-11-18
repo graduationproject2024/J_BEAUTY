@@ -54,8 +54,8 @@ const ARGON_OPTS = {
 };
 
 export function hashPassword(value) {
-  if (typeof value !== 'string' || value.length < 12 || value.length > 128) {
-    fail('Password must contain 12–128 characters');
+  if (typeof value !== 'string' || value.length < 8 || value.length > 128) {
+    fail('Password must contain 8–128 characters');
   }
   const salt = randomBytes(16).toString('hex');
   const derived = scryptSync(value, salt, 64);

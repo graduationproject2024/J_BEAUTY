@@ -356,9 +356,9 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'index',
       root8: fingerRoots.index,
-      spreadDeg: 3.4,
-      bendDegs: [-3.5, -7.5, -10.0],
-      segLens: [2.45, 1.75, 1.55],
+      spreadDeg: 1.6,
+      bendDegs: [-2.5, -5.0, -7.0],
+      segLens: [2.50, 1.78, 1.55],
       radii: [
         [0.64, 0.58],
         [0.57, 0.52], // proximal shaft taper
@@ -372,14 +372,14 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
       ],
       nailBedScaleW: 0.86,
       nailBedLen: 1.25,
-      upRollDeg: 2.5,
+      upRollDeg: 1.8,
     },
     {
       id: 'middle',
       root8: fingerRoots.middle,
       spreadDeg: 0.0,
-      bendDegs: [-3.0, -6.5, -9.0],
-      segLens: [2.70, 1.92, 1.65],
+      bendDegs: [-2.0, -4.5, -6.5],
+      segLens: [2.72, 1.95, 1.68],
       radii: [
         [0.67, 0.60],
         [0.59, 0.53],
@@ -393,14 +393,14 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
       ],
       nailBedScaleW: 0.88,
       nailBedLen: 1.32,
-      upRollDeg: 0.5,
+      upRollDeg: 0.3,
     },
     {
       id: 'ring',
       root8: fingerRoots.ring,
-      spreadDeg: -3.0,
-      bendDegs: [-3.5, -7.5, -10.0],
-      segLens: [2.50, 1.78, 1.55],
+      spreadDeg: -1.3,
+      bendDegs: [-2.5, -5.0, -7.0],
+      segLens: [2.55, 1.80, 1.58],
       radii: [
         [0.62, 0.56],
         [0.55, 0.49],
@@ -414,28 +414,28 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
       ],
       nailBedScaleW: 0.86,
       nailBedLen: 1.25,
-      upRollDeg: -1.5,
+      upRollDeg: -1.2,
     },
     {
       id: 'pinky',
       root8: fingerRoots.pinky,
-      spreadDeg: -6.2,
-      bendDegs: [-4.5, -9.0, -11.5],
-      segLens: [1.95, 1.38, 1.30],
+      spreadDeg: -2.8,
+      bendDegs: [-3.0, -6.0, -8.0],
+      segLens: [2.25, 1.55, 1.40],
       radii: [
         [0.54, 0.48],
-        [0.47, 0.41],
+        [0.48, 0.42],
         [0.50, 0.44],
         [0.44, 0.38],
         [0.42, 0.36],
         [0.44, 0.38],
         [0.39, 0.33],
-        [0.35, 0.29],
-        [0.21, 0.16],
+        [0.36, 0.30],
+        [0.23, 0.17],
       ],
-      nailBedScaleW: 0.84,
-      nailBedLen: 1.08,
-      upRollDeg: -2.5,
+      nailBedScaleW: 0.85,
+      nailBedLen: 1.20,
+      upRollDeg: -2.0,
     },
   ];
 
@@ -555,19 +555,18 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     tcy += verts[vi].y;
     tcz += verts[vi].z;
   }
-  const tStart = { x: tcx / 8 + 0.12, y: tcy / 8 - 0.22, z: tcz / 8 + 0.05 };
-  // Anatomically accurate opposable thumb: branches radially outward (~36 deg) from thenar eminence,
-  // curves smoothly forward at MCP/IP joints with natural pronation so thumbnail angles elegantly outward & upward!
-  const tDir0 = normVec({ x: 0.58, y: -0.22, z: 0.78 });
-  const tUp0 = normVec({ x: 0.42, y: 0.89, z: -0.14 });
+  const tStart = { x: tcx / 8 + 0.05, y: tcy / 8 - 0.26, z: tcz / 8 + 0.10 };
+  // Graceful relaxed feminine thumb resting gently alongside the index digit
+  const tDir0 = normVec({ x: 0.36, y: -0.22, z: 0.90 });
+  const tUp0 = normVec({ x: 0.32, y: 0.92, z: -0.16 });
   const tf0 = makeFrame(tDir0, tUp0);
 
-  const tDir1 = normVec({ x: 0.36, y: -0.15, z: 0.92 });
-  const tUp1 = normVec({ x: 0.48, y: 0.87, z: -0.12 });
+  const tDir1 = normVec({ x: 0.22, y: -0.15, z: 0.95 });
+  const tUp1 = normVec({ x: 0.35, y: 0.92, z: -0.13 });
   const tf1 = makeFrame(tDir1, tUp1);
 
-  const tDir2 = normVec({ x: 0.20, y: -0.11, z: 0.97 });
-  const tUp2 = normVec({ x: 0.44, y: 0.89, z: -0.10 });
+  const tDir2 = normVec({ x: 0.12, y: -0.09, z: 0.98 });
+  const tUp2 = normVec({ x: 0.33, y: 0.93, z: -0.10 });
   const tf2 = makeFrame(tDir2, tUp2);
 
   const tp1 = addVec(tStart, scaleVec(tf0.forward, 1.35));
@@ -656,7 +655,7 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     if (ref.isThumb) {
       const f = ref.fallbackFrame;
       nailAnchors[fid] = {
-        origin: addVec(addVec(cutCenter, scaleVec(f.up, 0.042)), scaleVec(f.forward, -0.02)),
+        origin: addVec(addVec(cutCenter, scaleVec(f.up, 0.012)), scaleVec(f.forward, -0.015)),
         frame: { right: f.right, up: f.up, forward: f.forward },
         bedWidth: Math.min(postSpanW * 0.86, ref.radiusMidX * 2 * ref.bedScaleW),
         bedLength: Math.max(exactBedLen, ref.bedLength || 1.22),
@@ -665,7 +664,7 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
       };
     } else {
       nailAnchors[fid] = {
-        origin: subVec(addVec(cutCenter, scaleVec(upAxis, 0.048)), scaleVec(actualFwd, 0.025)),
+        origin: subVec(addVec(cutCenter, scaleVec(upAxis, 0.014)), scaleVec(actualFwd, 0.018)),
         frame: { right: rightOrtho, up: upAxis, forward: actualFwd },
         bedWidth: Math.min(postSpanW * 0.86, ref.radiusMidX * 2 * ref.bedScaleW),
         bedLength: Math.max(exactBedLen, ref.bedLength || 1.22),

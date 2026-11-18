@@ -133,6 +133,12 @@ try {
     terms: true,
   });
   assert.ok([200, 201].includes(giftRes.status), `Gift create failed: ${giftRes.status}`);
+  // Approve gift card via Ops so it becomes approved_ready for redemption
+  const approveRes = await owner.req(`/api/ops/gift-requests/${giftRes.json.gift_request.id}`, {
+    status: 'approved_ready',
+    payment_verified: true,
+  });
+  assert.equal(approveRes.status, 200, `Gift approval failed: ${approveRes.status} ${JSON.stringify(approveRes.json)}`);
   const raceGiftCode = giftRes.json.gift_request.gift_code;
 
   const giftAttackers = await Promise.all(

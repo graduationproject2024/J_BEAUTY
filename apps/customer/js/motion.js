@@ -62,22 +62,46 @@ export function initScrollReveals() {
  * Luxury Metallic Rose-Gold Petals Membership Medallion (replaces primitive SVG flower).
  * Uses the official J Beauty Spa brand emblem framed in an orbital rose-gold progress ring.
  */
-export function renderSignatureBloomSVG(filledCount = 4, totalPetals = 8, lightMode = true) {
-  const ratio = Math.max(0, Math.min(1, filledCount / Math.max(1, totalPetals)));
-  const pct = Math.round(ratio * 100);
-  const deg = Math.round(ratio * 360);
+export function renderSignatureBloomSVG(filledCount = 4, totalPetals = 8, lightMode = true, userBalance = null) {
+  let balance = Number.isFinite(userBalance) ? userBalance : (filledCount > 8 ? filledCount : null);
+  let tierName = 'عضوية البتلة الفضية';
+  let pct = 0;
+  let deg = 0;
+
+  if (balance !== null) {
+    if (balance >= 500) {
+      tierName = 'عضوية بتلات VIP';
+      pct = 100;
+      deg = 360;
+    } else if (balance >= 200) {
+      tierName = 'عضوية الدلال الذهبي';
+      pct = Math.min(100, Math.round(((balance - 200) / 300) * 100));
+      deg = Math.round((pct / 100) * 360);
+    } else {
+      tierName = 'عضوية البتلة الفضية';
+      pct = Math.min(100, Math.round((balance / 200) * 100));
+      deg = Math.round((pct / 100) * 360);
+    }
+  } else {
+    const ratio = Math.max(0, Math.min(1, filledCount / Math.max(1, totalPetals)));
+    pct = Math.round(ratio * 100);
+    deg = Math.round(ratio * 360);
+    tierName = pct >= 80 ? 'عضوية بتلات VIP' : (pct >= 40 ? 'عضوية الدلال الذهبي' : 'عضوية البتلة الفضية');
+  }
 
   return `
     <div class="jb-luxury-medallion-card ${lightMode ? 'is-light' : 'is-dark'}" role="img" aria-label="وسام برنامج بتلات J الفاخر">
-      <div class="jb-medallion-beam" aria-hidden="true"></div>
-      <div class="jb-medallion-ring" style="--petal-deg:${deg}deg">
-        <div class="jb-medallion-core">
-          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="jb-medallion-logo">
+      <div class="jb-medallion-ring-wrap">
+        <div class="jb-medallion-beam" aria-hidden="true"></div>
+        <div class="jb-medallion-ring" style="--petal-deg:${deg}deg">
+          <div class="jb-medallion-core">
+            <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="jb-medallion-logo">
+          </div>
         </div>
       </div>
       <div class="jb-medallion-meta">
         <span class="jb-medallion-kicker">✦ J PETALS PRIVILÈGE ✦</span>
-        <strong class="jb-medallion-title">عضوية الدلال الذهبي</strong>
+        <strong class="jb-medallion-title">${tierName}</strong>
         <div class="jb-medallion-pill-row">
           <span class="jb-medallion-pill">1 ريال = 1 بتلة</span>
           <span class="jb-medallion-pill is-gold">${pct}% اكتمال</span>

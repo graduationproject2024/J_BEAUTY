@@ -77,8 +77,8 @@ export function evaluateNailPoint(shape, length, u) {
       };
     }
     case 'square': {
-      // Crisp straight sidewalls right to tiny corner micro-bevel at tip
-      const w = f > 0.93 ? 1.0 - 0.05 * Math.pow((f - 0.93) / 0.07, 2) : 1.0;
+      // Elegant salon soft square: straight crisp sidewalls with micro-rounded soft corners
+      const w = f > 0.88 ? 1.0 - 0.04 * Math.pow((f - 0.88) / 0.12, 1.8) : 1.0;
       return { w, zNorm: u, t: f, inFreeEdge: true, bedEnd };
     }
     default: {
@@ -213,29 +213,30 @@ export function buildSculptedNailGeometry(anchor, shape = 'almond', length = 'me
     }
   }
 
-  // Continuous closed manifold perimeter wall strip (shared indexed vertices along rim -> silky smooth normals, zero creases, and outward-facing quads)
+  // Dedicated perimeter wall vertices with sharp edge normal split (eliminates 45-deg crease & dark metallic shadow rims on dorsal polish)
   const wallTopIdx = [];
   const wallBotIdx = [];
 
+  const addWallPair = (topPt, botPt) => {
+    wallTopIdx.push(pushUniqueVertex(topPt));
+    wallBotIdx.push(pushUniqueVertex(botPt));
+  };
+
   // 1. Cuticle edge: iv = 0 .. vSteps - 1 (iu = 0)
   for (let iv = 0; iv < vSteps; iv++) {
-    wallTopIdx.push(topIdx[0][iv]);
-    wallBotIdx.push(botIdx[0][iv]);
+    addWallPair(topGrid[0][iv], botGrid[0][iv]);
   }
   // 2. Right lateral edge: iu = 0 .. uSteps - 1 (iv = vSteps)
   for (let iu = 0; iu < uSteps; iu++) {
-    wallTopIdx.push(topIdx[iu][vSteps]);
-    wallBotIdx.push(botIdx[iu][vSteps]);
+    addWallPair(topGrid[iu][vSteps], botGrid[iu][vSteps]);
   }
   // 3. Distal free-edge tip: iv = vSteps down to 1 (iu = uSteps)
   for (let iv = vSteps; iv > 0; iv--) {
-    wallTopIdx.push(topIdx[uSteps][iv]);
-    wallBotIdx.push(botIdx[uSteps][iv]);
+    addWallPair(topGrid[uSteps][iv], botGrid[uSteps][iv]);
   }
   // 4. Left lateral edge: iu = uSteps down to 1 (iv = 0)
   for (let iu = uSteps; iu > 0; iu--) {
-    wallTopIdx.push(topIdx[iu][0]);
-    wallBotIdx.push(botIdx[iu][0]);
+    addWallPair(topGrid[iu][0], botGrid[iu][0]);
   }
 
   const loopLen = wallTopIdx.length;

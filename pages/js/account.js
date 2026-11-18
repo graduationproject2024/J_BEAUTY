@@ -68,14 +68,14 @@ export function auth(mode = 'login') {
       )
     }
             ${field(
-      t('كلمة المرور (12 حرفاً على الأقل)', 'Password (min 12 characters)'),
+      t('كلمة المرور (8 أحرف على الأقل)', 'Password (min 8 characters)'),
       'password',
       'password',
       '',
-      `required minlength="12" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}"`,
+      `required minlength="8" autocomplete="${mode === 'login' ? 'current-password' : 'new-password'}"`,
     )}
             ${mode === 'register'
-      ? `${field(t('تأكيد كلمة المرور', 'Confirm password'), 'passwordConfirmation', 'password', '', 'required minlength="12" autocomplete="new-password"')}
+      ? `${field(t('تأكيد كلمة المرور', 'Confirm password'), 'passwordConfirmation', 'password', '', 'required minlength="8" autocomplete="new-password"')}
                    <label class="check">
                      <input type="checkbox" name="terms" required>
                      <span>${t('أوافق على الشروط وسياسة الخصوصية.', 'I agree to the terms and privacy notice.')} <a class="text-link" href="${href('terms')}">${t('اقرئي الشروط', 'Read terms')}</a></span>
@@ -141,7 +141,6 @@ export function bookingCard(b) {
         <strong><bdi>${money(b.total)}</bdi></strong>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           ${existingReview ? reviewModerationStatusBadge(existingReview) : ''}
-          ${b.invoice_pdf_url ? `<a class="btn small light" href="${esc(b.invoice_pdf_url)}" target="_blank" rel="noopener noreferrer">📄 ${t('فاتورة PDF', 'PDF Invoice')}</a>` : ''}
           ${canUploadReceipt ? `<button class="btn small sage" data-upload-receipt="${esc(b.reference)}" type="button">📤 ${b.receipt_uploaded ? t('تحديث إيصال الدفع', 'Update Receipt') : t('إرفاق إيصال الدفع', 'Upload Receipt')}</button>` : ''}
           <button class="btn small light" data-rebook="${esc(b.id)}" type="button">${t('إعادة الحجز', 'Rebook')}</button>
           ${canReview
@@ -205,7 +204,7 @@ export function petalsContent() {
             ${availableCount && !pendingReq ? `<span class='jb-rewards-available'>${availableCount === 1 ? t('مكافأة واحدة متاحة وفق رصيدك', '1 reward option within your balance') : t(`${num(availableCount)} مكافآت متاحة وفق رصيدك`, `${num(availableCount)} reward options within your balance`)}</span>` : ''}
             ${!state.user ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('register')}">${t('أنشئي حسابك', 'Create your account')}</a></div>` : ''}
           </div>
-          <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(filledPetals, 8, true)}</div>
+          <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(filledPetals, 8, true, hasLive ? balance : null)}</div>
         </div>
       </div>
       <div class='jb-rewards-aside'>

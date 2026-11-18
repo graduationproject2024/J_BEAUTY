@@ -455,13 +455,41 @@ export function createGiftRequest(db, helpers, user, body) {
   const personalMessage = optionalText(body.personal_message, 350);
   const theme = ['royal_gold', 'rose_petal', 'sage_silk'].includes(body.theme) ? body.theme : 'royal_gold';
 
-  const pkg = body.package_id ? helpers.packages().find((p) => p.id === body.package_id && p.active) : null;
-  const svc = !pkg && body.service_id ? helpers.services().find((s) => s.id === body.service_id && s.active) : null;
-  if (!pkg && !svc) fail('Choose a service or package to gift');
-
-  const chosen = pkg
-    ? { kind: 'package', id: pkg.id, name_ar: pkg.name_ar, name_en: pkg.name_en, price: pkg.price }
-    : { kind: 'service', id: svc.id, name_ar: svc.name_ar, name_en: svc.name_en, price: svc.price };
+  let chosen = null;
+  if (Array.isArray(body.service_ids) && body.service_ids.length > 0) {
+    const allServices = helpers.services();
+    const chosenSvcs = body.service_ids
+      .map((sid) => allServices.find((s) => s.id === sid && s.active))
+      .filter(Boolean);
+    if (!chosenSvcs.length) fail('Choose valid services for the custom package');
+    const totalPrice = chosenSvcs.reduce((acc, s) => acc + Number(s.price), 0);
+    const namesAr = chosenSvcs.map((s) => s.name_ar).join(' + ');
+    const namesEn = chosenSvcs.map((s) => s.name_en || s.name_ar).join(' + ');
+    chosen = {
+      kind: 'custom_package',
+      id: 'custom-' + uid(),
+      name_ar: `باقة إهداء مخصصة (${namesAr})`,
+      name_en: `Bespoke Gift Package (${namesEn})`,
+      price: totalPrice,
+      service_ids: chosenSvcs.map((s) => s.id),
+    };
+  } else if (body.voucher_amount && Number(body.voucher_amount) >= 100) {
+    const val = Math.round(Number(body.voucher_amount));
+    chosen = {
+      kind: 'voucher',
+      id: 'voucher-' + val,
+      name_ar: `قسيمة إهداء فاخرة بقيمة ${val} ر.س`,
+      name_en: `Luxury Gift Voucher (${val} SAR)`,
+      price: val,
+    };
+  } else {
+    const pkg = body.package_id ? helpers.packages().find((p) => p.id === body.package_id && p.active) : null;
+    const svc = !pkg && body.service_id ? helpers.services().find((s) => s.id === body.service_id && s.active) : null;
+    if (!pkg && !svc) fail('Choose a service, package, or custom gift selection');
+    chosen = pkg
+      ? { kind: 'package', id: pkg.id, name_ar: pkg.name_ar, name_en: pkg.name_en, price: pkg.price }
+      : { kind: 'service', id: svc.id, name_ar: svc.name_ar, name_en: svc.name_en, price: svc.price };
+  }
 
   const id = uid();
   const reference = `GIFT-${randomBytes(4).toString('hex').toUpperCase()}`;
@@ -479,9 +507,11 @@ export function createGiftRequest(db, helpers, user, body) {
     chosen,
     value: chosen.price,
     estimated_amount: chosen.price,
-    status: 'approved_ready',
+    status: 'pending_payment',
     payment_verified: false,
     redeemed: false,
+    receipt_uploaded: Boolean(body.receipt_file),
+    transfer_ref: body.transfer_ref ? String(body.transfer_ref).trim().slice(0, 80) : '',
     created_at: now(),
   };
 

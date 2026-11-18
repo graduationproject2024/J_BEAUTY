@@ -339,7 +339,12 @@ try {
       },
       [200, 201],
     );
-    assert.equal(g1.gift_request.status, 'approved_ready');
+    assert.equal(g1.gift_request.status, 'pending_payment');
+    // Owner approves gift request after payment verification
+    await owner.call(`/api/ops/gift-requests/${g1.gift_request.id}`, {
+      status: 'approved_ready',
+      payment_verified: true,
+    });
     const code1 = g1.gift_request.gift_code;
     assert.ok(code1.startsWith('JGIFT-'));
 

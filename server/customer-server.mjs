@@ -240,7 +240,7 @@ export function createCustomerApp({
       let body;
       if (!['GET', 'HEAD'].includes(method)) {
         const expectedOrigin = `${secure ? 'https' : 'http'}://${req.headers.host}`;
-        const isReceiptRoute = /^\/api\/bookings\/[^/]+\/receipt$/.test(route);
+        const isReceiptRoute = /^\/api\/(bookings|gift-requests)\/[^/]+\/receipt$/.test(route);
         body = await parseMutationRequest(
           req,
           session.csrf,
@@ -360,17 +360,21 @@ export function createCustomerApp({
           role: 'customer',
           verified: 0,
         };
-        db.run(
-          'INSERT INTO users(id,name,phone,password,role,verified,created_at) VALUES(?,?,?,?,?,?,?)',
-          u.id,
-          u.name,
-          u.phone,
-          u.password,
-          'customer',
-          0,
-          now(),
-        );
-        helpers.audit(u, 'account.register', u.id);
+        db.tx(() => {
+          db.run(
+            'INSERT INTO users(id,name,phone,password,role,verified,created_at) VALUES(?,?,?,?,?,?,?)',
+            u.id,
+            u.name,
+            u.phone,
+            u.password,
+            'customer',
+            0,
+            now(),
+          );
+          // Award 50 welcome petals immediately upon registration
+          helpers.recordLedger(u.id, null, 50, `welcome:${u.id}`, 'welcome_bonus');
+          helpers.audit(u, 'account.register', u.id, JSON.stringify({ welcome_petals: 50 }));
+        });
         return send(rotateCustomerSession(u), 201);
       }
 
@@ -551,6 +555,9 @@ export function createCustomerApp({
           if (gift.status === 'redeemed' || gift.redeemed) {
             fail('تم استخدام بطاقة الإهداء هذه مسبقاً.', 400);
           }
+          if (gift.status === 'pending_payment' || !gift.payment_verified) {
+            fail('بطاقة الإهداء بانتظار تأكيد التحويل البنكي والاعتماد من الإدارة قبل تفعيلها.', 400);
+          }
           const giftVal = Number(gift.estimated_amount || gift.chosen?.price || 0);
           const discountAmount = Math.min(spend > 0 ? spend : giftVal, giftVal);
           return send({
@@ -637,6 +644,23 @@ export function createCustomerApp({
       if (method === 'POST' && route === '/api/gift-requests') {
         checkRate(`gift:${req.socket.remoteAddress}`, 15, 3600000);
         return send(createGiftRequest(db, helpers, user, body), 201);
+      }
+
+      if (method === 'POST' && /^\/api\/gift-requests\/[^/]+\/receipt$/.test(route)) {
+        checkRate(`gift-receipt:${req.socket.remoteAddress}`, 20, 3600000);
+        const giftId = route.split('/')[3];
+        const row = db.get('SELECT id, data FROM gift_requests WHERE id=? OR reference=?', giftId, giftId);
+        if (!row) fail('Gift request not found', 404);
+        const fileData = String(body.file_data || '');
+        if (!fileData) fail('Receipt file is required', 400);
+        const gf = JSON.parse(row.data);
+        gf.receipt_uploaded = true;
+        gf.receipt_file = fileData.slice(0, 500);
+        gf.transfer_ref = body.transfer_ref ? String(body.transfer_ref).trim().slice(0, 80) : (gf.transfer_ref || '');
+        gf.sender_account = body.sender_name ? String(body.sender_name).trim().slice(0, 100) : (gf.sender_account || '');
+        db.run('UPDATE gift_requests SET data=? WHERE id=?', JSON.stringify(gf), row.id);
+        helpers.audit(user, 'gift.receipt_uploaded', row.id, JSON.stringify({ transfer_ref: gf.transfer_ref }));
+        return send({ ok: true });
       }
 
       if (method === 'GET' && route === '/api/account') {

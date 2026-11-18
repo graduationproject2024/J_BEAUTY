@@ -19,6 +19,7 @@ import { isWheelVisible } from './wheel.js';
 const MOODS = [
   {
     id: 'unwind',
+    icon: '🌿',
     ar: 'أرغب في الاسترخاء',
     en: 'Unwind & Release',
     sub_ar: 'جلسات مساج هادئة لتخفيف التوتر واستعادة التوازن.',
@@ -27,6 +28,7 @@ const MOODS = [
   },
   {
     id: 'pamper',
+    icon: '🌸',
     ar: 'أبحث عن لحظة عناية خاصة',
     en: 'Personal Pampering',
     sub_ar: 'تجمع بين الاسترخاء الجسدي والعناية المتكاملة باليدين والقدمين.',
@@ -35,6 +37,7 @@ const MOODS = [
   },
   {
     id: 'nails',
+    icon: '💅',
     ar: 'أرغب في تجديد إطلالة أظافري',
     en: 'Refresh My Nails',
     sub_ar: 'طلاء جل، فرنش كلاسيكي، أو أطراف ملونة بتصميمك.',
@@ -43,6 +46,7 @@ const MOODS = [
   },
   {
     id: 'occasion',
+    icon: '✨',
     ar: 'أستعد لمناسبة خاصة',
     en: 'Special Occasion Prep',
     sub_ar: 'إطلالة أظافر فرنسية متقنة مع عناية شاملة تليق بمناسبتك.',
@@ -144,7 +148,10 @@ export function home() {
             ${MOODS.map(
               (m) => `
               <button type="button" class="mood-btn ${state.homeMood === m.id ? 'active' : ''}" data-mood-pick="${m.id}">
-                <strong>${t(m.ar, m.en)}</strong>
+                <div class="row" style="gap:8px;align-items:center;margin-bottom:2px">
+                  <span style="font-size:20px;line-height:1">${m.icon}</span>
+                  <strong>${t(m.ar, m.en)}</strong>
+                </div>
                 <span>${t(m.sub_ar, m.sub_en)}</span>
               </button>
             `,
@@ -179,7 +186,7 @@ export function home() {
           </div>
           <ol class="visit-timeline">
             ${[
-              ['01', 'calendar', t('تقديم الطلب', 'Request Online'), t('اختاري فئة الخدمة والموعد المفضل في المدينة المنورة.', 'Select your service category and preferred time in Madinah.')],
+              ['01', 'calendar', t('تقديم الطلب', 'Request Online'), t('اختاري فئة الخدمة والموعد والحي المفضل بكل يسر وسهولة.', 'Select your service category, preferred time, and neighborhood.')],
               ['02', 'user', t('تأكيد الفريق', 'Team Confirmation'), t('تتواصل الموظفة عبر واتساب لمراجعة السعة وتأكيد الموعد.', 'Our team checks neighborhood capacity and confirms via WhatsApp.')],
               ['03', 'spark', t('تهيئة مستلزمات الزيارة', 'Calm Preparation'), t('نصل بمستلزمات نظيفة ومرتبة تلائم خصوصية منزلك.', 'Fresh linens and neatly prepared tools arrive at your home.')],
               ['04', 'check', t('الخدمة واحتساب البتلات', 'Service & Petals'), t('تستمتعين بجلستك، وتُضاف البتلات تلقائياً بعد إتمام الزيارة والدفع.', 'Relax in complete privacy; Petals credit after completed payment.')],
@@ -226,7 +233,7 @@ export function home() {
                   <span class="mini-foil-badge">VIP GIFT</span>
                 </div>
                 <div class="mini-foil-title">J Beauty Home Spa</div>
-                <div class="mini-foil-sub">${t('بطاقة دلال منزلية · المدينة المنورة', 'Luxury Home Spa Gift · Al Madinah')}</div>
+                <div class="mini-foil-sub">${t('بطاقة دلال منزلية فاخرة', 'Luxury Home Spa Gift Voucher')}</div>
                 <div class="mini-foil-code">JGIFT-••••-••••</div>
               </div>
             </div>
@@ -293,7 +300,7 @@ export function home() {
         <section class="cta-band" data-reveal>
           <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="cta-band-emblem">
           <span class="eyebrow">${t('✦ تجربة دلال منزلية استثنائية · سيدات فقط ✦', 'EXCLUSIVE WOMEN’S HOME SPA SANCTUARY')}</span>
-          <h2>${t('احجزي طقسك المنزلي الفاخر في المدينة المنورة', 'Reserve your calm moment at home')}</h2>
+          <h2>${t('احجزي طقسك المنزلي الفاخر', 'Reserve your calm moment at home')}</h2>
           <p>${t('خدمات سبا ومساج وعناية أظافر متكاملة تصلك إلى راحة منزلك، بأيدي خبيرات محترفات، حقائب وأدوات معقمة بالكامل وفق أعلى معايير الصالونات العالمية، لتستمتعي بلحظة هدوء واسترخاء تليق بك.', 'Curated home spa, therapeutic massage, and couture nail rituals delivered to your door with hospital-grade sanitization and five-star care.')}</p>
           <div class="cta-features-grid">
             <span class="cta-feature-pill">🌸 ${t('سيدات فقط وخصوصية تامة', 'Women only · Complete privacy')}</span>
@@ -332,7 +339,7 @@ export function services() {
     <main id="main" class="wrap">
       ${head(
         t('خدماتنا المنزلية', 'Home Spa & Nail Rituals'),
-        t('13 خدمة مصممة لعناية مريحة ومتكاملة للسيدات في المدينة المنورة.', '13 women-only treatments crafted for comfort and calm care at home in Madinah.'),
+        t('13 خدمة مصممة لعناية مريحة ومتكاملة للسيدات بتفاصيل استثنائية.', '13 women-only treatments crafted for comfort and calm care at home.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('الخدمات', 'Services'), '']],
       )}
       ${provisional()}

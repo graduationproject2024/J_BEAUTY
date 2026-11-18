@@ -358,8 +358,8 @@ export function reviewsContent(reviews = [], fallbackAsTrust = false) {
   `;
 }
 
-export const petalBloomSVG = (filledCount = 4, totalPetals = 8, lightMode = false) =>
-  renderSignatureBloomSVG(filledCount, totalPetals, lightMode);
+export const petalBloomSVG = (filledCount = 4, totalPetals = 8, lightMode = false, userBalance = null) =>
+  renderSignatureBloomSVG(filledCount, totalPetals, lightMode, userBalance);
 
 export function statusBadge(s) {
   const map = {

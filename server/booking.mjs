@@ -252,6 +252,9 @@ export function createBooking(db, helpers, user, sessionId, body) {
       if (gift.status === 'redeemed' || gift.redeemed) {
         fail('تم استخدام كود بطاقة الإهداء هذه مسبقاً.', 400);
       }
+      if (gift.status === 'pending_payment' || !gift.payment_verified) {
+        fail('بطاقة الإهداء بانتظار تأكيد التحويل البنكي وتفعيلها من الإدارة قبل الاستخدام.', 400);
+      }
       const giftVal = Number(gift.estimated_amount || gift.chosen?.price || 0);
       appliedCoupon = gift.gift_code || gift.reference;
       discountAmount = Math.min(subtotal, giftVal);

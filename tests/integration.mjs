@@ -176,9 +176,10 @@ try {
   });
 
   await test('Pending and confirmed bookings earn zero points', async () => {
-    assert.equal((await customer.call('/api/account')).balance, 0);
+    // Registered customer starts with 50 welcome petals bonus
+    assert.equal((await customer.call('/api/account')).balance, 50);
     await owner.call(`/api/ops/bookings/${bid}`, { status: 'confirmed' });
-    assert.equal((await customer.call('/api/account')).balance, 0);
+    assert.equal((await customer.call('/api/account')).balance, 50);
   });
 
   await test('Staff capacity prevents overlapping confirmations', async () => {
@@ -190,14 +191,14 @@ try {
   await test('Completed unpaid booking earns zero points', async () => {
     await owner.call(`/api/ops/bookings/${bid}`, { status: 'in_progress' });
     await owner.call(`/api/ops/bookings/${bid}`, { status: 'completed' });
-    assert.equal((await customer.call('/api/account')).balance, 0);
+    assert.equal((await customer.call('/api/account')).balance, 50);
   });
 
   await test('Verified payment awards actual spend and repeated save is idempotent', async () => {
     await owner.call(`/api/ops/bookings/${bid}`, { paid_amount: 250, payment_method: 'cash', payment_verified: true });
-    assert.equal((await customer.call('/api/account')).balance, 250);
+    assert.equal((await customer.call('/api/account')).balance, 300);
     await owner.call(`/api/ops/bookings/${bid}`, { paid_amount: 250, payment_method: 'cash', payment_verified: true });
-    assert.equal((await customer.call('/api/account')).balance, 250);
+    assert.equal((await customer.call('/api/account')).balance, 300);
     const adm = await owner.call('/api/ops/dashboard');
     const pay = adm.payments.find((x) => x.booking_id === bid);
     assert.ok(pay && pay.payment_verified_at);
@@ -238,9 +239,9 @@ try {
     const pending = admin.reward_requests.find((x) => x.user_id === user.id);
     const b = await customer.call('/api/bookings', { ...request, time: '18:00', idempotency_key: 'reward-booking-001' });
     await owner.call(`/api/ops/rewards/${pending.id}`, { booking_id: b.booking.id, action: 'commit' });
-    assert.equal((await customer.call('/api/account')).balance, 50);
+    assert.equal((await customer.call('/api/account')).balance, 100);
     assert.ok((await owner.call(`/api/ops/rewards/${pending.id}`, { booking_id: b.booking.id, action: 'commit' }, null)).status >= 400);
-    assert.equal((await customer.call('/api/account')).balance, 50);
+    assert.equal((await customer.call('/api/account')).balance, 100);
   });
 
   await test('Unauthenticated ops dashboard request rejected', async () => {
@@ -327,7 +328,7 @@ try {
       service_id: 'relaxation',
       terms: true,
     });
-    assert.equal(gf.gift_request.status, 'approved_ready');
+    assert.equal(gf.gift_request.status, 'pending_payment');
     assert.ok(String(gf.gift_request.gift_code || '').startsWith('JGIFT-'));
     await owner.call(`/api/ops/gift-requests/${gf.gift_request.id}`, { status: 'approved_ready', payment_verified: true });
   });

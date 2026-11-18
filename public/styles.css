@@ -2483,15 +2483,16 @@ dialog::backdrop {
 
 .mood-btn {
   text-align: start;
-  padding: 14px 16px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border);
-  background: var(--ivory);
+  padding: 16px 18px;
+  border-radius: var(--r-lg);
+  border: 1.5px solid rgba(212, 175, 124, 0.35);
+  background: #FFFFFF;
   color: var(--charcoal);
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  transition: border-color var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+  gap: 5px;
+  box-shadow: 0 4px 14px rgba(62, 41, 50, 0.04);
+  transition: all var(--dur) var(--ease-out);
 }
 
 .mood-btn strong {
@@ -2503,17 +2504,19 @@ dialog::backdrop {
 .mood-btn span {
   font-size: 13px;
   color: var(--ink-muted);
+  line-height: 1.5;
 }
 
 .mood-btn:hover {
-  border-color: var(--plum);
+  border-color: var(--rose-gold);
   transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(212, 175, 124, 0.2);
 }
 
 .mood-btn.active {
-  background: var(--blush-tint);
-  border-color: var(--plum);
-  box-shadow: 0 6px 18px rgba(80, 60, 69, 0.08);
+  background: linear-gradient(135deg, #FFFFFF, var(--blush-tint));
+  border-color: var(--rose-gold);
+  box-shadow: 0 8px 24px rgba(212, 175, 124, 0.24);
 }
 
 .mood-result {
@@ -4492,28 +4495,27 @@ dialog::backdrop {
 
 /* ===== J BEAUTY SPA BRAND & WHEEL OF REWARDS EXTENSIONS ===== */
 .brand-official-logo {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   flex-shrink: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1.5px solid rgba(212, 175, 124, 0.45);
-  box-shadow: 0 3px 12px rgba(212, 175, 124, 0.22);
-  padding: 2px;
-  transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  mix-blend-mode: multiply;
+  transition: transform var(--dur) var(--ease-out);
 }
 
 .brand:hover .brand-official-logo {
-  transform: scale(1.06);
-  box-shadow: 0 4px 16px rgba(212, 175, 124, 0.35);
+  transform: scale(1.05);
 }
 
 @media (max-width: 640px) {
   .brand-official-logo {
     width: 40px;
     height: 40px;
-    padding: 1px;
   }
 }
 
@@ -4827,12 +4829,23 @@ body {
   overflow: hidden;
   text-align: center;
 }
+.jb-medallion-ring-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+}
 .jb-medallion-beam {
   position: absolute;
-  inset: -40%;
-  background: conic-gradient(from 0deg, transparent 0deg, rgba(212, 175, 124, 0.22) 60deg, transparent 120deg, rgba(217, 183, 192, 0.22) 210deg, transparent 290deg);
-  animation: jbOrbitSpin 12s linear infinite;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(212, 175, 124, 0.65) 60deg, transparent 120deg, rgba(217, 183, 192, 0.6) 210deg, transparent 290deg);
+  animation: jbOrbitSpin 8s linear infinite;
   pointer-events: none;
+  filter: blur(5px);
+  z-index: 0;
 }
 @keyframes jbOrbitSpin {
   to { transform: rotate(360deg); }

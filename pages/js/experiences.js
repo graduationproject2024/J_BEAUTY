@@ -657,82 +657,129 @@ function renderLuxuryGiftCardHtml({ themeId = 'royal_gold', senderName = '', rec
   `;
 }
 
-function downloadGiftCardPng(gift) {
+async function downloadGiftCardPng(gift) {
   const th = GIFT_THEMES.find((x) => x.id === (gift.theme || 'royal_gold')) || GIFT_THEMES[0];
   const canvas = document.createElement('canvas');
   canvas.width = 1200;
-  canvas.height = 720;
+  canvas.height = 760;
   const ctx = canvas.getContext('2d');
 
-  // Background gradient
-  const grad = ctx.createLinearGradient(0, 0, 1200, 720);
-  if (th.id === 'royal_gold') {
-    grad.addColorStop(0, '#3E2932');
-    grad.addColorStop(0.55, '#593947');
-    grad.addColorStop(1, '#2B1B22');
-  } else if (th.id === 'rose_petal') {
-    grad.addColorStop(0, '#F5E9EC');
-    grad.addColorStop(0.55, '#D9B7C0');
-    grad.addColorStop(1, '#C9AEB6');
-  } else {
-    grad.addColorStop(0, '#EBF2E8');
-    grad.addColorStop(0.6, '#A7B79F');
-    grad.addColorStop(1, '#7D9476');
-  }
+  // Asynchronously load the official brand logo
+  const logoImg = new Image();
+  logoImg.crossOrigin = 'anonymous';
+  await new Promise((resolve) => {
+    logoImg.onload = resolve;
+    logoImg.onerror = resolve;
+    logoImg.src = '/J_BEAUTY/apps/customer/assets/brand/official-logo.png';
+  });
+
+  // Background deep royal velvet plum gradient
+  const grad = ctx.createLinearGradient(0, 0, 1200, 760);
+  grad.addColorStop(0, '#24141D');
+  grad.addColorStop(0.5, '#3A202E');
+  grad.addColorStop(1, '#1C0D16');
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 1200, 720);
+  ctx.fillRect(0, 0, 1200, 760);
 
-  // Rose gold luxury double border
+  // Soft warm radial spotlight
+  const radial = ctx.createRadialGradient(600, 380, 40, 600, 380, 560);
+  radial.addColorStop(0, 'rgba(212, 175, 124, 0.16)');
+  radial.addColorStop(1, 'transparent');
+  ctx.fillStyle = radial;
+  ctx.fillRect(0, 0, 1200, 760);
+
+  // Luxury Rose Gold Double Filigree Border
   ctx.strokeStyle = '#D4AF7C';
-  ctx.lineWidth = 5;
-  ctx.strokeRect(28, 28, 1144, 664);
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(42, 42, 1116, 636);
+  ctx.lineWidth = 4;
+  ctx.strokeRect(32, 32, 1136, 696);
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(44, 44, 1112, 672);
 
-  const ink = th.id === 'royal_gold' ? '#FAF7F5' : '#3E2932';
-  const accent = th.id === 'royal_gold' ? '#D4AF7C' : '#3E2932';
+  // Corner decorative flourishes
+  const drawCornerFlourish = (x, y, flipX, flipY) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(flipX, flipY);
+    ctx.strokeStyle = '#D4AF7C';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(14, 38);
+    ctx.lineTo(14, 14);
+    ctx.lineTo(38, 14);
+    ctx.moveTo(22, 22);
+    ctx.arc(22, 22, 3, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  };
+  drawCornerFlourish(44, 44, 1, 1);
+  drawCornerFlourish(1156, 44, -1, 1);
+  drawCornerFlourish(44, 716, 1, -1);
+  drawCornerFlourish(1156, 716, -1, -1);
 
+  // Centered Official Logo inside golden halo circle
+  if (logoImg.complete && logoImg.naturalWidth > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(600, 120, 48, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+    ctx.strokeStyle = '#D4AF7C';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.clip();
+    ctx.drawImage(logoImg, 600 - 45, 120 - 45, 90, 90);
+    ctx.restore();
+  }
+
+  // Header Typography
   ctx.textAlign = 'center';
-  ctx.fillStyle = accent;
-  ctx.font = 'bold 26px "IBM Plex Sans Arabic", sans-serif';
-  ctx.fillText('✦  J BEAUTY HOME SPA  ✦', 600, 115);
+  ctx.fillStyle = '#D4AF7C';
+  ctx.font = 'bold 20px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText('✦  J BEAUTY HOME SPA  ✦', 600, 198);
 
-  ctx.fillStyle = ink;
-  ctx.font = 'bold 52px "Noto Naskh Arabic", "IBM Plex Sans Arabic", serif';
-  ctx.fillText(`إهداء فاخر إلى ${gift.recipient_name || ''}`, 600, 225);
+  ctx.font = '22px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText('بطاقة إهداء فاخرة  ·  LUXURY GIFT VOUCHER', 600, 230);
 
-  ctx.font = '28px "IBM Plex Sans Arabic", sans-serif';
+  // Recipient Calligraphy Title
+  ctx.fillStyle = '#FAF7F5';
+  ctx.font = 'bold 42px "Noto Naskh Arabic", "IBM Plex Sans Arabic", serif';
+  ctx.fillText(`مُهداة بكل محبة إلى: ${gift.recipient_name || ''}`, 600, 305);
+
+  // Message in elegant italic quote
+  ctx.fillStyle = '#D9B7C0';
+  ctx.font = 'italic 23px "IBM Plex Sans Arabic", sans-serif';
   const quote = gift.personal_message || 'لحظة دلال وهدوء فاخرة تستحقينها في راحة منزلك';
-  ctx.fillText(`"${quote.slice(0, 68)}"`, 600, 305);
+  ctx.fillText(`“${quote.slice(0, 85)}”`, 600, 365);
 
-  // Selected service pill
-  ctx.fillStyle = th.id === 'royal_gold' ? 'rgba(212,175,124,0.18)' : 'rgba(255,255,255,0.65)';
-  ctx.fillRect(220, 360, 760, 86);
+  // Ritual / Experience Pill (NO PRICE DISPLAYED!)
+  ctx.fillStyle = 'rgba(212, 175, 124, 0.16)';
+  ctx.fillRect(240, 410, 720, 72);
   ctx.strokeStyle = '#D4AF7C';
   ctx.lineWidth = 2;
-  ctx.strokeRect(220, 360, 760, 86);
+  ctx.strokeRect(240, 410, 720, 72);
 
-  ctx.fillStyle = ink;
-  ctx.font = 'bold 30px "IBM Plex Sans Arabic", sans-serif';
-  ctx.fillText(`${gift.chosen?.name_ar || ''}  ·  ${gift.estimated_amount || gift.value || 0} ر.س`, 600, 414);
+  ctx.fillStyle = '#FAF7F5';
+  ctx.font = 'bold 26px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText(`✨ ${gift.chosen?.name_ar || 'جلسة عناية فاخرة خاصة'} ✨`, 600, 456);
 
-  // Gift code highlight box
+  // Gift Code Box (Golden Seal Style)
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(360, 488, 480, 92);
+  ctx.fillRect(350, 515, 500, 96);
   ctx.strokeStyle = '#D4AF7C';
   ctx.lineWidth = 3;
-  ctx.strokeRect(360, 488, 480, 92);
+  ctx.strokeRect(350, 515, 500, 96);
 
   ctx.fillStyle = '#6B6464';
-  ctx.font = '20px "IBM Plex Sans Arabic", sans-serif';
-  ctx.fillText('كود الإهداء الفوري (يُستخدم مباشرة عند الحجز)', 600, 520);
+  ctx.font = '19px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText('كود الإهداء الحصري (يُستخدم مباشرة عند حجز الموعد)', 600, 548);
   ctx.fillStyle = '#3E2932';
-  ctx.font = 'bold 34px monospace';
-  ctx.fillText(gift.gift_code || gift.reference || '', 600, 564);
+  ctx.font = 'bold 36px monospace';
+  ctx.fillText(gift.gift_code || gift.reference || '', 600, 594);
 
-  ctx.fillStyle = ink;
-  ctx.font = '24px "IBM Plex Sans Arabic", sans-serif';
-  ctx.fillText(`بكل محبة من: ${gift.sender_name || ''}  ·  المدينة المنورة`, 600, 646);
+  // Footer: Sender Line (NO "المدينة المنورة"!)
+  ctx.fillStyle = '#D4AF7C';
+  ctx.font = '22px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText(`بكل مودة وتقدير من: ${gift.sender_name || ''}`, 600, 665);
 
   const link = document.createElement('a');
   link.download = `J-Beauty-Gift-${gift.gift_code || gift.reference}.png`;
@@ -743,18 +790,25 @@ function downloadGiftCardPng(gift) {
 export function giftsPage() {
   const packages = state.catalog.packages || [];
   const services = state.catalog.services || [];
+  const s = state.catalog?.settings || {};
 
   if (state.giftResult) {
     const r = state.giftResult;
     const gf = r.gift_request || {};
     const giftCode = r.gift_code || gf.gift_code || gf.reference;
+    const isApproved = gf.status === 'approved_ready' && gf.payment_verified;
+    const receiptDone = Boolean(state.giftReceiptDone || gf.receipt_uploaded);
+
     return `
       <main id="main" class="wrap">
         <div class="luxury-confirm-shell" data-reveal>
           <div class="luxury-confirm-header">
-            <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم إصدار بطاقة الإهداء بنجاح', 'DIGITAL GIFT CARD ISSUED')} ✦</span>
-            <h1>${t('بطاقة الإهداء جاهزة للإرسال الآن 🎁', 'Your Luxury Gift Card Is Ready 🎁')}</h1>
-            <p class="muted">${t('تم تفعيل كود الإهداء تلقائياً في النظام! يمكن للمستفيدة إدخال الكود مباشرة في صفحة الحجز وسيتم التحقق منه وتطبيقه فوراً.', 'Your gift code is automatically active in our system and ready for immediate redemption at booking!')}</p>
+            <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم تسجيل طلب بطاقة الإهداء الفاخرة', 'LUXURY GIFT CARD REGISTERED')} ✦</span>
+            <h1>${t('بطاقة الإهداء الخاصة بك 🎁', 'Your Luxury Gift Card 🎁')}</h1>
+            <p class="muted">${t(
+              'لإتمام تفعيل كود الإهداء، يرجى إتمام التحويل البنكي وإرفاق الإيصال أدناه أو إرساله للإدارة عبر واتساب ليتم تفعيل الكود فوراً للاستخدام عند الحجز.',
+              'To activate your gift card, please complete the bank transfer and submit the receipt below or send it via WhatsApp.',
+            )}</p>
           </div>
 
           <div style="max-width:680px;margin:0 auto 24px">
@@ -767,6 +821,65 @@ export function giftsPage() {
               giftPrice: gf.estimated_amount || gf.value,
               code: giftCode,
             })}
+          </div>
+
+          <div class="luxury-confirm-grid" style="max-width:880px;margin:0 auto 28px">
+            <div class="card luxury-confirm-card">
+              <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('بيانات التحويل البنكي', 'BANK TRANSFER DETAILS')} ✦</span>
+              <h3 style="margin-top:6px">${t('تفاصيل سداد الإهداء', 'Gift Payment Details')}</h3>
+              <div class="summary-line"><span>${t('المُهدى إليها', 'Recipient')}</span><strong>${esc(gf.recipient_name)}</strong></div>
+              <div class="summary-line"><span>${t('الهدية المختارة', 'Gift Choice')}</span><strong>${esc(gf.chosen?.name_ar || '')}</strong></div>
+              <div class="summary-line summary-total"><span>${t('المبلغ المطلوب', 'Amount Due')}</span><span>${money(gf.value || gf.estimated_amount || 0)}</span></div>
+              <div class="bank-mini-box" style="margin-top:14px">
+                <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                  <span><strong>${t('البنك:', 'Bank:')}</strong> ${esc(s.bank_name || 'مصرف الراجحي')}</span>
+                  <span class="muted" style="font-size:12px">✦ ${t('تحويل بنكي فوري', 'Bank Transfer')}</span>
+                </div>
+                <div><strong>${t('المستفيد:', 'Account:')}</strong> ${esc(s.bank_account_holder || 'مؤسسة J Beauty Spa')}</div>
+                <div class="row" style="justify-content:space-between;align-items:center;background:#fff;padding:8px 12px;border-radius:var(--r-sm);border:1px dashed var(--rose-gold);margin-top:4px;gap:8px">
+                  <div>
+                    <span style="font-size:12px;display:block;color:var(--text-dark)">IBAN:</span>
+                    <bdi dir="ltr" class="mono" style="font-weight:700;letter-spacing:0.04em;color:var(--plum)" id="gift-iban-text">${esc(s.bank_iban || 'SA0380000000000000000000')}</bdi>
+                  </div>
+                  <button type="button" class="btn small light" id="copy-gift-iban-btn" style="padding:4px 10px;font-size:12px;white-space:nowrap">📋 ${t('نسخ الآيبان', 'Copy IBAN')}</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card luxury-confirm-card">
+              <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('توثيق سداد الهدية', 'PAYMENT VERIFICATION')} ✦</span>
+              <h3 style="margin-top:6px">${t('إرفاق إيصال الدفع للهدية', 'Attach Payment Receipt')}</h3>
+              <p class="muted" style="font-size:14px">${t('ارفعي إيصال التحويل البنكي هنا ليتم اعتماد وتفعيل بطاقة الإهداء فوراً من الإدارة.', 'Upload bank receipt to activate the gift card.')}</p>
+              ${
+                receiptDone
+                  ? `<div class="success" style="margin-top:14px">
+                       <strong>✓ ${t('تم استلام إيصال التحويل بنجاح!', 'Payment Receipt Uploaded!')}</strong>
+                       <p style="margin:6px 0 0;font-size:13.5px">${t('وصل الإيصال لمنصة الإدارة وجاري مراجعته وتفعيل كود الإهداء.', 'Your receipt is now with the management for activation.')}</p>
+                     </div>`
+                  : `
+                    <form id="gift-receipt-upload-form" data-gift-id="${esc(gf.id || giftCode)}" style="margin-top:14px;display:grid;gap:10px">
+                      <div id="gift-receipt-error" role="alert"></div>
+                      <label class="field" style="margin:0">
+                        ${t('اسم المحوّل (اختياري)', 'Sender Name (optional)')}
+                        <input type="text" name="sender_name" value="${esc(gf.sender_name || '')}" maxlength="100">
+                      </label>
+                      <label class="field" style="margin:0">
+                        ${t('رقم العملية المرجعي (اختياري)', 'Transfer Reference (optional)')}
+                        <input type="text" name="transfer_ref" placeholder="${t('مثال: TRF-982341', 'e.g. TRF-982341')}" maxlength="80">
+                      </label>
+                      <div class="field" style="margin:0">
+                        <label class="receipt-dropzone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 12px;border:1.5px dashed var(--rose-gold);border-radius:var(--r-md);background:var(--cream-bg);cursor:pointer;text-align:center;position:relative">
+                          <span style="font-size:24px;margin-bottom:4px">🧾</span>
+                          <strong id="gift-file-label" style="font-size:13px;color:var(--plum)">${t('اضغطي هنا لاختيار صورة الإيصال أو PDF', 'Choose receipt image or PDF')}</strong>
+                          <small class="muted" style="font-size:11.5px;margin-top:4px">${t('يدعم JPG, PNG, WEBP, PDF بحد أقصى 2MB', 'Supports JPG, PNG, WEBP, PDF up to 2MB')}</small>
+                          <input type="file" id="gift-receipt-file-input" name="receipt_file" accept="image/png,image/jpeg,image/webp,application/pdf" required style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+                        </label>
+                      </div>
+                      <button type="submit" class="btn sage" style="width:100%">📤 ${t('إرسال إيصال السداد للإدارة', 'Submit Payment Receipt')}</button>
+                    </form>
+                  `
+              }
+            </div>
           </div>
 
           <div class="hero-actions" style="justify-content:center;gap:12px;flex-wrap:wrap">
@@ -787,7 +900,7 @@ export function giftsPage() {
     <main id="main" class="wrap">
       ${head(
         t('أهدي لحظة عناية فاخرة', 'Gift a Luxury Ritual'),
-        t('صمّمي بطاقة إهداء إلكترونية فاخرة تُصدر فوراً بكود تفعيل آلي يُستخدم مباشرة في الحجز بدون انتظار.', 'Design a bespoke luxury digital gift card with an instant auto-verified code ready for immediate booking.'),
+        t('صمّمي بطاقة إهداء إلكترونية فاخرة باسم من تحبين ورسالتك الخاصة، تفعّل فورياً بعد التحويل البنكي.', 'Design a bespoke luxury digital gift card with your personal dedication, activated upon verified transfer.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('أهدي لحظة عناية', 'Gift a Ritual'), '']],
       )}
       <div class="gift-studio-grid">
@@ -811,7 +924,7 @@ export function giftsPage() {
             code: 'JGIFT-••••-••••',
           })}
           <p class="muted" style="text-align:center;font-size:13px;margin-top:12px">
-            ✨ ${t('بمجرد الإصدار ستحصلين على كود فوري موثق في النظام وبطاقة جاهزة للتحميل والمشاركة.', 'Upon creation you receive an auto-verified code and a downloadable high-res luxury card.')}
+            ✨ ${t('بطاقة رقمية فاخرة مصممة بختم J Beauty مع كود حجز رسمي موثق.', 'Luxury digital card crafted with the J Beauty seal and official booking code.')}
           </p>
         </div>
 
@@ -823,26 +936,67 @@ export function giftsPage() {
             ${field(t('جوالك السعودي', 'Your Saudi mobile'), 'sender_phone', 'tel', state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
           </div>
           ${field(t('اسم المُهدى إليها', 'Recipient name'), 'recipient_name', 'text', '', 'required placeholder="' + t('مثال: أختي سارة، والدتي الغالية...', 'e.g. Sarah, Mom...') + '"')}
-          <label class="field">
-            ${t('اختاري الباقة أو الخدمة للإهداء', 'Choose a package or service')}
-            <select name="gift_choice" required>
-              <optgroup label="${t('الباقات الفاخرة', 'Luxury Packages')}">
-                ${packages.map((p) => `<option value="pkg:${esc(p.id)}" data-label="${esc(nameOf(p))}" data-price="${p.price}">${esc(nameOf(p))} · ${money(p.price)}</option>`).join('')}
-              </optgroup>
-              <optgroup label="${t('الخدمات المفردة', 'Individual Services')}">
-                ${services.map((s) => `<option value="svc:${esc(s.id)}" data-label="${esc(nameOf(s))}" data-price="${s.price}">${esc(nameOf(s))} · ${money(s.price)}</option>`).join('')}
-              </optgroup>
-            </select>
-          </label>
+
+          <!-- Gift Mode Switcher: Preset vs Bespoke Package vs Custom Voucher -->
+          <div class="gift-type-tabs" style="display:flex;gap:8px;margin-bottom:12px;background:var(--cream-bg);padding:6px;border-radius:var(--r-md)">
+            <button type="button" class="btn small gift-mode-tab active" data-gift-mode="preset" style="flex:1;justify-content:center">${t('باقة أو خدمة جاهزة', 'Preset Ritual')}</button>
+            <button type="button" class="btn small light gift-mode-tab" data-gift-mode="custom_pkg" style="flex:1;justify-content:center">✨ ${t('باقة إهداء مخصصة', 'Bespoke Package')}</button>
+            <button type="button" class="btn small light gift-mode-tab" data-gift-mode="voucher" style="flex:1;justify-content:center">💳 ${t('قسيمة رصيد مالي', 'Voucher Credit')}</button>
+          </div>
+
+          <div id="gift-preset-section">
+            <label class="field">
+              ${t('اختاري الباقة أو الخدمة للإهداء', 'Choose a package or service')}
+              <select name="gift_choice">
+                <optgroup label="${t('الباقات الفاخرة', 'Luxury Packages')}">
+                  ${packages.map((p) => `<option value="pkg:${esc(p.id)}" data-label="${esc(nameOf(p))}" data-price="${p.price}">${esc(nameOf(p))} · ${money(p.price)}</option>`).join('')}
+                </optgroup>
+                <optgroup label="${t('الخدمات المفردة', 'Individual Services')}">
+                  ${services.map((s) => `<option value="svc:${esc(s.id)}" data-label="${esc(nameOf(s))}" data-price="${s.price}">${esc(nameOf(s))} · ${money(s.price)}</option>`).join('')}
+                </optgroup>
+              </select>
+            </label>
+          </div>
+
+          <div id="gift-custom-pkg-section" style="display:none;background:var(--blush-tint);border:1px dashed var(--rose-gold);padding:14px;border-radius:var(--r-md);margin-bottom:14px">
+            <label style="display:block;font-size:14px;font-weight:700;color:var(--plum);margin-bottom:8px">✦ ${t('اختاري الخدمات لتكوين باقة إهداء مخصصة لمن تحبين:', 'Select rituals to compose your bespoke package:')}</label>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:8px">
+              ${services.map((s) => `
+                <label class="check" style="margin:0;font-size:13px;background:#fff;padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--border)">
+                  <input type="checkbox" name="custom_service" value="${esc(s.id)}" data-price="${s.price}" data-label="${esc(nameOf(s))}">
+                  <span>${esc(nameOf(s))} (${money(s.price)})</span>
+                </label>
+              `).join('')}
+            </div>
+            <div class="row" style="justify-content:space-between;margin-top:10px;align-items:center">
+              <span class="muted" style="font-size:13px">${t('إجمالي الباقة المخصصة:', 'Bespoke Package Total:')}</span>
+              <strong id="custom-pkg-total-display" style="color:var(--rose-gold-deep);font-size:16px">0 ر.س</strong>
+            </div>
+          </div>
+
+          <div id="gift-voucher-section" style="display:none;background:var(--blush-tint);border:1px dashed var(--rose-gold);padding:14px;border-radius:var(--r-md);margin-bottom:14px">
+            <label class="field" style="margin:0">
+              ${t('حددي قيمة قسيمة الإهداء (ريال سعودي)', 'Enter Gift Voucher Amount (SAR)')}
+              <select name="voucher_amount">
+                <option value="150">150 ر.س</option>
+                <option value="250" selected>250 ر.س</option>
+                <option value="350">350 ر.س</option>
+                <option value="500">500 ر.س</option>
+                <option value="750">750 ر.س</option>
+                <option value="1000">1000 ر.س</option>
+              </select>
+            </label>
+          </div>
+
           <label class="field">
             ${t('رسالة الإهداء الشخصية (تظهر داخل البطاقة)', 'Personal dedication message')}
             <textarea name="personal_message" maxlength="350" placeholder="${t('أتمنى لك لحظة هادئة ومليئة بالجمال والدلال...', 'Wishing you a calm and restorative moment...')}"></textarea>
           </label>
           <label class="check">
             <input type="checkbox" name="terms" required>
-            <span>${t('أوافق على شروط الإهداء وتفعيل كود البطاقة مباشرة في نظام J Beauty Spa.', 'I accept the gift card terms and instant code activation.')}</span>
+            <span>${t('أوافق على شروط الإهداء وتفعيل كود البطاقة بعد التحويل البنكي المعتمد.', 'I agree to the gift card terms and code activation upon verified transfer.')}</span>
           </label>
-          <button type="submit" class="btn shimmer-btn" style="width:100%;padding:14px">🎁 ${t('إصدار بطاقة الإهداء والكود الفوري ✦', 'Generate Luxury Gift Card & Code ✦')}</button>
+          <button type="submit" class="btn shimmer-btn" style="width:100%;padding:14px">🎁 ${t('متابعة إصدار بطاقة الإهداء وتفاصيل السداد ✦', 'Proceed to Gift Card & Payment Details ✦')}</button>
         </form>
       </div>
     </main>
@@ -1122,9 +1276,28 @@ export function bindExperiences(renderFn) {
     };
   });
 
+  let currentGiftMode = 'preset';
+  document.querySelectorAll('.gift-mode-tab').forEach((btn) => {
+    btn.onclick = () => {
+      currentGiftMode = btn.dataset.giftMode;
+      document.querySelectorAll('.gift-mode-tab').forEach((b) => {
+        b.classList.toggle('active', b === btn);
+        b.classList.toggle('light', b !== btn);
+      });
+      const presetSec = $('#gift-preset-section');
+      const customSec = $('#gift-custom-pkg-section');
+      const voucherSec = $('#gift-voucher-section');
+      if (presetSec) presetSec.style.display = currentGiftMode === 'preset' ? 'block' : 'none';
+      if (customSec) customSec.style.display = currentGiftMode === 'custom_pkg' ? 'block' : 'none';
+      if (voucherSec) voucherSec.style.display = currentGiftMode === 'voucher' ? 'block' : 'none';
+      if (typeof syncGiftPreview === 'function') syncGiftPreview();
+    };
+  });
+
   const giftForm = $('#gift-form');
+  let syncGiftPreview = () => {};
   if (giftForm) {
-    const syncGiftPreview = () => {
+    syncGiftPreview = () => {
       const recEl = $('#gc-preview-recipient');
       const senEl = $('#gc-preview-sender');
       const msgEl = $('#gc-preview-message');
@@ -1136,10 +1309,24 @@ export function bindExperiences(renderFn) {
         const txt = giftForm.elements.personal_message?.value.trim() || t('لحظة دلال وهدوء فاخرة تستحقينها في راحة منزلك.', 'A tranquil luxury spa moment crafted especially for you at home.');
         msgEl.textContent = `“${txt}”`;
       }
-      const sel = giftForm.elements.gift_choice;
-      const opt = sel?.options?.[sel.selectedIndex];
-      if (opt && itemEl) itemEl.textContent = opt.dataset.label || opt.textContent;
-      if (opt && priceEl) priceEl.textContent = opt.dataset.price ? money(Number(opt.dataset.price)) : '';
+      if (currentGiftMode === 'preset') {
+        const sel = giftForm.elements.gift_choice;
+        const opt = sel?.options?.[sel.selectedIndex];
+        if (opt && itemEl) itemEl.textContent = opt.dataset.label || opt.textContent;
+        if (opt && priceEl) priceEl.textContent = opt.dataset.price ? money(Number(opt.dataset.price)) : '';
+      } else if (currentGiftMode === 'custom_pkg') {
+        const checked = [...giftForm.querySelectorAll('[name="custom_service"]:checked')];
+        const sum = checked.reduce((acc, c) => acc + Number(c.dataset.price || 0), 0);
+        const names = checked.map((c) => c.dataset.label).join(' + ') || t('باقة إهداء مخصصة', 'Bespoke Package');
+        const totalDisp = $('#custom-pkg-total-display');
+        if (totalDisp) totalDisp.textContent = money(sum);
+        if (itemEl) itemEl.textContent = names;
+        if (priceEl) priceEl.textContent = sum > 0 ? money(sum) : '';
+      } else if (currentGiftMode === 'voucher') {
+        const vVal = Number(giftForm.elements.voucher_amount?.value || 250);
+        if (itemEl) itemEl.textContent = t(`قسيمة رصيد إهداء بقيمة ${vVal} ر.س`, `Gift Voucher (${vVal} SAR)`);
+        if (priceEl) priceEl.textContent = money(vVal);
+      }
     };
     giftForm.addEventListener('input', syncGiftPreview);
     giftForm.addEventListener('change', syncGiftPreview);
@@ -1150,6 +1337,20 @@ export function bindExperiences(renderFn) {
     const f = e.target;
     const d = Object.fromEntries(new FormData(f));
     const [kind, id] = String(d.gift_choice || '').split(':');
+    let serviceIds = undefined;
+    let voucherAmount = undefined;
+
+    if (currentGiftMode === 'custom_pkg') {
+      const checked = [...f.querySelectorAll('[name="custom_service"]:checked')].map((c) => c.value);
+      if (!checked.length) {
+        $('#form-error').innerHTML = `<div class="error">${t('يرجى اختيار خدمة واحدة على الأقل للباقة المخصصة.', 'Please select at least 1 service.')}</div>`;
+        return;
+      }
+      serviceIds = checked;
+    } else if (currentGiftMode === 'voucher') {
+      voucherAmount = Number(d.voucher_amount || 250);
+    }
+
     e.submitter.disabled = true;
     try {
       const r = await api('/gift-requests', {
@@ -1158,17 +1359,83 @@ export function bindExperiences(renderFn) {
         recipient_name: d.recipient_name,
         personal_message: d.personal_message,
         theme: d.theme || state.giftTheme || 'royal_gold',
-        package_id: kind === 'pkg' ? id : undefined,
-        service_id: kind === 'svc' ? id : undefined,
+        package_id: currentGiftMode === 'preset' && kind === 'pkg' ? id : undefined,
+        service_id: currentGiftMode === 'preset' && kind === 'svc' ? id : undefined,
+        service_ids: serviceIds,
+        voucher_amount: voucherAmount,
         terms: f.elements.terms.checked,
       });
       state.giftResult = r;
+      state.giftReceiptDone = false;
       state.account = null;
-      toast(t('تم إصدار بطاقة الإهداء وتفعيل الكود فوراً 🎁', 'Gift card issued & code activated 🎁'));
+      toast(t('تم تسجيل طلب بطاقة الإهداء بنجاح 🎁', 'Gift card registered successfully 🎁'));
       renderFn();
+      window.scrollTo(0, 0);
     } catch (err) {
       $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
       e.submitter.disabled = false;
+    }
+  });
+
+  $('#gift-receipt-file-input')?.addEventListener('change', (e) => {
+    const fn = e.target.files?.[0]?.name;
+    const lbl = $('#gift-file-label');
+    if (lbl && fn) {
+      lbl.textContent = `✓ تم اختيار: ${fn}`;
+      lbl.style.color = 'var(--sage-deep)';
+    }
+  });
+
+  $('#copy-gift-iban-btn')?.addEventListener('click', async () => {
+    const iban = $('#gift-iban-text')?.textContent || '';
+    if (iban) {
+      try {
+        await navigator.clipboard.writeText(iban);
+        toast(t('تم نسخ الآيبان بنجاح 📋', 'IBAN copied to clipboard 📋'));
+      } catch {
+        toast(iban);
+      }
+    }
+  });
+
+  $('#gift-receipt-upload-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const giftId = form.dataset.giftId;
+    const fileInput = form.elements.receipt_file;
+    const errEl = $('#gift-receipt-error');
+    if (errEl) errEl.innerHTML = '';
+    const file = fileInput?.files?.[0];
+    if (!file) {
+      if (errEl) errEl.innerHTML = `<div class="error">${t('يرجى اختيار ملف الإيصال أولاً.', 'Please select a receipt file.')}</div>`;
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      if (errEl) errEl.innerHTML = `<div class="error">${t('الحد الأقصى لحجم الإيصال هو 2 ميجابايت.', 'Maximum receipt size is 2MB.')}</div>`;
+      return;
+    }
+    const submitBtn = e.submitter;
+    submitBtn.disabled = true;
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error(t('تعذر قراءة الملف', 'Failed to read file')));
+        reader.readAsDataURL(file);
+      });
+      await api(`/gift-requests/${encodeURIComponent(giftId)}/receipt`, {
+        file_data: dataUrl,
+        filename: file.name,
+        mime_type: file.type,
+        sender_name: form.elements.sender_name?.value || '',
+        transfer_ref: form.elements.transfer_ref?.value || '',
+      });
+      state.giftReceiptDone = true;
+      toast(t('تم إرسال إيصال السداد للإدارة بنجاح ✓', 'Payment receipt uploaded successfully ✓'));
+      renderFn();
+    } catch (err) {
+      if (errEl) errEl.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      submitBtn.disabled = false;
     }
   });
 
