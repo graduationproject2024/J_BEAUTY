@@ -24,7 +24,7 @@ import {
 } from './js/pages-public.js';
 import { bindBooking, booking } from './js/booking.js';
 import { accountPage, auth, bindAccount, petalsPage } from './js/account.js';
-import { initWheelFloatingButton, openRewardsWheelDialog } from './js/wheel.js';
+import { initWheelFloatingButton, openRewardsWheelDialog, syncWheelFloatingVisibility } from './js/wheel.js';
 
 let lastBeaconRoute = '';
 let loadedSharedCode = '';
@@ -154,6 +154,7 @@ export async function render() {
 
   updateMobileBar(cur);
   initScrollReveals();
+  syncWheelFloatingVisibility();
   maybeTrackRoute(cur);
   bind(cur);
 }

@@ -14,6 +14,7 @@ import {
   serviceCard,
 } from './components.js';
 import { atelierMiniWidget } from './atelier.js';
+import { isWheelVisible } from './wheel.js';
 
 const MOODS = [
   {
@@ -206,21 +207,53 @@ export function home() {
           ${atelierMiniWidget()}
         </section>
 
-        <!-- 5b. Wheel of Rewards Interactive Spotlight -->
+        <!-- 5a. Featured Luxury Digital Gift Card Showcase -->
         <section class="section-tight" data-reveal>
-          <div class="wheel-spotlight-banner">
-            <div class="wheel-spotlight-content">
-              <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('مكافآت وهدايا فورية', 'INSTANT GIFTS & PROMOS')} ✦</span>
-              <h3>${t('عجلة مكافآت J Beauty Spa 🌸', 'J Beauty Spa Wheel of Rewards 🌸')}</h3>
-              <p>${t('دوري العجلة واحصلي على كود خصم فوري يصل إلى 15% أو ماسك مجاني أو رصيد بتلات إضافي لموعدك القادم!', 'Spin the wheel for an instant discount up to 15%, a free hydrating mask, or bonus loyalty petals!')}</p>
+          <div class="gift-spotlight-band">
+            <div class="gift-spotlight-copy">
+              <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('إهداء فوري فاخر', 'INSTANT DIGITAL GIFTING')} ✦</span>
+              <h2>${t('أهدي لحظة عناية فاخرة لمن تحبين', 'Gift a Moment of Pure Luxury')}</h2>
+              <p>${t('صمّمي بطاقة إهداء إلكترونية فاخرة باسم من تحبين مع رسالتك الخاصة، ويصدر كود الإهداء فوراً للاستخدام المباشر في الحجز بكل سلاسة وأناقة.', 'Craft a bespoke digital spa gift card with a personal message and an instant auto-verified gift code ready to redeem at booking.')}</p>
+              <div class="hero-actions" style="margin-top:20px">
+                <a class="btn shimmer-btn" href="${href('gifts')}">🎁 ${t('صمّمي بطاقة الإهداء الآن', 'Design a Gift Card Now')}</a>
+                <a class="btn light" href="${href('packages')}">${t('استعرضي باقات الإهداء', 'Explore Packages')}</a>
+              </div>
             </div>
-            <div class="wheel-spotlight-action">
-              <button type="button" class="btn trigger-wheel-btn" data-open-wheel style="box-shadow:var(--shadow-gold);padding:14px 28px;font-size:16px">
-                🎁 ${t('تدوير العجلة الآن ✦', 'Spin the Wheel ✦')}
-              </button>
+            <div class="gift-spotlight-preview" aria-hidden="true">
+              <div class="mini-foil-card">
+                <div class="mini-foil-top">
+                  <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="mini-foil-logo">
+                  <span class="mini-foil-badge">VIP GIFT</span>
+                </div>
+                <div class="mini-foil-title">J Beauty Home Spa</div>
+                <div class="mini-foil-sub">${t('بطاقة دلال منزلية · المدينة المنورة', 'Luxury Home Spa Gift · Al Madinah')}</div>
+                <div class="mini-foil-code">JGIFT-••••-••••</div>
+              </div>
             </div>
           </div>
         </section>
+
+        ${
+          isWheelVisible()
+            ? `
+              <!-- 5b. Wheel of Rewards Interactive Spotlight (Shown only when periodic wheel is active) -->
+              <section class="section-tight" data-reveal>
+                <div class="wheel-spotlight-banner">
+                  <div class="wheel-spotlight-content">
+                    <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('هدية الزيارة الأولى والعروض الدورية', 'EXCLUSIVE PERIODIC REWARDS')} ✦</span>
+                    <h3>${t('عجلة مكافآت J Beauty Spa 🌸', 'J Beauty Spa Wheel of Rewards 🌸')}</h3>
+                    <p>${t('دوري العجلة واحصلي على كود خصم فوري لجلستك المنزلية القادمة!', 'Spin the wheel for an instant welcome promo code on your next booking!')}</p>
+                  </div>
+                  <div class="wheel-spotlight-action">
+                    <button type="button" class="btn shimmer-btn trigger-wheel-btn" data-open-wheel style="box-shadow:var(--shadow-gold);padding:14px 28px;font-size:16px">
+                      🎁 ${t('تدوير العجلة الآن ✦', 'Spin the Wheel ✦')}
+                    </button>
+                  </div>
+                </div>
+              </section>
+            `
+            : ''
+        }
 
         <!-- 6. J Beauty loyalty: Luxury bloom medallion + clear rewarding flow -->
         <section class='loyalty-band jb-loyalty-intro' data-reveal>
@@ -230,7 +263,7 @@ export function home() {
             <p>${t('برنامج "بتلات J" يمنحك نقاط مكافآت راقية مع كل جلسة منزلية مكتملة (1 ريال = 1 بتلة). اجمعي البتلات واستبدليها بخصومات وترقيات فاخرة لجلساتك القادمة.', 'Earn reward Petals with each completed home sanctuary visit (1 SAR = 1 Petal). Redeem your balance for exclusive savings and ritual upgrades.')}</p>
             <div class='hero-actions' style='margin-top:22px'>
               <a class='btn rose' href="${href('petals')}">${t('اكتشفي برنامج بتلات J', 'Explore Petals Rewards')}</a>
-              <a class='btn jb-quiet-link' href="${href('reviews')}">${t('اطّلعي على تجارب العميلات', 'Customer reviews')}</a>
+              <a class='btn light jb-quiet-link' href="${href('reviews')}">${t('اطّلعي على تجارب العميلات', 'Customer reviews')}</a>
             </div>
           </div>
           <div class='jb-loyalty-side'>
@@ -240,12 +273,7 @@ export function home() {
               <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتك ودلالك', 'Choose your reward')}</strong><p>${t('استبدلي رصيدك بخصومات مباشرة على حجوزاتك القادمة.', 'Redeem your balance for immediate discounts on upcoming visits.')}</p></div></div>
             </div>
             <div class='jb-petals-luxury-badge'>
-              <div class='jb-petals-card-wrap'>
-                <img src='/J_BEAUTY/apps/customer/assets/brand/official-logo.png' alt='J Beauty Spa' class='jb-petals-card-logo'>
-                <span class='jb-petals-card-tier'>برنامج بتلات J</span>
-                <strong class='jb-petals-card-tag'>عضوية الدلال الذهبي</strong>
-                <small class='jb-petals-card-rule'>١ ريال = ١ بتلة</small>
-              </div>
+              ${petalBloomSVG(6, 8, true)}
             </div>
           </div>
         </section>
@@ -274,10 +302,10 @@ export function home() {
             <span class="cta-feature-pill">🎁 ${t('كسب فوري لنقاط بتلات', 'Earn instant Petals')}</span>
           </div>
           <div class="cta-actions-wrap">
-            <a class="btn" href="${href('booking')}" style="padding:14px 32px;font-size:16px;box-shadow:var(--shadow-gold)">${t('احجزي موعدك الآن ✦', 'Book your ritual ✦')}</a>
+            <a class="btn shimmer-btn" href="${href('booking')}" style="padding:14px 32px;font-size:16px;box-shadow:var(--shadow-gold)">${t('احجزي موعدك الآن ✦', 'Book your ritual ✦')}</a>
             <a class="btn light" href="https://wa.me/966533718324" target="_blank" rel="noopener noreferrer" style="padding:14px 24px;font-size:15px">💬 ${t('تنسيق فوري عبر واتساب', 'Chat on WhatsApp')}</a>
-            <button type="button" class="btn rose trigger-wheel-btn" data-open-wheel style="padding:14px 22px;font-size:15px">🎁 ${t('عجلة المكافآت', 'Rewards Wheel')}</button>
-            <a class="btn text-link" href="${href('packages')}" style="padding:14px 18px;font-size:14.5px">${t('تصفحي الباقات والعروض', 'Browse packages')}</a>
+            ${isWheelVisible() ? `<button type="button" class="btn rose trigger-wheel-btn" data-open-wheel style="padding:14px 22px;font-size:15px">🎁 ${t('عجلة المكافآت', 'Rewards Wheel')}</button>` : ''}
+            <a class="btn light" href="${href('packages')}" style="padding:14px 22px;font-size:15px">${t('تصفحي الباقات والعروض', 'Browse packages')}</a>
           </div>
         </section>
       </div>

@@ -56,10 +56,14 @@ export function occasionsView(d) {
                       (gf) => `
                         <div class="ops-card" style="background:var(--ivory);margin-bottom:10px">
                           <div class="ops-row">
-                            <div><strong><bdi>${esc(gf.reference)}</bdi></strong> · ${esc(gf.sender_name)} → ${esc(gf.recipient_name)}</div>
+                            <div>
+                              <strong><bdi>${esc(gf.reference)}</bdi></strong>
+                              ${gf.gift_code ? ` · <span class="badge sage mono" style="letter-spacing:1px">${esc(gf.gift_code)}</span>` : ''}
+                              · ${esc(gf.sender_name)} → ${esc(gf.recipient_name)}
+                            </div>
                             ${statusBadge(gf.status)}
                           </div>
-                          <div class="muted"><bdi>${money(gf.value)}</bdi> · ${gf.payment_verified ? t('مدفوع وموثق', 'Payment verified') : t('بانتظار توثيق الدفع', 'Payment pending')}</div>
+                          <div class="muted"><bdi>${money(gf.value || gf.estimated_amount || 0)}</bdi> · ${gf.chosen ? esc(gf.chosen.name_ar || gf.chosen.name_en) : ''} · ${gf.redeemed ? t('تم استخدام الكود في حجز', 'Redeemed in booking') : gf.status === 'cancelled' ? t('ملغاة ولا تعمل', 'Cancelled & revoked') : t('الكود مفعّل تلقائياً للاستخدام', 'Code active for auto-redemption')}</div>
                           <div class="ops-chip-row" style="margin-top:8px">
                             ${
                               canVerifyGifts && !gf.payment_verified && gf.status !== 'cancelled'

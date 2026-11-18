@@ -2,9 +2,9 @@
 // Builds closed curved dorsal surface + side/tip thickness bevel + natural keratin underside.
 
 export const LENGTH_SCALES = {
-  short: { totalMult: 1.14, overhangFraction: 0.12, tipCurl: 0.015 },
-  medium: { totalMult: 1.28, overhangFraction: 0.24, tipCurl: 0.026 },
-  long: { totalMult: 1.45, overhangFraction: 0.38, tipCurl: 0.042 },
+  short: { totalMult: 1.24, overhangFraction: 0.20, tipCurl: 0.016 },
+  medium: { totalMult: 1.48, overhangFraction: 0.34, tipCurl: 0.028 },
+  long: { totalMult: 1.78, overhangFraction: 0.46, tipCurl: 0.044 },
 };
 
 // Polar-smooth parametric nail plate coordinates (wHalfScale, zNormalized)

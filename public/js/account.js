@@ -124,12 +124,16 @@ export function auth(mode = 'login') {
 
 export function bookingCard(b) {
   const existingReview = state.account?.reviews?.find((r) => r.booking_id === b.id);
-  const canReview = b.status === 'completed' && state.user?.verified;
+  const canReview = b.status === 'completed';
+  const canUploadReceipt = !b.payment_verified && !['cancelled', 'no_show'].includes(b.status);
   return `
     <article class="booking-card">
       <div class="row" style="margin-bottom:8px">
         <h3 style="margin:0"><bdi>${esc(b.reference)}</bdi></h3>
-        ${statusBadge(b.status)}
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          ${b.payment_verified ? `<span class="badge" style="background:var(--sage-green);color:#fff">✓ ${t('مدفوع', 'Paid')}</span>` : b.receipt_uploaded ? `<span class="badge pending">📤 ${t('تم رفع الإيصال', 'Receipt Sent')}</span>` : ''}
+          ${statusBadge(b.status)}
+        </div>
       </div>
       <p class="muted" style="margin-bottom:8px"><bdi>${esc(b.date)} · ${esc(b.time)}</bdi> · ${esc(b.neighborhood)}</p>
       <p style="margin-bottom:12px">${(b.items || []).map((i) => esc(nameOf(i) || i.name)).join(' · ')}</p>
@@ -137,6 +141,8 @@ export function bookingCard(b) {
         <strong><bdi>${money(b.total)}</bdi></strong>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           ${existingReview ? reviewModerationStatusBadge(existingReview) : ''}
+          ${b.invoice_pdf_url ? `<a class="btn small light" href="${esc(b.invoice_pdf_url)}" target="_blank" rel="noopener noreferrer">📄 ${t('فاتورة PDF', 'PDF Invoice')}</a>` : ''}
+          ${canUploadReceipt ? `<button class="btn small sage" data-upload-receipt="${esc(b.reference)}" type="button">📤 ${b.receipt_uploaded ? t('تحديث إيصال الدفع', 'Update Receipt') : t('إرفاق إيصال الدفع', 'Upload Receipt')}</button>` : ''}
           <button class="btn small light" data-rebook="${esc(b.id)}" type="button">${t('إعادة الحجز', 'Rebook')}</button>
           ${canReview
       ? existingReview
@@ -156,34 +162,32 @@ export function petalsContent() {
     .filter((r) => r && Number.isFinite(Number(r.points)) && Number(r.points) > 0 && Number.isFinite(Number(r.value)) && Number(r.value) > 0)
     .map((r) => ({ ...r, points: Number(r.points), value: Number(r.value) }))
     .sort((a, b) => a.points - b.points);
-  const verified = Boolean(state.user?.verified);
-  const hasLive = Boolean(verified && state.account);
+  const hasLive = Boolean(state.user && state.account);
   const balance = hasLive ? Math.max(0, Number(state.account.balance || 0)) : 0;
   const nextReward = rewards.find((r) => r.points > balance) || null;
   const topReward = rewards[rewards.length - 1] || null;
   const target = nextReward || topReward;
   const targetValue = target?.points || 1;
   const progressValue = Math.min(balance, targetValue);
+  const filledPetals = hasLive ? Math.max(1, Math.round((progressValue / Math.max(1, targetValue)) * 8)) : 5;
   const rewardsList = Array.isArray(state.account?.reward_requests) ? state.account.reward_requests : [];
   const pendingReq = rewardsList.find((q) => q.status === 'pending') || null;
   const availableCount = hasLive ? rewards.filter((r) => balance >= r.points).length : 0;
   const statusCopy = !state.user
     ? t('سجّلي الدخول لمشاهدة رصيدك الحقيقي من الزيارات المكتملة والمدفوعة.', 'Sign in to view your real balance earned from completed, verified visits.')
-    : !verified
-      ? t('وثّقي رقم جوالك لعرض رصيدك ومكافآتك.', 'Verify your phone number to view your balance and rewards.')
-      : !rewards.length
-        ? t('لم تُعتمد المكافآت بعد. ستظهر هنا فور إضافتها.', 'Rewards will appear when the program is configured.')
-        : pendingReq
-          ? t('لديك طلب مكافأة قيد المراجعة الإدارية حالياً ولا يمكن إرسال طلب جديد حتى حسمه.', 'A reward request is pending team approval; duplicate requests are disabled until resolved.')
-          : nextReward
-            ? t(`متبقٍ ${num(nextReward.points - balance)} بتلة للمكافأة التالية.`, `${num(nextReward.points - balance)} Petals until your next reward.`)
-            : t('يمكنك طلب المكافآت المتاحة لرصيدك.', 'You may request rewards available for your balance.');
+    : !rewards.length
+      ? t('لم تُعتمد المكافآت بعد. ستظهر هنا فور إضافتها.', 'Rewards will appear when the program is configured.')
+      : pendingReq
+        ? t('لديك طلب مكافأة قيد المراجعة الإدارية حالياً ولا يمكن إرسال طلب جديد حتى حسمه.', 'A reward request is pending team approval; duplicate requests are disabled until resolved.')
+        : nextReward
+          ? t(`متبقٍ ${num(nextReward.points - balance)} بتلة للمكافأة التالية.`, `${num(nextReward.points - balance)} Petals until your next reward.`)
+          : t('يمكنك طلب المكافآت المتاحة لرصيدك.', 'You may request rewards available for your balance.');
 
   return `
     <section class='jb-rewards-dashboard' aria-labelledby='jb-rewards-heading'>
       <div class='jb-rewards-main'>
         <div class='jb-rewards-heading'>
-          <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
+          <span class='eyebrow'>J BEAUTY · PETALS PROGRAM</span>
           <h2 id='jb-rewards-heading'>${t('برنامج بتلات J', 'J Petals Program')}</h2>
           <p>${t('برنامج بتلات J هو تعبيرنا عن الامتنان لثقتك الدائمة. كل جلسة عناية مكتملة تقربك من مكافآت وتجارب استرخاء استثنائية (1 ريال = 1 بتلة).', 'J Petals is our heartfelt appreciation for your trust. Every completed ritual brings you closer to exclusive treats and savings.')}</p>
         </div>
@@ -199,11 +203,10 @@ export function petalsContent() {
                 <progress max='${targetValue}' value='${progressValue}' aria-label="${t('التقدم نحو المكافأة', 'Progress toward reward')}"></progress>
               </div>` : ''}
             ${availableCount && !pendingReq ? `<span class='jb-rewards-available'>${availableCount === 1 ? t('مكافأة واحدة متاحة وفق رصيدك', '1 reward option within your balance') : t(`${num(availableCount)} مكافآت متاحة وفق رصيدك`, `${num(availableCount)} reward options within your balance`)}</span>` : ''}
-            ${!state.user ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('register')}">${t('أنشئي حسابك', 'Create your account')}</a></div>` : !verified ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('account')}">${t('خطوات توثيق الحساب', 'Verify your account')}</a></div>` : ''}
+            ${!state.user ? `<div class='jb-rewards-cta'><a class='btn rose' href="${href('register')}">${t('أنشئي حسابك', 'Create your account')}</a></div>` : ''}
           </div>
-          <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(4, 8, true)}</div>
+          <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(filledPetals, 8, true)}</div>
         </div>
-        ${state.account?.has_pending_entitlement && !verified ? `<div class='notice'>${t('قد توجد بتلات مستحقة معلّقة حتى اكتمال توثيق حسابك. تواصلي مع الفريق لإتمام التوثيق.', 'Eligible Petals may be pending until your account is verified. Contact the team to complete verification.')}</div>` : ''}
       </div>
       <div class='jb-rewards-aside'>
         <span class='eyebrow'>${t('طريقة عمل البرنامج', 'HOW IT WORKS')}</span>
@@ -385,27 +388,13 @@ export async function accountPage(section) {
           <button class="btn light small" id="logout" type="button" style="margin-top:12px">${t('تسجيل الخروج', 'Sign out')}</button>
         </aside>
         <div class="dashboard-content">
-          ${!state.user.verified
-      ? `<div class="notice">
-                   <h3 style="margin-bottom:6px">${t('توثيق ملكية رقم الجوال عبر واتساب', 'Verify Your Phone Ownership via WhatsApp')}</h3>
-                   <p>${t(
-        'لحماية خصوصية حجوزاتك ومنع ربط أي أرقام بالخطأ، نتحقق يدوياً من ملكية رقمك دون أي رسائل SMS مدفوعة:',
-        'To protect your booking history and loyalty balance without paid SMS OTPs, staff verifies your number in 4 simple steps:',
-      )}</p>
-                   <div class="verify-steps">
-                     <div class="verify-step">1. ${t('أنشئي مرجع التحقق المؤقت بالزر أدناه.', 'Generate your short-lived reference below.')}</div>
-                     <div class="verify-step">2. ${t('افتحي واتساب واضغطي إرسال بنفسك.', 'Open WhatsApp and press Send manually.')}</div>
-                     <div class="verify-step">3. ${t('تطابق الموظفة رقم المرسلة الفعلي مع حسابك.', 'Staff matches the actual WhatsApp sender.')}</div>
-                     <div class="verify-step">4. ${t('تُفتح حجوزاتك وبتلاتك فور الاعتماد.', 'Your rewards and reviews unlock immediately.')}</div>
-                   </div>
-                   <button class="btn small" id="verify-request" type="button">${t('تأكيد رقم الجوال عبر واتساب', 'Verify number through WhatsApp')}</button>
-                   <div id="verification-result"></div>
-                 </div>`
-      : `<div class="row" style="margin-bottom:18px">
-                   <span class="badge">✓ ${t('حساب موثق', 'Verified account')}</span>
-                   <a class="btn small" href="${href('booking')}">${t('طلب موعد جديد', 'Book a new visit')}</a>
-                 </div>`
-    }
+          <div class="row" style="margin-bottom:18px;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="badge" style="background:var(--sage-green);color:#fff">✓ ${t('حساب فعّال وجاهز', 'Active Member')}</span>
+              ${state.user.verified ? `<span class="badge">✦ ${t('موثّق من الإدارة', 'Staff Verified')}</span>` : ''}
+            </div>
+            <a class="btn small shimmer-btn" href="${href('booking')}">${t('طلب موعد جديد ✦', 'Book a new visit ✦')}</a>
+          </div>
 
           ${section === 'rewards'
       ? (() => {
@@ -620,6 +609,72 @@ export function bindAccount(goFn, renderFn) {
         toast(err.message);
         btn.disabled = false;
       }
+    };
+  });
+
+  document.querySelectorAll('[data-upload-receipt]').forEach((btn) => {
+    btn.onclick = () => {
+      const ref = btn.dataset.uploadReceipt;
+      const s = state.catalog?.settings || {};
+      openDialog(`
+        <div>
+          <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('توثيق الدفع', 'PAYMENT PROOF')} ✦</span>
+          <h2 style="margin:6px 0 8px">${t('إرفاق إيصال التحويل البنكي', 'Upload Payment Receipt')}</h2>
+          <p class="muted" style="font-size:14px">${t('رقم الحجز:', 'Booking Ref:')} <strong><bdi>${esc(ref)}</bdi></strong></p>
+          <div class="bank-mini-box" style="margin-bottom:14px">
+            <div><strong>${t('البنك:', 'Bank:')}</strong> ${esc(s.bank_name || 'مصرف الراجحي')}</div>
+            <div><strong>${t('المستفيد:', 'Account:')}</strong> ${esc(s.bank_account_holder || 'مؤسسة J Beauty Spa')}</div>
+            <div><strong>IBAN:</strong> <bdi class="mono">${esc(s.bank_iban || 'SA0380000000000000000000')}</bdi></div>
+          </div>
+          <form id="modal-receipt-form" style="display:grid;gap:10px">
+            <div id="modal-receipt-err" role="alert"></div>
+            <label class="field" style="margin:0">
+              ${t('اسم المحوّل (اختياري)', 'Sender Name')}
+              <input type="text" name="sender_name" value="${esc(state.user?.name || '')}" maxlength="100">
+            </label>
+            <label class="field" style="margin:0">
+              ${t('رقم العملية المرجعي (اختياري)', 'Transfer Reference')}
+              <input type="text" name="transfer_ref" placeholder="TRF-..." maxlength="80">
+            </label>
+            <label class="field" style="margin:0">
+              ${t('صورة الإيصال أو PDF (حد أقصى 2 ميجابايت)', 'Receipt Image or PDF (max 2MB)')}
+              <input type="file" name="receipt_file" accept="image/png,image/jpeg,image/webp,application/pdf" required>
+            </label>
+            <button type="submit" class="btn sage" style="width:100%">📤 ${t('رفع وإرسال الإيصال للإدارة', 'Upload Receipt')}</button>
+          </form>
+        </div>
+      `);
+      document.querySelector('#modal-receipt-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const file = form.elements.receipt_file?.files?.[0];
+        const errBox = document.querySelector('#modal-receipt-err');
+        if (!file) return;
+        e.submitter.disabled = true;
+        try {
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ''));
+            reader.onerror = () => reject(new Error(t('تعذر قراءة الملف', 'Read failed')));
+            reader.readAsDataURL(file);
+          });
+          await api(`/bookings/${encodeURIComponent(ref)}/receipt`, {
+            file_data: dataUrl,
+            filename: file.name,
+            mime_type: file.type,
+            sender_name: form.elements.sender_name?.value || '',
+            transfer_ref: form.elements.transfer_ref?.value || '',
+            phone: state.user?.phone || '',
+          });
+          document.querySelector('#modal')?.close();
+          state.account = null;
+          toast(t('تم إرسال إيصال الدفع لمنصة الإدارة بنجاح ✓', 'Receipt uploaded successfully ✓'));
+          renderFn();
+        } catch (err) {
+          if (errBox) errBox.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+          e.submitter.disabled = false;
+        }
+      });
     };
   });
 

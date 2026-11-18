@@ -138,13 +138,17 @@ export function employeeCustomerView(user, hasPendingVerification) {
 }
 
 export function checkRateLimit(db, key, max, windowMs = 900000) {
+  const effectiveMax =
+    process.env.NODE_ENV === 'test' && Number(process.env.TEST_RATE_LIMIT_MULTIPLIER) > 1
+      ? max * Number(process.env.TEST_RATE_LIMIT_MULTIPLIER)
+      : max;
   const nowMs = Date.now();
   const row = db.get('SELECT * FROM rate_limits WHERE key=?', key);
   if (!row || row.until < nowMs) {
     db.run('INSERT OR REPLACE INTO rate_limits VALUES(?,?,?)', key, 1, nowMs + windowMs);
     return;
   }
-  if (row.count >= max) {
+  if (row.count >= effectiveMax) {
     fail('Too many attempts. Try again later.', 429);
   }
   db.run('UPDATE rate_limits SET count=count+1 WHERE key=?', key);

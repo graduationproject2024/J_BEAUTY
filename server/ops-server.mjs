@@ -229,7 +229,14 @@ export function createOpsApp({
       let body;
       if (!['GET', 'HEAD'].includes(method)) {
         const expectedOrigin = `${secure ? 'https' : 'http'}://${req.headers.host}`;
-        body = await parseMutationRequest(req, session.csrf, [expectedOrigin, process.env.OPS_ORIGIN], sid);
+        const isReceiptRoute = /^\/api\/ops\/bookings\/[^/]+\/receipt$/.test(route);
+        body = await parseMutationRequest(
+          req,
+          session.csrf,
+          [expectedOrigin, process.env.OPS_ORIGIN],
+          sid,
+          isReceiptRoute ? 2_900_000 : 50000,
+        );
       }
 
       const checkRate = (key, max, windowMs) => checkRateLimit(db, key, max, windowMs);
@@ -416,7 +423,7 @@ export function createOpsApp({
         if (isMfaRequiredForUser(user) && !session.mfa_verified) {
           fail('MFA verification required', 403);
         }
-        return handleOpsRoute({ db, helpers, user, route, query, body, checkRate, send, customerOrigin: resolveCustomerOrigin() });
+        return handleOpsRoute({ db, helpers, user, route, query, body, checkRate, send, res, customerOrigin: resolveCustomerOrigin() });
       }
 
       fail('Not found', 404);

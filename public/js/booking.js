@@ -13,7 +13,25 @@ import {
 } from './state.js';
 import { field, head, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
-import { openRewardsWheelDialog } from './wheel.js';
+import { isWheelVisible, openRewardsWheelDialog } from './wheel.js';
+
+function isNeighborhoodOutOfRange(neighborhood) {
+  const s = state.catalog?.settings || {};
+  const excluded = Array.isArray(s.excluded_areas) ? s.excluded_areas : [];
+  if (!excluded.length || !neighborhood) return false;
+  const norm = (str) =>
+    String(str || '')
+      .trim()
+      .toLowerCase()
+      .replace(/^حي\s+/, '')
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه');
+  const target = norm(neighborhood);
+  return excluded.some((a) => {
+    const ex = norm(a);
+    return ex && (target === ex || target.includes(ex) || ex.includes(target));
+  });
+}
 
 export const BOOKING_ADD_ONS = [
   {
@@ -77,7 +95,8 @@ export function selectedSummary() {
 
   const basePrice = pkg ? pkg.price : items.reduce((sum, s) => sum + Number(s.price), 0);
   const addOnsPrice = selectedAddOnObjs.reduce((sum, a) => sum + Number(a.price), 0);
-  const subtotal = basePrice + addOnsPrice;
+  const deliveryFee = Math.max(0, Number(state.catalog?.settings?.delivery_fee || 0));
+  const subtotal = basePrice + addOnsPrice + deliveryFee;
 
   const baseDuration = pkg ? pkg.duration : items.reduce((sum, s) => sum + Number(s.duration), 0);
   const addOnsDuration = selectedAddOnObjs.reduce((sum, a) => sum + Number(a.duration), 0);
@@ -99,6 +118,7 @@ export function selectedSummary() {
     addOns: selectedAddOnObjs,
     basePrice,
     addOnsPrice,
+    deliveryFee,
     subtotal,
     discount,
     coupon: state.draft.coupon || null,
@@ -132,6 +152,11 @@ function summaryBodyHtml() {
             .join('')
         : ''
     }
+    ${
+      s.deliveryFee > 0
+        ? `<div class="summary-line"><span>${t('رسوم التوصيل المنزلي', 'Home delivery fee')}</span><span>${money(s.deliveryFee)}</span></div>`
+        : ''
+    }
     <div class="summary-line">
       <span>${t('مدة الجلسة', 'Duration')}</span>
       <span>${minutes(s.duration)}</span>
@@ -140,7 +165,7 @@ function summaryBodyHtml() {
       s.discount > 0
         ? `
           <div class="summary-line" style="color:var(--sage-deep);font-weight:600">
-            <span>${t('كود الخصم', 'Discount Code')} (${esc(s.coupon.code)})</span>
+            <span>${t('كود الخصم / الإهداء', 'Promo / Gift Code')} (${esc(s.coupon.code)})</span>
             <span>-${money(s.discount)}</span>
           </div>
         `
@@ -151,8 +176,8 @@ function summaryBodyHtml() {
       <span>${money(s.total)}</span>
     </div>
     <p class="muted" style="margin-top:12px;margin-bottom:0">${t(
-      'الوقت المفضل ليس حجزاً مؤكداً. يتواصل فريقنا لتأكيد الموعد يدوياً.',
-      'Preferred times are requests. All appointments are confirmed manually by our team.',
+      'فريق J Beauty Spa يتواصل معك مباشرة عبر واتساب لتأكيد الموعد بكل يسر.',
+      'Our J Beauty Spa concierge confirms your appointment smoothly via WhatsApp.',
     )}</p>
   `;
 }
@@ -427,7 +452,7 @@ function stepThreeTimeHtml() {
         : ''
     }
     <label class="field">
-      ${t('الحي في المدينة المنورة', 'Madinah neighborhood')}
+      ${t('الحي في المدينة المنورة (الخدمة متاحة لجميع أحياء المدينة)', 'Madinah neighborhood (all Madinah areas covered)')}
       ${
         s.areas?.length
           ? `<select name="neighborhood" required>
@@ -439,15 +464,30 @@ function stepThreeTimeHtml() {
                  )
                  .join('')}
              </select>`
-          : `<input name="neighborhood" value="${esc(state.draft.neighborhood)}" required maxlength="100" placeholder="${t('مثال: حي العقيق / سلطانة', 'e.g. Al Aqiq / Sultana')}">`
+          : `<input name="neighborhood" value="${esc(state.draft.neighborhood)}" required maxlength="100" placeholder="${t('اكتبي اسم الحي في المدينة المنورة (مثال: العقيق، سلطانة، شوران، الدفاع)', 'Enter your Madinah neighborhood (e.g. Al Aqiq, Sultana)')}">`
       }
     </label>
+    ${
+      Number(s.delivery_fee || 0) > 0
+        ? `<p class="muted" style="font-size:13.5px;margin-top:-6px;margin-bottom:10px">✦ ${t(`تُضاف رسوم توصيل منزلي رمزية (${money(s.delivery_fee)}) شاملة جميع أحياء المدينة المنورة.`, `Home delivery fee (${money(s.delivery_fee)}) applies across Al Madinah.`)}</p>`
+        : ''
+    }
+    ${
+      s.excluded_areas?.length
+        ? `<div class="notice" style="background:var(--cream-bg);border-color:var(--rose-gold);font-size:13.5px;margin-top:6px">
+             <strong>${t('تنويه نطاق التغطية:', 'Coverage Notice:')}</strong>
+             ${t('نخدم جميع أحياء المدينة المنورة باستثناء:', 'All Madinah neighborhoods are covered except:')}
+             <strong>${s.excluded_areas.map(esc).join('، ')}</strong>
+           </div>`
+        : ''
+    }
   `;
 }
 
 function stepFourDetailsHtml() {
   const prefillName = state.draft.name || state.user?.name || '';
   const prefillPhone = state.draft.phone || state.user?.phone || '';
+  const showWheelBtn = isWheelVisible();
   return `
     <h3>${t('بيانات التواصل', 'Your contact details')}</h3>
     <div class="form-grid">
@@ -471,14 +511,18 @@ function stepFourDetailsHtml() {
       <textarea name="notes" maxlength="1000" placeholder="${t('أي تفضيلات حول التوقيت أو التنسيق المنزلي...', 'Any helpful arrival or preference notes...')}">${esc(state.draft.notes)}</textarea>
     </label>
 
-    <div class="card coupon-input-card" style="margin-top:16px;background:var(--blush-tint);border:1px dashed var(--rose-gold);padding:16px 20px;border-radius:var(--r-md)">
+    <div class="card coupon-input-card" style="margin-top:16px;background:var(--cream-bg);border:1px dashed var(--rose-gold);padding:16px 20px;border-radius:var(--r-md)">
       <div class="row" style="margin-bottom:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <strong style="color:var(--plum);font-size:15px">✦ ${t('هل لديك كود خصم أو كوبون؟', 'Have a promo or discount code?')}</strong>
-        <button type="button" class="btn text-link small" id="open-wheel-from-booking" style="color:var(--plum);font-weight:600;padding:2px 10px;font-size:13px;border-radius:var(--r-sm);border:1px solid var(--rose-gold);background:#fff">🎁 ${t('دوري عجلة المكافآت واربحي خصما فوريا', 'Spin Rewards Wheel')}</button>
+        <strong style="color:var(--plum);font-size:15px">✦ ${t('هل لديك كود خصم أو كود بطاقة إهداء؟', 'Have a promo or gift card code?')}</strong>
+        ${
+          showWheelBtn
+            ? `<button type="button" class="btn light small" id="open-wheel-from-booking" style="font-weight:600;padding:5px 12px;font-size:13px">🎁 ${t('دوري عجلة المكافآت واربحي خصماً فورياً', 'Spin Rewards Wheel')}</button>`
+            : ''
+        }
       </div>
       <div class="row" style="gap:8px;align-items:center">
-        <input type="text" id="coupon-code-input" value="${esc(state.draft.coupon_code || '')}" placeholder="${t('مثال: SPAWHEEL10 أو LUXURY15', 'e.g. SPAWHEEL10')}" style="flex:1;text-transform:uppercase;padding:8px 12px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:#fff">
-        <button type="button" class="btn small" id="apply-coupon-btn" style="white-space:nowrap">${t('تطبيق الخصم', 'Apply')}</button>
+        <input type="text" id="coupon-code-input" value="${esc(state.draft.coupon_code || '')}" placeholder="${t('مثال: JB10 أو JGIFT-XXXX', 'e.g. JB10 or JGIFT-XXXX')}" style="flex:1;text-transform:uppercase;padding:8px 12px;border:1px solid var(--border-strong);border-radius:var(--r-sm);background:#fff">
+        <button type="button" class="btn small" id="apply-coupon-btn" style="white-space:nowrap">${t('تطبيق الكود', 'Apply')}</button>
       </div>
       <div id="coupon-feedback" style="margin-top:8px;font-size:13.5px">
         ${state.draft.coupon ? `<span style="color:var(--sage-deep);font-weight:600">✓ ${t('تم تفعيل الكوبون:', 'Coupon active:')} ${esc(state.draft.coupon.code)} (${t('خصم', 'Save')} ${state.draft.coupon.discount_type === 'percent' ? state.draft.coupon.value + '%' : state.draft.coupon.value + ' ' + t('ريال', 'SAR')})</span>` : ''}
@@ -551,41 +595,119 @@ function stepFiveReviewHtml() {
 
 export function bookingSuccess() {
   const r = state.bookingResult;
+  const b = r.booking || {};
+  const s = state.catalog?.settings || {};
+  const receiptDone = Boolean(state.bookingReceiptDone || b.receipt_uploaded);
+
   return `
     <main id="main" class="wrap">
-      ${head(t('تم حفظ طلب الحجز', 'Appointment Request Saved'))}
-      <div class="content">
-        <div class="success">
-          <div class="row" style="margin-bottom:10px">
-            <h2 style="margin:0;font-size:24px">${t('تم تسجيل طلبك، وسيتم تأكيد الموعد بعد مراجعته مع فريق J Beauty.', 'Your request is saved. J Beauty will review and personally confirm your appointment.')}</h2>
-            <span class="badge pending">${t('بانتظار التأكيد', 'Pending confirmation')}</span>
+      <div class="luxury-confirm-shell" data-reveal>
+        <div class="luxury-confirm-header">
+          <div class="luxury-confirm-crest">
+            <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="luxury-confirm-logo">
           </div>
-          <p style="margin-bottom:0">${t('رقم الطلب المرجعي:', 'Booking Reference:')} <strong><bdi>${esc(r.booking?.reference)}</bdi></strong></p>
-        </div>
-
-        <div class="card" style="margin-bottom:20px">
-          <h3>${t('الخطوة التالية: إرسال الطلب عبر واتساب', 'Next Step: Send via WhatsApp')}</h3>
+          <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم استلام حجزك بنجاح', 'RESERVATION RECEIVED')} ✦</span>
+          <h1>${t('أهلاً بك في لحظة دلالك القادمة 🌸', 'Your Calm Sanctuary Moment Awaits 🌸')}</h1>
           <p class="muted">${t(
-            'بالضغط على زر فتح واتساب ستُفتح محادثة تحتوي على تفاصيل طلبك جاهزة. عليك الضغط على زر الإرسال داخل واتساب بنفسك. فتح الرابط لا يعني وصول الرسالة أو تأكيد الموعد.',
-            'Clicking Open WhatsApp opens your chat app with a prepared message. You must press Send yourself inside WhatsApp. Opening the link does not send the message or confirm your booking.',
+            'تم تسجيل طلبك بأمان لدى فريق J Beauty Spa وتم فتح واتساب لتأكيد موعدك مباشرة مع منسّقة الحجوزات.',
+            'Your appointment is safely registered with J Beauty Spa and WhatsApp has been opened for instant concierge confirmation.',
           )}</p>
-          <div class="hero-actions">
-            ${
-              r.whatsapp_url
-                ? `<a class="btn sage" id="whatsapp-handoff-link" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener">${t('فتح واتساب', 'Open WhatsApp')}</a>`
-                : `<div class="notice" style="margin:0;width:100%">${t(
-                    'رقم واتساب التجاري غير مضاف بعد في إعدادات الموقع، لكن طلبك محفوظ بأمان في قاعدة البيانات ليراجعه الفريق.',
-                    'The business WhatsApp number is not configured yet, but your request is safely saved for staff review.',
-                  )}</div>`
-            }
-            <button class="btn light" id="copy-message" type="button">${t('نسخ نص الرسالة', 'Copy message')}</button>
+          <div class="luxury-ref-pill">
+            <span>${t('رقم الحجز المرجعي:', 'Booking Reference:')}</span>
+            <strong><bdi>${esc(b.reference)}</bdi></strong>
           </div>
-          <pre style="margin-top:18px">${esc(r.message)}</pre>
         </div>
 
-        <div class="hero-actions">
-          <button id="new-booking" class="btn light" type="button">${t('تقديم طلب حجز جديد', 'Start a new request')}</button>
-          <a class="text-link" href="${href(state.user ? 'account' : 'home')}">${state.user ? t('الذهاب إلى جواز الجمال', 'Go to Beauty Passport') : t('العودة للرئيسية', 'Return home')}</a>
+        <div class="luxury-confirm-grid">
+          <div class="card luxury-confirm-card">
+            <h3>${t('تفاصيل موعدك المسجل', 'Your Booking Summary')}</h3>
+            <div class="summary-line"><span>${t('العميلة', 'Client')}</span><strong>${esc(b.name)}</strong></div>
+            <div class="summary-line"><span>${t('الموعد', 'Schedule')}</span><strong><bdi>${esc(b.date)} · ${esc(b.time)}</bdi></strong></div>
+            <div class="summary-line"><span>${t('الحي', 'Neighborhood')}</span><strong>${esc(b.neighborhood)}</strong></div>
+            <div class="summary-line">
+              <span>${t('الخدمات', 'Services')}</span>
+              <strong>${(b.items || []).map((i) => esc(nameOf(i) || i.name_ar)).join(' + ')}</strong>
+            </div>
+            ${
+              (b.add_ons || []).length
+                ? `<div class="summary-line" style="color:var(--rose-gold-deep)">
+                     <span>${t('الخدمات الإضافية', 'Add-ons')}</span>
+                     <strong>${b.add_ons.map((a) => `${esc(a.name_ar)} (+${money(a.price)})`).join(' + ')}</strong>
+                   </div>`
+                : ''
+            }
+            ${
+              Number(b.delivery_fee || 0) > 0
+                ? `<div class="summary-line"><span>${t('رسوم التوصيل', 'Delivery')}</span><strong>${money(b.delivery_fee)}</strong></div>`
+                : ''
+            }
+            ${
+              b.discount_amount > 0
+                ? `<div class="summary-line" style="color:var(--sage-deep)"><span>${t('الخصم', 'Discount')} (${esc(b.coupon_code)})</span><strong>-${money(b.discount_amount)}</strong></div>`
+                : ''
+            }
+            <div class="summary-line summary-total">
+              <span>${t('إجمالي الحجز', 'Total')}</span>
+              <span>${money(b.total)}</span>
+            </div>
+
+            <div class="hero-actions" style="margin-top:20px;gap:10px;flex-wrap:wrap">
+              ${
+                r.whatsapp_url
+                  ? `<a class="btn shimmer-btn" id="whatsapp-handoff-link" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;flex:1;justify-content:center">💬 ${t('متابعة التأكيد عبر واتساب', 'Continue on WhatsApp')}</a>`
+                  : ''
+              }
+              ${
+                r.invoice_pdf_url
+                  ? `<a class="btn light" href="${esc(r.invoice_pdf_url)}" target="_blank" rel="noopener noreferrer">📄 ${t('تحميل الفاتورة PDF', 'Download PDF Invoice')}</a>`
+                  : ''
+              }
+            </div>
+          </div>
+
+          <div class="card luxury-confirm-card">
+            <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('توثيق الدفع والتحويل البنكي', 'PAYMENT PROOF UPLOAD')} ✦</span>
+            <h3 style="margin-top:6px">${t('إرفاق إيصال الدفع', 'Upload Payment Receipt')}</h3>
+            <p class="muted" style="font-size:14px">${t(
+              'بعد إتمام التحويل البنكي لتأكيد موعدك، يمكنك رفع صورة الإيصال أو ملف PDF هنا ليصل مباشرة إلى قسم المالية وتوثيق الدفع فوراً.',
+              'After completing your bank transfer, upload your receipt image or PDF here for instant finance verification in our portal.',
+            )}</p>
+            <div class="bank-mini-box">
+              <div><strong>${t('البنك:', 'Bank:')}</strong> ${esc(s.bank_name || 'مصرف الراجحي')}</div>
+              <div><strong>${t('المستفيد:', 'Account:')}</strong> ${esc(s.bank_account_holder || 'مؤسسة J Beauty Spa')}</div>
+              <div><strong>IBAN:</strong> <bdi class="mono">${esc(s.bank_iban || 'SA0380000000000000000000')}</bdi></div>
+            </div>
+            ${
+              receiptDone
+                ? `<div class="success" style="margin-top:14px">
+                     <strong>✓ ${t('تم استلام إيصال الدفع بنجاح!', 'Payment Receipt Uploaded!')}</strong>
+                     <p style="margin:6px 0 0;font-size:13.5px">${t('وصل الإيصال لمنصة الإدارة وجاري مراجعته وتأكيد موعدك.', 'Your receipt is now attached to your booking for staff verification.')}</p>
+                   </div>`
+                : `
+                  <form id="booking-receipt-upload-form" data-booking-ref="${esc(b.reference)}" style="margin-top:14px;display:grid;gap:10px">
+                    <div id="receipt-upload-error" role="alert"></div>
+                    <label class="field" style="margin:0">
+                      ${t('اسم المحوّل (اختياري)', 'Sender Name (optional)')}
+                      <input type="text" name="sender_name" value="${esc(b.name || '')}" maxlength="100">
+                    </label>
+                    <label class="field" style="margin:0">
+                      ${t('رقم العملية المرجعي (اختياري)', 'Transfer Reference (optional)')}
+                      <input type="text" name="transfer_ref" placeholder="${t('مثال: TRF-982341', 'e.g. TRF-982341')}" maxlength="80">
+                    </label>
+                    <label class="field" style="margin:0">
+                      ${t('صورة الإيصال أو ملف PDF (حتى 2 ميجابايت)', 'Receipt Image or PDF (max 2MB)')}
+                      <input type="file" name="receipt_file" accept="image/png,image/jpeg,image/webp,application/pdf" required>
+                    </label>
+                    <button type="submit" class="btn sage" style="width:100%">📤 ${t('إرسال إيصال الدفع للإدارة', 'Submit Payment Receipt')}</button>
+                  </form>
+                `
+            }
+          </div>
+        </div>
+
+        <div class="hero-actions" style="justify-content:center;margin-top:24px;gap:12px">
+          <button id="new-booking" class="btn light" type="button">${t('حجز موعد إضافي', 'Book another visit')}</button>
+          <a class="btn light" href="${href(state.user ? 'account' : 'home')}">${state.user ? t('الذهاب إلى جواز الجمال', 'Go to Beauty Passport') : t('العودة للرئيسية', 'Return home')}</a>
         </div>
       </div>
     </main>
@@ -839,6 +961,15 @@ export function bindBooking(renderFn) {
         errBox.innerHTML = `<div class="error">${t('يرجى تحديد التاريخ والوقت والحي.', 'Please choose your preferred date, time, and neighborhood.')}</div>`;
         return;
       }
+      if (isNeighborhoodOutOfRange(state.draft.neighborhood)) {
+        const s = state.catalog?.settings || {};
+        const msg = t(
+          s.out_of_range_message_ar || 'نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.',
+          s.out_of_range_message_en || 'Sorry, this neighborhood is currently outside our service coverage.',
+        );
+        errBox.innerHTML = `<div class="error">${esc(msg)}</div>`;
+        return;
+      }
     }
     if (state.bookingStep === 4) {
       if (!state.draft.name.trim() || !state.draft.phone.trim()) {
@@ -862,8 +993,17 @@ export function bindBooking(renderFn) {
     const submitBtn = e.submitter;
     submitBtn.disabled = true;
     try {
-      state.bookingResult = await api('/bookings', state.draft);
+      const res = await api('/bookings', state.draft);
+      state.bookingResult = res;
+      state.bookingReceiptDone = false;
       state.account = null;
+      // Direct immediate WhatsApp handoff — zero extra clicks!
+      if (res.whatsapp_url) {
+        trackFunnel('whatsapp_handoff_click');
+        try {
+          window.open(res.whatsapp_url, '_blank', 'noopener,noreferrer');
+        } catch {}
+      }
       renderFn();
       window.scrollTo(0, 0);
     } catch (err) {
@@ -872,20 +1012,54 @@ export function bindBooking(renderFn) {
     }
   });
 
+  $('#booking-receipt-upload-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const ref = form.dataset.bookingRef;
+    const fileInput = form.elements.receipt_file;
+    const errEl = $('#receipt-upload-error');
+    if (errEl) errEl.innerHTML = '';
+    const file = fileInput?.files?.[0];
+    if (!file) {
+      if (errEl) errEl.innerHTML = `<div class="error">${t('يرجى اختيار ملف الإيصال أولاً.', 'Please select a receipt file.')}</div>`;
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      if (errEl) errEl.innerHTML = `<div class="error">${t('الحد الأقصى لحجم الإيصال هو 2 ميجابايت.', 'Maximum receipt size is 2MB.')}</div>`;
+      return;
+    }
+    const submitBtn = e.submitter;
+    submitBtn.disabled = true;
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error(t('تعذر قراءة الملف', 'Failed to read file')));
+        reader.readAsDataURL(file);
+      });
+      await api(`/bookings/${encodeURIComponent(ref)}/receipt`, {
+        file_data: dataUrl,
+        filename: file.name,
+        mime_type: file.type,
+        sender_name: form.elements.sender_name?.value || '',
+        transfer_ref: form.elements.transfer_ref?.value || '',
+        phone: state.bookingResult?.booking?.phone || state.draft?.phone || '',
+      });
+      state.bookingReceiptDone = true;
+      toast(t('تم إرسال إيصال الدفع لمنصة الإدارة بنجاح ✓', 'Payment receipt uploaded successfully ✓'));
+      renderFn();
+    } catch (err) {
+      if (errEl) errEl.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      submitBtn.disabled = false;
+    }
+  });
+
   $('#whatsapp-handoff-link')?.addEventListener('click', () => {
     trackFunnel('whatsapp_handoff_click');
   });
 
-  $('#copy-message')?.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(state.bookingResult?.message || '');
-      toast(t('تم نسخ الرسالة', 'Copied'));
-    } catch {
-      toast(t('يمكنك تحديد النص ونسخه يدوياً.', 'Select and copy the message manually.'));
-    }
-  });
-
   $('#new-booking')?.addEventListener('click', () => {
+    state.bookingReceiptDone = false;
     state.bookingResult = null;
     state.bookingStep = 1;
     state.bookingMode = 'services';

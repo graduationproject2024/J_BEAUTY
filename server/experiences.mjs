@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { now, uid } from './db.mjs';
-import { validateSchedule } from './booking.mjs';
+import { isNeighborhoodExcluded, validateSchedule } from './booking.mjs';
 import { fail, optionalText, phone, text, whatsappUrl } from './validation.mjs';
 import { evaluateAtelierServiceMatch } from '../apps/customer/js/atelier/service-mapping.js';
 
@@ -316,10 +316,14 @@ export function togglePassportFavorite(db, helpers, user, body) {
 }
 
 export function savePassportPreferences(db, helpers, user, body) {
-  const areas = helpers.settings().areas || [];
+  const s = helpers.settings();
+  const areas = s.areas || [];
   const neighborhood = optionalText(body.preferred_neighborhood, 150);
+  if (neighborhood && isNeighborhoodExcluded(s, neighborhood)) {
+    fail(s.out_of_range_message_ar || 'نعتذر، هذا الحي خارج نطاق التغطية حالياً.');
+  }
   if (neighborhood && areas.length && !areas.includes(neighborhood)) {
-    fail('Neighborhood is outside configured service areas');
+    fail(s.out_of_range_message_ar || 'Neighborhood is outside configured service areas');
   }
   const pressure = ['light', 'medium', 'firm'].includes(body.pressure) ? body.pressure : 'medium';
   const nailFinish = VALID_FINISH.has(body.nail_finish) ? body.nail_finish : 'gloss';
@@ -419,16 +423,23 @@ export function createGroupRequest(db, helpers, user, body) {
     recordFunnelEvent(db, 'group_request');
   });
 
+  const participantsLines = participants
+    .map((p, idx) => `  ${idx + 1}. ${p.label}: ${p.items.map((i) => `${i.name_ar} (${i.price} ر.س)`).join(' + ')}`)
+    .join('\n');
+
   const message =
-    `مرحباً J Beauty،\n` +
-    `طلب تنسيق جلسات المناسبات\n` +
-    `رقم الطلب: ${reference}\n` +
-    `منسّقة المناسبة: ${organizerName}\n` +
-    `عدد المستفيدات: ${participants.length}\n` +
-    `التاريخ والوقت المفضل: ${body.date} ${body.time}\n` +
-    `الحي: ${neighborhood}\n` +
-    `الإجمالي التقديري: ${totalPrice} ر.س\n` +
-    `يرجى مراجعة توفر الفريق وتأكيد التنسيق.`;
+    `مرحباً J Beauty Spa 🌸\n` +
+    `طلب تنسيق مناسبة خاصة في المدينة المنورة:\n` +
+    `• رقم الطلب: ${reference}\n` +
+    `• منسّقة المناسبة: ${organizerName}\n` +
+    `• الجوال: ${organizerPhone}\n` +
+    `• عدد المستفيدات: ${participants.length}\n` +
+    `• التفاصيل والخدمات:\n${participantsLines}\n` +
+    `• التاريخ والوقت: ${body.date} الساعة ${body.time}\n` +
+    `• الحي: ${neighborhood}\n` +
+    `• إجمالي الباقة: ${totalPrice} ر.س` +
+    `${notes ? `\n• ملاحظات: ${notes}` : ''}\n` +
+    `بانتظار مراجعة الفريق وتأكيد توفر المختصات ✨`;
 
   return { group_request: reqObj, message, whatsapp_url: whatsappUrl(s, message) };
 }
@@ -442,6 +453,7 @@ export function createGiftRequest(db, helpers, user, body) {
   }
   const recipientName = text(body.recipient_name, 100);
   const personalMessage = optionalText(body.personal_message, 350);
+  const theme = ['royal_gold', 'rose_petal', 'sage_silk'].includes(body.theme) ? body.theme : 'royal_gold';
 
   const pkg = body.package_id ? helpers.packages().find((p) => p.id === body.package_id && p.active) : null;
   const svc = !pkg && body.service_id ? helpers.services().find((s) => s.id === body.service_id && s.active) : null;
@@ -452,18 +464,22 @@ export function createGiftRequest(db, helpers, user, body) {
     : { kind: 'service', id: svc.id, name_ar: svc.name_ar, name_en: svc.name_en, price: svc.price };
 
   const id = uid();
-  const reference = `GIFT-${randomBytes(5).toString('hex').toUpperCase()}`;
+  const reference = `GIFT-${randomBytes(4).toString('hex').toUpperCase()}`;
+  const giftCode = `JGIFT-${randomBytes(4).toString('hex').toUpperCase()}`;
   const reqObj = {
     id,
     reference,
+    gift_code: giftCode,
+    theme,
     user_id: user?.role === 'customer' ? user.id : null,
     sender_name: senderName,
     sender_phone: senderPhone,
     recipient_name: recipientName,
     personal_message: personalMessage,
     chosen,
+    value: chosen.price,
     estimated_amount: chosen.price,
-    status: 'pending_staff_payment',
+    status: 'approved_ready',
     payment_verified: false,
     redeemed: false,
     created_at: now(),
@@ -471,19 +487,34 @@ export function createGiftRequest(db, helpers, user, body) {
 
   db.tx(() => {
     db.run('INSERT INTO gift_requests VALUES(?,?,?,?,?)', id, reference, reqObj.user_id, JSON.stringify(reqObj), reqObj.created_at);
-    helpers.audit(user, 'gift.request', id);
+    helpers.audit(user, 'gift.request', id, JSON.stringify({ reference, gift_code: giftCode, recipient: recipientName, value: chosen.price }));
     recordFunnelEvent(db, 'gift_request');
   });
 
-  const message =
-    `مرحباً J Beauty،\n` +
-    `أرغب في طلب بطاقة إهداء من J Beauty\n` +
-    `مرجع الطلب: ${reference}\n` +
-    `من: ${senderName}\n` +
-    `إلى: ${recipientName}\n` +
-    `الخدمة أو الباقة المختارة: ${chosen.name_ar}\n` +
-    `القيمة التقديرية: ${chosen.price} ر.س\n` +
-    `يرجى تنسيق تأكيد الإهداء والدفع يدوياً.`;
+  const shareMessage =
+    `🌸 إهداء فاخر لك يا ${recipientName} من ${senderName} 🌸\n` +
+    `${personalMessage ? `"${personalMessage}"\n\n` : ''}` +
+    `🎁 الهدية: ${chosen.name_ar} من J Beauty Home Spa\n` +
+    `✨ كود الإهداء الخاص بك: ${giftCode}\n` +
+    `يمكنك استخدام الكود مباشرة عند حجز جلستك المنزلية في المدينة المنورة عبر الموقع:\n` +
+    `https://j-beauty-gamma.vercel.app/ar/booking`;
 
-  return { gift_request: reqObj, message, whatsapp_url: whatsappUrl(helpers.settings(), message) };
+  const message =
+    `مرحباً J Beauty Spa 🌸\n` +
+    `تم إصدار بطاقة إهداء فاخرة:\n` +
+    `• رقم المرجع: ${reference}\n` +
+    `• كود الإهداء: ${giftCode}\n` +
+    `• من: ${senderName} (${senderPhone})\n` +
+    `• إلى: ${recipientName}\n` +
+    `• الخدمة / الباقة: ${chosen.name_ar}\n` +
+    `• القيمة: ${chosen.price} ر.س`;
+
+  return {
+    gift_request: reqObj,
+    gift_code: giftCode,
+    share_message: shareMessage,
+    share_whatsapp_url: `https://wa.me/?text=${encodeURIComponent(shareMessage)}`,
+    message,
+    whatsapp_url: whatsappUrl(helpers.settings(), message),
+  };
 }

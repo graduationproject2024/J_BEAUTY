@@ -1,4 +1,5 @@
 import { $ops, can, esc, loadDashboard, money, opsApi, opsToast, statusBadge, t } from '../ops-state.js';
+import { openReceiptModal } from './bookings.js';
 
 export function paymentsView(d) {
   const payments = d.payments || [];
@@ -121,6 +122,7 @@ export function paymentsView(d) {
               <th>${t('العميلة', 'Client')}</th>
               <th>${t('المدفوع / المسترد / الصافي', 'Paid / Refund / Net')}</th>
               <th>${t('الوسيلة والتوثيق', 'Method & Status')}</th>
+              <th>${t('الإيصال والفاتورة', 'Receipt & Invoice')}</th>
             </tr>
           </thead>
           <tbody>
@@ -137,10 +139,20 @@ export function paymentsView(d) {
                       <span class="badge">${esc(p.payment_method || '-')}</span>
                       ${p.payment_verified ? `<span class="badge mfa-ok">${t('موثق', 'Verified')}</span>` : `<span class="badge pending">${t('بانتظار التوثيق', 'Awaiting Check')}</span>`}
                     </td>
+                    <td>
+                      <div class="ops-chip-row">
+                        ${
+                          p.receipt_count > 0
+                            ? `<button type="button" class="btn small sage" data-view-receipt="${esc(p.booking_id)}">📎 ${t('عرض الإيصال', 'Receipt')} (${p.receipt_count})</button>`
+                            : `<span class="muted" style="font-size:.82rem">${t('بدون إيصال', 'No receipt')}</span>`
+                        }
+                        <a href="/api/ops/bookings/${esc(p.booking_id)}/invoice.pdf" target="_blank" rel="noopener noreferrer" class="btn small light">📄 PDF</a>
+                      </div>
+                    </td>
                   </tr>
                 `,
               )
-              .join('') || `<tr><td colspan="4" class="muted">${t('لا توجد سجلات مدفوعات.', 'No payment records yet.')}</td></tr>`}
+              .join('') || `<tr><td colspan="5" class="muted">${t('لا توجد سجلات مدفوعات.', 'No payment records yet.')}</td></tr>`}
           </tbody>
         </table>
       </div>
@@ -151,6 +163,10 @@ export function paymentsView(d) {
               <div class="ops-mobile-card">
                 <div class="ops-row"><strong><bdi>${esc(p.reference)}</bdi></strong>${p.payment_verified ? `<span class="badge mfa-ok">${t('موثق', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثق', 'Unverified')}</span>`}</div>
                 <div>${esc(p.customer_name)} · <bdi>${money(p.net_amount)}</bdi></div>
+                <div class="ops-chip-row" style="margin-top:8px">
+                  ${p.receipt_count > 0 ? `<button type="button" class="btn small sage" data-view-receipt="${esc(p.booking_id)}">📎 ${t('عرض الإيصال', 'Receipt')} (${p.receipt_count})</button>` : ''}
+                  <a href="/api/ops/bookings/${esc(p.booking_id)}/invoice.pdf" target="_blank" rel="noopener noreferrer" class="btn small light">📄 ${t('فاتورة PDF', 'PDF Invoice')}</a>
+                </div>
               </div>
             `,
           )
@@ -161,6 +177,9 @@ export function paymentsView(d) {
 }
 
 export function bindPayments(renderFn) {
+  document.querySelectorAll('[data-view-receipt]').forEach((btn) => {
+    btn.onclick = () => openReceiptModal(btn.dataset.viewReceipt);
+  });
   $ops('#ops-refund-req-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));

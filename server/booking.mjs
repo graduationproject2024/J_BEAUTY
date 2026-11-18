@@ -3,6 +3,25 @@ import { BOOKING_ADD_ONS, now, uid } from './db.mjs';
 import { fail, money, phone, text, whatsappUrl } from './validation.mjs';
 import { reconcileLoyalty } from './loyalty.mjs';
 import { hasCapability, requireCapability } from './authorization/permissions.mjs';
+import { invoiceToken } from './pdf-invoice.mjs';
+
+export function isNeighborhoodExcluded(settings, neighborhood) {
+  const excluded = Array.isArray(settings?.excluded_areas) ? settings.excluded_areas : [];
+  if (!excluded.length) return false;
+  const norm = (str) =>
+    String(str || '')
+      .trim()
+      .toLowerCase()
+      .replace(/^حي\s+/, '')
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه');
+  const target = norm(neighborhood);
+  if (!target) return false;
+  return excluded.some((area) => {
+    const ex = norm(area);
+    return ex && (target === ex || target.includes(ex) || ex.includes(target));
+  });
+}
 
 function validatePractitionerConflict(helpers, booking, staffId) {
   if (!staffId) return;
@@ -49,8 +68,11 @@ export function validateSchedule(helpers, booking, confirmed = false, enforceLea
   ) {
     fail('Outside working hours');
   }
+  if (isNeighborhoodExcluded(s, booking.neighborhood)) {
+    fail(s.out_of_range_message_ar || 'نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.', 400);
+  }
   if (s.areas.length && !s.areas.includes(booking.neighborhood)) {
-    fail('Neighborhood is outside configured service areas');
+    fail(s.out_of_range_message_ar || 'Neighborhood is outside configured service areas');
   }
 
   if (confirmed) {
@@ -62,8 +84,8 @@ export function validateSchedule(helpers, booking, confirmed = false, enforceLea
     if (needsCredentials) {
       fail('Professional credential approval is required before confirmation');
     }
-    if (!s.capacity || !s.areas.length) {
-      fail('Owner must configure staff capacity and service areas before confirmation');
+    if (!s.capacity) {
+      fail('Owner must configure staff capacity before confirmation');
     }
 
     const start = +startDt;
@@ -90,32 +112,70 @@ export function validateSchedule(helpers, booking, confirmed = false, enforceLea
 }
 
 export function formatBookingResult(helpers, booking) {
-  const notesLine = booking.notes ? `\nملاحظات: ${booking.notes}` : '';
-  const addOnsLine = booking.add_ons && booking.add_ons.length
-    ? `\nلمسات الدلال الإضافية: ${booking.add_ons.map((a) => a.name_ar).join(' + ')}`
-    : '';
+  const servicesList = (booking.items || [])
+    .map((i) => `${i.name_ar} (${i.price} ر.س)`)
+    .join(' + ');
+  const addOnsLine =
+    booking.add_ons && booking.add_ons.length
+      ? `\nالخدمات الإضافية (Add-Ons): ${booking.add_ons.map((a) => `${a.name_ar} (+${a.price} ر.س)`).join(' + ')}`
+      : '';
+  const deliveryLine =
+    Number(booking.delivery_fee || 0) > 0
+      ? `\nرسوم التوصيل المنزلي: ${booking.delivery_fee} ر.س`
+      : '';
   const discountLine = booking.discount_amount
-    ? `\nكوبون الخصم (${booking.coupon_code}): -${booking.discount_amount} ر.س`
+    ? `\nكود الخصم / الإهداء (${booking.coupon_code}): -${booking.discount_amount} ر.س`
     : '';
+  const notesLine = booking.notes ? `\nملاحظات: ${booking.notes}` : '';
   const message =
-    `مرحباً J Beauty Spa،\n` +
-    `أرغب في تقديم طلب حجز منزلي في المدينة المنورة.\n` +
-    `رقم الطلب: ${booking.reference}\n` +
-    `الاسم: ${booking.name}\n` +
-    `الخدمة: ${booking.items.map((i) => i.name_ar).join('، ')}` +
-    `${addOnsLine}\n` +
-    `التاريخ المفضل: ${booking.date}\n` +
-    `الوقت المفضل: ${booking.time}\n` +
-    `الحي: ${booking.neighborhood}\n` +
+    `مرحباً J Beauty Spa 🌸\n` +
+    `طلب حجز منزلي في المدينة المنورة:\n` +
+    `• رقم الطلب: ${booking.reference}\n` +
+    `• الاسم: ${booking.name}\n` +
+    `• الجوال: ${booking.phone}\n` +
+    `• الخدمات: ${servicesList}` +
+    `${addOnsLine}` +
+    `${deliveryLine}\n` +
+    `• التاريخ والوقت: ${booking.date} الساعة ${booking.time}\n` +
+    `• الحي: ${booking.neighborhood}` +
     `${discountLine}\n` +
-    `الإجمالي التقديري: ${booking.total} ر.س` +
+    `• إجمالي الحجز: ${booking.total} ر.س` +
     `${notesLine}\n` +
-    `يرجى تأكيد توفر الموعد.`;
+    `بانتظار تأكيد الموعد وتفاصيل الدفع ✨`;
+  const invTok = invoiceToken(booking);
+  const invUrl = `/api/invoices/${booking.reference}/${invTok}`;
+  const invPdfUrl = `/api/invoices/${booking.reference}/${invTok}.pdf`;
   return {
-    booking,
+    booking: {
+      ...booking,
+      invoice_token: invTok,
+      invoice_url: invUrl,
+      invoice_pdf_url: invPdfUrl,
+      whatsapp_message: message,
+    },
+    invoice_token: invTok,
+    invoice_url: invUrl,
+    invoice_pdf_url: invPdfUrl,
     message,
     whatsapp_url: whatsappUrl(helpers.settings(), message),
   };
+}
+
+export function findActiveGiftByCode(db, code) {
+  const clean = String(code || '').trim().toUpperCase();
+  if (!clean) return null;
+  const rows = db.all('SELECT id, reference, data FROM gift_requests');
+  for (const row of rows) {
+    try {
+      const g = JSON.parse(row.data);
+      const giftCode = String(g.gift_code || '').trim().toUpperCase();
+      const refCode = String(row.reference || '').trim().toUpperCase();
+      if (giftCode === clean || refCode === clean) {
+        return { rowId: row.id, gift: g };
+      }
+    } catch {}
+  }
+  return null;
 }
 
 export function createBooking(db, helpers, user, sessionId, body) {
@@ -152,12 +212,18 @@ export function createBooking(db, helpers, user, sessionId, body) {
     fail('This service requires business credential approval before booking');
   }
 
-  // Parse optional add-ons:
+  // Parse optional add-ons (accept array of IDs or objects with id):
   const validAddOns = [];
   if (Array.isArray(body.add_ons) && body.add_ons.length) {
-    for (const aId of body.add_ons) {
+    const seenAddOns = new Set();
+    for (const rawAddon of body.add_ons) {
+      const aId = typeof rawAddon === 'object' && rawAddon ? rawAddon.id : rawAddon;
+      if (!aId || seenAddOns.has(aId)) continue;
       const found = BOOKING_ADD_ONS.find((a) => a.id === aId);
-      if (found) validAddOns.push(found);
+      if (found) {
+        seenAddOns.add(aId);
+        validAddOns.push(found);
+      }
     }
   }
 
@@ -165,52 +231,66 @@ export function createBooking(db, helpers, user, sessionId, body) {
   const baseDuration = items.reduce((sum, item) => sum + item.duration, 0);
   const addOnsTotal = validAddOns.reduce((sum, a) => sum + a.price, 0);
   const addOnsDuration = validAddOns.reduce((sum, a) => sum + a.duration, 0);
-  const subtotal = baseTotal + addOnsTotal;
+  const deliveryFee = Math.max(0, Number(s.delivery_fee || 0));
+  const subtotal = baseTotal + addOnsTotal + deliveryFee;
   const finalDuration = baseDuration + addOnsDuration;
 
   const clientPhone = phone(body.phone);
 
-  // Parse optional coupon code:
+  // Parse optional coupon or auto-verified gift card code:
   let appliedCoupon = null;
+  let appliedGiftRow = null;
   let discountAmount = 0;
   if (body.coupon_code) {
     const code = String(body.coupon_code).trim().toUpperCase();
-    const c = db.get('SELECT * FROM coupons WHERE UPPER(code)=? AND active=1', code);
-    const today = new Date().toISOString().slice(0, 10);
-    if (!c) {
-      fail('كود الخصم المدخل غير صالح أو غير مفعّل', 400);
-    }
-    if (c.valid_from && c.valid_from > today) fail('هذا الكوبون لم يبدأ تفعيله بعد', 400);
-    if (c.valid_until && c.valid_until < today) fail('عذراً، انتهت صلاحية هذا الكوبون', 400);
-    if (c.min_spend && subtotal < c.min_spend) {
-      fail(`الحد الأدنى للاستفادة من هذا الكوبون هو ${c.min_spend} ر.س`, 400);
-    }
-    if (c.max_uses > 0 && c.used_count >= c.max_uses) {
-      fail('عذراً، اكتمل الحد الأقصى لاستخدام هذا الكوبون', 400);
-    }
-
-    // Enforce single-use per customer (phone or user_id)
-    const altPhone = clientPhone.startsWith('966') ? '0' + clientPhone.slice(3) : clientPhone;
-    const alreadyRedeemed = db.get(
-      'SELECT id FROM coupon_redemptions WHERE UPPER(coupon_code)=? AND (phone=? OR phone=? OR (user_id IS NOT NULL AND user_id=?))',
-      c.code,
-      clientPhone,
-      altPhone,
-      user?.id || null,
-    );
-    if (alreadyRedeemed) {
-      fail('تم استخدام كود الخصم هذا مسبقاً لهذا الرقم. الكوبون متاح للاستخدام لمرة واحدة فقط لكل عميلة.', 400);
-    }
-
-    appliedCoupon = c.code;
-    if (c.discount_type === 'percent') {
-      discountAmount = Math.round((subtotal * c.discount_value) / 100);
+    const giftMatch = findActiveGiftByCode(db, code);
+    if (giftMatch) {
+      const { gift } = giftMatch;
+      if (gift.status === 'cancelled') {
+        fail('تم إلغاء بطاقة الإهداء هذه من قبل الإدارة ولا يمكن استخدامها.', 400);
+      }
+      if (gift.status === 'redeemed' || gift.redeemed) {
+        fail('تم استخدام كود بطاقة الإهداء هذه مسبقاً.', 400);
+      }
+      const giftVal = Number(gift.estimated_amount || gift.chosen?.price || 0);
+      appliedCoupon = gift.gift_code || gift.reference;
+      discountAmount = Math.min(subtotal, giftVal);
+      appliedGiftRow = giftMatch;
     } else {
-      discountAmount = Math.min(subtotal, c.discount_value);
+      const c = db.get('SELECT * FROM coupons WHERE UPPER(code)=? AND active=1', code);
+      const today = new Date().toISOString().slice(0, 10);
+      if (!c) {
+        fail('كود الخصم المدخل غير صالح أو غير مفعّل', 400);
+      }
+      if (c.valid_from && c.valid_from > today) fail('هذا الكوبون لم يبدأ تفعيله بعد', 400);
+      if (c.valid_until && c.valid_until < today) fail('عذراً، انتهت صلاحية هذا الكوبون', 400);
+      if (c.min_spend && subtotal < c.min_spend) {
+        fail(`الحد الأدنى للاستفادة من هذا الكوبون هو ${c.min_spend} ر.س`, 400);
+      }
+      if (c.max_uses > 0 && c.used_count >= c.max_uses) {
+        fail('عذراً، اكتمل الحد الأقصى لاستخدام هذا الكوبون', 400);
+      }
+
+      // Enforce single-use per customer (phone or user_id)
+      const altPhone = clientPhone.startsWith('966') ? '0' + clientPhone.slice(3) : clientPhone;
+      const alreadyRedeemed = db.get(
+        'SELECT id FROM coupon_redemptions WHERE UPPER(coupon_code)=? AND (phone=? OR phone=? OR (user_id IS NOT NULL AND user_id=?))',
+        c.code,
+        clientPhone,
+        altPhone,
+        user?.id || null,
+      );
+      if (alreadyRedeemed) {
+        fail('تم استخدام كود الخصم هذا مسبقاً لهذا الرقم. الكوبون متاح للاستخدام لمرة واحدة فقط لكل عميلة.', 400);
+      }
+
+      appliedCoupon = c.code;
+      if (c.discount_type === 'percent') {
+        discountAmount = Math.round((subtotal * c.discount_value) / 100);
+      } else {
+        discountAmount = Math.min(subtotal, c.discount_value);
+      }
     }
-    try {
-      db.run('UPDATE coupons SET used_count = used_count + 1 WHERE id=?', c.id);
-    } catch {}
   }
 
   const finalTotal = Math.max(0, subtotal - discountAmount);
@@ -240,6 +320,7 @@ export function createBooking(db, helpers, user, sessionId, body) {
       duration,
     })),
     package_id: selectedPkg?.id || null,
+    delivery_fee: deliveryFee,
     subtotal,
     coupon_code: appliedCoupon,
     discount_amount: discountAmount,
@@ -251,6 +332,8 @@ export function createBooking(db, helpers, user, sessionId, body) {
     payment_verified: false,
     payment_verified_at: null,
     payment_method: null,
+    receipt_uploaded: false,
+    receipt_uploaded_at: null,
     refund_cents: 0,
     points_rate: s.points_per_sar,
     assigned_staff_id: null,
@@ -266,6 +349,44 @@ export function createBooking(db, helpers, user, sessionId, body) {
   validateSchedule(helpers, booking);
 
   db.tx(() => {
+    // Re-check atomic single-use inside BEGIN IMMEDIATE transaction (prevents race condition!)
+    if (appliedGiftRow) {
+      const freshRow = db.get('SELECT data FROM gift_requests WHERE id=?', appliedGiftRow.rowId);
+      const freshGift = freshRow ? JSON.parse(freshRow.data) : null;
+      if (!freshGift || freshGift.status === 'cancelled' || freshGift.redeemed || freshGift.status === 'redeemed') {
+        fail('بطاقة الإهداء هذه لم تعد صالحة أو تم استخدامها للتو.', 400);
+      }
+      freshGift.status = 'redeemed';
+      freshGift.redeemed = true;
+      freshGift.redeemed_booking_id = booking.id;
+      freshGift.redeemed_booking_ref = booking.reference;
+      freshGift.redeemed_at = now();
+      db.run('UPDATE gift_requests SET data=? WHERE id=?', JSON.stringify(freshGift), appliedGiftRow.rowId);
+    } else if (appliedCoupon) {
+      const altPhone = clientPhone.startsWith('966') ? '0' + clientPhone.slice(3) : clientPhone;
+      const raceCheck = db.get(
+        'SELECT id FROM coupon_redemptions WHERE UPPER(coupon_code)=? AND (phone=? OR phone=? OR (user_id IS NOT NULL AND user_id=?))',
+        appliedCoupon,
+        clientPhone,
+        altPhone,
+        user?.id || null,
+      );
+      if (raceCheck) {
+        fail('تم استخدام كود الخصم هذا مسبقاً لهذا الرقم.', 400);
+      }
+      db.run('UPDATE coupons SET used_count = used_count + 1 WHERE UPPER(code)=?', appliedCoupon);
+      db.run(
+        'INSERT INTO coupon_redemptions(id, coupon_id, coupon_code, user_id, phone, booking_id, created_at) VALUES(?,?,?,?,?,?,?)',
+        uid(),
+        appliedCoupon,
+        appliedCoupon,
+        user?.id || null,
+        clientPhone,
+        booking.id,
+        now(),
+      );
+    }
+
     db.run(
       'INSERT INTO bookings(id,reference,user_id,scope,idempotency,data,assigned_staff_id) VALUES(?,?,?,?,?,?,?)',
       booking.id,
@@ -276,21 +397,7 @@ export function createBooking(db, helpers, user, sessionId, body) {
       JSON.stringify(booking),
       null,
     );
-    if (appliedCoupon) {
-      try {
-        db.run(
-          'INSERT INTO coupon_redemptions(id, coupon_id, coupon_code, user_id, phone, booking_id, created_at) VALUES(?,?,?,?,?,?,?)',
-          uid(),
-          appliedCoupon,
-          appliedCoupon,
-          user?.id || null,
-          clientPhone,
-          booking.id,
-          now(),
-        );
-      } catch {}
-    }
-    helpers.audit(user, 'booking.request', booking.id);
+    helpers.audit(user, 'booking.request', booking.id, JSON.stringify({ reference: booking.reference, total: booking.total, add_ons: validAddOns.length }));
   });
 
   return { created: true, result: formatBookingResult(helpers, booking) };

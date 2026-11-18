@@ -245,10 +245,10 @@ export function lookbookPage() {
 }
 
 const OCCASION_TYPES = [
-  ['bridal', 'تجهيز عروس وصديقاتها', 'Bridal Preparation', 'تنسيق جلسات العروس وقريباتها في المنزل'],
-  ['family', 'لقاء عائلي مريح', 'Family Gathering', 'جلسات استرخاء وأظافر للأمهات والأخوات'],
-  ['gathering', 'جمعة صديقات وقهوة', 'Friends Ritual', 'تجربة سبا نسائية مشتركة في راحة البيت'],
-  ['eid', 'تهيئة عيد ومناسبة خاصة', 'Celebration & Eid Prep', 'تجهيز جماعي أنيق قبل العيد أو الحفل'],
+  ['bridal', 'جناح العروس والوصيفات', 'Bridal Sanctuary Suite', 'طقوس عناية ملكية متكاملة للعروس ومرافقاتها في أجواء منزلية حالمة'],
+  ['family', 'جلسة دلال العائلة', 'Royal Family Retreat', 'تجربة استرخاء وعناية فاخرة للأمهات والأخوات بلمسات سبا راقية'],
+  ['gathering', 'أمسية سبا الصديقات', 'Ladies’ Soirée Spa', 'جلسة تجميل واسترخاء جماعية راقية تضفي سحراً خاصاً على لقائكن'],
+  ['eid', 'إطلالة العيد والاحتفالات', 'Eid & Gala Glow Ritual', 'تجهيز متكامل للأظافر والمساج لإطلالة متألقة في الأعياد والمناسبات الكبرى'],
 ];
 
 const customGuestName = (p) => {
@@ -299,18 +299,32 @@ export function groupBookingPage() {
 
   if (state.groupResult) {
     const r = state.groupResult;
+    const gr = r.group_request || {};
     return `
       <main id="main" class="wrap">
-        ${head(t('تم تسجيل طلب تنسيق المناسبة', 'Occasion Request Saved'))}
-        <div class="content card">
-          <div class="success">
-            <h3>${t('بانتظار موافقة الإدارة ومراجعة السعة', 'Awaiting Operations Approval & Capacity Review')}</h3>
-            <p>${t('رقم الطلب:', 'Reference:')} <strong><bdi>${esc(r.group_request.reference)}</bdi></strong></p>
+        <div class="luxury-confirm-shell" data-reveal>
+          <div class="luxury-confirm-header">
+            <div class="luxury-confirm-crest">
+              <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="luxury-confirm-logo">
+            </div>
+            <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم تسجيل طلب المناسبة بنجاح', 'OCCASION REQUEST RECEIVED')} ✦</span>
+            <h1>${t('فريق تنسيق المناسبات بخدمتك 🌸', 'Our Occasions Concierge Is Ready 🌸')}</h1>
+            <p class="muted">${t('تم حفظ تفاصيل مناسبتك وتم فتح واتساب لتأكيد توفر الأخصائيات وتنسيق جميع التفاصيل معك مباشرة.', 'Your group ritual details are saved and WhatsApp has been opened to finalize specialist coordination.')}</p>
+            <div class="luxury-ref-pill">
+              <span>${t('رقم طلب المناسبة:', 'Occasion Ref:')}</span>
+              <strong><bdi>${esc(gr.reference)}</bdi></strong>
+            </div>
           </div>
-          <p class="muted">${t('لا يتم تأكيد طلبات المناسبات آلياً. أرسلي التفاصيل عبر واتساب لمراجعة توفر الفريق.', 'Occasion requests are never auto-confirmed. Send via WhatsApp for team capacity coordination.')}</p>
-          ${r.whatsapp_url ? `<a class="btn sage" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener">${t('فتح واتساب', 'Open WhatsApp')}</a>` : ''}
-          <pre style="margin-top:14px">${esc(r.message)}</pre>
-          <button type="button" class="btn light" id="new-group-req">${t('طلب تنسيق مناسبة جديدة', 'New occasion request')}</button>
+          <div class="card luxury-confirm-card" style="max-width:640px;margin:0 auto">
+            <div class="summary-line"><span>${t('المنسّقة', 'Coordinator')}</span><strong>${esc(gr.organizer_name)}</strong></div>
+            <div class="summary-line"><span>${t('عدد المستفيدات', 'Participants')}</span><strong>${num((gr.participants || []).length)}</strong></div>
+            <div class="summary-line"><span>${t('الموعد والحي', 'Schedule & Area')}</span><strong><bdi>${esc(gr.date)} · ${esc(gr.time)}</bdi> · ${esc(gr.neighborhood)}</strong></div>
+            <div class="summary-line summary-total"><span>${t('إجمالي الباقة', 'Package Total')}</span><span>${money(gr.estimated_total)}</span></div>
+            <div class="hero-actions" style="margin-top:20px;justify-content:center;gap:12px">
+              ${r.whatsapp_url ? `<a class="btn shimmer-btn" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💬 ${t('متابعة التنسيق عبر واتساب', 'Continue on WhatsApp')}</a>` : ''}
+              <button type="button" class="btn light" id="new-group-req">${t('تنسيق مناسبة أخرى', 'Plan another occasion')}</button>
+            </div>
+          </div>
         </div>
       </main>
     `;
@@ -597,65 +611,240 @@ export function groupBookingPage() {
   `;
 }
 
+const GIFT_THEMES = [
+  { id: 'royal_gold', ar: 'الذهب الملكي', en: 'Royal Rose Gold', bg: 'linear-gradient(135deg,#3E2932 0%,#5A3A47 55%,#2C1B22 100%)', accent: '#D4AF7C', ink: '#FAF7F5' },
+  { id: 'rose_petal', ar: 'بتلات الورد', en: 'Dusty Pink Velvet', bg: 'linear-gradient(135deg,#F4E6EA 0%,#D9B7C0 55%,#C9AEB6 100%)', accent: '#3E2932', ink: '#3E2932' },
+  { id: 'sage_silk', ar: 'الميرمية الحريرية', en: 'Sage Botanical Silk', bg: 'linear-gradient(135deg,#E6EFE3 0%,#A7B79F 60%,#7D9476 100%)', accent: '#FFFFFF', ink: '#263423' },
+];
+
+function renderLuxuryGiftCardHtml({ themeId = 'royal_gold', senderName = '', recipientName = '', personalMessage = '', giftName = '', giftPrice = 0, code = 'JGIFT-PREVIEW' }) {
+  const th = GIFT_THEMES.find((x) => x.id === themeId) || GIFT_THEMES[0];
+  return `
+    <div class="gift-live-card theme-${esc(th.id)}" id="luxury-gift-card-preview" style="background:${th.bg};color:${th.ink}">
+      <div class="gift-card-foil-shine" aria-hidden="true"></div>
+      <div class="gift-card-top">
+        <div class="gift-card-brand">
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="gift-card-logo">
+          <div>
+            <strong>J Beauty Spa</strong>
+            <small>${t('سبا نسائي منزلي فاخر · المدينة المنورة', 'Luxury Women’s Home Spa · Madinah')}</small>
+          </div>
+        </div>
+        <span class="gift-card-vip-tag">✦ ${t('بطاقة إهداء فاخرة', 'LUXURY GIFT CARD')} ✦</span>
+      </div>
+      <div class="gift-card-body">
+        <div class="gift-card-recipient">
+          <small>${t('إهداء خاص إلى', 'GIFTED WITH LOVE TO')}</small>
+          <strong id="gc-preview-recipient">${esc(recipientName || t('اسم من تحبين', 'Your Beloved Recipient'))}</strong>
+        </div>
+        <p class="gift-card-quote" id="gc-preview-message">“${esc(personalMessage || t('لحظة دلال وهدوء فاخرة تستحقينها في راحة منزلك.', 'A tranquil luxury spa moment crafted especially for you at home.'))}”</p>
+        <div class="gift-card-ritual">
+          <span id="gc-preview-item">${esc(giftName || t('باقة أو خدمة من اختيارك', 'Selected Ritual or Package'))}</span>
+          <strong id="gc-preview-price">${giftPrice ? money(giftPrice) : ''}</strong>
+        </div>
+      </div>
+      <div class="gift-card-footer">
+        <div>
+          <small>${t('بكل محبة من', 'WITH LOVE FROM')}</small>
+          <strong id="gc-preview-sender">${esc(senderName || t('اسمك الكريم', 'Your Name'))}</strong>
+        </div>
+        <div class="gift-card-code-box">
+          <small>${t('كود التفعيل المباشر', 'INSTANT REDEEM CODE')}</small>
+          <strong class="mono">${esc(code)}</strong>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function downloadGiftCardPng(gift) {
+  const th = GIFT_THEMES.find((x) => x.id === (gift.theme || 'royal_gold')) || GIFT_THEMES[0];
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200;
+  canvas.height = 720;
+  const ctx = canvas.getContext('2d');
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, 1200, 720);
+  if (th.id === 'royal_gold') {
+    grad.addColorStop(0, '#3E2932');
+    grad.addColorStop(0.55, '#593947');
+    grad.addColorStop(1, '#2B1B22');
+  } else if (th.id === 'rose_petal') {
+    grad.addColorStop(0, '#F5E9EC');
+    grad.addColorStop(0.55, '#D9B7C0');
+    grad.addColorStop(1, '#C9AEB6');
+  } else {
+    grad.addColorStop(0, '#EBF2E8');
+    grad.addColorStop(0.6, '#A7B79F');
+    grad.addColorStop(1, '#7D9476');
+  }
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 1200, 720);
+
+  // Rose gold luxury double border
+  ctx.strokeStyle = '#D4AF7C';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(28, 28, 1144, 664);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(42, 42, 1116, 636);
+
+  const ink = th.id === 'royal_gold' ? '#FAF7F5' : '#3E2932';
+  const accent = th.id === 'royal_gold' ? '#D4AF7C' : '#3E2932';
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = accent;
+  ctx.font = 'bold 26px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText('✦  J BEAUTY HOME SPA  ✦', 600, 115);
+
+  ctx.fillStyle = ink;
+  ctx.font = 'bold 52px "Noto Naskh Arabic", "IBM Plex Sans Arabic", serif';
+  ctx.fillText(`إهداء فاخر إلى ${gift.recipient_name || ''}`, 600, 225);
+
+  ctx.font = '28px "IBM Plex Sans Arabic", sans-serif';
+  const quote = gift.personal_message || 'لحظة دلال وهدوء فاخرة تستحقينها في راحة منزلك';
+  ctx.fillText(`"${quote.slice(0, 68)}"`, 600, 305);
+
+  // Selected service pill
+  ctx.fillStyle = th.id === 'royal_gold' ? 'rgba(212,175,124,0.18)' : 'rgba(255,255,255,0.65)';
+  ctx.fillRect(220, 360, 760, 86);
+  ctx.strokeStyle = '#D4AF7C';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(220, 360, 760, 86);
+
+  ctx.fillStyle = ink;
+  ctx.font = 'bold 30px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText(`${gift.chosen?.name_ar || ''}  ·  ${gift.estimated_amount || gift.value || 0} ر.س`, 600, 414);
+
+  // Gift code highlight box
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(360, 488, 480, 92);
+  ctx.strokeStyle = '#D4AF7C';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(360, 488, 480, 92);
+
+  ctx.fillStyle = '#6B6464';
+  ctx.font = '20px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText('كود الإهداء الفوري (يُستخدم مباشرة عند الحجز)', 600, 520);
+  ctx.fillStyle = '#3E2932';
+  ctx.font = 'bold 34px monospace';
+  ctx.fillText(gift.gift_code || gift.reference || '', 600, 564);
+
+  ctx.fillStyle = ink;
+  ctx.font = '24px "IBM Plex Sans Arabic", sans-serif';
+  ctx.fillText(`بكل محبة من: ${gift.sender_name || ''}  ·  المدينة المنورة`, 600, 646);
+
+  const link = document.createElement('a');
+  link.download = `J-Beauty-Gift-${gift.gift_code || gift.reference}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
 export function giftsPage() {
+  const packages = state.catalog.packages || [];
+  const services = state.catalog.services || [];
+
   if (state.giftResult) {
     const r = state.giftResult;
+    const gf = r.gift_request || {};
+    const giftCode = r.gift_code || gf.gift_code || gf.reference;
     return `
       <main id="main" class="wrap">
-        ${head(t('تم حفظ طلب الإهداء', 'Gift Request Saved'))}
-        <div class="content card">
-          <div class="success">
-            <h3>${t('بانتظار مراجعة الفريق وتوثيق الدفع اليدوي', 'Pending Staff Review & Manual Payment Verification')}</h3>
-            <p>${t('مرجع الإهداء:', 'Gift Reference:')} <strong><bdi>${esc(r.gift_request.reference)}</bdi></strong></p>
+        <div class="luxury-confirm-shell" data-reveal>
+          <div class="luxury-confirm-header">
+            <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم إصدار بطاقة الإهداء بنجاح', 'DIGITAL GIFT CARD ISSUED')} ✦</span>
+            <h1>${t('بطاقة الإهداء جاهزة للإرسال الآن 🎁', 'Your Luxury Gift Card Is Ready 🎁')}</h1>
+            <p class="muted">${t('تم تفعيل كود الإهداء تلقائياً في النظام! يمكن للمستفيدة إدخال الكود مباشرة في صفحة الحجز وسيتم التحقق منه وتطبيقه فوراً.', 'Your gift code is automatically active in our system and ready for immediate redemption at booking!')}</p>
           </div>
-          <p class="muted">${t('لا يُفعّل الإهداء كرصيد مدفوع إلا بعد تحقق الموظفة من السداد. يمكنك إرسال التفاصيل الآن عبر واتساب.', 'Gift cards are activated only after manual staff payment verification.')}</p>
-          ${r.whatsapp_url ? `<a class="btn sage" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener">${t('فتح واتساب لتنسيق الإهداء', 'Open WhatsApp')}</a>` : ''}
-          <pre style="margin-top:14px">${esc(r.message)}</pre>
-          <button type="button" class="btn light" id="new-gift-req">${t('إعداد إهداء آخر', 'Create another gift request')}</button>
+
+          <div style="max-width:680px;margin:0 auto 24px">
+            ${renderLuxuryGiftCardHtml({
+              themeId: gf.theme || 'royal_gold',
+              senderName: gf.sender_name,
+              recipientName: gf.recipient_name,
+              personalMessage: gf.personal_message,
+              giftName: gf.chosen ? nameOf(gf.chosen) : '',
+              giftPrice: gf.estimated_amount || gf.value,
+              code: giftCode,
+            })}
+          </div>
+
+          <div class="hero-actions" style="justify-content:center;gap:12px;flex-wrap:wrap">
+            <button type="button" class="btn shimmer-btn" id="download-gift-card-png">🖼️ ${t('تحميل بطاقة الإهداء كصورة فاخرة', 'Download Luxury Card PNG')}</button>
+            <a class="btn" href="${esc(r.share_whatsapp_url || r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💌 ${t('إرسال البطاقة للمستفيدة عبر واتساب', 'Send Gift to Recipient on WhatsApp')}</a>
+            <button type="button" class="btn light" id="copy-gift-code-btn" data-code="${esc(giftCode)}">📋 ${t('نسخ كود الإهداء', 'Copy Gift Code')}</button>
+            <button type="button" class="btn light" id="new-gift-req">${t('تصميم بطاقة إهداء أخرى', 'Create another gift')}</button>
+          </div>
         </div>
       </main>
     `;
   }
 
+  const defaultChoice = packages[0] ? { name: nameOf(packages[0]), price: packages[0].price } : services[0] ? { name: nameOf(services[0]), price: services[0].price } : { name: '', price: 0 };
+  const activeTheme = state.giftTheme || 'royal_gold';
+
   return `
     <main id="main" class="wrap">
       ${head(
-        t('أهدي لحظة عناية', 'Gift a Ritual'),
-        t('أعدّي بطاقة إهداء إلكترونية أنيقة يتم تنسيقها واعتمادها يدوياً مع فريق J Beauty.', 'Prepare a thoughtful digital gift voucher request coordinated manually with our team.'),
-        [[t('الرئيسية', 'Home'), 'home'], [t('الإهداء', 'Gift a Ritual'), '']],
+        t('أهدي لحظة عناية فاخرة', 'Gift a Luxury Ritual'),
+        t('صمّمي بطاقة إهداء إلكترونية فاخرة تُصدر فوراً بكود تفعيل آلي يُستخدم مباشرة في الحجز بدون انتظار.', 'Design a bespoke luxury digital gift card with an instant auto-verified code ready for immediate booking.'),
+        [[t('الرئيسية', 'Home'), 'home'], [t('أهدي لحظة عناية', 'Gift a Ritual'), '']],
       )}
-      <div class="notice">${t(
-        'تنويه شفاف: الموقع لا يبيع بطاقات مدفوعة إلكترونياً بشكل آلي. تسجيل الإهداء يُنشئ طلباً يُفعّل بعد مراجعة الفريق وتوثيق التحويل أو الدفع يدوياً.',
-        'Transparent workflow: this form submits a manual gift request. Gift cards become redeemable only after staff confirms payment.',
-      )}</div>
-      <form id="gift-form" class="card content">
-        <div id="form-error" role="alert"></div>
-        <div class="form-grid">
-          ${field(t('اسم المُهدية', 'Your name'), 'sender_name', 'text', state.user?.name || '', 'required')}
-          ${field(t('جوالك السعودي', 'Your Saudi mobile'), 'sender_phone', 'tel', state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
+      <div class="gift-studio-grid">
+        <div class="gift-studio-preview-col">
+          <div class="gift-theme-picker" role="radiogroup" aria-label="${t('اختاري تصميم البطاقة', 'Choose card theme')}">
+            ${GIFT_THEMES.map(
+              (th) => `
+                <button type="button" class="mini-chip ${activeTheme === th.id ? 'active' : ''}" data-gift-theme="${th.id}">
+                  ✦ ${t(th.ar, th.en)}
+                </button>
+              `,
+            ).join('')}
+          </div>
+          ${renderLuxuryGiftCardHtml({
+            themeId: activeTheme,
+            senderName: state.user?.name || '',
+            recipientName: '',
+            personalMessage: '',
+            giftName: defaultChoice.name,
+            giftPrice: defaultChoice.price,
+            code: 'JGIFT-••••-••••',
+          })}
+          <p class="muted" style="text-align:center;font-size:13px;margin-top:12px">
+            ✨ ${t('بمجرد الإصدار ستحصلين على كود فوري موثق في النظام وبطاقة جاهزة للتحميل والمشاركة.', 'Upon creation you receive an auto-verified code and a downloadable high-res luxury card.')}
+          </p>
         </div>
-        ${field(t('اسم المُهدى إليها', 'Recipient name'), 'recipient_name', 'text', '', 'required')}
-        <label class="field">
-          ${t('اختاري باقة أو خدمة للإهداء', 'Choose a package or service')}
-          <select name="gift_choice" required>
-            <optgroup label="${t('الباقات', 'Packages')}">
-              ${(state.catalog.packages || []).map((p) => `<option value="pkg:${esc(p.id)}">${esc(nameOf(p))} · ${money(p.price)}</option>`).join('')}
-            </optgroup>
-            <optgroup label="${t('الخدمات', 'Services')}">
-              ${(state.catalog.services || []).map((s) => `<option value="svc:${esc(s.id)}">${esc(nameOf(s))} · ${money(s.price)}</option>`).join('')}
-            </optgroup>
-          </select>
-        </label>
-        <label class="field">
-          ${t('رسالة الإهداء الشخصية (اختياري)', 'Personal message (optional)')}
-          <textarea name="personal_message" maxlength="350" placeholder="${t('أتمنى لك لحظة هادئة ومليئة بالجمال...', 'Wishing you a calm and restorative moment...')}"></textarea>
-        </label>
-        <label class="check">
-          <input type="checkbox" name="terms" required>
-          <span>${t('أفهم أن الإهداء طلب يدوي يُفعّل فقط بعد تأكيد الفريق والدفع.', 'I understand this is a manual request activated only after staff confirmation and payment.')}</span>
-        </label>
-        <button type="submit" class="btn">${t('تسجيل طلب الإهداء', 'Submit Gift Request')}</button>
-      </form>
+
+        <form id="gift-form" class="card">
+          <div id="form-error" role="alert"></div>
+          <input type="hidden" name="theme" value="${esc(activeTheme)}">
+          <div class="form-grid">
+            ${field(t('اسم المُهدية', 'Your name'), 'sender_name', 'text', state.user?.name || '', 'required')}
+            ${field(t('جوالك السعودي', 'Your Saudi mobile'), 'sender_phone', 'tel', state.user?.phone || '', 'required placeholder="05xxxxxxxx"')}
+          </div>
+          ${field(t('اسم المُهدى إليها', 'Recipient name'), 'recipient_name', 'text', '', 'required placeholder="' + t('مثال: أختي سارة، والدتي الغالية...', 'e.g. Sarah, Mom...') + '"')}
+          <label class="field">
+            ${t('اختاري الباقة أو الخدمة للإهداء', 'Choose a package or service')}
+            <select name="gift_choice" required>
+              <optgroup label="${t('الباقات الفاخرة', 'Luxury Packages')}">
+                ${packages.map((p) => `<option value="pkg:${esc(p.id)}" data-label="${esc(nameOf(p))}" data-price="${p.price}">${esc(nameOf(p))} · ${money(p.price)}</option>`).join('')}
+              </optgroup>
+              <optgroup label="${t('الخدمات المفردة', 'Individual Services')}">
+                ${services.map((s) => `<option value="svc:${esc(s.id)}" data-label="${esc(nameOf(s))}" data-price="${s.price}">${esc(nameOf(s))} · ${money(s.price)}</option>`).join('')}
+              </optgroup>
+            </select>
+          </label>
+          <label class="field">
+            ${t('رسالة الإهداء الشخصية (تظهر داخل البطاقة)', 'Personal dedication message')}
+            <textarea name="personal_message" maxlength="350" placeholder="${t('أتمنى لك لحظة هادئة ومليئة بالجمال والدلال...', 'Wishing you a calm and restorative moment...')}"></textarea>
+          </label>
+          <label class="check">
+            <input type="checkbox" name="terms" required>
+            <span>${t('أوافق على شروط الإهداء وتفعيل كود البطاقة مباشرة في نظام J Beauty Spa.', 'I accept the gift card terms and instant code activation.')}</span>
+          </label>
+          <button type="submit" class="btn shimmer-btn" style="width:100%;padding:14px">🎁 ${t('إصدار بطاقة الإهداء والكود الفوري ✦', 'Generate Luxury Gift Card & Code ✦')}</button>
+        </form>
+      </div>
     </main>
   `;
 }
@@ -898,6 +1087,11 @@ export function bindExperiences(renderFn) {
       state.groupResult = r;
       state.occasionStep = 1;
       state.account = null;
+      if (r.whatsapp_url) {
+        try {
+          window.open(r.whatsapp_url, '_blank', 'noopener,noreferrer');
+        } catch {}
+      }
       renderFn();
     } catch (err) {
       $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
@@ -911,6 +1105,46 @@ export function bindExperiences(renderFn) {
     renderFn();
   });
 
+  // Live Luxury Gift Card theme switcher & real-time preview sync
+  document.querySelectorAll('[data-gift-theme]').forEach((btn) => {
+    btn.onclick = () => {
+      state.giftTheme = btn.dataset.giftTheme;
+      const hiddenTheme = document.querySelector('#gift-form [name="theme"]');
+      if (hiddenTheme) hiddenTheme.value = state.giftTheme;
+      const th = GIFT_THEMES.find((x) => x.id === state.giftTheme) || GIFT_THEMES[0];
+      const card = document.querySelector('#luxury-gift-card-preview');
+      if (card) {
+        card.className = `gift-live-card theme-${th.id}`;
+        card.style.background = th.bg;
+        card.style.color = th.ink;
+      }
+      document.querySelectorAll('[data-gift-theme]').forEach((x) => x.classList.toggle('active', x === btn));
+    };
+  });
+
+  const giftForm = $('#gift-form');
+  if (giftForm) {
+    const syncGiftPreview = () => {
+      const recEl = $('#gc-preview-recipient');
+      const senEl = $('#gc-preview-sender');
+      const msgEl = $('#gc-preview-message');
+      const itemEl = $('#gc-preview-item');
+      const priceEl = $('#gc-preview-price');
+      if (recEl) recEl.textContent = giftForm.elements.recipient_name?.value.trim() || t('اسم من تحبين', 'Your Beloved Recipient');
+      if (senEl) senEl.textContent = giftForm.elements.sender_name?.value.trim() || t('اسمك الكريم', 'Your Name');
+      if (msgEl) {
+        const txt = giftForm.elements.personal_message?.value.trim() || t('لحظة دلال وهدوء فاخرة تستحقينها في راحة منزلك.', 'A tranquil luxury spa moment crafted especially for you at home.');
+        msgEl.textContent = `“${txt}”`;
+      }
+      const sel = giftForm.elements.gift_choice;
+      const opt = sel?.options?.[sel.selectedIndex];
+      if (opt && itemEl) itemEl.textContent = opt.dataset.label || opt.textContent;
+      if (opt && priceEl) priceEl.textContent = opt.dataset.price ? money(Number(opt.dataset.price)) : '';
+    };
+    giftForm.addEventListener('input', syncGiftPreview);
+    giftForm.addEventListener('change', syncGiftPreview);
+  }
+
   $('#gift-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
@@ -923,16 +1157,35 @@ export function bindExperiences(renderFn) {
         sender_phone: d.sender_phone,
         recipient_name: d.recipient_name,
         personal_message: d.personal_message,
+        theme: d.theme || state.giftTheme || 'royal_gold',
         package_id: kind === 'pkg' ? id : undefined,
         service_id: kind === 'svc' ? id : undefined,
         terms: f.elements.terms.checked,
       });
       state.giftResult = r;
       state.account = null;
+      toast(t('تم إصدار بطاقة الإهداء وتفعيل الكود فوراً 🎁', 'Gift card issued & code activated 🎁'));
       renderFn();
     } catch (err) {
       $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
       e.submitter.disabled = false;
+    }
+  });
+
+  $('#download-gift-card-png')?.addEventListener('click', () => {
+    if (state.giftResult?.gift_request) {
+      downloadGiftCardPng(state.giftResult.gift_request);
+      toast(t('تم تحميل بطاقة الإهداء كصورة فاخرة 🖼️', 'Luxury gift card downloaded 🖼️'));
+    }
+  });
+
+  $('#copy-gift-code-btn')?.addEventListener('click', async (e) => {
+    const code = e.currentTarget.dataset.code || '';
+    try {
+      await navigator.clipboard.writeText(code);
+      toast(t('تم نسخ كود الإهداء: ' + code, 'Gift code copied: ' + code));
+    } catch {
+      toast(code);
     }
   });
 

@@ -106,13 +106,13 @@ export function customersView(d) {
                   const rebookMsg = encodeURIComponent(
                     `مرحباً بك ${c.name} من J Beauty Spa 🌸\n` +
                     `مرت فترة منذ جلستك الأخيرة.. هل حان وقت تجديد الدلال والراحة؟\n` +
-                    `يسعدنا تقديم كود خصم خاص 10% لجلستك القادمة: [SPAWHEEL10] ✨\n` +
+                    `يسعدنا تقديم كود خصم خاص 10% لجلستك القادمة: JB10 ✨\n` +
                     `احجزي موعدك الآن بكل سهولة ونصلك في راحة بيتك.`
                   );
                   const birthdayMsg = encodeURIComponent(
                     `كل عام وأنت بألف خير وتألق ${c.name}! 🎉🌸\n` +
                     `أسرة J Beauty Spa تتمنى لك عاماً مليئاً بالجمال والسعادة.\n` +
-                    `يسعدنا إهداؤك خصم 15% بمناسبة يوم ميلادك بكود: [LUXURY15] 🎁✨\n` +
+                    `يسعدنا إهداؤك هدية خصم 15 ر.س بمناسبة يوم ميلادك بكود: JBSAR15 🎁✨\n` +
                     `نتشرف دائماً بخدمتك.`
                   );
                   return `
@@ -126,6 +126,11 @@ export function customersView(d) {
                       <td><bdi>${esc(String(c.created_at || '').slice(0, 10))}</bdi></td>
                       <td>
                         <div class="ops-chip-row">
+                          ${
+                            canVerify
+                              ? `<button type="button" class="btn small ${c.verified ? 'light' : 'sage'}" data-verify-toggle="${esc(c.id)}" data-next-verified="${c.verified ? '0' : '1'}">${c.verified ? t('إلغاء التوثيق', 'Unverify') : t('توثيق الحساب', 'Verify')}</button>`
+                              : ''
+                          }
                           <a href="https://wa.me/?text=${rebookMsg}" target="_blank" rel="noopener noreferrer" class="btn small light" title="${t('إرسال تذكير إعادة الحجز عبر واتساب', 'Send Re-booking reminder')}">
                             🔄 ${t('تذكير إعادة الحجز', 'Re-book')}
                           </a>
@@ -148,16 +153,21 @@ export function customersView(d) {
             (c) => {
               const rebookMsg = encodeURIComponent(
                 `مرحباً بك ${c.name} من J Beauty Spa 🌸\n` +
-                `مرت فترة منذ جلستك الأخيرة.. هل حان وقت تجديد الدلال والراحة؟ كود خصم خاص 10%: [SPAWHEEL10] ✨`
+                `مرت فترة منذ جلستك الأخيرة.. هل حان وقت تجديد الدلال والراحة؟ كود خصم خاص 10%: JB10 ✨`
               );
               const birthdayMsg = encodeURIComponent(
-                `كل عام وأنت بخير ${c.name}! 🎉 هدية يوم ميلادك خصم 15% من J Beauty Spa بكود: [LUXURY15] 🎁`
+                `كل عام وأنت بخير ${c.name}! 🎉 هدية يوم ميلادك خصم 15 ر.س من J Beauty Spa بكود: JBSAR15 🎁`
               );
               return `
                 <div class="ops-mobile-card">
                   <div class="ops-row"><strong>${esc(c.name)}</strong>${c.verified ? `<span class="badge mfa-ok">${t('موثقة', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثقة', 'Unverified')}</span>`}</div>
                   <div class="muted"><bdi>${esc(c.masked_phone)}</bdi> · <bdi>${esc(String(c.created_at || '').slice(0, 10))}</bdi></div>
                   <div class="ops-chip-row" style="margin-top:8px">
+                    ${
+                      canVerify
+                        ? `<button type="button" class="btn small ${c.verified ? 'light' : 'sage'}" data-verify-toggle="${esc(c.id)}" data-next-verified="${c.verified ? '0' : '1'}">${c.verified ? t('إلغاء التوثيق', 'Unverify') : t('توثيق الحساب', 'Verify')}</button>`
+                        : ''
+                    }
                     <a href="https://wa.me/?text=${rebookMsg}" target="_blank" rel="noopener noreferrer" class="btn small light">🔄 ${t('تذكير إعادة الحجز', 'Re-book')}</a>
                     <a href="https://wa.me/?text=${birthdayMsg}" target="_blank" rel="noopener noreferrer" class="btn small" style="background:var(--rose-gold-light);color:var(--plum)">🎁 ${t('هدية الميلاد', 'Birthday')}</a>
                   </div>
@@ -201,6 +211,23 @@ export function bindCustomers(renderFn) {
       opsToast(err.message);
       e.submitter.disabled = false;
     }
+  });
+
+  document.querySelectorAll('[data-verify-toggle]').forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.dataset.verifyToggle;
+      const verified = btn.dataset.nextVerified === '1';
+      btn.disabled = true;
+      try {
+        await opsApi(`/customers/${id}/verify-toggle`, { verified });
+        await loadDashboard();
+        opsToast(verified ? t('تم توثيق الحساب', 'Customer verified') : t('تم إلغاء توثيق الحساب', 'Customer unverified'));
+        renderFn();
+      } catch (err) {
+        opsToast(err.message);
+        btn.disabled = false;
+      }
+    };
   });
 }
 

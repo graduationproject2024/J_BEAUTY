@@ -18,34 +18,71 @@ export function staffView(d) {
   const legacyPending = list.filter((u) => u.role === 'legacy_employee');
   const selected = list.find((u) => u.id === opsState.selectedStaffId && u.role !== 'owner');
 
+  const firstComm = commissions[0] || { threshold: 50, commission_rate_pct: 5, month: '' };
+  const totalMonthVisits = commissions.reduce((sum, c) => sum + Number(c.visits_count || 0), 0);
+  const totalUniqueClients = commissions.reduce((sum, c) => sum + Number(c.unique_clients || 0), 0);
+  const totalCommissions = commissions.reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
+
   return `
     <div class="ops-card">
-      <div class="row" style="margin-bottom:12px">
-        <h2>${t('إنتاجية وعمولات المختصات لهذا الشهر (الهدف 50 زيارة / 5% عمولة)', 'Practitioner Monthly Performance & Commission (50 visits threshold / 5% commission)')}</h2>
+      <div class="ops-row" style="margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="margin:0 0 4px">${t(`عداد الأخصائيات والزيارات والعمولات (الهدف ${num(firstComm.threshold)} زيارة · عمولة ${num(firstComm.commission_rate_pct)}%)`, `Practitioner Visit, Client & Commission Counter (${num(firstComm.threshold)} visits · ${num(firstComm.commission_rate_pct)}%)`)}</h2>
+          <p class="muted" style="margin:0;font-size:13.5px">${t('يتم تحديث عداد الزيارات وعدد العميلات تلقائياً فور تعيين الأخصائية وإكمال الجلسة في تبويب الحجوزات.', 'Visit and client counters update automatically whenever a booking is assigned to a specialist and marked completed.')}</p>
+        </div>
+        <span class="badge">${t('شهر التقرير:', 'Month:')} <bdi>${esc(firstComm.month || '')}</bdi></span>
       </div>
+
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="ops-card" style="margin:0;background:var(--ivory);text-align:center;padding:14px">
+          <div class="muted" style="font-size:13px">${t('إجمالي زيارات الشهر المكتملة', 'Completed Visits (Month)')}</div>
+          <strong style="font-size:26px;color:var(--plum)">${num(totalMonthVisits)}</strong>
+        </div>
+        <div class="ops-card" style="margin:0;background:var(--ivory);text-align:center;padding:14px">
+          <div class="muted" style="font-size:13px">${t('إجمالي العميلات المخدومات', 'Unique Clients Served')}</div>
+          <strong style="font-size:26px;color:var(--plum)">${num(totalUniqueClients)}</strong>
+        </div>
+        <div class="ops-card" style="margin:0;background:var(--ivory);text-align:center;padding:14px">
+          <div class="muted" style="font-size:13px">${t('إجمالي العمولات المستحقة', 'Total Commission Due')}</div>
+          <strong style="font-size:26px;color:var(--sage-deep)">${num(totalCommissions)} ر.س</strong>
+        </div>
+      </div>
+
       <div class="ops-table-wrap">
         <table class="ops-table">
           <thead>
             <tr>
-              <th>${t('المختصة', 'Practitioner')}</th>
-              <th>${t('الزيارات المكتملة هذا الشهر', 'Visits This Month')}</th>
-              <th>${t('الهدف الشهري', 'Monthly Target')}</th>
-              <th>${t('الزيارات الإضافية المستحقة للعمولة', 'Visits Beyond 50')}</th>
-              <th>${t('نسبة العمولة', 'Rate')}</th>
-              <th>${t('مبلغ العمولة المستحق', 'Earned Commission')}</th>
+              <th>${t('الأخصائية', 'Specialist')}</th>
+              <th>${t('زيارات الشهر (مكتملة)', 'Month Visits')}</th>
+              <th>${t('عدد العميلات', 'Unique Clients')}</th>
+              <th>${t('إيرادات الشهر', 'Month Revenue')}</th>
+              <th>${t('التقدم نحو الهدف', 'Target Progress')}</th>
+              <th>${t('زيارات فوق الهدف', 'Excess Visits')}</th>
+              <th>${t('العمولة المستحقة', 'Earned Commission')}</th>
+              <th>${t('الإجمالي التراكمي', 'All-Time')}</th>
             </tr>
           </thead>
           <tbody>
             ${commissions.map((c) => `
               <tr>
-                <td><strong>${esc(c.name)}</strong></td>
-                <td><span class="badge ${c.visits_count >= c.threshold ? 'mfa-ok' : ''}">${num(c.visits_count)} ${t('زيارة', 'visits')}</span></td>
-                <td>${num(c.threshold)} ${t('زيارة', 'visits')}</td>
+                <td>
+                  <strong>${esc(c.name)}</strong>
+                  <div class="muted" style="font-size:12px">${esc(roleLabel(c.role || 'practitioner'))}</div>
+                </td>
+                <td><span class="badge ${c.visits_count >= c.threshold ? 'mfa-ok' : ''}" style="font-size:14px">${num(c.visits_count)} ${t('زيارة', 'visits')}</span></td>
+                <td><strong>${num(c.unique_clients || 0)}</strong> ${t('عميلة', 'clients')}</td>
+                <td><strong>${num(c.month_revenue || 0)} ر.س</strong></td>
+                <td style="min-width:130px">
+                  <div style="font-size:12px;margin-bottom:4px"><bdi>${num(c.visits_count)} / ${num(c.threshold)}</bdi> (${num(c.progress_pct || 0)}%)</div>
+                  <div style="height:8px;background:#E8DFDA;border-radius:99px;overflow:hidden">
+                    <div style="height:100%;width:${num(c.progress_pct || 0)}%;background:linear-gradient(90deg,var(--rose-gold),var(--sage-green));border-radius:99px"></div>
+                  </div>
+                </td>
                 <td><strong>${num(c.excess_visits)}</strong></td>
-                <td>5%</td>
-                <td><strong style="color:var(--sage-ink);font-size:15px">${num(c.commission_amount)} ر.س</strong></td>
+                <td><strong style="color:var(--sage-ink);font-size:15px">${num(c.commission_amount)} ر.س</strong> <small class="muted">(${num(c.commission_rate_pct ?? 5)}%)</small></td>
+                <td><small class="muted">${num(c.all_time_visits || 0)} ${t('زيارة', 'visits')} · ${num(c.all_time_unique_clients || 0)} ${t('عميلة', 'clients')}</small></td>
               </tr>
-            `).join('') || `<tr><td colspan="6" class="muted">${t('لا توجد أخصائيات مسجلات بعد.', 'No practitioners assigned yet.')}</td></tr>`}
+            `).join('') || `<tr><td colspan="8" class="muted">${t('لا توجد أخصائيات مسجلات بعد. أضيفي أخصائية من النموذج أدناه.', 'No practitioners assigned yet.')}</td></tr>`}
           </tbody>
         </table>
       </div>

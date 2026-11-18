@@ -1,4 +1,4 @@
-import { $ops, can, esc, loadDashboard, num, opsApi, opsState, opsToast, t } from '../ops-state.js';
+import { $ops, can, esc, loadDashboard, num, opsApi, opsToast, t } from '../ops-state.js';
 
 export function couponsView(d) {
   const coupons = d.coupons || [];
@@ -13,7 +13,7 @@ export function couponsView(d) {
             <form id="ops-create-coupon-form" class="form-grid" style="align-items:end">
               <label class="field">
                 ${t('رمز الكوبون (إنجليزي بدون مسافات)', 'Coupon Code')}
-                <input type="text" name="code" required placeholder="JBEAUTY10" style="text-transform:uppercase" maxlength="25">
+                <input type="text" name="code" required placeholder="JB10" style="text-transform:uppercase" maxlength="25">
               </label>
               <label class="field">
                 ${t('نوع الخصم', 'Discount Type')}
@@ -28,7 +28,7 @@ export function couponsView(d) {
               </label>
               <label class="field">
                 ${t('الحد الأدنى للطلب (ر.س)', 'Min Spend (SAR)')}
-                <input type="number" name="min_spend" min="0" value="0" placeholder="100">
+                <input type="number" name="min_spend" min="0" value="100" placeholder="100">
               </label>
               <label class="field">
                 ${t('تاريخ البدء', 'Valid From')}
@@ -40,7 +40,7 @@ export function couponsView(d) {
               </label>
               <label class="field">
                 ${t('الحد الأقصى للاستخدام (0 = غير محدود)', 'Max Uses')}
-                <input type="number" name="max_uses" min="0" value="1000">
+                <input type="number" name="max_uses" min="0" value="500">
               </label>
               <button type="submit" class="btn sage">${t('حفظ وتفعيل الكوبون', 'Save Coupon')}</button>
             </form>
@@ -138,7 +138,7 @@ export function bindCoupons(rerender) {
       e.preventDefault();
       const fd = new FormData(form);
       const data = {
-        code: fd.get('code'),
+        code: String(fd.get('code') || '').trim().toUpperCase(),
         discount_type: fd.get('discount_type'),
         discount_value: Number(fd.get('discount_value')),
         min_spend: Number(fd.get('min_spend') || 0),
@@ -147,44 +147,50 @@ export function bindCoupons(rerender) {
         max_uses: Number(fd.get('max_uses') || 0),
         active: true,
       };
+      if (e.submitter) e.submitter.disabled = true;
       try {
-        await opsApi('/api/ops/coupons', data);
-        opsToast(t('تم إنشاء كود الخصم بنجاح', 'Coupon created successfully'));
+        await opsApi('/coupons', data);
+        opsToast(t('تم إنشاء كود الخصم بنجاح ✓', 'Coupon created successfully ✓'));
         form.reset();
         await loadDashboard();
         rerender();
       } catch (err) {
         opsToast(err.message, 'error');
+        if (e.submitter) e.submitter.disabled = false;
       }
     });
   }
 
-  $ops('button[data-coupon-toggle]').forEach((btn) => {
+  document.querySelectorAll('button[data-coupon-toggle]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.couponToggle;
       const active = btn.dataset.couponActive === '1';
+      btn.disabled = true;
       try {
-        await opsApi(`/api/ops/coupons/${id}`, { active });
-        opsToast(active ? t('تم تفعيل الكوبون', 'Coupon enabled') : t('تم تعطيل الكوبون', 'Coupon disabled'));
+        await opsApi(`/coupons/${encodeURIComponent(id)}`, { active });
+        opsToast(active ? t('تم تفعيل الكوبون ✓', 'Coupon enabled ✓') : t('تم تعطيل الكوبون', 'Coupon disabled'));
         await loadDashboard();
         rerender();
       } catch (err) {
         opsToast(err.message, 'error');
+        btn.disabled = false;
       }
     });
   });
 
-  $ops('button[data-coupon-delete]').forEach((btn) => {
+  document.querySelectorAll('button[data-coupon-delete]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       if (!confirm(t('هل أنت متأكدة من حذف هذا الكوبون نهائياً؟', 'Delete this coupon permanently?'))) return;
       const id = btn.dataset.couponDelete;
+      btn.disabled = true;
       try {
-        await opsApi(`/api/ops/coupons/${id}`, { action: 'delete' });
-        opsToast(t('تم حذف الكوبون', 'Coupon deleted'));
+        await opsApi(`/coupons/${encodeURIComponent(id)}`, { action: 'delete' });
+        opsToast(t('تم حذف الكوبون بنجاح ✓', 'Coupon deleted ✓'));
         await loadDashboard();
         rerender();
       } catch (err) {
         opsToast(err.message, 'error');
+        btn.disabled = false;
       }
     });
   });

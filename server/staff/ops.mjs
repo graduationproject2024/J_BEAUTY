@@ -11,6 +11,7 @@ import {
   requireCapability,
 } from '../authorization/permissions.mjs';
 import { fail, maskPhone, money, phone, safeImageUrl, safeSocialUrl, text } from '../validation.mjs';
+import { generateInvoicePdfBuffer, invoiceToken, validateReceiptUpload } from '../pdf-invoice.mjs';
 
 function paginate(items, pageParam, limitParam, defaultLimit = 50) {
   const limit = Math.min(200, Math.max(1, Number(limitParam) || defaultLimit));
@@ -72,6 +73,7 @@ function filterScopedBookings(db, helpers, user, pendingRewardBookingIds) {
     .map((b) => {
       const closed = b.status === 'cancelled' || b.status === 'no_show' || (b.status === 'completed' && b.payment_verified);
       const maskNeeded = !isOwner && (closed || (!canReadAll && canReadAssigned));
+      const invTok = invoiceToken(b);
       return {
         id: b.id,
         reference: b.reference,
@@ -84,6 +86,10 @@ function filterScopedBookings(db, helpers, user, pendingRewardBookingIds) {
         date: b.date,
         time: b.time,
         items: b.items,
+        add_ons: b.add_ons || [],
+        delivery_fee: b.delivery_fee || 0,
+        coupon_code: b.coupon_code || null,
+        discount_amount: b.discount_amount || 0,
         package_id: b.package_id,
         total: canReadAll || canFinance ? b.total : null,
         duration: b.duration,
@@ -95,6 +101,13 @@ function filterScopedBookings(db, helpers, user, pendingRewardBookingIds) {
         payment_verified: b.payment_verified,
         payment_verified_at: b.payment_verified_at || null,
         payment_method: canFinance || isOwner ? b.payment_method : null,
+        receipt_uploaded: !!b.receipt_uploaded,
+        receipt_uploaded_at: b.receipt_uploaded_at || null,
+        receipt_sender_name: b.receipt_sender_name || '',
+        receipt_transfer_ref: b.receipt_transfer_ref || '',
+        invoice_token: invTok,
+        invoice_url: `/api/invoices/${encodeURIComponent(b.reference)}/${invTok}`,
+        invoice_pdf_url: `/api/invoices/${encodeURIComponent(b.reference)}/${invTok}.pdf`,
         created_at: b.created_at,
       };
     });
@@ -169,25 +182,40 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
   const canReadPayments = hasCapability(user, 'payments.read') || hasCapability(user, 'payments.verify');
   const allBookingsRaw = canReadPayments || isOwner || hasCapability(user, 'reports.operational') ? helpers.bookings() : [];
 
+  const receiptCounts = new Map(
+    db.all('SELECT booking_id, COUNT(*) AS n FROM payment_receipts GROUP BY booking_id').map((r) => [r.booking_id, r.n]),
+  );
+
   const payments = canReadPayments
     ? allBookingsRaw
-        .filter((b) => b.payment_verified || (b.status === 'completed' && !b.payment_verified))
-        .map((b) => ({
-          id: b.id,
-          booking_id: b.id,
-          reference: b.reference,
-          customer_name: b.name,
-          booking_total: b.total,
-          paid_amount: b.paid_amount || 0,
-          refund_amount: (b.refund_cents || 0) / 100,
-          outstanding_amount: Math.max(0, Math.round((b.total * 100 - (b.paid_cents || 0))) / 100),
-          net_amount: Math.max(0, (b.paid_cents || 0) - (b.refund_cents || 0)) / 100,
-          payment_method: b.payment_method,
-          payment_verified: b.payment_verified,
-          payment_verified_at: b.payment_verified_at || null,
-          service_date: b.date,
-          status: b.status,
-        }))
+        .filter((b) => b.payment_verified || b.receipt_uploaded || (b.status === 'completed' && !b.payment_verified))
+        .map((b) => {
+          const invTok = invoiceToken(b);
+          const rcCount = receiptCounts.get(b.id) || (b.receipt_uploaded ? 1 : 0);
+          return {
+            id: b.id,
+            booking_id: b.id,
+            reference: b.reference,
+            customer_name: b.name,
+            customer_phone: isOwner ? b.phone : maskPhone(b.phone),
+            booking_total: b.total,
+            paid_amount: b.paid_amount || 0,
+            refund_amount: (b.refund_cents || 0) / 100,
+            outstanding_amount: Math.max(0, Math.round((b.total * 100 - (b.paid_cents || 0))) / 100),
+            net_amount: Math.max(0, (b.paid_cents || 0) - (b.refund_cents || 0)) / 100,
+            payment_method: b.payment_method,
+            payment_verified: b.payment_verified,
+            payment_verified_at: b.payment_verified_at || null,
+            receipt_uploaded: rcCount > 0,
+            receipt_count: rcCount,
+            receipt_uploaded_at: b.receipt_uploaded_at || null,
+            receipt_transfer_ref: b.receipt_transfer_ref || '',
+            invoice_url: `/api/invoices/${encodeURIComponent(b.reference)}/${invTok}`,
+            invoice_pdf_url: `/api/invoices/${encodeURIComponent(b.reference)}/${invTok}.pdf`,
+            service_date: b.date,
+            status: b.status,
+          };
+        })
     : [];
 
   const refundRequests =
@@ -211,6 +239,8 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
     ? db.all('SELECT * FROM reviews').map((r) => ({ ...JSON.parse(r.data), booking_id: r.booking_id }))
     : [];
 
+  const bookingsById = new Map(allBookingsRaw.map((b) => [b.id, b]));
+  const couponsById = new Map(db.all('SELECT id, code FROM coupons').map((c) => [c.id, c.code]));
   const auditPage = Math.max(1, Number(query.audit_page) || 1);
   const auditLimit = Math.min(200, Math.max(1, Number(query.audit_limit) || 50));
   const auditTotal = hasCapability(user, 'audit.read') ? db.get('SELECT COUNT(*) AS n FROM audit').n : 0;
@@ -219,9 +249,23 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
         .all('SELECT * FROM audit ORDER BY id DESC LIMIT ? OFFSET ?', auditLimit, (auditPage - 1) * auditLimit)
         .map((row) => {
           const actorInfo = row.actor ? allUsersById.get(row.actor) : null;
+          let targetLabel = row.target || '';
+          if (row.target) {
+            if (bookingsById.has(row.target)) {
+              const bk = bookingsById.get(row.target);
+              targetLabel = `${bk.reference} · ${bk.name}`;
+            } else if (allUsersById.has(row.target)) {
+              targetLabel = allUsersById.get(row.target).name;
+            } else if (couponsById.has(row.target)) {
+              targetLabel = `كوبون ${couponsById.get(row.target)}`;
+            } else if (row.target === '1') {
+              targetLabel = 'إعدادات المنصة';
+            }
+          }
           return {
             ...row,
             actor_name: actorInfo ? `${actorInfo.name} (${actorInfo.role})` : row.actor || 'System',
+            target_label: targetLabel,
           };
         })
     : [];
@@ -308,32 +352,133 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
       ? db.all('SELECT * FROM coupons ORDER BY created_at DESC')
       : [],
     commissions: assignablePractitioners.map((p) => {
-      const monthPrefix = todayStr.slice(0, 7);
-      const visits = allBookingsRaw.filter(
-        (b) => b.assigned_staff_id === p.id && b.status === 'completed' && String(b.date || '').startsWith(monthPrefix),
+      const monthPrefix = (query.commission_month && /^\d{4}-\d{2}$/.test(query.commission_month))
+        ? query.commission_month
+        : todayStr.slice(0, 7);
+      const allCompleted = allBookingsRaw.filter(
+        (b) => b.assigned_staff_id === p.id && b.status === 'completed',
       );
-      const count = visits.length;
-      const threshold = 50;
+      const monthCompleted = allCompleted.filter((b) => String(b.date || '').startsWith(monthPrefix));
+      const allAssignedActive = allBookingsRaw.filter(
+        (b) => b.assigned_staff_id === p.id && ['confirmed', 'in_progress', 'completed'].includes(b.status),
+      );
+      const uniqueMonthClients = new Set(monthCompleted.map((b) => b.phone).filter(Boolean)).size;
+      const uniqueAllClients = new Set(allCompleted.map((b) => b.phone).filter(Boolean)).size;
+      const monthRevenue = monthCompleted.reduce((acc, b) => acc + Number(b.paid_amount || b.total || 0), 0);
+      const allTimeRevenue = allCompleted.reduce((acc, b) => acc + Number(b.paid_amount || b.total || 0), 0);
+      const count = monthCompleted.length;
+      const threshold = Math.max(1, Number(currentSettings.commission_threshold || 50));
+      const ratePct = Math.max(0, Number(currentSettings.commission_rate ?? 5));
+      const rate = ratePct / 100;
       const excess = Math.max(0, count - threshold);
-      const excessRevenue = visits.slice(threshold).reduce((acc, b) => acc + Number(b.total || 0), 0);
-      const commission = Math.round(excessRevenue * 0.05);
+      const excessRevenue = monthCompleted.slice(threshold).reduce((acc, b) => acc + Number(b.paid_amount || b.total || 0), 0);
+      const commission = Math.round(excessRevenue * rate);
       return {
         staff_id: p.id,
         name: p.name,
+        role: p.role,
         month: monthPrefix,
         visits_count: count,
+        active_assigned_count: allAssignedActive.length,
+        unique_clients: uniqueMonthClients,
+        month_revenue: Math.round(monthRevenue * 100) / 100,
+        all_time_visits: allCompleted.length,
+        all_time_unique_clients: uniqueAllClients,
+        all_time_revenue: Math.round(allTimeRevenue * 100) / 100,
+        progress_pct: Math.min(100, Math.round((count / threshold) * 100)),
         threshold,
         excess_visits: excess,
-        commission_rate: 0.05,
+        commission_rate: rate,
+        commission_rate_pct: ratePct,
         commission_amount: commission,
       };
     }),
   };
 }
 
-export function handleOpsRoute({ db, helpers, user, route, query, body, checkRate, send, customerOrigin }) {
+export function handleOpsRoute({ db, helpers, user, route, query, body, checkRate, send, res, customerOrigin }) {
   if (route === '/api/ops/dashboard' && !body) {
     return send(getOpsDashboardPayload(db, helpers, user, query));
+  }
+
+  if (/^\/api\/ops\/bookings\/[^/]+\/invoice\.pdf$/.test(route) && !body) {
+    if (!hasCapability(user, 'bookings.read') && !hasCapability(user, 'payments.read')) {
+      fail('Missing required permission', 403);
+    }
+    const id = route.split('/')[4];
+    const b = helpers.bookings().find((x) => x.id === id || x.reference === id);
+    if (!b) fail('Booking not found', 404);
+    const pdfBuf = generateInvoicePdfBuffer(b, helpers.settings());
+    res.writeHead(200, {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="J-Beauty-Invoice-${b.reference}.pdf"`,
+      'Cache-Control': 'no-store',
+    });
+    return res.end(pdfBuf);
+  }
+
+  if (/^\/api\/ops\/bookings\/[^/]+\/receipt$/.test(route) && !body) {
+    if (!hasCapability(user, 'bookings.read') && !hasCapability(user, 'payments.read')) {
+      fail('Missing required permission', 403);
+    }
+    const id = route.split('/')[4];
+    const b = helpers.bookings().find((x) => x.id === id || x.reference === id);
+    if (!b) fail('Booking not found', 404);
+    const receipts = db.all('SELECT * FROM payment_receipts WHERE booking_id=? ORDER BY created_at DESC', b.id);
+    return send({ booking_reference: b.reference, receipts });
+  }
+
+  if (/^\/api\/ops\/bookings\/[^/]+\/receipt$/.test(route) && body) {
+    if (!hasCapability(user, 'payments.verify') && !hasCapability(user, 'bookings.update')) {
+      fail('Missing required permission to attach receipt', 403);
+    }
+    const id = route.split('/')[4];
+    const b = helpers.bookings().find((x) => x.id === id || x.reference === id);
+    if (!b) fail('Booking not found', 404);
+    const parsed = validateReceiptUpload(body);
+    const recId = uid();
+    const uploadedAt = now();
+    db.tx(() => {
+      db.run(
+        'INSERT INTO payment_receipts(id, booking_id, reference, filename, mime_type, data_url, sender_name, transfer_ref, uploaded_by, created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+        recId,
+        b.id,
+        b.reference,
+        parsed.filename,
+        parsed.mime_type,
+        parsed.data_url,
+        parsed.sender_name || b.name,
+        parsed.transfer_ref,
+        user.id,
+        uploadedAt,
+      );
+      b.receipt_uploaded = true;
+      b.receipt_uploaded_at = uploadedAt;
+      b.receipt_id = recId;
+      b.receipt_sender_name = parsed.sender_name || b.name;
+      b.receipt_transfer_ref = parsed.transfer_ref;
+      helpers.saveBooking(b);
+      helpers.audit(user, 'booking.receipt_upload', b.id, JSON.stringify({ reference: b.reference, filename: parsed.filename, uploaded_by: 'staff' }));
+    });
+    return send({ ok: true, receipt: { id: recId, filename: parsed.filename, mime_type: parsed.mime_type, created_at: uploadedAt } }, 201);
+  }
+
+  if (/^\/api\/ops\/customers\/[^/]+\/verify-toggle$/.test(route) && body) {
+    requireCapability(user, 'customers.verify_identity');
+    const id = route.split('/')[4];
+    const target = db.get("SELECT * FROM users WHERE id=? AND role='customer'", id);
+    if (!target) fail('Customer not found', 404);
+    const nextVal = body.verified === true || body.verified === 1 ? 1 : 0;
+    db.tx(() => {
+      db.run('UPDATE users SET verified=? WHERE id=?', nextVal, id);
+      if (nextVal) {
+        for (const b of helpers.bookings().filter((x) => x.user_id === id)) {
+          reconcileLoyalty(db, helpers, b);
+        }
+      }
+      helpers.audit(user, 'account.verify', id, JSON.stringify({ verified: !!nextVal, name: target.name }));
+    });
+    return send({ ok: true, verified: !!nextVal });
   }
 
   if (route === '/api/ops/coupons' && !body) {
@@ -731,6 +876,69 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
     if (!Array.isArray(s.areas) || s.areas.length > 100 || s.areas.some((v) => typeof v !== 'string' || !v.trim() || v.length > 150)) {
       fail('Invalid areas');
     }
+    if (!Array.isArray(s.excluded_areas)) s.excluded_areas = [];
+    if (s.excluded_areas.length > 100 || s.excluded_areas.some((v) => typeof v !== 'string' || !v.trim() || v.length > 150)) {
+      fail('Invalid excluded areas');
+    }
+    s.delivery_fee = Math.max(0, Math.min(500, Number(s.delivery_fee || 0)));
+    s.wheel_enabled = Boolean(s.wheel_enabled);
+    s.wheel_first_visit_only = Boolean(s.wheel_first_visit_only);
+    s.wheel_cooldown_days = Math.max(1, Math.min(365, Math.round(Number(s.wheel_cooldown_days || 14))));
+    s.commission_threshold = Math.max(1, Math.min(1000, Math.round(Number(s.commission_threshold || 50))));
+    s.commission_rate = Math.max(0, Math.min(50, Number(s.commission_rate ?? 5)));
+    s.bank_name = String(s.bank_name || '').trim().slice(0, 120);
+    s.bank_account_holder = String(s.bank_account_holder || '').trim().slice(0, 150);
+    s.bank_iban = String(s.bank_iban || '').trim().slice(0, 60);
+
+    if (Array.isArray(s.wheel_prizes) && s.wheel_prizes.length) {
+      if (s.wheel_prizes.length > 12) fail('Maximum 12 wheel prizes');
+      const safePalette = ['#D9B7C0', '#D4AF7C', '#A7B79F', '#C9AEB6', '#EDE6E1', '#D4AF7C'];
+      s.wheel_prizes = s.wheel_prizes.map((p, idx) => {
+        const code = String(p.code || `JB${idx + 1}`).trim().toUpperCase().replace(/\s+/g, '').slice(0, 25);
+        const discountType = p.discount_type === 'fixed' ? 'fixed' : 'percent';
+        const val = Math.max(1, Math.min(discountType === 'percent' ? 50 : 250, Number(p.value || 5)));
+        const color = /^#[0-9A-Fa-f]{6}$/.test(String(p.color || '')) ? p.color : safePalette[idx % safePalette.length];
+        const textColor = /^#[0-9A-Fa-f]{6}$/.test(String(p.textColor || '')) ? p.textColor : (color === '#D4AF7C' || color === '#A7B79F' ? '#FFFFFF' : '#3E2932');
+        const prizeObj = {
+          id: String(p.id || `wheel-${idx + 1}`).slice(0, 40),
+          title_ar: String(p.title_ar || `خصم ${val}${discountType === 'percent' ? '%' : ' ريال'}`).trim().slice(0, 50),
+          title_en: String(p.title_en || `${val}${discountType === 'percent' ? '%' : ' SAR'} OFF`).trim().slice(0, 50),
+          desc_ar: String(p.desc_ar || 'مكافأة حصرية من عجلة J Beauty Spa').trim().slice(0, 140),
+          desc_en: String(p.desc_en || 'Exclusive reward from J Beauty Spa Wheel').trim().slice(0, 140),
+          code,
+          discount_type: discountType,
+          value: val,
+          color,
+          textColor,
+        };
+        // Auto-sync prize coupon code into coupons table so winning code always works!
+        const existingC = db.get('SELECT id, used_count FROM coupons WHERE UPPER(code)=?', code);
+        if (existingC) {
+          db.run(
+            'UPDATE coupons SET discount_type=?, discount_value=?, active=1 WHERE id=?',
+            discountType,
+            val,
+            existingC.id,
+          );
+        } else {
+          db.run(
+            'INSERT OR IGNORE INTO coupons(id, code, discount_type, discount_value, min_spend, valid_from, valid_until, max_uses, used_count, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+            `coupon-wheel-${code.toLowerCase()}`,
+            code,
+            discountType,
+            val,
+            100,
+            '2026-01-01',
+            '2027-12-31',
+            1000,
+            0,
+            1,
+            now(),
+          );
+        }
+        return prizeObj;
+      });
+    }
     if (!Array.isArray(s.working_days) || s.working_days.some((v) => !Number.isInteger(v) || v < 0 || v > 6)) {
       fail('Invalid working days');
     }
@@ -852,7 +1060,7 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
     if (!Number.isInteger(points) || !points || Math.abs(points) > 100000) fail('Invalid points');
     db.tx(() => {
       const target = db.get('SELECT * FROM users WHERE id=?', body.user_id);
-      if (!target?.verified || target.role !== 'customer') fail('Verified customer required');
+      if (!target || target.role !== 'customer') fail('Customer required');
       if (helpers.balance(target.id) + points < 0) fail('Balance cannot be negative');
       helpers.recordLedger(target.id, null, points, `manual:${uid()}`, `manual: ${reason}`);
       helpers.audit(user, 'loyalty.adjust', target.id, JSON.stringify({ points, reason }));

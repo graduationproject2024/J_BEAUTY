@@ -1,4 +1,5 @@
 import { readFileSync, existsSync } from 'node:fs';
+import { timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 import { fail } from './validation.mjs';
 import { verifyCsrfToken } from './auth.mjs';
@@ -19,28 +20,39 @@ export const MIME_TYPES = {
   '.xml': 'application/xml; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
+  '.pdf': 'application/pdf',
 };
 
 export const IMMUTABLE_EXTS = new Set(['.woff2', '.woff', '.webp', '.avif', '.png', '.jpg', '.jpeg']);
 
 export const DEFAULT_CSP =
-  "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+  "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
 
 export function setBaseSecurityHeaders(res, { secure, noindex = false, referrerPolicy = 'strict-origin-when-cross-origin' } = {}) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', referrerPolicy);
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Content-Security-Policy', DEFAULT_CSP);
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
   if (noindex) {
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   }
   if (secure) {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
 }
 
 export function resolveSafeSubpath(rootDir, relativePath) {
-  const decoded = decodeURIComponent(relativePath);
+  let decoded;
+  try {
+    decoded = decodeURIComponent(String(relativePath || ''));
+  } catch {
+    fail('Invalid path encoding', 400);
+  }
+  if (decoded.includes('\0') || decoded.includes('\\')) {
+    fail('Forbidden', 403);
+  }
   if (decoded.split('/').some((seg) => seg.startsWith('.'))) {
     fail('Forbidden', 403);
   }
@@ -67,7 +79,31 @@ export function serveFileResponse(res, method, filePath, { noStore = false } = {
   return true;
 }
 
-export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [], sessionId = '') {
+function sanitizeJsonObject(val, depth = 0) {
+  if (depth > 16) fail('Payload too deeply nested', 400);
+  if (Array.isArray(val)) {
+    return val.map((item) => sanitizeJsonObject(item, depth + 1));
+  }
+  if (val && typeof val === 'object') {
+    const clean = Object.create(null);
+    for (const [k, v] of Object.entries(val)) {
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+      clean[k] = sanitizeJsonObject(v, depth + 1);
+    }
+    return clean;
+  }
+  return val;
+}
+
+function safeStrEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || !a || !b) return false;
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  return timingSafeEqual(ba, bb);
+}
+
+export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [], sessionId = '', maxBytes = 50000) {
   const origin = req.headers.origin;
   const allowed = new Set(allowedOrigins.filter(Boolean));
   if (origin && !allowed.has(origin)) {
@@ -77,7 +113,7 @@ export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [
     fail('Cross-site request rejected', 403);
   }
   const clientCsrf = req.headers['x-csrf-token'];
-  const isDirect = clientCsrf && expectedCsrf && clientCsrf === expectedCsrf;
+  const isDirect = safeStrEqual(clientCsrf, expectedCsrf);
   const isHmac = clientCsrf && verifyCsrfToken(clientCsrf, sessionId);
   if (!isDirect && !isHmac) {
     fail('Invalid CSRF token', 403);
@@ -88,7 +124,7 @@ export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
-    if (Buffer.byteLength(raw) > 50000) fail('Request too large', 413);
+    if (Buffer.byteLength(raw) > maxBytes) fail('Request too large', 413);
   }
   let body;
   try {
@@ -99,6 +135,6 @@ export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [
   if (!body || Array.isArray(body) || typeof body !== 'object') {
     fail('Invalid request');
   }
-  return body;
+  return sanitizeJsonObject(body);
 }
 

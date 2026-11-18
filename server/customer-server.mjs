@@ -18,8 +18,15 @@ import {
   verifyPassword,
 } from './auth.mjs';
 import { fail, optionalText, phone, text, whatsappUrl } from './validation.mjs';
-import { createBooking } from './booking.mjs';
+import { createBooking, findActiveGiftByCode } from './booking.mjs';
 import { requestReward } from './loyalty.mjs';
+import {
+  generateInvoicePdfBuffer,
+  invoiceToken,
+  renderInvoiceHtml,
+  validateReceiptUpload,
+  verifyInvoiceToken,
+} from './pdf-invoice.mjs';
 import {
   parseMutationRequest,
   resolveSafeSubpath,
@@ -233,11 +240,13 @@ export function createCustomerApp({
       let body;
       if (!['GET', 'HEAD'].includes(method)) {
         const expectedOrigin = `${secure ? 'https' : 'http'}://${req.headers.host}`;
+        const isReceiptRoute = /^\/api\/bookings\/[^/]+\/receipt$/.test(route);
         body = await parseMutationRequest(
           req,
           session.csrf,
           [expectedOrigin, process.env.CUSTOMER_ORIGIN, process.env.PUBLIC_ORIGIN],
           sid,
+          isReceiptRoute ? 2_900_000 : 50000,
         );
       }
 
@@ -438,11 +447,132 @@ export function createCustomerApp({
         return send(createGroupRequest(db, helpers, user, body), 201);
       }
 
+      if (method === 'GET' && /^\/api\/invoices\/[^/]+\/[^/]+$/.test(route)) {
+        const parts = route.split('/');
+        const ref = decodeURIComponent(parts[3] || '');
+        const rawTok = decodeURIComponent(parts[4] || '');
+        const isPdf = rawTok.endsWith('.pdf');
+        const tok = isPdf ? rawTok.slice(0, -4) : rawTok;
+        const b = helpers.bookings().find((x) => x.reference === ref);
+        if (!b || !verifyInvoiceToken(b, tok)) {
+          fail('Invoice not found or link invalid', 404);
+        }
+        const s = helpers.settings();
+        if (isPdf) {
+          const pdfBuf = generateInvoicePdfBuffer(b, s);
+          res.writeHead(200, {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="J-Beauty-Invoice-${b.reference}.pdf"`,
+            'Cache-Control': 'no-store',
+          });
+          return res.end(pdfBuf);
+        }
+        const html = renderInvoiceHtml(b, s, `/api/invoices/${encodeURIComponent(b.reference)}/${encodeURIComponent(tok)}.pdf`);
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store',
+        });
+        return res.end(html);
+      }
+
+      if (method === 'POST' && /^\/api\/bookings\/[^/]+\/receipt$/.test(route)) {
+        checkRate(`receipt:${req.socket.remoteAddress}`, 20, 3600000);
+        const ref = decodeURIComponent(route.split('/')[3] || '').trim().toUpperCase();
+        const b = helpers.bookings().find((x) => x.reference === ref || x.id === ref);
+        if (!b) fail('لم يتم العثور على الحجز المحدد', 404);
+
+        // Verify ownership: either logged-in owner, same booking session scope, or matching phone number
+        const rowMeta = db.get('SELECT scope, user_id FROM bookings WHERE id=?', b.id);
+        let authorized = false;
+        if (user && b.user_id && b.user_id === user.id) authorized = true;
+        else if (rowMeta && rowMeta.scope === session.id) authorized = true;
+        else if (body.phone) {
+          try {
+            if (phone(body.phone) === b.phone) authorized = true;
+          } catch {}
+        }
+        if (!authorized) {
+          fail('يرجى إدخال رقم الجوال المسجل في الحجز لتأكيد رفع الإيصال', 403);
+        }
+
+        const parsed = validateReceiptUpload(body);
+        const recId = uid();
+        const uploadedAt = now();
+        db.tx(() => {
+          db.run(
+            'INSERT INTO payment_receipts(id, booking_id, reference, filename, mime_type, data_url, sender_name, transfer_ref, uploaded_by, created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+            recId,
+            b.id,
+            b.reference,
+            parsed.filename,
+            parsed.mime_type,
+            parsed.data_url,
+            parsed.sender_name,
+            parsed.transfer_ref,
+            user ? user.id : 'customer',
+            uploadedAt,
+          );
+          b.receipt_uploaded = true;
+          b.receipt_uploaded_at = uploadedAt;
+          b.receipt_id = recId;
+          b.receipt_sender_name = parsed.sender_name;
+          b.receipt_transfer_ref = parsed.transfer_ref;
+          helpers.saveBooking(b);
+          helpers.audit(user, 'booking.receipt_upload', b.id, JSON.stringify({ reference: b.reference, filename: parsed.filename, transfer_ref: parsed.transfer_ref }));
+        });
+        return send(
+          {
+            ok: true,
+            receipt: {
+              id: recId,
+              booking_reference: b.reference,
+              filename: parsed.filename,
+              mime_type: parsed.mime_type,
+              created_at: uploadedAt,
+            },
+          },
+          201,
+        );
+      }
+
       if (method === 'POST' && route === '/api/coupons/validate') {
         checkRate(`coupon:${req.socket.remoteAddress}`, 40);
         const code = String(body?.code || '').trim().toUpperCase();
         const spend = Number(body?.total || body?.subtotal || 0);
         if (!code) fail('يرجى إدخال كود الكوبون', 400);
+
+        // First check auto-generated Gift Cards against Ops DB directly
+        const giftMatch = findActiveGiftByCode(db, code);
+        if (giftMatch) {
+          const { gift } = giftMatch;
+          if (gift.status === 'cancelled') {
+            fail('تم إلغاء بطاقة الإهداء هذه من قبل الإدارة.', 400);
+          }
+          if (gift.status === 'redeemed' || gift.redeemed) {
+            fail('تم استخدام بطاقة الإهداء هذه مسبقاً.', 400);
+          }
+          const giftVal = Number(gift.estimated_amount || gift.chosen?.price || 0);
+          const discountAmount = Math.min(spend > 0 ? spend : giftVal, giftVal);
+          return send({
+            valid: true,
+            is_gift: true,
+            coupon: {
+              code: gift.gift_code || gift.reference,
+              discount_type: 'fixed',
+              discount_value: giftVal,
+              value: giftVal,
+              min_spend: 0,
+              is_gift: true,
+              recipient_name: gift.recipient_name,
+            },
+            code: gift.gift_code || gift.reference,
+            discount_type: 'fixed',
+            discount_value: giftVal,
+            discount_amount: discountAmount,
+            final_total: Math.max(0, spend - discountAmount),
+          });
+        }
+
         const coupon = db.get('SELECT * FROM coupons WHERE UPPER(code)=? AND active=1', code);
         if (!coupon) fail('كود الكوبون غير صحيح أو غير مفعّل', 404);
         const today = new Date().toISOString().slice(0, 10);
@@ -511,20 +641,25 @@ export function createCustomerApp({
 
       if (method === 'GET' && route === '/api/account') {
         needUser();
-        const myBookings = helpers.bookings().filter((b) => b.user_id === user.id);
-        const hasPendingEntitlement =
-          !user.verified &&
-          myBookings.some((b) => b.status === 'completed' && b.payment_verified);
+        const myBookings = helpers
+          .bookings()
+          .filter((b) => b.user_id === user.id)
+          .map((b) => {
+            const tok = invoiceToken(b);
+            return {
+              ...b,
+              invoice_url: `/api/invoices/${encodeURIComponent(b.reference)}/${tok}`,
+              invoice_pdf_url: `/api/invoices/${encodeURIComponent(b.reference)}/${tok}.pdf`,
+            };
+          });
         const passport = getPassportData(db, helpers, user);
         const referralCode = 'REF' + user.phone.slice(-6);
         return send({
           user: publicUser(user),
           bookings: myBookings,
-          ledger: user.verified
-            ? db.all('SELECT * FROM ledger WHERE user_id=? ORDER BY created_at DESC', user.id)
-            : [],
-          balance: user.verified ? helpers.balance(user.id) : 0,
-          has_pending_entitlement: hasPendingEntitlement,
+          ledger: db.all('SELECT * FROM ledger WHERE user_id=? ORDER BY created_at DESC', user.id),
+          balance: helpers.balance(user.id),
+          has_pending_entitlement: false,
           rewards: helpers.settings().rewards,
           reward_requests: db
             .all('SELECT data FROM reward_requests WHERE user_id=?', user.id)
@@ -592,7 +727,6 @@ export function createCustomerApp({
         }
 
         needUser();
-        if (!user.verified) fail('Phone verification required', 403);
         const b = helpers.bookings().find((x) => x.id === body.booking_id);
         if (!b || b.user_id !== user.id || b.status !== 'completed') {
           fail('Completed owned booking required', 403);

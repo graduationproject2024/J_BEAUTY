@@ -4675,3 +4675,510 @@ dialog::backdrop {
   border-radius: 999px;
   border: 1px solid var(--border-gold);
 }
+
+
+/* =========================================================================
+   J BEAUTY SPA — 21ST.DEV LUXURY MOTION, EXACT PALETTE & CONTRAST GUARD
+   Palette: --dusty-pink (#D9B7C0), --mauve-pink (#C9AEB6),
+            --sage-green (#A7B79F), --rose-gold (#D4AF7C),
+            --cream-bg (#EDE6E1), --text-dark (#6B6464)
+   ========================================================================= */
+
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 85% 0%, rgba(217, 183, 192, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 10% 35%, rgba(167, 183, 159, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 45% at 50% 100%, rgba(212, 175, 124, 0.16) 0%, transparent 60%),
+    linear-gradient(180deg, #FAF7F5 0%, var(--cream-bg) 52%, #F6F0EC 100%);
+  color: var(--plum);
+}
+
+.muted, p {
+  color: var(--text-dark);
+}
+
+/* --- Global Button Contrast Safety Guard (Zero invisible text anywhere!) --- */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 220ms var(--ease-out), box-shadow 260ms var(--ease-out), background-color 220ms var(--ease-out), border-color 220ms var(--ease-out), color 220ms var(--ease-out);
+}
+.btn:active {
+  transform: scale(0.97) !important;
+}
+.btn.light {
+  background: #FFFFFF !important;
+  color: var(--plum) !important;
+  border: 1.5px solid rgba(212, 175, 124, 0.65) !important;
+  box-shadow: 0 3px 12px rgba(62, 41, 50, 0.06);
+}
+.btn.light:hover {
+  background: var(--cream-bg) !important;
+  color: var(--plum) !important;
+  border-color: var(--rose-gold) !important;
+  transform: translateY(-2px);
+}
+.btn.rose {
+  background: linear-gradient(135deg, var(--dusty-pink), var(--mauve-pink)) !important;
+  color: var(--plum) !important;
+  border: 1px solid rgba(212, 175, 124, 0.45) !important;
+  font-weight: 700;
+}
+.btn.rose:hover {
+  filter: brightness(0.96);
+  transform: translateY(-2px);
+}
+.btn.sage {
+  background: linear-gradient(135deg, #7E9676, #5F7758) !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+}
+.btn.sage:hover {
+  filter: brightness(1.06);
+  transform: translateY(-2px);
+}
+.btn.text-link {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: var(--plum) !important;
+  border: 1.5px solid rgba(212, 175, 124, 0.55) !important;
+  text-decoration: none !important;
+  font-weight: 600;
+}
+.btn.text-link:hover {
+  background: var(--plum) !important;
+  color: #FFFFFF !important;
+  border-color: var(--plum) !important;
+}
+.jb-quiet-link {
+  background: #FFFFFF !important;
+  color: var(--plum) !important;
+  border: 1.5px solid var(--rose-gold) !important;
+  font-weight: 600 !important;
+}
+.jb-quiet-link:hover {
+  background: var(--plum) !important;
+  color: #FFFFFF !important;
+}
+
+/* --- 21st.dev Shimmer Sweep Button --- */
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 22%, rgba(255, 255, 255, 0.34) 48%, transparent 72%);
+  transform: translateX(-140%);
+  animation: jbShimmerSweep 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes jbShimmerSweep {
+  0%, 55% { transform: translateX(-140%); }
+  100% { transform: translateX(160%); }
+}
+
+/* --- 21st.dev Cursor-Tracking Spotlight Cards --- */
+.card, .service-card, .package-card, .jb-path, .jb-reward-card {
+  position: relative;
+  transition: transform 280ms var(--ease-out), box-shadow 300ms var(--ease-out), border-color 260ms var(--ease-out);
+}
+.card::before, .service-card::before, .package-card::before, .jb-path::before, .jb-reward-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(212, 175, 124, 0.14), transparent 70%);
+  opacity: 0;
+  transition: opacity 280ms var(--ease-out);
+  pointer-events: none;
+  z-index: 0;
+}
+.card:hover::before, .service-card:hover::before, .package-card:hover::before, .jb-path:hover::before, .jb-reward-card:hover::before {
+  opacity: 1;
+}
+.service-card:hover, .package-card:hover, .jb-reward-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 44px rgba(62, 41, 50, 0.11), 0 0 0 1px rgba(212, 175, 124, 0.45);
+}
+
+/* --- Smooth Scroll Stagger Reveals --- */
+[data-reveal].will-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 620ms var(--ease-out) var(--reveal-delay, 0ms), transform 620ms var(--ease-out) var(--reveal-delay, 0ms);
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Luxury Petals Medallion Card (Replaces Primitive SVG Flower) --- */
+.jb-luxury-medallion-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px 22px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(145deg, #FFFFFF 0%, #FAF4F0 48%, var(--cream-bg) 100%);
+  border: 1.5px solid rgba(212, 175, 124, 0.65);
+  box-shadow: 0 18px 44px rgba(62, 41, 50, 0.12), inset 0 1px 0 #FFFFFF;
+  min-width: 230px;
+  overflow: hidden;
+  text-align: center;
+}
+.jb-medallion-beam {
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(212, 175, 124, 0.22) 60deg, transparent 120deg, rgba(217, 183, 192, 0.22) 210deg, transparent 290deg);
+  animation: jbOrbitSpin 12s linear infinite;
+  pointer-events: none;
+}
+@keyframes jbOrbitSpin {
+  to { transform: rotate(360deg); }
+}
+.jb-medallion-ring {
+  position: relative;
+  z-index: 1;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  padding: 6px;
+  background: conic-gradient(var(--rose-gold) 0deg, var(--dusty-pink) var(--petal-deg, 220deg), rgba(212, 175, 124, 0.22) var(--petal-deg, 220deg));
+  box-shadow: 0 8px 24px rgba(212, 175, 124, 0.34);
+  display: grid;
+  place-items: center;
+}
+.jb-medallion-core {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #FFFFFF;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  box-shadow: inset 0 2px 10px rgba(62, 41, 50, 0.06);
+}
+.jb-medallion-logo {
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+}
+.jb-medallion-meta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.jb-medallion-kicker {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: var(--rose-gold-deep);
+}
+.jb-medallion-title {
+  font-size: 17px;
+  color: var(--plum);
+  font-family: var(--font-display);
+}
+.jb-medallion-pill-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.jb-medallion-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--plum);
+  border: 1px solid rgba(212, 175, 124, 0.45);
+}
+.jb-medallion-pill.is-gold {
+  background: linear-gradient(135deg, var(--rose-gold), #B68B54);
+  color: #FFFFFF;
+  border-color: transparent;
+}
+
+/* --- Luxury Gift Spotlight & Creative Gift Card Studio --- */
+.gift-spotlight-band {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: clamp(24px, 4vw, 44px);
+  align-items: center;
+  padding: clamp(28px, 4.5vw, 48px);
+  border-radius: var(--r-xl);
+  background:
+    radial-gradient(ellipse at 15% 20%, rgba(217, 183, 192, 0.28), transparent 55%),
+    linear-gradient(135deg, #FFFFFF 0%, #FAF3EF 50%, var(--cream-bg) 100%);
+  border: 1.5px solid rgba(212, 175, 124, 0.55);
+  box-shadow: 0 18px 46px rgba(62, 41, 50, 0.08);
+}
+.gift-spotlight-copy h2 {
+  margin: 8px 0 10px;
+  color: var(--plum);
+}
+.mini-foil-card {
+  background: linear-gradient(135deg, #3E2932 0%, #593A47 55%, #2B1A21 100%);
+  color: #FAF7F5;
+  padding: 24px;
+  border-radius: 20px;
+  border: 1.5px solid var(--rose-gold);
+  box-shadow: 0 22px 48px rgba(62, 41, 50, 0.28);
+  transform: perspective(900px) rotateY(-6deg) rotateX(3deg);
+  transition: transform 360ms var(--ease-out);
+}
+.gift-spotlight-band:hover .mini-foil-card {
+  transform: perspective(900px) rotateY(0deg) rotateX(0deg) translateY(-4px);
+}
+.mini-foil-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.mini-foil-logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 3px;
+  border: 1px solid var(--rose-gold);
+}
+.mini-foil-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(212, 175, 124, 0.22);
+  color: var(--rose-gold-light);
+  border: 1px solid rgba(212, 175, 124, 0.5);
+}
+.mini-foil-title {
+  font-family: var(--font-en-display);
+  font-size: 24px;
+  color: var(--rose-gold-light);
+  letter-spacing: 0.06em;
+}
+.mini-foil-sub {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+.mini-foil-code {
+  margin-top: 18px;
+  display: inline-block;
+  font-family: monospace;
+  font-size: 15px;
+  letter-spacing: 2px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px dashed var(--rose-gold);
+  color: #FFFFFF;
+}
+
+.gift-studio-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 28px;
+  align-items: start;
+}
+.gift-theme-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+.gift-live-card {
+  position: relative;
+  border-radius: 24px;
+  padding: clamp(24px, 3.5vw, 34px);
+  border: 2px solid var(--rose-gold);
+  box-shadow: 0 24px 56px rgba(62, 41, 50, 0.22);
+  overflow: hidden;
+  transition: transform 320ms var(--ease-out), box-shadow 320ms var(--ease-out);
+}
+.gift-live-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 30px 64px rgba(62, 41, 50, 0.26);
+}
+.gift-card-foil-shine {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(380px circle at var(--mx, 25%) var(--my, 25%), rgba(255, 255, 255, 0.22), transparent 65%);
+  pointer-events: none;
+}
+.gift-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(212, 175, 124, 0.4);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+.gift-card-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gift-card-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  padding: 2px;
+  border: 1.5px solid var(--rose-gold);
+}
+.gift-card-brand strong {
+  display: block;
+  font-size: 18px;
+}
+.gift-card-brand small {
+  font-size: 12px;
+  opacity: 0.82;
+}
+.gift-card-vip-tag {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 124, 0.65);
+  background: rgba(212, 175, 124, 0.16);
+}
+.gift-card-recipient small {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+.gift-card-recipient strong {
+  display: block;
+  font-size: clamp(22px, 2.5vw, 30px);
+  margin-top: 4px;
+}
+.gift-card-quote {
+  margin: 14px 0 18px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: inherit !important;
+  opacity: 0.92;
+}
+.gift-card-ritual {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(212, 175, 124, 0.45);
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+.gift-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.gift-card-footer small {
+  display: block;
+  font-size: 11px;
+  opacity: 0.8;
+}
+.gift-card-code-box {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--plum);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--rose-gold);
+  text-align: center;
+}
+.gift-card-code-box strong {
+  font-size: 16px;
+  letter-spacing: 1.4px;
+  color: var(--plum);
+}
+
+/* --- Trustworthy Luxury Booking & Occasion Confirmation Shell --- */
+.luxury-confirm-shell {
+  padding: 18px 0 42px;
+}
+.luxury-confirm-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 28px;
+}
+.luxury-confirm-crest {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 2px solid var(--rose-gold);
+  box-shadow: 0 10px 28px rgba(212, 175, 124, 0.28);
+  display: grid;
+  place-items: center;
+  padding: 6px;
+}
+.luxury-confirm-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.luxury-ref-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 22px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--rose-gold);
+  box-shadow: 0 6px 20px rgba(62, 41, 50, 0.08);
+  margin-top: 12px;
+  font-size: 15px;
+}
+.luxury-ref-pill strong {
+  color: var(--plum);
+  letter-spacing: 1px;
+  font-size: 17px;
+}
+.luxury-confirm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+.luxury-confirm-card {
+  background: #FFFFFF;
+  border: 1.5px solid rgba(212, 175, 124, 0.45);
+  border-radius: var(--r-xl);
+  padding: 26px;
+  box-shadow: 0 14px 36px rgba(62, 41, 50, 0.07);
+}
+.bank-mini-box {
+  background: var(--cream-bg);
+  border: 1px solid rgba(212, 175, 124, 0.45);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  font-size: 13.5px;
+  display: grid;
+  gap: 5px;
+  color: var(--plum);
+}
+
+@media (max-width: 860px) {
+  .gift-spotlight-band,
+  .gift-studio-grid,
+  .luxury-confirm-grid {
+    grid-template-columns: 1fr;
+  }
+}

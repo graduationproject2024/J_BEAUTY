@@ -327,7 +327,8 @@ try {
       service_id: 'relaxation',
       terms: true,
     });
-    assert.equal(gf.gift_request.status, 'pending_staff_payment');
+    assert.equal(gf.gift_request.status, 'approved_ready');
+    assert.ok(String(gf.gift_request.gift_code || '').startsWith('JGIFT-'));
     await owner.call(`/api/ops/gift-requests/${gf.gift_request.id}`, { status: 'approved_ready', payment_verified: true });
   });
 

@@ -45,8 +45,9 @@ export function header() {
     ['packages', 'الباقات', 'Packages'],
     ['atelier', 'أتيليه الأظافر', 'Nail Atelier'],
     ['occasions', 'المناسبات', 'Occasions'],
-    ['reviews', 'التقييمات', 'Reviews'],
+    ['gifts', 'أهدي لحظة عناية', 'Gift a Ritual'],
     ['petals', 'بتلات J', 'J Petals'],
+    ['reviews', 'التقييمات', 'Reviews'],
   ];
   const accountRoute = state.user ? 'account' : 'login';
 

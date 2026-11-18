@@ -30,6 +30,26 @@ export const DEFAULT_SETTINGS = {
   announcement_active: true,
   announcement_link: '/booking',
   areas: [],
+  excluded_areas: [],
+  out_of_range_message_ar: 'نعتذر عزيزتي، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة. يمكنك التواصل معنا عبر واتساب للتنسيق الخاص.',
+  out_of_range_message_en: 'Sorry, this neighborhood is currently outside our standard Madinah coverage area. Please contact us on WhatsApp for special arrangements.',
+  delivery_fee: 0,
+  wheel_enabled: true,
+  wheel_cooldown_days: 14,
+  wheel_first_visit_only: false,
+  wheel_prizes: [
+    { id: 'jb5', title_ar: 'خصم 5%', title_en: '5% OFF', desc_ar: 'خصم 5% ترحيبي على جلستك القادمة', desc_en: '5% welcome discount on your next visit', code: 'JB5', discount_type: 'percent', value: 5, color: '#D9B7C0', textColor: '#3E2932' },
+    { id: 'jb7', title_ar: 'خصم 7%', title_en: '7% OFF', desc_ar: 'خصم 7% لطيف على خدمات السبا والأظافر', desc_en: '7% off spa & nail rituals', code: 'JB7', discount_type: 'percent', value: 7, color: '#D4AF7C', textColor: '#FFFFFF' },
+    { id: 'jbsar10', title_ar: 'خصم 10 ريال', title_en: '10 SAR OFF', desc_ar: 'خصم 10 ريال فوري على حجزك', desc_en: '10 SAR instant savings on your booking', code: 'JBSAR10', discount_type: 'fixed', value: 10, color: '#A7B79F', textColor: '#FFFFFF' },
+    { id: 'jb10', title_ar: 'خصم 10%', title_en: '10% OFF', desc_ar: 'الجائزة الكبرى: خصم 10% على الباقات والخدمات', desc_en: 'Grand Prize: 10% off rituals & packages', code: 'JB10', discount_type: 'percent', value: 10, color: '#C9AEB6', textColor: '#3E2932' },
+    { id: 'jbsar15', title_ar: 'خصم 15 ريال', title_en: '15 SAR OFF', desc_ar: 'خصم 15 ريال فوري للطلبات فوق 180 ريال', desc_en: '15 SAR off bookings over 180 SAR', code: 'JBSAR15', discount_type: 'fixed', value: 15, color: '#EDE6E1', textColor: '#3E2932' },
+    { id: 'jbpetals20', title_ar: '20 بتلة هدية', title_en: '20 Bonus Petals', desc_ar: 'قسيمة تعادل 20 بتلة خصم فوري', desc_en: 'Instant voucher worth 20 Petals', code: 'JBPETALS20', discount_type: 'fixed', value: 10, color: '#D4AF7C', textColor: '#FFFFFF' },
+  ],
+  commission_threshold: 50,
+  commission_rate: 5,
+  bank_name: 'مصرف الراجحي',
+  bank_account_holder: 'مؤسسة J Beauty Spa',
+  bank_iban: 'SA0380000000000000000000',
   capacity: 0,
   working_days: [0, 1, 2, 3, 4, 5, 6],
   opening_time: '09:00',
@@ -89,6 +109,12 @@ export const BOOKING_ADD_ONS = [
 ];
 
 export const DEFAULT_COUPONS = [
+  { id: 'coupon-jb5', code: 'JB5', discount_type: 'percent', discount_value: 5, min_spend: 100, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
+  { id: 'coupon-jb7', code: 'JB7', discount_type: 'percent', discount_value: 7, min_spend: 120, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
+  { id: 'coupon-jb10', code: 'JB10', discount_type: 'percent', discount_value: 10, min_spend: 180, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 500, used_count: 0, active: 1 },
+  { id: 'coupon-jbsar10', code: 'JBSAR10', discount_type: 'fixed', discount_value: 10, min_spend: 100, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
+  { id: 'coupon-jbsar15', code: 'JBSAR15', discount_type: 'fixed', discount_value: 15, min_spend: 180, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 500, used_count: 0, active: 1 },
+  { id: 'coupon-jbpetals20', code: 'JBPETALS20', discount_type: 'fixed', discount_value: 10, min_spend: 100, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
   {
     id: 'coupon-wheel10',
     code: 'SPAWHEEL10',
@@ -726,6 +752,8 @@ export function openDatabase(dbPath) {
     CREATE TABLE IF NOT EXISTS staff_commissions(id TEXT PRIMARY KEY, staff_id TEXT NOT NULL, month TEXT NOT NULL, visits_count INTEGER DEFAULT 0, threshold INTEGER DEFAULT 50, commission_rate REAL DEFAULT 0.05, commission_amount REAL DEFAULT 0, updated_at TEXT NOT NULL, UNIQUE(staff_id, month));
     CREATE TABLE IF NOT EXISTS referrals(id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, code TEXT UNIQUE NOT NULL, invitee_id TEXT, booking_id TEXT, status TEXT NOT NULL DEFAULT 'pending', bonus_petals INTEGER DEFAULT 50, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS coupon_redemptions(id TEXT PRIMARY KEY, coupon_id TEXT NOT NULL, coupon_code TEXT NOT NULL, user_id TEXT, phone TEXT NOT NULL, booking_id TEXT, created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS payment_receipts(id TEXT PRIMARY KEY, booking_id TEXT NOT NULL, reference TEXT NOT NULL, filename TEXT NOT NULL, mime_type TEXT NOT NULL, data_url TEXT NOT NULL, sender_name TEXT, transfer_ref TEXT, uploaded_by TEXT, created_at TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS idx_payment_receipts_booking ON payment_receipts(booking_id);
     CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_phone ON coupon_redemptions(phone, coupon_code);
     CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
     CREATE INDEX IF NOT EXISTS idx_ledger_user ON ledger(user_id);

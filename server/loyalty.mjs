@@ -12,7 +12,7 @@ import { fail } from './validation.mjs';
 export function reconcileLoyalty(db, helpers, booking) {
   if (!booking.user_id) return;
   const user = db.get('SELECT * FROM users WHERE id=?', booking.user_id);
-  if (!user?.verified) return;
+  if (!user || user.role !== 'customer') return;
 
   const prior = db.get(
     "SELECT COALESCE(SUM(points),0) AS n FROM ledger WHERE booking_id=? AND reason IN ('visit','visit adjustment')",
@@ -43,7 +43,7 @@ export function reconcileLoyalty(db, helpers, booking) {
 }
 
 export function requestReward(db, helpers, user, rewardId) {
-  if (!user.verified) fail('Phone verification required', 403);
+  if (!user || user.role !== 'customer') fail('Customer account required', 403);
   const reward = helpers.settings().rewards.find((r) => r.id === rewardId);
   if (!reward) fail('Reward unavailable');
 
@@ -101,7 +101,8 @@ export function processRewardAction(db, helpers, actorUser, rewardRequestId, bod
       if (!b) fail('Booking not found', 404);
       const customer = db.get('SELECT * FROM users WHERE id=?', reqObj.user_id);
       if (
-        !customer?.verified ||
+        !customer ||
+        customer.role !== 'customer' ||
         b.user_id !== reqObj.user_id ||
         !['pending_confirmation', 'confirmed'].includes(b.status) ||
         b.reward_id ||
