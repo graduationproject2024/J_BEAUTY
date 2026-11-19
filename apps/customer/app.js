@@ -21,6 +21,7 @@ import {
   recovery,
   reviewsPage,
   services,
+  trackPage,
 } from './js/pages-public.js';
 import { bindBooking, booking } from './js/booking.js';
 import { accountPage, auth, bindAccount, petalsPage } from './js/account.js';
@@ -134,6 +135,7 @@ export async function render() {
     else if (cur === 'contact') body = contact();
     else if (cur === 'faq') body = faq();
     else if (cur === 'recovery') body = recovery();
+    else if (cur === 'track') body = trackPage();
     else body = notFound();
   } catch (err) {
     body = `<main id="main" class="wrap">${head(t('تعذر تحميل الصفحة', 'Unable to load page'))}<div class="error">${esc(err.message)}</div><button class="btn" id="retry" type="button">${t('إعادة المحاولة', 'Try again')}</button></main>`;
@@ -149,6 +151,7 @@ export async function render() {
     occasions: t('تنسيق جلسات المناسبات', 'Occasion Experiences'),
     gifts: t('أهدي لحظة عناية', 'Gift a Ritual'),
     account: t('جواز الجمال وحسابي', 'Beauty Passport & Account'),
+    track: t('متابعة حالة الحجز', 'Track Booking Status'),
   };
   document.title = 'J Beauty Spa | ' + (titleMap[cur] || cur.replaceAll('-', ' '));
 

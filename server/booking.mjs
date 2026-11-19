@@ -4,6 +4,8 @@ import { fail, money, phone, text, whatsappUrl } from './validation.mjs';
 import { reconcileLoyalty } from './loyalty.mjs';
 import { hasCapability, requireCapability } from './authorization/permissions.mjs';
 import { invoiceToken } from './pdf-invoice.mjs';
+import { calculateTravelBuffer } from './scheduling/travel.mjs';
+import { autoAssignPractitioner } from './scheduling/availability.mjs';
 
 export function isNeighborhoodExcluded(settings, neighborhood) {
   const excluded = Array.isArray(settings?.excluded_areas) ? settings.excluded_areas : [];
@@ -27,7 +29,8 @@ function validatePractitionerConflict(helpers, booking, staffId) {
   if (!staffId) return;
   const s = helpers.settings();
   const start = +new Date(`${booking.date}T${booking.time}:00+03:00`);
-  const end = start + (booking.duration + s.travel_buffer) * 60000;
+  const bDurationMs = (Number(booking.duration) || 60) * 60000;
+  const end = start + bDurationMs;
   for (const other of helpers.bookings()) {
     if (
       other.id === booking.id ||
@@ -37,9 +40,20 @@ function validatePractitionerConflict(helpers, booking, staffId) {
       continue;
     }
     const oStart = +new Date(`${other.date}T${other.time}:00+03:00`);
-    const oEnd = oStart + (other.duration + s.travel_buffer) * 60000;
+    const oDurationMs = (Number(other.duration) || 60) * 60000;
+    const oEnd = oStart + oDurationMs;
+    const travelMs = calculateTravelBuffer(s, other.neighborhood, booking.neighborhood) * 60000;
+
+    // Direct overlap
     if (oStart < end && oEnd > start) {
       fail('Assigned practitioner has an overlapping appointment during this window', 409);
+    }
+    // Travel buffer overlap between consecutive appointments
+    if (oStart < start && oEnd + travelMs > start) {
+      fail('Assigned practitioner has an overlapping appointment or travel buffer during this window', 409);
+    }
+    if (start < oStart && end + travelMs > oStart) {
+      fail('Assigned practitioner has an overlapping appointment or travel buffer during this window', 409);
     }
   }
 }
@@ -330,6 +344,8 @@ export function createBooking(db, helpers, user, sessionId, body) {
     total: finalTotal,
     duration: finalDuration,
     status: 'pending_confirmation',
+    payment_status: 'awaiting_receipt',
+    hold_expires_at: new Date(Date.now() + 3600000).toISOString(),
     paid_amount: 0,
     paid_cents: 0,
     payment_verified: false,
@@ -537,6 +553,22 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
         b.payment_verified_at = now();
       }
       b.payment_verified = body.payment_verified;
+      if (body.payment_verified) {
+        b.payment_status = 'verified_paid';
+        b.hold_expires_at = null;
+        if (b.status === 'pending_confirmation') {
+          b.status = 'confirmed';
+        }
+        if (!b.assigned_staff_id) {
+          try {
+            const autoAssign = autoAssignPractitioner(db, helpers, b);
+            if (autoAssign) {
+              b.assigned_staff_id = autoAssign.id;
+              b.assigned_staff_name = autoAssign.name;
+            }
+          } catch {}
+        }
+      }
     }
 
     if (body.refund_amount !== undefined) {

@@ -114,11 +114,11 @@ try {
   await test('Paid before completion earns zero; completion awards once', async () => {
     await update(b, { status: 'confirmed' });
     await fin.call('/api/ops/bookings/' + b.id, { paid_amount: 250, payment_method: 'cash', payment_verified: true });
-    assert.equal(await bal(), 0);
+    assert.equal(await bal(), 50, 'Uncompleted booking must not award service petals (only 50 welcome petals)');
     await update(b, { status: 'completed' });
-    assert.equal(await bal(), 250);
+    assert.equal(await bal(), 300);
     await update(b, { status: 'completed' }, false);
-    assert.equal(await bal(), 250);
+    assert.equal(await bal(), 300);
   });
 
   await test('Two-step refund request (finance -> owner) reverses exact points cleanly', async () => {
@@ -128,17 +128,17 @@ try {
       reason: 'Finance requested partial refund',
     });
     assert.equal(req.refund_request.status, 'pending');
-    assert.equal(await bal(), 250, 'Pending refund request must not alter points before Owner approval');
+    assert.equal(await bal(), 300, 'Pending refund request must not alter points before Owner approval');
 
     await owner.call(`/api/ops/refunds/${req.refund_request.id}/decide`, { decision: 'approve' });
-    assert.equal(await bal(), 224);
+    assert.equal(await bal(), 274);
     const repeat = await owner.call(`/api/ops/refunds/${req.refund_request.id}/decide`, { decision: 'approve' }, false);
     assert.equal(repeat.httpStatus, 409);
   });
 
   await test('Immutable verified payment rejects amount overwrite', async () => {
     assert.equal((await fin.call('/api/ops/bookings/' + b.id, { paid_amount: 999 }, false)).httpStatus, 400);
-    assert.equal(await bal(), 224);
+    assert.equal(await bal(), 274);
   });
 
   const target = await book('13:00');
@@ -149,7 +149,7 @@ try {
     const list = (await c.call('/api/account')).reward_requests;
     assert.equal(list.filter((x) => x.status === 'pending').length, 1);
     await fin.call('/api/ops/rewards/' + list[0].id, { action: 'cancel' });
-    assert.equal(await bal(), 224);
+    assert.equal(await bal(), 274);
   });
 
   const r = (await c.call('/api/rewards/request', { reward_id: 'petal-200' })).reward_request;
@@ -158,17 +158,17 @@ try {
   await test('Refund cannot drive balance below zero and transaction rolls back', async () => {
     const out = await update(b, { refund_amount: 250, reason: 'Full refund' }, false);
     assert.equal(out.httpStatus, 409);
-    assert.equal(await bal(), 24);
+    assert.equal(await bal(), 74);
     const stored = (await c.call('/api/account')).bookings.find((x) => x.id === b.id);
     assert.equal(stored.refund_cents, 2550);
   });
 
   await test('Reward reversal restores points once; then full refund succeeds', async () => {
     await fin.call('/api/ops/rewards/' + r.id, { action: 'cancel' });
-    assert.equal(await bal(), 224);
+    assert.equal(await bal(), 274);
     assert.equal((await fin.call('/api/ops/rewards/' + r.id, { action: 'cancel' }, false)).httpStatus, 409);
     await update(b, { refund_amount: 250, reason: 'Full refund' });
-    assert.equal(await bal(), 0);
+    assert.equal(await bal(), 50);
   });
 
   await test('Recovery URL targets Customer origin, expires and single-use reset invalidates all sessions', async () => {

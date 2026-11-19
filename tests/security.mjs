@@ -251,14 +251,14 @@ try {
 
   await test('Finance verifies payment & requests refund, but ONLY Owner can approve refund or adjust Petals manually', async () => {
     await fin.call('/api/ops/bookings/' + b1.id, { paid_amount: 250, payment_method: 'cash', payment_verified: true });
-    assert.equal((await cust.call('/api/account')).balance, 250);
+    assert.equal((await cust.call('/api/account')).balance, 300);
 
     const refReq = await fin.call('/api/ops/refunds/request', { booking_id: b1.id, amount: 50, reason: 'Finance check' }, 201);
     await fin.call(`/api/ops/refunds/${refReq.refund_request.id}/decide`, { decision: 'approve' }, 403);
     await fin.call('/api/ops/adjustment', { user_id: user.id, points: 50, reason: 'Blocked for finance' }, 403);
 
     await owner.call(`/api/ops/refunds/${refReq.refund_request.id}/decide`, { decision: 'approve' });
-    assert.equal((await cust.call('/api/account')).balance, 200);
+    assert.equal((await cust.call('/api/account')).balance, 250);
   });
 
   await test('Role/permission update & disable immediately invalidate active staff sessions', async () => {

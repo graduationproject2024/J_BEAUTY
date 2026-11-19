@@ -696,6 +696,42 @@ export function recovery() {
   `;
 }
 
+export function trackPage() {
+  const q = new URLSearchParams(location.search);
+  const refFromUrl = esc(q.get('ref') || '');
+  return `
+    <main id="main" class="wrap">
+      <div class="luxury-confirm-shell" data-reveal>
+        <div class="luxury-confirm-header">
+          <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('متابعة حالة الحجز والتحقق المباشر', 'TRACK YOUR BOOKING STATUS')} ✦</span>
+          <h1>${t('استعلام عن حالة موعدك المنزلي ✨', 'Track Your At-Home Appointment ✨')}</h1>
+          <p class="muted">${t(
+            'تابعي حالة طلبك، توثيق التحويل البنكي، واعتماد الموعد المباشر بدون انتظار.',
+            'Track your booking request, bank transfer verification, and final confirmation in real-time.',
+          )}</p>
+        </div>
+
+        <div class="card" style="max-width:540px;margin:0 auto 24px">
+          <form id="track-booking-form" style="display:grid;gap:12px">
+            <div id="track-error" role="alert"></div>
+            <label class="field" style="margin:0">
+              ${t('رقم الحجز المرجعي', 'Booking Reference')}
+              <input type="text" name="ref" value="${refFromUrl}" required placeholder="J-XXXXXX" style="text-transform:uppercase" class="mono">
+            </label>
+            <label class="field" style="margin:0">
+              ${t('آخر 4 أرقام من رقم الجوال المسجل', 'Last 4 digits of registered mobile')}
+              <input type="tel" name="phone_last4" maxlength="4" pattern="\\d{4}" required placeholder="1234" class="mono">
+            </label>
+            <button type="submit" class="btn" style="width:100%">🔍 ${t('استعلام عن الموعد', 'Check Booking Status')}</button>
+          </form>
+        </div>
+
+        <div id="track-result-container"></div>
+      </div>
+    </main>
+  `;
+}
+
 export function notFound() {
   return `
     <main id="main" class="wrap">
@@ -799,4 +835,133 @@ export function bindPublicInteractions(goFn, renderFn) {
       }
     };
   });
+
+  const trackForm = $('#track-booking-form');
+  if (trackForm) {
+    trackForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errBox = $('#track-error');
+      const resContainer = $('#track-result-container');
+      errBox.innerHTML = '';
+      const ref = trackForm.ref.value.trim().toUpperCase();
+      const phoneLast4 = trackForm.phone_last4.value.trim();
+      try {
+        const data = await api(`/bookings/track?ref=${encodeURIComponent(ref)}&phone=${encodeURIComponent(phoneLast4)}`);
+        const isPaid = Boolean(data.payment_verified);
+        const hasReceipt = Boolean(data.receipt_uploaded);
+        const isCompleted = data.status === 'completed';
+
+        let step = 1;
+        if (hasReceipt && !isPaid) step = 2;
+        else if (isPaid && !isCompleted) step = 3;
+        else if (isCompleted) step = 5;
+
+        const statusBadges = {
+          pending_confirmation: {
+            label_ar: hasReceipt ? 'تم استلام الإيصال · جاري التحقق المالي' : 'بانتظار إرفاق إيصال التحويل',
+            label_en: hasReceipt ? 'Receipt Under Review' : 'Awaiting Bank Receipt',
+            cls: hasReceipt ? 'badge-pending' : 'badge-warn',
+          },
+          confirmed: {
+            label_ar: 'موعد مؤكد رسمياً وموثق',
+            label_en: 'Confirmed & Verified',
+            cls: 'badge-confirmed',
+          },
+          completed: {
+            label_ar: 'جلسة مكتملة بنجاح ✦',
+            label_en: 'Completed Ritual ✦',
+            cls: 'badge-completed',
+          },
+          cancelled: {
+            label_ar: 'ملغي',
+            label_en: 'Cancelled',
+            cls: 'badge-cancelled',
+          },
+        };
+
+        const badgeInfo = statusBadges[data.status] || statusBadges.pending_confirmation;
+
+        resContainer.innerHTML = `
+          <div class="card luxury-confirm-card" style="max-width:680px;margin:0 auto;animation:fadeIn 0.3s ease-out">
+            <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+              <div>
+                <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('رقم الحجز:', 'Booking Ref:')} <bdi class="mono">${esc(data.reference)}</bdi></span>
+                <h3 style="margin:4px 0">${esc(data.name)}</h3>
+              </div>
+              <span class="badge ${badgeInfo.cls}">${t(badgeInfo.label_ar, badgeInfo.label_en)}</span>
+            </div>
+
+            <div class="track-stepper" style="margin:20px 0;display:flex;justify-content:space-between;position:relative">
+              <div class="track-step ${step >= 1 ? 'completed' : ''}">
+                <div class="track-dot">${step >= 1 ? '✓' : '1'}</div>
+                <span>${t('استلام الطلب', 'Requested')}</span>
+              </div>
+              <div class="track-step ${step >= 2 ? 'completed' : (step === 1 ? 'active' : '')}">
+                <div class="track-dot">${step >= 2 ? '✓' : '2'}</div>
+                <span>${t('إيصال التحويل', 'Receipt')}</span>
+              </div>
+              <div class="track-step ${step >= 3 ? 'completed' : (step === 2 ? 'active' : '')}">
+                <div class="track-dot">${step >= 3 ? '✓' : '3'}</div>
+                <span>${t('تأكيد الموعد', 'Confirmed')}</span>
+              </div>
+              <div class="track-step ${step >= 4 ? 'completed' : ''}">
+                <div class="track-dot">${step >= 4 ? '✓' : '4'}</div>
+                <span>${t('تنفيذ الجلسة', 'Service')}</span>
+              </div>
+              <div class="track-step ${step >= 5 ? 'completed' : ''}">
+                <div class="track-dot">${step >= 5 ? '✦' : '5'}</div>
+                <span>${t('بتلات الولاء', 'Petals')}</span>
+              </div>
+            </div>
+
+            <div class="summary-line"><span>${t('الموعد', 'Time')}</span><strong><bdi>${esc(data.date)} · ${esc(data.time)}</bdi></strong></div>
+            <div class="summary-line"><span>${t('الحي', 'Neighborhood')}</span><strong>${esc(data.neighborhood)}</strong></div>
+            <div class="summary-line"><span>${t('مدة الجلسة', 'Duration')}</span><strong>${esc(data.duration)} دقيقة</strong></div>
+            <div class="summary-line summary-total"><span>${t('إجمالي الحجز', 'Total')}</span><span>${money(data.total)}</span></div>
+
+            ${!hasReceipt && !isPaid ? `
+              <div style="margin-top:16px;padding:12px;background:var(--cream-bg);border-radius:var(--r-md);border:1px dashed var(--rose-gold)">
+                <p style="margin:0 0 10px;font-size:13.5px"><strong>✦ ${t('إرفاق إيصال التحويل البنكي:', 'Upload Payment Receipt:')}</strong></p>
+                <form id="track-upload-receipt-form" style="display:grid;gap:8px">
+                  <input type="file" name="receipt_file" accept="image/*,application/pdf" required>
+                  <button type="submit" class="btn sage small">📤 ${t('إرسال الإيصال للمراجعة', 'Submit Receipt')}</button>
+                </form>
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        const uploadForm = $('#track-upload-receipt-form');
+        if (uploadForm) {
+          uploadForm.onsubmit = async (evt) => {
+            evt.preventDefault();
+            const file = uploadForm.receipt_file.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async () => {
+              try {
+                await api(`/bookings/${encodeURIComponent(data.reference)}/receipt`, {
+                  filename: file.name,
+                  mime_type: file.type,
+                  data_url: reader.result,
+                  sender_name: data.name,
+                });
+                toast(t('تم رفع الإيصال بنجاح وجاري مراجعته.', 'Receipt uploaded successfully!'));
+                trackForm.dispatchEvent(new Event('submit'));
+              } catch (err) {
+                toast(err.message);
+              }
+            };
+            reader.readAsDataURL(file);
+          };
+        }
+      } catch (err) {
+        errBox.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      }
+    });
+
+    if (trackForm.ref.value && new URLSearchParams(location.search).has('ref')) {
+      trackForm.phone_last4?.focus();
+    }
+  }
 }

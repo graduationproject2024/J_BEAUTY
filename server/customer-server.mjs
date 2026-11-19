@@ -33,6 +33,7 @@ import {
   serveFileResponse,
   setBaseSecurityHeaders,
 } from './http-utils.mjs';
+import { computeAvailableSlots } from './scheduling/availability.mjs';
 import {
   createGiftRequest,
   createGroupRequest,
@@ -75,6 +76,7 @@ export function createCustomerApp({
       const url = new URL(req.url, 'http://localhost');
       const route = url.pathname;
       const method = req.method;
+      const query = Object.fromEntries(url.searchParams.entries());
 
       if (route === '/robots.txt') {
         res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -303,6 +305,51 @@ export function createCustomerApp({
         });
       }
 
+      if (method === 'GET' && route === '/api/availability') {
+        checkRate(`avail:${req.socket.remoteAddress}`, 120, 60000);
+        const slotsResult = computeAvailableSlots(db, helpers, {
+          date: query.date,
+          duration: query.duration ? Number(query.duration) : 60,
+          neighborhood: query.neighborhood,
+        });
+        return send(slotsResult);
+      }
+
+      if (method === 'GET' && route === '/api/bookings/track') {
+        checkRate(`track:${req.socket.remoteAddress}`, 60, 600000);
+        const ref = String(query.ref || '').trim();
+        const phoneDigits = String(query.phone || '').trim();
+        if (!ref) fail('رقم الحجز المرجعي مطلوب', 400);
+        const b = helpers.bookings().find((x) => x.id === ref || x.reference === ref.toUpperCase());
+        if (!b) fail('لم يتم العثور على حجز بهذا الرقم المرجعي', 404);
+
+        if (!user || (user.role === 'customer' && b.user_id && b.user_id !== user.id)) {
+          const cleanPhone = String(b.phone || '').replace(/\D/g, '');
+          const last4 = cleanPhone.slice(-4);
+          if (!phoneDigits || phoneDigits.slice(-4) !== last4) {
+            fail('يرجى إدخال آخر 4 أرقام من جوال الحجز للتحقق والأمان', 403);
+          }
+        }
+
+        return send({
+          reference: b.reference,
+          name: b.name,
+          neighborhood: b.neighborhood,
+          date: b.date,
+          time: b.time,
+          duration: b.duration,
+          status: b.status,
+          payment_status: b.payment_status || (b.payment_verified ? 'verified_paid' : (b.receipt_uploaded ? 'receipt_submitted' : 'awaiting_receipt')),
+          payment_verified: !!b.payment_verified,
+          receipt_uploaded: !!b.receipt_uploaded,
+          total: b.total,
+          items: b.items,
+          add_ons: b.add_ons,
+          created_at: b.created_at,
+          hold_expires_at: b.hold_expires_at || null,
+        });
+      }
+
       if (method === 'GET' && route === '/api/atelier/colors') {
         return send({ colors: db.all('SELECT * FROM nail_shades WHERE active=1 ORDER BY sort_order ASC, created_at DESC') });
       }
@@ -481,8 +528,8 @@ export function createCustomerApp({
 
       if (method === 'POST' && /^\/api\/bookings\/[^/]+\/receipt$/.test(route)) {
         checkRate(`receipt:${req.socket.remoteAddress}`, 20, 3600000);
-        const ref = decodeURIComponent(route.split('/')[3] || '').trim().toUpperCase();
-        const b = helpers.bookings().find((x) => x.reference === ref || x.id === ref);
+        const rawParam = decodeURIComponent(route.split('/')[3] || '').trim();
+        const b = helpers.bookings().find((x) => x.id === rawParam || x.reference === rawParam.toUpperCase());
         if (!b) fail('لم يتم العثور على الحجز المحدد', 404);
 
         // Verify ownership: either logged-in owner, same booking session scope, or matching phone number
@@ -521,6 +568,8 @@ export function createCustomerApp({
           b.receipt_id = recId;
           b.receipt_sender_name = parsed.sender_name;
           b.receipt_transfer_ref = parsed.transfer_ref;
+          b.payment_status = 'receipt_submitted';
+          b.hold_expires_at = new Date(Date.now() + 86400000).toISOString();
           helpers.saveBooking(b);
           helpers.audit(user, 'booking.receipt_upload', b.id, JSON.stringify({ reference: b.reference, filename: parsed.filename, transfer_ref: parsed.transfer_ref }));
         });

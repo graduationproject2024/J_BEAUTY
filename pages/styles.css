@@ -5195,3 +5195,115 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== LUXURY BOOKING TRACKING STEPPER & BADGES ===== */
+.track-stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  margin: 24px 0 28px;
+}
+.track-stepper::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: rgba(212, 175, 124, 0.3);
+  z-index: 1;
+}
+.track-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  text-align: center;
+}
+.track-step span {
+  font-size: 11.5px;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+.track-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--cream-bg);
+  border: 2px solid rgba(212, 175, 124, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  transition: all 0.25s ease;
+}
+.track-step.active .track-dot {
+  background: var(--plum);
+  border-color: var(--rose-gold);
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(212, 175, 124, 0.25);
+}
+.track-step.active span {
+  color: var(--plum);
+  font-weight: 700;
+}
+.track-step.completed .track-dot {
+  background: var(--sage);
+  border-color: var(--sage-deep);
+  color: #FFFFFF;
+}
+.track-step.completed span {
+  color: var(--sage-deep);
+  font-weight: 600;
+}
+
+.badge-pending {
+  background: rgba(212, 175, 124, 0.18);
+  color: var(--rose-gold-deep);
+  border: 1px solid rgba(212, 175, 124, 0.5);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-warn {
+  background: rgba(201, 122, 107, 0.15);
+  color: #A94442;
+  border: 1px solid rgba(201, 122, 107, 0.4);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-confirmed {
+  background: rgba(167, 183, 159, 0.25);
+  color: var(--sage-deep);
+  border: 1px solid var(--sage);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-completed {
+  background: linear-gradient(135deg, rgba(212, 175, 124, 0.2), rgba(167, 183, 159, 0.3));
+  color: var(--plum);
+  border: 1px solid var(--rose-gold);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge-cancelled {
+  background: #F8D7DA;
+  color: #721C24;
+  border: 1px solid #F5C6CB;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}

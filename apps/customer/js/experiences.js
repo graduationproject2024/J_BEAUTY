@@ -617,7 +617,16 @@ const GIFT_THEMES = [
   { id: 'sage_silk', ar: 'الميرمية الحريرية', en: 'Sage Botanical Silk', bg: 'linear-gradient(135deg,#E6EFE3 0%,#A7B79F 60%,#7D9476 100%)', accent: '#FFFFFF', ink: '#263423' },
 ];
 
-function renderLuxuryGiftCardHtml({ themeId = 'royal_gold', senderName = '', recipientName = '', personalMessage = '', giftName = '', giftPrice = 0, code = 'JGIFT-PREVIEW' }) {
+function renderLuxuryGiftCardHtml({
+  themeId = 'royal_gold',
+  senderName = '',
+  recipientName = '',
+  personalMessage = '',
+  giftName = '',
+  giftPrice = 0,
+  code = '••••-••••-JGIFT',
+  isApproved = false,
+}) {
   const th = GIFT_THEMES.find((x) => x.id === themeId) || GIFT_THEMES[0];
   return `
     <div class="gift-live-card theme-${esc(th.id)}" id="luxury-gift-card-preview" style="background:${th.bg};color:${th.ink}">
@@ -627,7 +636,7 @@ function renderLuxuryGiftCardHtml({ themeId = 'royal_gold', senderName = '', rec
           <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="gift-card-logo">
           <div>
             <strong>J Beauty Spa</strong>
-            <small>${t('سبا نسائي منزلي فاخر · المدينة المنورة', 'Luxury Women’s Home Spa · Madinah')}</small>
+            <small>${t('سبا نسائي منزلي فاخر · باقات إهداء راقية', 'Luxury Women’s Home Spa · Bespoke Gifting')}</small>
           </div>
         </div>
         <span class="gift-card-vip-tag">✦ ${t('بطاقة إهداء فاخرة', 'LUXURY GIFT CARD')} ✦</span>
@@ -649,8 +658,8 @@ function renderLuxuryGiftCardHtml({ themeId = 'royal_gold', senderName = '', rec
           <strong id="gc-preview-sender">${esc(senderName || t('اسمك الكريم', 'Your Name'))}</strong>
         </div>
         <div class="gift-card-code-box">
-          <small>${t('كود التفعيل المباشر', 'INSTANT REDEEM CODE')}</small>
-          <strong class="mono">${esc(code)}</strong>
+          <small>${isApproved ? t('كود التفعيل المعتمد', 'REDEEM CODE') : t('كود الإهداء (يُفعّل بعد التحقق من السداد)', 'GIFT CODE (ACTIVATES AFTER PAYMENT)')}</small>
+          <strong class="mono">${isApproved ? esc(code) : '••••-••••-JGIFT'}</strong>
         </div>
       </div>
     </div>
@@ -820,6 +829,7 @@ export function giftsPage() {
               giftName: gf.chosen ? nameOf(gf.chosen) : '',
               giftPrice: gf.estimated_amount || gf.value,
               code: giftCode,
+              isApproved,
             })}
           </div>
 
@@ -921,7 +931,8 @@ export function giftsPage() {
             personalMessage: '',
             giftName: defaultChoice.name,
             giftPrice: defaultChoice.price,
-            code: 'JGIFT-••••-••••',
+            code: '••••-••••-JGIFT',
+            isApproved: false,
           })}
           <p class="muted" style="text-align:center;font-size:13px;margin-top:12px">
             ✨ ${t('بطاقة رقمية فاخرة مصممة بختم J Beauty مع كود حجز رسمي موثق.', 'Luxury digital card crafted with the J Beauty seal and official booking code.')}

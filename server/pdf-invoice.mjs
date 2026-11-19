@@ -302,7 +302,7 @@ export function renderInvoiceHtml(booking, settings = {}, pdfDownloadUrl = '') {
  * so forged MIME types, SVG/XSS payloads, and executables are impossible.
  */
 export function validateReceiptUpload(body) {
-  const raw = String(body?.file_data || '').trim();
+  const raw = String(body?.file_data || body?.data_url || '').trim();
   if (!raw) fail('يرجى إرفاق صورة أو ملف PDF لإيصال الدفع', 400);
 
   let base64Str = raw;

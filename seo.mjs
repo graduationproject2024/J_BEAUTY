@@ -29,6 +29,7 @@ const APP_ONLY_ROUTES = new Set([
   'register',
   'recovery',
   'reset',
+  'track',
 ]);
 
 const DESCRIPTIONS = {

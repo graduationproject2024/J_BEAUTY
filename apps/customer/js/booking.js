@@ -433,18 +433,20 @@ function stepThreeTimeHtml() {
       )}
       ${field(t('الوقت المفضل', 'Preferred time'), 'time', 'time', state.draft.time, 'required')}
     </div>
-    ${
-      suggestedTimes.length
-        ? `<div class="time-chips" aria-label="${t('أوقات مقترحة', 'Quick time options')}">
-             ${suggestedTimes
-               .map(
-                 (slot) =>
-                   `<button type="button" class="time-chip ${state.draft.time === slot ? 'active' : ''}" data-pick-time="${slot}">${slot}</button>`,
-               )
-               .join('')}
-           </div>`
-        : ''
-    }
+    <div id="available-slots-container" style="margin-top:10px">
+      ${
+        suggestedTimes.length
+          ? `<div class="time-chips" aria-label="${t('أوقات مقترحة', 'Quick time options')}">
+               ${suggestedTimes
+                 .map(
+                   (slot) =>
+                     `<button type="button" class="time-chip ${state.draft.time === slot ? 'active' : ''}" data-pick-time="${slot}">${slot}</button>`,
+                 )
+                 .join('')}
+             </div>`
+          : ''
+      }
+    </div>
     <label class="field">
       ${t('الحي في المدينة المنورة (الخدمة متاحة لجميع أحياء المدينة)', 'Madinah neighborhood (all Madinah areas covered)')}
       ${
@@ -651,6 +653,7 @@ export function bookingSuccess() {
                   ? `<a class="btn shimmer-btn" id="whatsapp-handoff-link" href="${esc(r.whatsapp_url)}" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;flex:1;justify-content:center">💬 ${t('متابعة التأكيد عبر واتساب', 'Continue on WhatsApp')}</a>`
                   : ''
               }
+              <a class="btn light" href="/${state.lang}/track?ref=${esc(b.reference)}" style="justify-content:center">🔍 ${t('متابعة حالة الحجز', 'Track Booking')}</a>
             </div>
           </div>
 
@@ -918,6 +921,52 @@ export function bindBooking(renderFn) {
     openRewardsWheelDialog();
   });
 
+  async function loadAvailableSlotsForDate(dateStr, neighborhoodStr) {
+    const container = $('#available-slots-container');
+    if (!container || !dateStr) return;
+    const s = selectedSummary();
+    const dur = s.duration || 60;
+    container.innerHTML = `<div style="font-size:13px;color:var(--text-dark);padding:6px 0">⏳ ${t('جاري احتساب المواعيد الشاغرة حسب مدة الجلسة (' + minutes(dur) + ')...', 'Calculating available slots for duration...')}</div>`;
+    try {
+      const q = new URLSearchParams({ date: dateStr, duration: String(dur), neighborhood: neighborhoodStr || '' });
+      const res = await api(`/availability?${q.toString()}`);
+      if (res.available_slots && res.available_slots.length > 0) {
+        container.innerHTML = `
+          <div style="margin-top:4px">
+            <p style="font-size:13px;margin:0 0 6px;color:var(--text-dark)">
+              <strong>✦ ${t('المواعيد المتاحة فعلياً لجلسة بمدة', 'Available Slots for')} <bdi>${minutes(dur)}</bdi>:</strong>
+            </p>
+            <div class="time-chips" aria-label="${t('المواعيد المتاحة', 'Available Slots')}">
+              ${res.available_slots
+                .map(
+                  (slot) =>
+                    `<button type="button" class="time-chip ${state.draft.time === slot ? 'active' : ''}" data-pick-time="${slot}">${slot}</button>`,
+                )
+                .join('')}
+            </div>
+          </div>
+        `;
+        container.querySelectorAll('[data-pick-time]').forEach((btn) => {
+          btn.onclick = () => {
+            saveDraft();
+            state.draft.time = btn.dataset.pickTime;
+            const timeInput = document.querySelector('#booking-form [name="time"]');
+            if (timeInput) timeInput.value = btn.dataset.pickTime;
+            container.querySelectorAll('[data-pick-time]').forEach((x) => x.classList.toggle('active', x === btn));
+          };
+        });
+      } else {
+        container.innerHTML = `
+          <div class="notice" style="margin-top:8px;background:var(--cream-bg);font-size:13px">
+            ✦ ${t('نعتذر، جميع المواعيد لهذا التاريخ مكتملة بالكامل لجلسة بمدة ' + minutes(dur) + '. يرجى اختيار تاريخ آخر.', 'All slots are fully booked for this duration on this date. Please choose another date.')}
+          </div>
+        `;
+      }
+    } catch {
+      // Keep static chips on error
+    }
+  }
+
   document.querySelectorAll('[data-pick-date]').forEach((btn) => {
     btn.onclick = () => {
       saveDraft();
@@ -925,8 +974,29 @@ export function bindBooking(renderFn) {
       const dateInput = document.querySelector('#booking-form [name="date"]');
       if (dateInput) dateInput.value = btn.dataset.pickDate;
       document.querySelectorAll('[data-pick-date]').forEach((x) => x.classList.toggle('active', x === btn));
+      loadAvailableSlotsForDate(state.draft.date, state.draft.neighborhood);
     };
   });
+
+  const dateInputEl = document.querySelector('#booking-form [name="date"]');
+  if (dateInputEl) {
+    dateInputEl.addEventListener('change', () => {
+      saveDraft();
+      loadAvailableSlotsForDate(dateInputEl.value, state.draft.neighborhood);
+    });
+  }
+
+  const neighborhoodInputEl = document.querySelector('#booking-form [name="neighborhood"]');
+  if (neighborhoodInputEl) {
+    neighborhoodInputEl.addEventListener('change', () => {
+      saveDraft();
+      loadAvailableSlotsForDate(state.draft.date, neighborhoodInputEl.value);
+    });
+  }
+
+  if (state.bookingStep === 3 && state.draft.date) {
+    loadAvailableSlotsForDate(state.draft.date, state.draft.neighborhood);
+  }
 
   document.querySelectorAll('[data-pick-time]').forEach((btn) => {
     btn.onclick = () => {
