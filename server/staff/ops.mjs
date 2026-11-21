@@ -428,6 +428,22 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
     return send({ booking_reference: b.reference, receipts });
   }
 
+  if (/^\/api\/ops\/gift-requests\/[^/]+\/receipt$/.test(route) && !body) {
+    const id = route.split('/')[4];
+    const row = db.get('SELECT id, reference, data FROM gift_requests WHERE id=? OR reference=?', id, id);
+    if (!row) fail('Gift request not found', 404);
+    const receipts = db.all('SELECT * FROM payment_receipts WHERE booking_id=? OR reference=? ORDER BY created_at DESC', row.id, row.reference);
+    return send({ reference: row.reference, receipts });
+  }
+
+  if (/^\/api\/ops\/group-requests\/[^/]+\/receipt$/.test(route) && !body) {
+    const id = route.split('/')[4];
+    const row = db.get('SELECT id, reference, data FROM group_requests WHERE id=? OR reference=?', id, id);
+    if (!row) fail('Group request not found', 404);
+    const receipts = db.all('SELECT * FROM payment_receipts WHERE booking_id=? OR reference=? ORDER BY created_at DESC', row.id, row.reference);
+    return send({ reference: row.reference, receipts });
+  }
+
   if (/^\/api\/ops\/bookings\/[^/]+\/receipt$/.test(route) && body) {
     if (!hasCapability(user, 'payments.verify') && !hasCapability(user, 'bookings.update')) {
       fail('Missing required permission to attach receipt', 403);
@@ -614,14 +630,14 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
   if (/^\/api\/ops\/group-requests\/[^/]+$/.test(route) && body) {
     requireCapability(user, 'occasions.manage');
     const id = route.split('/').pop();
-    const row = db.get('SELECT * FROM group_requests WHERE id=?', id);
+    const row = db.get('SELECT * FROM group_requests WHERE id=? OR reference=?', id, id);
     if (!row) fail('Group request not found', 404);
     const reqObj = JSON.parse(row.data);
     if (!['pending_approval', 'approved', 'cancelled'].includes(body.status)) fail('Invalid status');
     reqObj.status = body.status;
     reqObj.updated_at = now();
-    db.run('UPDATE group_requests SET data=? WHERE id=?', JSON.stringify(reqObj), id);
-    helpers.audit(user, 'group.update', id, JSON.stringify({ status: body.status }));
+    db.run('UPDATE group_requests SET data=? WHERE id=?', JSON.stringify(reqObj), row.id);
+    helpers.audit(user, 'group.update', row.id, JSON.stringify({ status: body.status }));
     return send({ group_request: reqObj });
   }
 
@@ -632,7 +648,7 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
       requireCapability(user, 'occasions.manage');
     }
     const id = route.split('/').pop();
-    const row = db.get('SELECT * FROM gift_requests WHERE id=?', id);
+    const row = db.get('SELECT * FROM gift_requests WHERE id=? OR reference=?', id, id);
     if (!row) fail('Gift request not found', 404);
     const reqObj = JSON.parse(row.data);
     if (body.status && ['pending_staff_payment', 'approved_ready', 'redeemed', 'cancelled'].includes(body.status)) {
@@ -648,8 +664,8 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
         reqObj.payment_verified_at = now();
       }
     }
-    db.run('UPDATE gift_requests SET data=? WHERE id=?', JSON.stringify(reqObj), id);
-    helpers.audit(user, 'gift.update', id, JSON.stringify({ status: reqObj.status, payment_verified: reqObj.payment_verified }));
+    db.run('UPDATE gift_requests SET data=? WHERE id=?', JSON.stringify(reqObj), row.id);
+    helpers.audit(user, 'gift.update', row.id, JSON.stringify({ status: reqObj.status, payment_verified: reqObj.payment_verified }));
     return send({ gift_request: reqObj });
   }
 

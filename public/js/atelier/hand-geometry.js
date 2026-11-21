@@ -356,19 +356,19 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'index',
       root8: fingerRoots.index,
-      spreadDeg: 1.6,
-      bendDegs: [-2.5, -5.0, -7.0],
-      segLens: [2.50, 1.78, 1.55],
+      spreadDeg: 2.8,
+      bendDegs: [-2.2, -4.6, -6.6],
+      segLens: [2.44, 1.70, 1.48],
       radii: [
-        [0.64, 0.58],
-        [0.57, 0.52], // proximal shaft taper
-        [0.60, 0.54], // subtle PIP knuckle
-        [0.53, 0.47], // middle phalanx shaft
-        [0.51, 0.45],
-        [0.53, 0.47], // subtle DIP knuckle
-        [0.48, 0.41],
-        [0.43, 0.36],
-        [0.26, 0.20], // graceful rounded fingertip taper
+        [0.62, 0.56],
+        [0.55, 0.50], // proximal shaft taper
+        [0.58, 0.52], // subtle PIP knuckle
+        [0.51, 0.45], // middle phalanx shaft
+        [0.49, 0.43],
+        [0.51, 0.45], // subtle DIP knuckle
+        [0.46, 0.39],
+        [0.41, 0.34],
+        [0.25, 0.19], // graceful rounded fingertip taper
       ],
       nailBedScaleW: 0.86,
       nailBedLen: 1.25,
@@ -377,19 +377,19 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'middle',
       root8: fingerRoots.middle,
-      spreadDeg: 0.0,
-      bendDegs: [-2.0, -4.5, -6.5],
-      segLens: [2.72, 1.95, 1.68],
+      spreadDeg: 0.2,
+      bendDegs: [-1.8, -4.2, -6.2],
+      segLens: [2.68, 1.90, 1.62],
       radii: [
-        [0.67, 0.60],
-        [0.59, 0.53],
-        [0.62, 0.56],
-        [0.55, 0.49],
+        [0.65, 0.58],
+        [0.57, 0.51],
+        [0.60, 0.54],
         [0.53, 0.47],
-        [0.55, 0.49],
-        [0.50, 0.43],
-        [0.45, 0.37],
-        [0.27, 0.21],
+        [0.51, 0.45],
+        [0.53, 0.47],
+        [0.48, 0.41],
+        [0.43, 0.35],
+        [0.26, 0.20],
       ],
       nailBedScaleW: 0.88,
       nailBedLen: 1.32,
@@ -398,19 +398,19 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'ring',
       root8: fingerRoots.ring,
-      spreadDeg: -1.3,
-      bendDegs: [-2.5, -5.0, -7.0],
-      segLens: [2.55, 1.80, 1.58],
+      spreadDeg: -2.2,
+      bendDegs: [-2.2, -4.8, -6.8],
+      segLens: [2.50, 1.76, 1.52],
       radii: [
-        [0.62, 0.56],
-        [0.55, 0.49],
-        [0.58, 0.52],
-        [0.51, 0.45],
+        [0.60, 0.54],
+        [0.53, 0.47],
+        [0.56, 0.50],
         [0.49, 0.43],
-        [0.51, 0.45],
-        [0.46, 0.39],
-        [0.41, 0.34],
-        [0.24, 0.18],
+        [0.47, 0.41],
+        [0.49, 0.43],
+        [0.44, 0.37],
+        [0.39, 0.32],
+        [0.23, 0.17],
       ],
       nailBedScaleW: 0.86,
       nailBedLen: 1.25,
@@ -419,23 +419,23 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     {
       id: 'pinky',
       root8: fingerRoots.pinky,
-      spreadDeg: -2.8,
-      bendDegs: [-3.0, -6.0, -8.0],
-      segLens: [2.25, 1.55, 1.40],
+      spreadDeg: -4.8,
+      bendDegs: [-2.5, -5.2, -7.0],
+      segLens: [2.12, 1.44, 1.28], // Anatomically reaches just below ring DIP joint
       radii: [
-        [0.54, 0.48],
-        [0.48, 0.42],
-        [0.50, 0.44],
+        [0.55, 0.49],
+        [0.49, 0.43],
+        [0.51, 0.45],
         [0.44, 0.38],
         [0.42, 0.36],
         [0.44, 0.38],
         [0.39, 0.33],
-        [0.36, 0.30],
-        [0.23, 0.17],
+        [0.35, 0.29],
+        [0.22, 0.16],
       ],
-      nailBedScaleW: 0.85,
-      nailBedLen: 1.20,
-      upRollDeg: -2.0,
+      nailBedScaleW: 0.86,
+      nailBedLen: 1.25,
+      upRollDeg: -1.6,
     },
   ];
 
@@ -555,40 +555,40 @@ export function buildAnatomicalHandGeometry({ subdivisionLevels = 2, verify = tr
     tcy += verts[vi].y;
     tcz += verts[vi].z;
   }
-  const tStart = { x: tcx / 8 + 0.05, y: tcy / 8 - 0.26, z: tcz / 8 + 0.10 };
-  // Graceful relaxed feminine thumb resting gently alongside the index digit
-  const tDir0 = normVec({ x: 0.36, y: -0.22, z: 0.90 });
-  const tUp0 = normVec({ x: 0.32, y: 0.92, z: -0.16 });
+  const tStart = { x: tcx / 8 + 0.04, y: tcy / 8 - 0.28, z: tcz / 8 + 0.08 };
+  // Graceful relaxed feminine thumb resting naturally tucked alongside the index digit
+  const tDir0 = normVec({ x: 0.14, y: -0.10, z: 0.985 });
+  const tUp0 = normVec({ x: 0.10, y: 0.99, z: -0.06 });
   const tf0 = makeFrame(tDir0, tUp0);
 
-  const tDir1 = normVec({ x: 0.22, y: -0.15, z: 0.95 });
-  const tUp1 = normVec({ x: 0.35, y: 0.92, z: -0.13 });
+  const tDir1 = normVec({ x: 0.09, y: -0.06, z: 0.994 });
+  const tUp1 = normVec({ x: 0.08, y: 0.994, z: -0.04 });
   const tf1 = makeFrame(tDir1, tUp1);
 
-  const tDir2 = normVec({ x: 0.12, y: -0.09, z: 0.98 });
-  const tUp2 = normVec({ x: 0.33, y: 0.93, z: -0.10 });
+  const tDir2 = normVec({ x: 0.04, y: -0.03, z: 0.998 });
+  const tUp2 = normVec({ x: 0.05, y: 0.998, z: -0.02 });
   const tf2 = makeFrame(tDir2, tUp2);
 
-  const tp1 = addVec(tStart, scaleVec(tf0.forward, 1.35));
-  const tpMCP = addVec(tp1, scaleVec(tf0.forward, 1.25));
-  const tpMid = addVec(tpMCP, scaleVec(tf1.forward, 1.05));
-  const tpIP = addVec(tpMCP, scaleVec(tf1.forward, 1.90));
+  const tp1 = addVec(tStart, scaleVec(tf0.forward, 1.28));
+  const tpMCP = addVec(tp1, scaleVec(tf0.forward, 1.20));
+  const tpMid = addVec(tpMCP, scaleVec(tf1.forward, 1.00));
+  const tpIP = addVec(tpMCP, scaleVec(tf1.forward, 1.78));
   const tpPreCuticle = addVec(tpIP, scaleVec(tf2.forward, 0.24));
   const tpCuticle = addVec(tpIP, scaleVec(tf2.forward, 0.42));
   const tpMidBed = addVec(tpIP, scaleVec(tf2.forward, 0.88));
-  const tpDistBed = addVec(tpIP, scaleVec(tf2.forward, 1.32));
-  const tpTip = addVec(tpIP, scaleVec(tf2.forward, 1.54));
+  const tpDistBed = addVec(tpIP, scaleVec(tf2.forward, 1.30));
+  const tpTip = addVec(tpIP, scaleVec(tf2.forward, 1.50));
 
   const thumbRings = [
-    addFingerRing(tp1, tf0, 0.92, 0.80, { aoBase: 0.94, warmthBase: 0.24 }),
-    addFingerRing(tpMCP, tf1, 0.78, 0.68, { knucklePuff: 0.018, warmthBase: 0.32, crease: 0.24 }),
-    addFingerRing(tpMid, tf1, 0.68, 0.60, { warmthBase: 0.18 }),
-    addFingerRing(tpIP, tf2, 0.66, 0.58, { knucklePuff: 0.014, warmthBase: 0.34, crease: 0.24 }),
-    addFingerRing(tpPreCuticle, tf2, 0.63, 0.55, { knucklePuff: 0.012, cuticleCurve: 0.035, wallPuff: 0.022, warmthBase: 0.44, crease: 0.24 }),
-    addFingerRing(tpCuticle, tf2, 0.61, 0.52, { dorsalRecess: 0.10, cuticleCurve: -0.08, wallPuff: 0.022, padDroop: 0.035, warmthBase: 0.44, nailBedHighlight: true }),
-    addFingerRing(tpMidBed, tf2, 0.57, 0.48, { dorsalRecess: 0.11, wallPuff: 0.020, padDroop: 0.045, warmthBase: 0.42, nailBedHighlight: true }),
-    addFingerRing(tpDistBed, tf2, 0.50, 0.41, { dorsalRecess: 0.06, wallPuff: 0.012, padDroop: 0.035, warmthBase: 0.48, nailBedHighlight: true }),
-    addFingerRing(tpTip, tf2, 0.30, 0.22, { dorsalRecess: 0.01, padDroop: 0.015, warmthBase: 0.44 }),
+    addFingerRing(tp1, tf0, 0.86, 0.74, { aoBase: 0.94, warmthBase: 0.24 }),
+    addFingerRing(tpMCP, tf1, 0.74, 0.64, { knucklePuff: 0.018, warmthBase: 0.32, crease: 0.24 }),
+    addFingerRing(tpMid, tf1, 0.65, 0.56, { warmthBase: 0.18 }),
+    addFingerRing(tpIP, tf2, 0.63, 0.54, { knucklePuff: 0.014, warmthBase: 0.34, crease: 0.24 }),
+    addFingerRing(tpPreCuticle, tf2, 0.60, 0.52, { knucklePuff: 0.012, cuticleCurve: 0.035, wallPuff: 0.022, warmthBase: 0.44, crease: 0.24 }),
+    addFingerRing(tpCuticle, tf2, 0.58, 0.49, { dorsalRecess: 0.10, cuticleCurve: -0.08, wallPuff: 0.022, padDroop: 0.035, warmthBase: 0.44, nailBedHighlight: true }),
+    addFingerRing(tpMidBed, tf2, 0.54, 0.45, { dorsalRecess: 0.11, wallPuff: 0.020, padDroop: 0.045, warmthBase: 0.42, nailBedHighlight: true }),
+    addFingerRing(tpDistBed, tf2, 0.47, 0.38, { dorsalRecess: 0.06, wallPuff: 0.012, padDroop: 0.035, warmthBase: 0.48, nailBedHighlight: true }),
+    addFingerRing(tpTip, tf2, 0.28, 0.20, { dorsalRecess: 0.01, padDroop: 0.015, warmthBase: 0.44 }),
   ];
 
   stitchRing8(thumbRoot8, thumbRings[0]);

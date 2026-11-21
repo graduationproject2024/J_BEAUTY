@@ -77,8 +77,9 @@ export function evaluateNailPoint(shape, length, u) {
       };
     }
     case 'square': {
-      // Elegant salon soft square: straight crisp sidewalls with micro-rounded soft corners
-      const w = f > 0.88 ? 1.0 - 0.04 * Math.pow((f - 0.88) / 0.12, 1.8) : 1.0;
+      // Elegant salon soft square: gentle natural taper (1.0 at cuticle down to 0.95 at tip) with micro-beveled soft corners
+      const taper = 1.0 - 0.05 * f;
+      const w = f > 0.84 ? taper - 0.06 * Math.pow((f - 0.84) / 0.16, 1.6) : taper;
       return { w, zNorm: u, t: f, inFreeEdge: true, bedEnd };
     }
     default: {
@@ -97,6 +98,10 @@ export function evaluateTipForwardContour(shape, length, vAbs) {
   if (shape === 'almond') {
     // Elegant organic petal dome: continuous smooth parabolic curve across tip apex (dz/dv = 0 at center)
     return -0.022 * freeExt * (vAbs * vAbs);
+  }
+  if (shape === 'square') {
+    // Subtle salon micro-softening at outer corners (dz/dv = 0 at center)
+    return -0.016 * freeExt * Math.pow(vAbs, 3.2);
   }
   return 0;
 }

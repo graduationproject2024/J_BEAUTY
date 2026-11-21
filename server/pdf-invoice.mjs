@@ -316,7 +316,7 @@ export function validateReceiptUpload(body) {
   }
 
   const allowedMimes = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'application/pdf']);
-  if (!allowedMimes.has(declaredMime)) {
+  if (!allowedMimes.has(declaredMime) || (body?.mime_type && !allowedMimes.has(String(body.mime_type).toLowerCase().trim()))) {
     fail('صيغة الإيصال غير مدعومة. الصيغ المسموحة فقط: PNG, JPG, WEBP, PDF', 400);
   }
 
@@ -348,6 +348,19 @@ export function validateReceiptUpload(body) {
 
   if (!verifiedMime) {
     fail('محتوى الملف لا يطابق صورة أو PDF صالحة (تم رفض الملف لأسباب أمنية)', 400);
+  }
+
+  const rawFilename = String(body?.filename || '');
+  if (rawFilename) {
+    if (rawFilename.includes('..') || rawFilename.includes('/') || rawFilename.includes('\\') || rawFilename.includes('\0')) {
+      fail('اسم الملف غير مسموح به (مسار غير آمن)', 400);
+    }
+    const extMatch = rawFilename.match(/\.([a-zA-Z0-9]+)$/);
+    const ext = extMatch ? `.${extMatch[1].toLowerCase()}` : '';
+    const allowedExts = new Set(['.png', '.jpg', '.jpeg', '.webp', '.pdf']);
+    if (ext && !allowedExts.has(ext)) {
+      fail('امتداد الملف غير مسموح به. الصيغ المسموحة: png, jpg, jpeg, webp, pdf', 400);
+    }
   }
 
   const safeName = String(body?.filename || `receipt.${verifiedMime === 'application/pdf' ? 'pdf' : verifiedMime.split('/')[1]}`)

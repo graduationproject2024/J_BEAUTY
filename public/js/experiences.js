@@ -277,8 +277,8 @@ export function groupBookingPage() {
   state.occasionGuestTab = guestIdx;
 
   const defaultDate = new Date(Date.parse(riyadhToday() + 'T12:00:00Z') + 86400000).toISOString().slice(0, 10);
-  if (!g.organizer_name && state.user?.name) g.organizer_name = state.user.name;
-  if (!g.organizer_phone && state.user?.phone) g.organizer_phone = state.user.phone;
+  if (g.organizer_name === undefined) g.organizer_name = state.user?.name || '';
+  if (g.organizer_phone === undefined) g.organizer_phone = state.user?.phone || '';
   if (!g.date) g.date = defaultDate;
   if (!g.time) g.time = '17:00';
   if (!g.neighborhood && state.account?.passport?.preferences?.preferred_neighborhood) {
@@ -649,7 +649,6 @@ function renderLuxuryGiftCardHtml({
         <p class="gift-card-quote" id="gc-preview-message">“${esc(personalMessage || t('لحظة دلال وهدوء فاخرة تستحقينها في راحة منزلك.', 'A tranquil luxury spa moment crafted especially for you at home.'))}”</p>
         <div class="gift-card-ritual">
           <span id="gc-preview-item">${esc(giftName || t('باقة أو خدمة من اختيارك', 'Selected Ritual or Package'))}</span>
-          <strong id="gc-preview-price">${giftPrice ? money(giftPrice) : ''}</strong>
         </div>
       </div>
       <div class="gift-card-footer">
@@ -894,8 +893,12 @@ export function giftsPage() {
 
           <div class="hero-actions" style="justify-content:center;gap:12px;flex-wrap:wrap">
             <button type="button" class="btn shimmer-btn" id="download-gift-card-png">🖼️ ${t('تحميل بطاقة الإهداء كصورة فاخرة', 'Download Luxury Card PNG')}</button>
-            <a class="btn" href="${esc(r.share_whatsapp_url || r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💌 ${t('إرسال البطاقة للمستفيدة عبر واتساب', 'Send Gift to Recipient on WhatsApp')}</a>
-            <button type="button" class="btn light" id="copy-gift-code-btn" data-code="${esc(giftCode)}">📋 ${t('نسخ كود الإهداء', 'Copy Gift Code')}</button>
+            ${
+              isApproved
+                ? `<a class="btn" href="${esc(r.share_whatsapp_url || r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💌 ${t('إرسال البطاقة للمستفيدة عبر واتساب', 'Send Gift to Recipient on WhatsApp')}</a>
+                   <button type="button" class="btn light" id="copy-gift-code-btn" data-code="${esc(giftCode)}">📋 ${t('نسخ كود الإهداء', 'Copy Gift Code')}</button>`
+                : `<span class="badge pending" style="padding:10px 16px;font-size:13.5px">⏳ ${t('يتم إصدار كود الإهداء وتفعيله بعد التحقق من سداد التحويل البنكي لدى الإدارة', 'Gift code will be activated and issued once staff verifies your bank transfer')}</span>`
+            }
             <button type="button" class="btn light" id="new-gift-req">${t('تصميم بطاقة إهداء أخرى', 'Create another gift')}</button>
           </div>
         </div>
@@ -1229,6 +1232,21 @@ export function bindExperiences(renderFn) {
 
     state.occasionStep = Math.min(5, state.occasionStep + 1);
     renderFn();
+  });
+
+  $('#group-form')?.addEventListener('input', (e) => {
+    const target = e.target;
+    if (!target) return;
+    if (target.name && state.groupDraft.hasOwnProperty(target.name)) {
+      state.groupDraft[target.name] = target.value;
+    }
+    const guestLabelMatch = target.getAttribute('data-guest-label');
+    if (guestLabelMatch !== null) {
+      const idx = Number(guestLabelMatch);
+      if (state.groupDraft.participants[idx]) {
+        state.groupDraft.participants[idx].label = target.value;
+      }
+    }
   });
 
   $('#group-form')?.addEventListener('submit', async (e) => {

@@ -556,7 +556,7 @@ function stepFiveReviewHtml() {
         <strong>${esc(state.draft.name)}</strong>
         <bdi class="muted">${esc(state.draft.phone)}</bdi>
       </div>
-      <p class="muted" style="margin-bottom:6px">${t('الموعد المفضل:', 'Preferred time:')} ${esc(state.draft.date)} · ${esc(state.draft.time)} (Asia/Riyadh)</p>
+      <p class="muted" style="margin-bottom:6px">${t('الموعد:', 'Schedule:')} ${esc(state.draft.date)} · ${esc(state.draft.time)}</p>
       <p class="muted" style="margin-bottom:6px">${t('الحي:', 'Neighborhood:')} ${esc(state.draft.neighborhood)}</p>
       <p class="muted" style="margin-bottom:6px">${t('المختار:', 'Selection:')} ${s.items.map((x) => esc(nameOf(x))).join(' + ')}</p>
       ${s.addOns.length ? `<p class="muted" style="margin-bottom:6px">${t('الخدمات الإضافية:', 'Add-ons:')} ${s.addOns.map((a) => `${esc(t(a.ar, a.en))} (+${money(a.price)})`).join(' · ')}</p>` : ''}
@@ -1073,15 +1073,8 @@ export function bindBooking(renderFn) {
       renderFn();
       window.scrollTo(0, 0);
 
-      // Direct immediate WhatsApp handoff — zero popup blockers, zero extra clicks!
-      if (res.whatsapp_url) {
-        trackFunnel('whatsapp_handoff_click');
-        try {
-          window.location.href = res.whatsapp_url;
-        } catch {
-          window.open(res.whatsapp_url, '_blank');
-        }
-      }
+      // Render confirmation screen smoothly so client sees reference & can upload receipt or open WhatsApp
+      trackFunnel('booking_submitted');
     } catch (err) {
       errBox.innerHTML = `<div class="error">${esc(err.message)}</div>`;
       submitBtn.disabled = false;

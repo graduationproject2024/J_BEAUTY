@@ -35,7 +35,7 @@ const home = read('apps/customer/js/pages-public.js');
 assert.ok(home.includes('jb-quick-paths'), 'Homepage discovery links missing');
 assert.ok(home.includes('jb-path-occasion'), 'Occasions homepage path missing');
 assert.ok(home.includes('jb-path-reviews'), 'Reviews homepage path missing');
-assert.ok(home.includes('اقرئي التقييمات أو قيّمي تجربتكِ'), 'Reviews CTA missing');
+assert.ok(home.includes('اقرئي التقييمات أو قيّمي تجربتك'), 'Reviews CTA missing');
 const experiences = read('apps/customer/js/experiences.js');
 assert.ok(experiences.includes('progress five') && experiences.includes('occasion-tabs'), '5-step Occasions wizard missing');
 const account = read('apps/customer/js/account.js');

@@ -332,7 +332,7 @@ try {
         sender_name: 'مها الحربي',
         sender_phone: '0501000010',
         recipient_name: 'ريم الحربي',
-        personal_message: 'كل عام وأنتِ بخير يا ريم',
+        personal_message: 'كل عام وأنت بخير يا ريم',
         service_id: 'relaxation',
         theme: 'rose-velvet',
         terms: true,

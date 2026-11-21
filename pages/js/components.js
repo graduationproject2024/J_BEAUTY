@@ -74,7 +74,10 @@ export function header() {
     : '';
 
   const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
-  const waUrl = `https://wa.me/${esc(waDigits)}`;
+  const waHeaderMsg = encodeURIComponent(
+    t('مرحباً فريق J Beauty Spa 🌸، أود الاستفسار عن خدمات السبا والعناية المنزلية...', 'Hello J Beauty Spa team 🌸, I would like to inquire about home spa services...'),
+  );
+  const waUrl = `https://wa.me/${esc(waDigits)}?text=${waHeaderMsg}`;
   const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
   const ttUrl = safeURL(s.tiktok) ? esc(s.tiktok) : 'https://www.tiktok.com/@j_beautyspa?_r=1&_t=ZS-9BGSeUNcuyj';
   const scUrl = safeURL(s.snapchat) ? esc(s.snapchat) : 'https://snapchat.com/add/j_beautyspa';
@@ -128,7 +131,10 @@ export function header() {
 export function footer() {
   const s = state.catalog.settings || {};
   const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
-  const waUrl = `https://wa.me/${esc(waDigits)}`;
+  const waHeaderMsg = encodeURIComponent(
+    t('مرحباً فريق J Beauty Spa 🌸، أود الاستفسار عن خدمات السبا والعناية المنزلية...', 'Hello J Beauty Spa team 🌸, I would like to inquire about home spa services...'),
+  );
+  const waUrl = `https://wa.me/${esc(waDigits)}?text=${waHeaderMsg}`;
   const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
   const ttUrl = safeURL(s.tiktok) ? esc(s.tiktok) : 'https://www.tiktok.com/@j_beautyspa?_r=1&_t=ZS-9BGSeUNcuyj';
   const scUrl = safeURL(s.snapchat) ? esc(s.snapchat) : 'https://snapchat.com/add/j_beautyspa';

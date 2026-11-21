@@ -110,7 +110,7 @@ export function auth(mode = 'login') {
           <ul class="inclusion-list">
             <li>${t('حفظ تصاميم أتيليه J للأظافر وإعادة طلبها بنقرة', 'Save custom J Nail Atelier designs for effortless rebooking')}</li>
             <li>${t('متابعة رصيد بتلات J بعد اكتمال الخدمة والدفع', 'Track genuine J Petals earned after staff-verified completed visits')}</li>
-            <li>${t('توثيق شخصي لملكية الجوال عبر واتساب بدون رسائل OTP مدفوعة', 'Personal WhatsApp number confirmation without third-party SMS fees')}</li>
+            <li>${t('تأكيد فوري ومباشر للمواعيد عبر واتساب بكل خصوصية وسهولة', 'Instant appointment confirmation via WhatsApp with full privacy and ease')}</li>
             <li>${t('إدارة مفضلة الخدمات وتفضيلات الزيارة المنزلية بالمدينة المنورة', 'Bookmark preferred rituals and Madinah neighborhood notes')}</li>
           </ul>
           <div class="hero-actions" style="margin-top:20px">

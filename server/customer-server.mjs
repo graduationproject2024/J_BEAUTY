@@ -698,18 +698,78 @@ export function createCustomerApp({
       if (method === 'POST' && /^\/api\/gift-requests\/[^/]+\/receipt$/.test(route)) {
         checkRate(`gift-receipt:${req.socket.remoteAddress}`, 20, 3600000);
         const giftId = route.split('/')[3];
-        const row = db.get('SELECT id, data FROM gift_requests WHERE id=? OR reference=?', giftId, giftId);
+        const row = db.get('SELECT id, reference, data FROM gift_requests WHERE id=? OR reference=?', giftId, giftId);
         if (!row) fail('Gift request not found', 404);
         const fileData = String(body.file_data || '');
-        if (!fileData) fail('Receipt file is required', 400);
+        if (!fileData || !fileData.startsWith('data:')) fail('Valid receipt file is required', 400);
+        if (fileData.length > 3.5 * 1024 * 1024) fail('Receipt file too large (max 2.5MB)', 400);
+        const mimeType = fileData.slice(5, fileData.indexOf(';')) || 'image/jpeg';
+        const recId = uid();
+        const uploadedAt = now();
         const gf = JSON.parse(row.data);
         gf.receipt_uploaded = true;
-        gf.receipt_file = fileData.slice(0, 500);
+        gf.receipt_uploaded_at = uploadedAt;
+        gf.receipt_id = recId;
+        gf.receipt_file = fileData;
         gf.transfer_ref = body.transfer_ref ? String(body.transfer_ref).trim().slice(0, 80) : (gf.transfer_ref || '');
         gf.sender_account = body.sender_name ? String(body.sender_name).trim().slice(0, 100) : (gf.sender_account || '');
-        db.run('UPDATE gift_requests SET data=? WHERE id=?', JSON.stringify(gf), row.id);
-        helpers.audit(user, 'gift.receipt_uploaded', row.id, JSON.stringify({ transfer_ref: gf.transfer_ref }));
-        return send({ ok: true });
+        db.tx(() => {
+          db.run(
+            'INSERT INTO payment_receipts(id, booking_id, reference, filename, mime_type, data_url, sender_name, transfer_ref, uploaded_by, created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+            recId,
+            row.id,
+            row.reference,
+            String(body.filename || 'gift-receipt').slice(0, 120),
+            mimeType,
+            fileData,
+            gf.sender_account,
+            gf.transfer_ref,
+            user ? 'customer' : 'guest',
+            uploadedAt,
+          );
+          db.run('UPDATE gift_requests SET data=? WHERE id=?', JSON.stringify(gf), row.id);
+          helpers.audit(user, 'gift.receipt_uploaded', row.id, JSON.stringify({ transfer_ref: gf.transfer_ref }));
+        });
+        return send({ ok: true, receipt_id: recId });
+      }
+
+      if (method === 'POST' && /^\/api\/group-requests\/[^/]+\/receipt$/.test(route)) {
+        checkRate(`group-receipt:${req.socket.remoteAddress}`, 20, 3600000);
+        const grpId = route.split('/')[3];
+        const row = db.get('SELECT id, reference, data FROM group_requests WHERE id=? OR reference=?', grpId, grpId);
+        if (!row) fail('Group request not found', 404);
+        const fileData = String(body.file_data || '');
+        if (!fileData || !fileData.startsWith('data:')) fail('Valid receipt file is required', 400);
+        if (fileData.length > 3.5 * 1024 * 1024) fail('Receipt file too large (max 2.5MB)', 400);
+        const mimeType = fileData.slice(5, fileData.indexOf(';')) || 'image/jpeg';
+        const recId = uid();
+        const uploadedAt = now();
+        const gr = JSON.parse(row.data);
+        gr.receipt_uploaded = true;
+        gr.receipt_uploaded_at = uploadedAt;
+        gr.receipt_id = recId;
+        gr.receipt_file = fileData;
+        gr.status = 'deposit_receipt_uploaded';
+        gr.transfer_ref = body.transfer_ref ? String(body.transfer_ref).trim().slice(0, 80) : (gr.transfer_ref || '');
+        gr.sender_account = body.sender_name ? String(body.sender_name).trim().slice(0, 100) : (gr.sender_account || '');
+        db.tx(() => {
+          db.run(
+            'INSERT INTO payment_receipts(id, booking_id, reference, filename, mime_type, data_url, sender_name, transfer_ref, uploaded_by, created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+            recId,
+            row.id,
+            row.reference,
+            String(body.filename || 'occasion-receipt').slice(0, 120),
+            mimeType,
+            fileData,
+            gr.sender_account,
+            gr.transfer_ref,
+            user ? 'customer' : 'coordinator',
+            uploadedAt,
+          );
+          db.run('UPDATE group_requests SET data=? WHERE id=?', JSON.stringify(gr), row.id);
+          helpers.audit(user, 'group.receipt_uploaded', row.id, JSON.stringify({ transfer_ref: gr.transfer_ref }));
+        });
+        return send({ ok: true, receipt_id: recId });
       }
 
       if (method === 'GET' && route === '/api/account') {
@@ -727,6 +787,9 @@ export function createCustomerApp({
           });
         const passport = getPassportData(db, helpers, user);
         const referralCode = 'REF' + user.phone.slice(-6);
+        if (!db.get("SELECT id FROM ledger WHERE user_id=? AND reason='welcome_bonus'", user.id)) {
+          helpers.recordLedger(user.id, null, 50, `welcome:${user.id}`, 'welcome_bonus');
+        }
         return send({
           user: publicUser(user),
           bookings: myBookings,

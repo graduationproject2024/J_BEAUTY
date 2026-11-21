@@ -112,6 +112,23 @@ export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [
   if (req.headers['sec-fetch-site'] === 'cross-site') {
     fail('Cross-site request rejected', 403);
   }
+  const referer = req.headers.referer;
+  if (referer) {
+    try {
+      const refOrigin = new URL(referer).origin;
+      if (refOrigin && !allowed.has(refOrigin)) {
+        fail('Cross-origin referer rejected', 403);
+      }
+    } catch {
+      fail('Invalid referer header', 400);
+    }
+  }
+  if (req.headers['x-forwarded-host']) {
+    const fwdHost = String(req.headers['x-forwarded-host']).split(',')[0].trim();
+    if (fwdHost && req.headers.host && fwdHost !== req.headers.host) {
+      fail('Host header mismatch', 403);
+    }
+  }
   const clientCsrf = req.headers['x-csrf-token'];
   const isDirect = safeStrEqual(clientCsrf, expectedCsrf);
   const isHmac = clientCsrf && verifyCsrfToken(clientCsrf, sessionId);
@@ -122,9 +139,17 @@ export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [
     fail('JSON content required', 415);
   }
   let raw = '';
+  let tooLarge = false;
   for await (const chunk of req) {
-    raw += chunk;
-    if (Buffer.byteLength(raw) > maxBytes) fail('Request too large', 413);
+    if (!tooLarge) {
+      raw += chunk;
+      if (Buffer.byteLength(raw) > maxBytes) {
+        tooLarge = true;
+      }
+    }
+  }
+  if (tooLarge) {
+    fail('Request too large', 413);
   }
   let body;
   try {

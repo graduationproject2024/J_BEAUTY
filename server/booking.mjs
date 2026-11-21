@@ -183,8 +183,10 @@ export function findActiveGiftByCode(db, code) {
     try {
       const g = JSON.parse(row.data);
       const giftCode = String(g.gift_code || '').trim().toUpperCase();
-      const refCode = String(row.reference || '').trim().toUpperCase();
-      if (giftCode === clean || refCode === clean) {
+      // SECURITY: Gift card must be paid, verified, and activated by staff before redemption
+      if (!g.payment_verified || g.status !== 'approved_ready') continue;
+      if (g.redeemed || g.status === 'redeemed' || g.status === 'cancelled') continue;
+      if (giftCode === clean) {
         return { rowId: row.id, gift: g };
       }
     } catch {}
@@ -372,8 +374,8 @@ export function createBooking(db, helpers, user, sessionId, body) {
     if (appliedGiftRow) {
       const freshRow = db.get('SELECT data FROM gift_requests WHERE id=?', appliedGiftRow.rowId);
       const freshGift = freshRow ? JSON.parse(freshRow.data) : null;
-      if (!freshGift || freshGift.status === 'cancelled' || freshGift.redeemed || freshGift.status === 'redeemed') {
-        fail('بطاقة الإهداء هذه لم تعد صالحة أو تم استخدامها للتو.', 400);
+      if (!freshGift || !freshGift.payment_verified || freshGift.status !== 'approved_ready' || freshGift.status === 'cancelled' || freshGift.redeemed || freshGift.status === 'redeemed') {
+        fail('بطاقة الإهداء هذه غير مفعّلة أو لم يتم التحقق من سدادها أو تم استخدامها بالفعل.', 400);
       }
       freshGift.status = 'redeemed';
       freshGift.redeemed = true;

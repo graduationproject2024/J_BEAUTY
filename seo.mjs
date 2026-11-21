@@ -2,7 +2,7 @@ const TITLES = {
   '': ['سبا نسائي منزلي في المدينة المنورة', 'Women’s Home Spa in Madinah'],
   services: ['خدمات المساج والعناية بالأظافر والجل', 'Massage, Nail Care & Gel Services'],
   packages: ['باقات السبا المنزلي في المدينة المنورة', 'Home Spa Packages in Madinah'],
-  studio: ['استوديو J لاختيار طقسكِ المناسب', 'J Ritual Studio — Personalized Discovery'],
+  studio: ['استوديو J لاختيار طقسك المناسب', 'J Ritual Studio — Personalized Discovery'],
   atelier: ['أتيليه الأظافر التفاعلي | J Nail Atelier', 'J Nail Atelier — Interactive Nail Customizer'],
   lookbook: ['معرض الإطلالات والأناقة | Beauty Lookbook', 'Beauty Lookbook — Curated Styles'],
   occasions: ['تنسيق جلسات المناسبات | J Beauty', 'Occasion Experiences | J Beauty'],
@@ -34,7 +34,7 @@ const APP_ONLY_ROUTES = new Set([
 
 const DESCRIPTIONS = {
   '': [
-    'J Beauty — سبا نسائي منزلي في المدينة المنورة. مساج استرخائي وعلاجي، منيكير وبديكير منزلي، أتيليه الأظافر التفاعلي، وخدمات الجل في راحة بيتكِ.',
+    'J Beauty — سبا نسائي منزلي في المدينة المنورة. مساج استرخائي وعلاجي، منيكير وبديكير منزلي، أتيليه الأظافر التفاعلي، وخدمات الجل في راحة بيتك.',
     'J Beauty — Women’s home spa in Al Madinah Al Munawwarah. At-home massage rituals, manicure, pedicure, J Nail Atelier, and gel care with personal confirmation.',
   ],
   services: [
@@ -46,11 +46,11 @@ const DESCRIPTIONS = {
     'Curated home spa packages in Madinah: J Nail Glow, J Serenity, J Rose Ritual, and J Signature.',
   ],
   studio: [
-    'أجيبي عن 4 أسئلة بسيطة في استوديو J للوصول إلى الطقوس أو الباقة الأنسب لوقتكِ وميزانيتكِ.',
+    'أجيبي عن 4 أسئلة بسيطة في استوديو J للوصول إلى الطقوس أو الباقة الأنسب لوقتك وميزانيتك.',
     'Answer 4 quick questions in J Ritual Studio to find catalog-verified rituals aligned with your time and budget.',
   ],
   atelier: [
-    'صممي شكل الأظافر والطول واللون والفرنش في أتيليه J التفاعلي قبل حجز موعدكِ المنزلي في المدينة المنورة.',
+    'صممي شكل الأظافر والطول واللون والفرنش في أتيليه J التفاعلي قبل حجز موعدك المنزلي في المدينة المنورة.',
     'Explore nail shapes, lengths, shades, and French tip styles in J Nail Atelier before requesting your home visit in Madinah.',
   ],
   lookbook: [
@@ -66,7 +66,7 @@ const DESCRIPTIONS = {
     'Prepare a personal digital spa gift request for a loved one with transparent manual staff confirmation.',
   ],
   petals: [
-    'نادي بتلات J: اجمعي البتلات بعد زياراتكِ المكتملة والمدفوعة واستبدليها بمكافآت خصم على مواعيدكِ القادمة.',
+    'نادي بتلات J: اجمعي البتلات بعد زياراتك المكتملة والمدفوعة واستبدليها بمكافآت خصم على مواعيدك القادمة.',
     'J Petals Club: earn petals after completed, staff-verified paid visits and redeem rewards on eligible future bookings.',
   ],
   reviews: [
@@ -145,7 +145,7 @@ function buildSsrBody(lang, route, services, packages) {
   }
 
   if (route === 'services') {
-    const heading = isAr ? 'طقوس العناية بكِ في المنزل' : 'Home Spa Rituals & Services';
+    const heading = isAr ? 'طقوس العناية بك في المنزل' : 'Home Spa Rituals & Services';
     const items = services
       .filter((s) => s.active)
       .map(
@@ -172,11 +172,11 @@ function buildSsrBody(lang, route, services, packages) {
     const h1 =
       route === '' || route === 'home'
         ? isAr
-          ? 'لحظتكِ الخاصة… في راحة بيتكِ'
+          ? 'لحظتك الخاصة… في راحة بيتك'
           : 'Your Moment of Beauty, At Home.'
         : TITLES[route][isAr ? 0 : 1];
     const lead = DESCRIPTIONS[route]?.[isAr ? 0 : 1] || '';
-    const cta = isAr ? 'احجزي موعدكِ' : 'Book your moment';
+    const cta = isAr ? 'احجزي موعدك' : 'Book your moment';
     return `<main id="main" class="wrap ssr-shell"><div class="page-head"><span class="eyebrow">J Beauty · MADINAH</span><h1>${escape(h1)}</h1><p>${escape(lead)}</p><a class="btn" href="/${lang}/booking">${cta}</a></div></main>`;
   }
 
@@ -194,7 +194,7 @@ function buildStructuredData(base, lang, route, services, service) {
       name: 'J Beauty',
       description:
         lang === 'ar'
-          ? 'سبا نسائي منزلي في المدينة المنورة يقدم جلسات المساج والعناية بالأظافر والجل في راحة منزلكِ.'
+          ? 'سبا نسائي منزلي في المدينة المنورة يقدم جلسات المساج والعناية بالأظافر والجل في راحة منزلك.'
           : 'Women-only home spa in Al Madinah Al Munawwarah offering massage, nail care, and gel rituals at home.',
       areaServed: {
         '@type': 'City',

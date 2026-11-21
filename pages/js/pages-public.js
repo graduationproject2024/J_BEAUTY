@@ -421,7 +421,7 @@ export function detail(id) {
             <a class="btn" href="${href('booking')}?service=${esc(s.id)}">${t('اطلبي هذه الخدمة', 'Request this ritual')}</a>
             <a class="btn light" href="${href('services')}">${t('عودة للخدمات', 'All rituals')}</a>
           </div>
-          <p class="muted" style="margin-top:14px">${t('الأسعار والمواعيد المفضلة تخضع للتأكيد اليدوي من فريق J Beauty.', 'Prices and preferred times are subject to manual team confirmation.')}</p>
+          <p class="muted" style="margin-top:14px">${t('خدمة منزلية معقمة ومتكاملة تصلك بأيدي خبيرات معتمدات.', 'Full sanitized home spa service delivered by certified specialists.')}</p>
         </div>
       </div>
       <section class="section">
@@ -620,7 +620,7 @@ export function contact() {
               : t('ستظهر قائمة الأحياء المعتمدة فور إعدادها من الإدارة.', 'Approved Madinah neighborhoods will appear here once configured by management.')
           }</p>
           <h3 style="margin-top:22px">${t('أوقات العمل المبدئية', 'Operating Hours')}</h3>
-          <p class="muted">${esc(s.opening_time || '09:00')} – ${esc(s.closing_time || '22:00')} (${t('توقيت الرياض', 'Asia/Riyadh')})</p>
+          <p class="muted">${esc(s.opening_time || '09:00')} – ${esc(s.closing_time || '22:00')}</p>
         </div>
       </div>
     </main>
@@ -678,17 +678,32 @@ export function faq() {
 }
 
 export function recovery() {
+  const s = state.catalog.settings || {};
+  const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
+  const waResetMsg = encodeURIComponent(
+    t(
+      'مرحباً فريق J Beauty Spa 🌸، أود استعادة كلمة المرور لحسابي المسجل لديكم وتعيين كلمة مرور جديدة.',
+      'Hello J Beauty Spa team 🌸, I would like to request password recovery for my registered account.',
+    ),
+  );
+  const waUrl = `https://wa.me/${esc(waDigits)}?text=${waResetMsg}`;
+
   return `
     <main id="main" class="wrap">
-      ${head(t('استعادة الحساب بمساعدة الفريق', 'Staff-Assisted Account Recovery'))}
-      <div class="content card">
+      ${head(
+        t('استعادة كلمة المرور', 'Password Recovery'),
+        t('استعادة آمنة وموثوقة لحسابك في جواز الجمال.', 'Secure recovery for your Beauty Passport account.'),
+        [[t('الرئيسية', 'Home'), 'home'], [t('استعادة الحساب', 'Recovery'), '']],
+      )}
+      <div class="content card" style="max-width:580px;margin:0 auto">
+        <h3>${t('استعادة كلمة المرور عبر محادثة واتساب الرسمية', 'Recover Password via WhatsApp')}</h3>
         <p>${t(
-          'للحفاظ على خصوصية حسابك بدون خدمات رسائل مدفوعة، تواصلي مع فريق J Beauty من نفس محادثة واتساب المسجلة لدينا. بعد التحقق من رقمك ينشئ الفريق لك رابط استعادة قصير الصلاحية للاستخدام مرة واحدة.',
-          'To keep recovery secure without paid SMS services, contact J Beauty from the WhatsApp number linked to your account. Once verified, staff can generate a short-lived single-use reset link.',
+          'للحفاظ على خصوصية وأمان حسابك، يتم التحقق من طلب استعادة كلمة المرور عبر محادثة واتساب الرسمية لفريق خدمة العميلات. سنرسل لك رمز استعادة فوري ومباشر لتعيين كلمة مرور جديدة.',
+          'To ensure privacy and security, password recovery is verified via our official WhatsApp support. Our team will assist you with an instant recovery token.',
         )}</p>
-        <p class="muted">${t('لا تشاركي كلمة مرورك السابقة مع أي شخص أبداً.', 'Never share your current password with anyone.')}</p>
-        <div class="hero-actions" style="margin-top:20px">
-          <a class="btn" href="${href('contact')}">${t('تواصلي مع الفريق', 'Contact the team')}</a>
+        <p class="muted" style="font-size:13.5px">${t('بعد التواصل مع الفريق، ستصلك رسالة تحتوي على رمز التحقق لإتمام تعيين كلمة المرور.', 'After messaging our team, you will receive a reset token to enter on the next step.')}</p>
+        <div class="hero-actions" style="margin-top:22px;gap:12px;flex-wrap:wrap">
+          <a class="btn" href="${waUrl}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💬 ${t('تواصل مباشر عبر واتساب لاستعادة الحساب', 'Chat on WhatsApp to Recover')}</a>
           <a class="btn light" href="${href('reset')}">${t('لديّ رمز استعادة بالفعل', 'I already have a reset token')}</a>
         </div>
       </div>
