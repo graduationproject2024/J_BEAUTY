@@ -20,6 +20,7 @@ COPY --chown=node:node packages ./packages
 COPY --chown=node:node server ./server
 COPY --chown=node:node api ./api
 COPY --chown=node:node data ./data
+COPY --chown=node:node scripts ./scripts
 
 USER node
 
