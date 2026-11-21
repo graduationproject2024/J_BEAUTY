@@ -7,7 +7,7 @@
     "node": ">=22.5.0"
   },
   "scripts": {
-    "start": "node server.mjs",
+    "start": "node --no-warnings server.mjs",
     "build": "node scripts/sync-all.mjs",
     "create-owner": "node scripts/create-owner.mjs",
     "test": "node tests/integration.mjs",

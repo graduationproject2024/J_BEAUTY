@@ -25,4 +25,4 @@ COPY --chown=node:node scripts ./scripts
 # Expose Customer Portal (3000) and Operations Portal (3100)
 EXPOSE 3000 3100
 
-CMD ["node", "server.mjs"]
+CMD ["node", "--no-warnings", "server.mjs"]

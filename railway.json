@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "node server.mjs",
+    "startCommand": "node --no-warnings server.mjs",
     "healthcheckPath": "/api/catalog",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",

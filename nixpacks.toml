@@ -5,4 +5,4 @@ nixPkgs = ["nodejs_22"]
 cmds = ["npm run build"]
 
 [start]
-cmd = "node server.mjs"
+cmd = "node --no-warnings server.mjs"
