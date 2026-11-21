@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "node server.mjs",
+    "build": "node scripts/sync-all.mjs",
     "create-owner": "node scripts/create-owner.mjs",
     "test": "node tests/integration.mjs",
     "audit": "node tests/audit-a11y-perf.cjs",
