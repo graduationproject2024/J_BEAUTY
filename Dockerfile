@@ -19,7 +19,6 @@ COPY --chown=node:node apps ./apps
 COPY --chown=node:node packages ./packages
 COPY --chown=node:node server ./server
 COPY --chown=node:node api ./api
-COPY --chown=node:node data ./data
 COPY --chown=node:node scripts ./scripts
 
 # Expose Customer Portal (3000) and Operations Portal (3100)
