@@ -38,8 +38,8 @@ export function createPlatform({
       return `http://${process.env.HOST || '127.0.0.1'}:${port}`;
     });
   const port = Number(process.env.PORT || 3000);
-  const opsPort = Number(process.env.OPS_PORT || 3100);
-  const isUnifiedSinglePort = port === opsPort || !process.env.OPS_PORT;
+  const opsPort = Number(process.env.OPS_PORT || (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID ? port : 3100));
+  const isUnifiedSinglePort = port === opsPort || !process.env.OPS_PORT || Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID);
   const ops = createOpsApp({ dbPath, db, helpers, customerOrigin: resolveCustomerOrigin });
   const customer = createCustomerApp({ dbPath, db, helpers, opsApp: isUnifiedSinglePort ? ops : null });
 
@@ -79,13 +79,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   } else {
     const host = process.env.HOST || '0.0.0.0';
     const customerPort = Number(process.env.PORT || 3000);
-    const opsPort = Number(process.env.OPS_PORT || 3100);
+    const opsPort = Number(process.env.OPS_PORT || (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID ? customerPort : 3100));
     platform.customerServer.listen(customerPort, host, () => {
       console.log(`J Beauty Customer Portal running at http://${host}:${customerPort}`);
     });
-    platform.opsServer.listen(opsPort, host, () => {
-      console.log(`J Beauty Operations Portal running at http://${host}:${opsPort}`);
-    });
+    if (opsPort !== customerPort) {
+      platform.opsServer.listen(opsPort, host, () => {
+        console.log(`J Beauty Operations Portal running at http://${host}:${opsPort}`);
+      });
+    }
   }
 }
 

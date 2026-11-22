@@ -5,7 +5,6 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
   PORT=3000 \
-  OPS_PORT=3100 \
   HOST=0.0.0.0 \
   DB_PATH=/app/data/jspa.sqlite
 
