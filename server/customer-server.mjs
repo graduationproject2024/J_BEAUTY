@@ -81,7 +81,7 @@ export function createCustomerApp({
       const query = Object.fromEntries(url.searchParams.entries());
 
       if (opsApp) {
-        if (route.startsWith('/api/ops') || /^\/(ar|en)?\/(ops)(\/|$)/.test(route) || route.startsWith('/ops/')) {
+        if (route.startsWith('/api/ops') || route === '/ops' || route.startsWith('/ops/') || /^\/(ar|en)\/ops(\/|$)/.test(route)) {
           return await opsApp.handler(req, res);
         }
       }
