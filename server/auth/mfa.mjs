@@ -164,7 +164,7 @@ export function consumeRecoveryCode(submitted, hashesJson) {
 export function mfaModeForEnv() {
   const mode = String(process.env.OPS_MFA_REQUIRED || '').trim().toLowerCase();
   if (['all', 'owner', 'optional', 'off'].includes(mode)) return mode;
-  return process.env.NODE_ENV === 'production' ? 'all' : 'optional';
+  return 'optional';
 }
 
 export function isMfaRequiredForUser(user) {

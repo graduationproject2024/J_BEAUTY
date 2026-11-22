@@ -298,7 +298,11 @@ export function pageMetadata(html, pathname, services = [], packages = []) {
     );
 
   if (ssrShell) {
-    out = out.replace('<div id="app"></div>', () => `<div id="app">${ssrShell}</div>`);
+    if (out.includes('<div id="app"></div>')) {
+      out = out.replace('<div id="app"></div>', () => `<div id="app">${ssrShell}</div>`);
+    } else {
+      out = out.replace(/<div id="app">[\s\S]*?<\/div>/, () => `<div id="app">${ssrShell}</div>`);
+    }
   }
 
   return out;

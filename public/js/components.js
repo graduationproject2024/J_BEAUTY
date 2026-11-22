@@ -75,7 +75,7 @@ export function header() {
 
   const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
   const waHeaderMsg = encodeURIComponent(
-    t('مرحباً فريق J Beauty Spa 🌸، أود الاستفسار عن خدمات السبا والعناية المنزلية...', 'Hello J Beauty Spa team 🌸, I would like to inquire about home spa services...'),
+    t('مرحباً خدمة عملاء J Beauty Spa 🌸، أود الاستفسار والدعم...', 'Hello J Beauty Spa customer care 🌸, I would like assistance...'),
   );
   const waUrl = `https://wa.me/${esc(waDigits)}?text=${waHeaderMsg}`;
   const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
@@ -132,7 +132,7 @@ export function footer() {
   const s = state.catalog.settings || {};
   const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
   const waHeaderMsg = encodeURIComponent(
-    t('مرحباً فريق J Beauty Spa 🌸، أود الاستفسار عن خدمات السبا والعناية المنزلية...', 'Hello J Beauty Spa team 🌸, I would like to inquire about home spa services...'),
+    t('مرحباً خدمة عملاء J Beauty Spa 🌸، أود الاستفسار والدعم...', 'Hello J Beauty Spa customer care 🌸, I would like assistance...'),
   );
   const waUrl = `https://wa.me/${esc(waDigits)}?text=${waHeaderMsg}`;
   const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
@@ -200,6 +200,7 @@ export function footer() {
         <div class="footer-bottom">
           <span>© ${new Date().getFullYear()} J Beauty Spa · ${t('المدينة المنورة، المملكة العربية السعودية', 'Al Madinah, Saudi Arabia')}</span>
           <span>${t('للسيدات فقط · التأكيد يتم يدوياً عبر الفريق', 'Women only · Manual staff confirmation')}</span>
+          <a href="/ops" style="color:var(--rose-gold-deep);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px">🔐 ${t('بوابة الإدارة والعمليات', 'Operations Portal')}</a>
         </div>
       </div>
     </footer>
@@ -740,3 +741,30 @@ export const field = (label, key, type = 'text', value = '', extra = '') => {
       : '';
   return `<label class="field">${label}<input name="${key}" type="${type}" value="${esc(value)}" ${dirAttr} ${extra}></label>`;
 };
+
+export function localizeError(msg) {
+  if (!msg) return '';
+  const s = String(msg).trim();
+  const dict = {
+    'Outside working hours': t('الموعد المختار خارج مواعيد العمل المعتمدة (يومياً من 9:00 صباحاً حتى 10:00 مساءً).', 'The selected appointment is outside working hours (9:00 AM to 10:00 PM).'),
+    'Appointment is too soon': t('نرجو اختيار موعد يبعد ساعتين على الأقل من الآن لإتاحة التجهيز والوصول للأخصائية.', 'Please select a slot at least 2 hours in advance.'),
+    'Date is unavailable': t('هذا التاريخ غير متاح للحجوزات حالياً، يرجى اختيار تاريخ آخر.', 'This date is currently unavailable for booking.'),
+    'Invalid date or time': t('يرجى تحديد تاريخ ووقت صحيحين.', 'Invalid date or time format.'),
+    'Invalid date': t('التاريخ المختار غير صالح.', 'Invalid date selected.'),
+    'Outside operating hours': t('الموعد خارج ساعات العمل (من 9:00 ص إلى 10:00 م).', 'Outside operating hours.'),
+    'Neighborhood is outside configured service areas': t('نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.', 'Neighborhood is outside service coverage in Al Madinah.'),
+    'Assigned practitioner has an overlapping appointment during this window': t('الأخصائية المختارة مرتبطة بموعد آخر خلال هذه الفترة.', 'Practitioner conflict during this window.'),
+    'Assigned practitioner has an overlapping appointment or travel buffer during this window': t('الأخصائية المختارة لديها موعد أو وقت انتقال خلال هذه الفترة.', 'Practitioner schedule or travel conflict.'),
+    'Capacity exceeded for this time slot': t('نعتذر، اكتملت السعة التشغيلية لهذا الوقت، يرجى اختيار موعد آخر.', 'Capacity exceeded for this time slot.'),
+    'Coupon not found or inactive': t('كود الخصم غير صحيح أو غير مفعّل.', 'Coupon not found or inactive.'),
+    'Coupon has expired': t('انتهت صلاحية كود الخصم.', 'Coupon has expired.'),
+    'Minimum booking total not reached for this coupon': t('قيمة الحجز أقل من الحد الأدنى لتفعيل هذا الكوبون.', 'Minimum booking total not reached for this coupon.'),
+    'Coupon usage limit reached': t('تم استنفاد الحد الأقصى لاستخدام هذا الكوبون.', 'Coupon usage limit reached.'),
+    'Invalid authenticator code': t('رمز المصادقة غير صحيح، يرجى التأكد وإعادة المحاولة.', 'Invalid authenticator code.'),
+    'Invalid CSRF token': t('انتهت صلاحية الجلسة، يرجى تحديث الصفحة.', 'Invalid session token.'),
+    'Invalid phone or password': t('رقم الجوال أو كلمة المرور غير صحيحة.', 'Invalid phone or password.'),
+    'Staff account required to access Operations Portal': t('هذه البوابة مخصصة لمنسوبي وفريق J Beauty فقط.', 'Staff account required.'),
+    'Method not allowed': t('العملية غير مسموحة.', 'Method not allowed.'),
+  };
+  return dict[s] || s;
+}

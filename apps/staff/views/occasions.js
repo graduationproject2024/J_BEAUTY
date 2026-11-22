@@ -201,10 +201,23 @@ export function bindOccasions(renderFn) {
   document.querySelectorAll('[data-occ-act]').forEach((btn) => {
     btn.onclick = async () => {
       btn.disabled = true;
+      const occId = btn.dataset.occId;
+      const act = btn.dataset.occAct;
+      const allOccs = opsState.dashboard?.group_requests || [];
+      const occ = allOccs.find((x) => x.id === occId);
       try {
-        await opsApi(`/group-requests/${btn.dataset.occId}`, { status: btn.dataset.occAct });
+        await opsApi(`/group-requests/${occId}`, { status: act });
         await loadDashboard();
-        opsToast(t('تم تحديث طلب المناسبة', 'Occasion request updated'));
+        if (act === 'approved' && occ && occ.organizer_phone) {
+          const depositReq = Math.round(Number(occ.estimated_total || 0) * 0.3) || 100;
+          const waUrl = `https://wa.me/${phone(occ.organizer_phone)}?text=${encodeURIComponent(
+            `مرحباً أ/ ${occ.organizer_name} 🌸\nيسعدنا إبلاغك باعتماد طلب حجز جلسة المناسبات الخاصة بك لدى J Beauty Spa ✨\n\n• رقم الحجز: ${occ.reference}\n• الموعد: ${occ.date} ${occ.time}\n• الحي: ${occ.neighborhood}\n• الإجمالي التقديري: ${occ.estimated_total} ر.س\n• العربون المطلوب لتأكيد الموعد: ${depositReq} ر.س\n\n💳 بيانات الحساب البنكي:\nمصرف الراجحي\nالمستفيد: مؤسسة J Beauty Spa\nالآيبان: SA0380000000000000000000\n\nيرجى تحويل العربون ورفع الإيصال لتثبيت الموعد نهائياً وتجهيز فريق العمل 🌸`,
+          )}`;
+          try { window.open(waUrl, '_blank', 'noopener,noreferrer'); } catch {}
+          opsToast(t('تم اعتماد الطلب وفتح واتساب لإشعار العميلة بالعربون 🌸', 'Occasion approved & WhatsApp confirmation opened'));
+        } else {
+          opsToast(t('تم تحديث طلب المناسبة', 'Occasion request updated'));
+        }
         renderFn();
       } catch (err) {
         opsToast(err.message);

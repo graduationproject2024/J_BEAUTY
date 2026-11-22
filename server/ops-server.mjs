@@ -61,8 +61,19 @@ export function createOpsApp({
     typeof customerOrigin === 'function' ? customerOrigin() : customerOrigin;
 
   function ownerBootstrap({ name, phone: ph, password: pw }) {
-    if (db.get("SELECT id FROM users WHERE role='owner'")) {
-      fail('Owner already exists');
+    const existing = db.get("SELECT * FROM users WHERE role='owner'");
+    if (existing) {
+      if (ph && pw) {
+        db.run(
+          "UPDATE users SET name=?, phone=?, password=?, verified=1 WHERE id=?",
+          name ? text(name) : existing.name,
+          phone(ph),
+          hashPassword(pw),
+          existing.id,
+        );
+        return publicUser({ ...existing, name: name || existing.name, phone: phone(ph), role: 'owner', verified: true });
+      }
+      return publicUser(existing);
     }
     const u = {
       id: uid(),

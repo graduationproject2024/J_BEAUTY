@@ -11,7 +11,7 @@ import {
   t,
   toast,
 } from './state.js';
-import { field, head, provisional } from './components.js';
+import { field, head, localizeError, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
 import { isWheelVisible, openRewardsWheelDialog } from './wheel.js';
 
@@ -395,7 +395,7 @@ function stepThreeTimeHtml() {
   const closeTime = s.closing_time || '22:00';
   const workingDays = s.working_days || [0, 1, 2, 3, 4, 5, 6];
   const blocked = new Set(s.blocked_dates || []);
-  const suggestedTimes = ['10:00', '12:00', '14:00', '16:00', '18:00', '20:00'].filter(
+  const suggestedTimes = ['10:00', '12:00', '14:00', '16:00', '18:00', '18:30', '19:30', '20:00', '20:30'].filter(
     (slot) => slot >= openTime && slot <= closeTime,
   );
 
@@ -720,59 +720,63 @@ export function bookingSuccess() {
   `;
 }
 
+function stepTwoCombinedScheduleHtml() {
+  return `
+    <div class="booking-step2-flow">
+      ${stepThreeTimeHtml()}
+      <div style="margin-top:28px;padding-top:22px;border-top:1.5px solid var(--border)">
+        ${stepFourDetailsHtml()}
+      </div>
+      <div style="margin-top:28px;padding-top:22px;border-top:1.5px solid var(--border)">
+        ${stepFiveReviewHtml()}
+      </div>
+    </div>
+  `;
+}
+
 export function booking() {
   if (state.bookingResult) return bookingSuccess();
+  const currentStep = state.bookingStep >= 2 ? 2 : 1;
   const steps = [
-    t('الفئة', 'Category'),
-    t('الخدمة', 'Ritual'),
-    t('الموعد', 'Time'),
-    t('بياناتك', 'Details'),
-    t('المراجعة', 'Review'),
+    t('اختيار الخدمات', 'Select Rituals'),
+    t('الموعد والتأكيد', 'Schedule & Confirm'),
   ];
 
   return `
     <main id="main" class="wrap">
       ${head(
         t('طلب موعد منزلي', 'Request Your Moment'),
-        t('خمس خطوات ميسرة، ثم مراجعة وتأكيد شخصي من فريق J Beauty.', 'Five calm steps, followed by personal confirmation from our team.'),
+        t('خطوتان ميسرتان فقط لحجز جلستك الفاخرة وتأكيدها مباشرة مع الفريق.', 'Two seamless steps to book your luxury home spa moment with direct concierge confirmation.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('طلب حجز', 'Booking'), '']],
       )}
       <div class="booking-layout">
         <div class="booking-main">
-          <div class="progress five" aria-label="${t('مراحل الحجز', 'Booking steps')}">
+          <div class="progress two-step" aria-label="${t('مراحل الحجز', 'Booking steps')}">
             ${steps
               .map(
                 (label, idx) =>
-                  `<span class="${idx + 1 <= state.bookingStep ? 'current' : ''} ${idx + 1 === state.bookingStep ? 'active-step' : ''}"><b>${idx + 1}</b><em>${label}</em></span>`,
+                  `<span class="${idx + 1 <= currentStep ? 'current' : ''} ${idx + 1 === currentStep ? 'active-step' : ''}"><b>${idx + 1}</b><em>${label}</em></span>`,
               )
               .join('')}
           </div>
           <form id="booking-form" novalidate>
             <div id="form-error" role="alert"></div>
             ${
-              state.bookingStep === 1
-                ? stepOneCategoryHtml()
-                : state.bookingStep === 2
-                  ? stepTwoServiceHtml()
-                  : state.bookingStep === 3
-                    ? stepThreeTimeHtml()
-                    : state.bookingStep === 4
-                      ? stepFourDetailsHtml()
-                      : stepFiveReviewHtml()
+              currentStep === 1
+                ? stepTwoServiceHtml()
+                : stepTwoCombinedScheduleHtml()
             }
-            <div class="form-actions ${state.bookingStep === 1 ? 'single-action' : ''}">
+            <div class="form-actions ${currentStep === 1 ? 'single-action' : ''}">
               ${
-                state.bookingStep > 1
-                  ? `<button type="button" class="btn light" id="back-step">${t('السابق', 'Back')}</button>`
+                currentStep > 1
+                  ? `<button type="button" class="btn light" id="back-step">${t('السابق (تعديل الخدمات)', 'Back (Edit Rituals)')}</button>`
                   : ''
               }
-              <button class="btn form-next-btn" type="submit">
+              <button class="btn form-next-btn" type="submit" style="${currentStep > 1 ? 'background:linear-gradient(135deg,var(--plum),var(--plum-dark));font-size:16px;padding:14px 28px' : ''}">
                 ${
-                  state.bookingStep === 5
-                    ? t('تسجيل طلب الحجز', 'Submit appointment request')
-                    : state.bookingStep > 1
-                      ? t('متابعة', 'Continue')
-                      : t('متابعة لاختيار الخدمة', 'Continue to rituals')
+                  currentStep === 2
+                    ? t('تأكيد وإرسال طلب الحجز فوراً 🌸', 'Confirm & Book Appointment 🌸')
+                    : t('متابعة لتحديد الموعد والموقع (خطوة ٢ من ٢) ←', 'Continue to Schedule & Location (Step 2 of 2) →')
                 }
               </button>
             </div>
@@ -1010,61 +1014,62 @@ export function bindBooking(renderFn) {
 
   $('#back-step')?.addEventListener('click', () => {
     saveDraft();
-    state.bookingStep = Math.max(1, state.bookingStep - 1);
+    state.bookingStep = 1;
     renderFn();
+    window.scrollTo(0, 0);
   });
 
   $('#booking-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     saveDraft();
     const errBox = $('#form-error');
-    if (state.bookingStep === 1) {
-      if (!state.bookingCategory) state.bookingCategory = 'massage';
+    if (errBox) errBox.innerHTML = '';
+    const currentStep = state.bookingStep >= 2 ? 2 : 1;
+
+    if (currentStep === 1) {
+      if (!selectedSummary().items.length) {
+        errBox.innerHTML = `<div class="error">${t('يرجى اختيار خدمة أو باقة واحدة على الأقل للمتابعة.', 'Please select at least one ritual or package to continue.')}</div>`;
+        return;
+      }
       state.bookingStep = 2;
       trackFunnel('booking_step_2');
-      renderFn();
-      return;
-    }
-    if (state.bookingStep === 2 && !selectedSummary().items.length) {
-      errBox.innerHTML = `<div class="error">${t('اختاري خدمة أو باقة.', 'Please choose a service or package.')}</div>`;
-      return;
-    }
-    if (state.bookingStep === 3) {
-      if (!state.draft.date || !state.draft.time || !state.draft.neighborhood.trim()) {
-        errBox.innerHTML = `<div class="error">${t('يرجى تحديد التاريخ والوقت والحي.', 'Please choose your preferred date, time, and neighborhood.')}</div>`;
-        return;
-      }
-      if (isNeighborhoodOutOfRange(state.draft.neighborhood)) {
-        const s = state.catalog?.settings || {};
-        const msg = t(
-          s.out_of_range_message_ar || 'نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.',
-          s.out_of_range_message_en || 'Sorry, this neighborhood is currently outside our service coverage.',
-        );
-        errBox.innerHTML = `<div class="error">${esc(msg)}</div>`;
-        return;
-      }
-    }
-    if (state.bookingStep === 4) {
-      if (!state.draft.name.trim() || !state.draft.phone.trim()) {
-        errBox.innerHTML = `<div class="error">${t('يرجى إدخال الاسم ورقم الجوال السعودي.', 'Please enter your name and Saudi mobile number.')}</div>`;
-        return;
-      }
-    }
-    if (state.bookingStep < 5) {
-      state.bookingStep++;
-      trackFunnel(`booking_step_${state.bookingStep}`);
       renderFn();
       window.scrollTo(0, 0);
       return;
     }
 
+    if (!state.draft.date || !state.draft.time || !state.draft.neighborhood?.trim()) {
+      errBox.innerHTML = `<div class="error">${t('يرجى تحديد التاريخ والوقت والحي.', 'Please choose your preferred date, time, and neighborhood.')}</div>`;
+      return;
+    }
+    if (isNeighborhoodOutOfRange(state.draft.neighborhood)) {
+      const s = state.catalog?.settings || {};
+      const msg = t(
+        s.out_of_range_message_ar || 'نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.',
+        s.out_of_range_message_en || 'Sorry, this neighborhood is currently outside our service coverage.',
+      );
+      errBox.innerHTML = `<div class="error">${esc(msg)}</div>`;
+      return;
+    }
+    if (!state.draft.name?.trim() || !state.draft.phone?.trim()) {
+      errBox.innerHTML = `<div class="error">${t('يرجى إدخال الاسم ورقم الجوال السعودي.', 'Please enter your name and Saudi mobile number.')}</div>`;
+      return;
+    }
     if (!state.draft.terms) {
       errBox.innerHTML = `<div class="error">${t('يرجى الموافقة على سياسة الحجز والخصوصية.', 'Please accept the booking policies and privacy notice.')}</div>`;
       return;
     }
 
+    // Auto-normalize 12h evening time (e.g. 06:30 -> 18:30)
+    let chosenTime = state.draft.time;
+    if (chosenTime && /^0[1-8]:\d{2}$/.test(chosenTime)) {
+      const [hh, mm] = chosenTime.split(':');
+      chosenTime = `${Number(hh) + 12}:${mm}`;
+      state.draft.time = chosenTime;
+    }
+
     const submitBtn = e.submitter;
-    submitBtn.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
     try {
       const res = await api('/bookings', state.draft);
       state.bookingResult = res;
@@ -1072,12 +1077,10 @@ export function bindBooking(renderFn) {
       state.account = null;
       renderFn();
       window.scrollTo(0, 0);
-
-      // Render confirmation screen smoothly so client sees reference & can upload receipt or open WhatsApp
       trackFunnel('booking_submitted');
     } catch (err) {
-      errBox.innerHTML = `<div class="error">${esc(err.message)}</div>`;
-      submitBtn.disabled = false;
+      errBox.innerHTML = `<div class="error">${esc(localizeError(err.message))}</div>`;
+      if (submitBtn) submitBtn.disabled = false;
     }
   });
 

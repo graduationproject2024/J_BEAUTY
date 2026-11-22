@@ -60,6 +60,20 @@ function validatePractitionerConflict(helpers, booking, staffId) {
 
 export function validateSchedule(helpers, booking, confirmed = false, enforceLead = true) {
   const s = helpers.settings();
+
+  // Intelligent 12h-to-24h time normalization (e.g. mobile 06:30 entered for evening 6:30 PM -> 18:30)
+  if (booking.time && typeof booking.time === 'string') {
+    const parts = booking.time.split(':');
+    if (parts.length === 2) {
+      let hh = Number(parts[0]);
+      const mm = parts[1];
+      if (hh < 9 && hh + 12 <= 22) {
+        hh += 12;
+        booking.time = `${String(hh).padStart(2, '0')}:${mm}`;
+      }
+    }
+  }
+
   if (!/^\d{4}-\d{2}-\d{2}$/.test(booking.date) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(booking.time)) {
     fail('Invalid date or time');
   }

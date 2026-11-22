@@ -55,6 +55,7 @@ export function createCustomerApp({
   dbPath = process.env.DB_PATH || path.join(ROOT, 'data', 'jspa.sqlite'),
   db: sharedDb = null,
   helpers: sharedHelpers = null,
+  opsApp = null,
 } = {}) {
   const ownsDb = !sharedDb;
   const db = sharedDb || openDatabase(dbPath);
@@ -77,6 +78,12 @@ export function createCustomerApp({
       const route = url.pathname;
       const method = req.method;
       const query = Object.fromEntries(url.searchParams.entries());
+
+      if (opsApp) {
+        if (route.startsWith('/api/ops') || /^\/(ar|en)?\/(ops)(\/|$)/.test(route) || route.startsWith('/ops/')) {
+          return await opsApp.handler(req, res);
+        }
+      }
 
       if (route === '/robots.txt') {
         res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });

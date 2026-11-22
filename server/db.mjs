@@ -923,26 +923,24 @@ export function openDatabase(dbPath) {
     }
   }
 
-  if (process.env.VERCEL || process.env.AUTO_BOOTSTRAP_OWNER === 'true') {
-    const hasOwner = get("SELECT id FROM users WHERE role='owner' LIMIT 1");
-    if (!hasOwner) {
-      try {
-        const defaultOwnerPhone = process.env.OWNER_PHONE ? phone(process.env.OWNER_PHONE) : '966500000001';
-        const defaultOwnerName = process.env.OWNER_NAME || 'إدارة J Beauty';
-        const defaultOwnerPassword = process.env.OWNER_PASSWORD || 'JBeauty@Admin2026!';
-        run(
-          'INSERT OR IGNORE INTO users(id,name,phone,password,role,verified,created_at) VALUES(?,?,?,?,?,?,?)',
-          uid(),
-          defaultOwnerName,
-          defaultOwnerPhone,
-          hashPassword(defaultOwnerPassword),
-          'owner',
-          1,
-          now(),
-        );
-      } catch (err) {
-        console.warn('Initial owner bootstrap skipped:', err.message);
-      }
+  const hasOwner = get("SELECT id FROM users WHERE role='owner' LIMIT 1");
+  if (!hasOwner) {
+    try {
+      const defaultOwnerPhone = process.env.OWNER_PHONE ? phone(process.env.OWNER_PHONE) : '966500000001';
+      const defaultOwnerName = process.env.OWNER_NAME || 'إدارة J Beauty';
+      const defaultOwnerPassword = process.env.OWNER_PASSWORD || 'JBeauty@Admin2026!';
+      run(
+        'INSERT OR IGNORE INTO users(id,name,phone,password,role,verified,created_at) VALUES(?,?,?,?,?,?,?)',
+        uid(),
+        defaultOwnerName,
+        defaultOwnerPhone,
+        hashPassword(defaultOwnerPassword),
+        'owner',
+        1,
+        now(),
+      );
+    } catch (err) {
+      console.warn('Initial owner bootstrap skipped:', err.message);
     }
   }
 

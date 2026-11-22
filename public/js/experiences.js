@@ -1,5 +1,5 @@
 import { $, api, esc, href, minutes, money, nameOf, num, riyadhToday, state, t, toast } from './state.js';
-import { field, head, provisional } from './components.js';
+import { field, head, localizeError, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
 
 export function studioPage() {
@@ -252,7 +252,8 @@ const OCCASION_TYPES = [
 ];
 
 const customGuestName = (p) => {
-  const raw = String(p?.label || '').trim();
+  if (!p) return '';
+  const raw = String(p.label ?? '').trim();
   if (!raw || /^(المستفيدة|Guest|Participant)\s*[\d\u0660-\u0669]+$/i.test(raw)) {
     return '';
   }
@@ -354,8 +355,14 @@ export function groupBookingPage() {
           ).join('')}
         </div>
         <div class="form-grid">
-          ${field(t('اسم منسّقة المناسبة', 'Coordinator name'), 'organizer_name', 'text', g.organizer_name, 'required')}
-          ${field(t('رقم الجوال السعودي', 'Saudi mobile'), 'organizer_phone', 'tel', g.organizer_phone, 'required placeholder="05xxxxxxxx"')}
+          <label class="field">
+            <span class="field-label">${t('اسم منسّقة المناسبة', 'Coordinator name')}</span>
+            <input name="organizer_name" id="occ-organizer-name" type="text" value="${esc(g.organizer_name || '')}" required maxlength="100" autocomplete="name" placeholder="${t('اكتبي اسمك الكريم...', 'Enter coordinator name...')}">
+          </label>
+          <label class="field">
+            <span class="field-label">${t('رقم الجوال السعودي', 'Saudi mobile')}</span>
+            <input name="organizer_phone" id="occ-organizer-phone" type="tel" dir="ltr" value="${esc(g.organizer_phone || '')}" required maxlength="15" autocomplete="tel" placeholder="05xxxxxxxx">
+          </label>
         </div>
       `;
     }
@@ -771,18 +778,26 @@ async function downloadGiftCardPng(gift) {
   ctx.fillText(`✨ ${gift.chosen?.name_ar || 'جلسة عناية فاخرة خاصة'} ✨`, 600, 456);
 
   // Gift Code Box (Golden Seal Style)
+  const isApproved = Boolean(gift.payment_verified && (gift.status === 'approved_ready' || gift.status === 'active'));
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(350, 515, 500, 96);
+  ctx.fillRect(300, 515, 600, 96);
   ctx.strokeStyle = '#D4AF7C';
   ctx.lineWidth = 3;
-  ctx.strokeRect(350, 515, 500, 96);
+  ctx.strokeRect(300, 515, 600, 96);
 
   ctx.fillStyle = '#6B6464';
   ctx.font = '19px "IBM Plex Sans Arabic", sans-serif';
-  ctx.fillText('كود الإهداء الحصري (يُستخدم مباشرة عند حجز الموعد)', 600, 548);
-  ctx.fillStyle = '#3E2932';
-  ctx.font = 'bold 36px monospace';
-  ctx.fillText(gift.gift_code || gift.reference || '', 600, 594);
+  if (isApproved) {
+    ctx.fillText('كود الإهداء الحصري (يُستخدم مباشرة عند حجز الموعد)', 600, 548);
+    ctx.fillStyle = '#3E2932';
+    ctx.font = 'bold 36px monospace';
+    ctx.fillText(gift.gift_code || gift.reference || '', 600, 594);
+  } else {
+    ctx.fillText('حالة كود الإهداء (قيد التحقق وتأكيد السداد من الإدارة)', 600, 548);
+    ctx.fillStyle = '#8B4513';
+    ctx.font = 'bold 26px "IBM Plex Sans Arabic", monospace';
+    ctx.fillText('••••-••••-JGIFT (يُفعّل فور تأكيد الإدارة)', 600, 594);
+  }
 
   // Footer: Sender Line (NO "المدينة المنورة"!)
   ctx.fillStyle = '#D4AF7C';
@@ -892,7 +907,7 @@ export function giftsPage() {
           </div>
 
           <div class="hero-actions" style="justify-content:center;gap:12px;flex-wrap:wrap">
-            <button type="button" class="btn shimmer-btn" id="download-gift-card-png">🖼️ ${t('تحميل بطاقة الإهداء كصورة فاخرة', 'Download Luxury Card PNG')}</button>
+            <button type="button" class="btn shimmer-btn" id="download-gift-card-png">🖼️ ${isApproved ? t('تحميل بطاقة الإهداء الفاخرة كصورة', 'Download Luxury Gift Card PNG') : t('تحميل معاينة البطاقة (الكود محجوب لحين التحقق)', 'Download Card Preview (Code Masked)')}</button>
             ${
               isApproved
                 ? `<a class="btn" href="${esc(r.share_whatsapp_url || r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💌 ${t('إرسال البطاقة للمستفيدة عبر واتساب', 'Send Gift to Recipient on WhatsApp')}</a>
@@ -1277,7 +1292,7 @@ export function bindExperiences(renderFn) {
       }
       renderFn();
     } catch (err) {
-      $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      $('#form-error').innerHTML = `<div class="error">${esc(localizeError(err.message))}</div>`;
       e.submitter.disabled = false;
     }
   });
@@ -1401,7 +1416,7 @@ export function bindExperiences(renderFn) {
       renderFn();
       window.scrollTo(0, 0);
     } catch (err) {
-      $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      $('#form-error').innerHTML = `<div class="error">${esc(localizeError(err.message))}</div>`;
       e.submitter.disabled = false;
     }
   });

@@ -29,15 +29,19 @@ export function createPlatform({
 } = {}) {
   const db = openDatabase(dbPath);
   const helpers = createHelpers(db);
-  const customer = createCustomerApp({ dbPath, db, helpers });
+  let customerAddr = null;
   const resolveCustomerOrigin =
     customerOrigin ||
     (() => {
-      const addr = customer.server.address();
+      const addr = customerAddr || (customer?.server?.address && customer.server.address());
       const port = addr && typeof addr === 'object' ? addr.port : Number(process.env.PORT || 3000);
       return `http://${process.env.HOST || '127.0.0.1'}:${port}`;
     });
+  const port = Number(process.env.PORT || 3000);
+  const opsPort = Number(process.env.OPS_PORT || 3100);
+  const isUnifiedSinglePort = port === opsPort || !process.env.OPS_PORT;
   const ops = createOpsApp({ dbPath, db, helpers, customerOrigin: resolveCustomerOrigin });
+  const customer = createCustomerApp({ dbPath, db, helpers, opsApp: isUnifiedSinglePort ? ops : null });
 
   return {
     db: db.raw,
