@@ -444,9 +444,30 @@ export async function accountPage(section) {
                    ${(passport.group_requests || []).length || (passport.gift_requests || []).length
           ? `<h3 style="margin-top:24px">${t('طلبات المناسبات والإهداء', 'Occasion & Gift Requests')}</h3>
                           ${[...(passport.group_requests || []), ...(passport.gift_requests || [])]
-            .map(
-              (req) => `<div class="booking-card"><div class="row"><strong><bdi>${esc(req.reference)}</bdi></strong>${statusBadge(req.status)}</div><p class="muted">${esc(req.created_at?.slice(0, 10) || '')}</p></div>`,
-            )
+            .map((req) => {
+              const isGroup = 'organizer_name' in req || 'estimated_total' in req;
+              const isApproved = req.status === 'approved' || req.status === 'approved_ready';
+              const deposit = isGroup ? Math.round(Number(req.estimated_total || 0) * 0.3) || 100 : 0;
+              return `
+                <div class="booking-card" style="border:1px solid ${isApproved ? 'var(--rose-gold)' : 'var(--border)'};border-radius:var(--r-md);margin-bottom:12px;padding:16px">
+                  <div class="row" style="margin-bottom:6px">
+                    <strong><bdi>${esc(req.reference)}</bdi></strong>
+                    ${statusBadge(req.status)}
+                  </div>
+                  <p class="muted" style="margin:0 0 6px;font-size:13px">${esc(req.created_at?.slice(0, 10) || '')}${isGroup ? ` · ${esc(req.date || '')} ${esc(req.time || '')} · ${money(req.estimated_total)}` : ''}</p>
+                  ${
+                    isGroup && isApproved
+                      ? `<div style="background:var(--cream);border-radius:var(--r-sm);padding:10px;margin-top:8px;font-size:13px;border:1px solid rgba(212,175,124,0.3)">
+                          <strong style="color:var(--plum);display:block;margin-bottom:4px">🎉 ${t('تم اعتماد طلب المناسبة بنجاح!', 'Occasion Request Approved!')}</strong>
+                          <div>${t('العربون المطلوب لتأكيد وتثبيت الموعد نهائياً:', 'Deposit required to finalize booking:')} <strong style="color:var(--rose-gold-deep)">${money(deposit)}</strong></div>
+                          <div style="font-size:12px;color:var(--ink-muted);margin-top:3px">${t('مصرف الراجحي · الآيبان:', 'Al Rajhi Bank · IBAN:')} <bdi class="mono">SA0380000000000000000000</bdi></div>
+                          <a href="https://wa.me/966533718324?text=${encodeURIComponent(t(`مرحباً فريق J Beauty 🌸 بخصوص طلب المناسبة ${req.reference}، أود تأكيد سداد العربون (${deposit} ر.س)...`, `Hello J Beauty team 🌸 Regarding occasion ${req.reference}, I would like to confirm deposit payment...`))}" target="_blank" rel="noopener" class="btn small" style="background:#25D366;color:#fff;margin-top:8px;display:inline-flex;align-items:center;gap:6px">💬 ${t('تأكيد السداد عبر واتساب', 'Confirm Payment via WhatsApp')}</a>
+                        </div>`
+                      : ''
+                  }
+                </div>
+              `;
+            })
             .join('')}`
           : ''
         }`

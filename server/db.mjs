@@ -108,85 +108,12 @@ export const BOOKING_ADD_ONS = [
   { id: 'heel-peel', name_ar: 'تقشير كعب القدم المركز وتنعيم الحرير', name_en: 'Silk Heel Smoothing Peel', price: 35, duration: 15 },
 ];
 
-export const DEFAULT_COUPONS = [
-  { id: 'coupon-jb5', code: 'JB5', discount_type: 'percent', discount_value: 5, min_spend: 100, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
-  { id: 'coupon-jb7', code: 'JB7', discount_type: 'percent', discount_value: 7, min_spend: 120, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
-  { id: 'coupon-jb10', code: 'JB10', discount_type: 'percent', discount_value: 10, min_spend: 180, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 500, used_count: 0, active: 1 },
-  { id: 'coupon-jbsar10', code: 'JBSAR10', discount_type: 'fixed', discount_value: 10, min_spend: 100, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
-  { id: 'coupon-jbsar15', code: 'JBSAR15', discount_type: 'fixed', discount_value: 15, min_spend: 180, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 500, used_count: 0, active: 1 },
-  { id: 'coupon-jbpetals20', code: 'JBPETALS20', discount_type: 'fixed', discount_value: 10, min_spend: 100, valid_from: '2026-01-01', valid_until: '2027-12-31', max_uses: 1000, used_count: 0, active: 1 },
-  {
-    id: 'coupon-wheel10',
-    code: 'SPAWHEEL10',
-    discount_type: 'percent',
-    discount_value: 10,
-    min_spend: 100,
-    valid_from: '2026-01-01',
-    valid_until: '2027-12-31',
-    max_uses: 1000,
-    used_count: 0,
-    active: 1,
-  },
-  {
-    id: 'coupon-luxury15',
-    code: 'LUXURY15',
-    discount_type: 'percent',
-    discount_value: 15,
-    min_spend: 200,
-    valid_from: '2026-01-01',
-    valid_until: '2027-12-31',
-    max_uses: 500,
-    used_count: 0,
-    active: 1,
-  },
-  {
-    id: 'coupon-petal20',
-    code: 'PETAL20',
-    discount_type: 'fixed',
-    discount_value: 20,
-    min_spend: 150,
-    valid_from: '2026-01-01',
-    valid_until: '2027-12-31',
-    max_uses: 500,
-    used_count: 0,
-    active: 1,
-  },
-  {
-    id: 'coupon-freemask',
-    code: 'FREEMASK',
-    discount_type: 'fixed',
-    discount_value: 35,
-    min_spend: 150,
-    valid_from: '2026-01-01',
-    valid_until: '2027-12-31',
-    max_uses: 500,
-    used_count: 0,
-    active: 1,
-  },
-  {
-    id: 'coupon-petals50',
-    code: 'PETALS50',
-    discount_type: 'fixed',
-    discount_value: 25,
-    min_spend: 150,
-    valid_from: '2026-01-01',
-    valid_until: '2027-12-31',
-    max_uses: 1000,
-    used_count: 0,
-    active: 1,
-  },
-  {
-    id: 'coupon-welcome10',
-    code: 'WELCOME10',
-    discount_type: 'percent',
-    discount_value: 10,
-    min_spend: 100,
-    valid_from: '2026-01-01',
-    valid_until: '2027-12-31',
-    max_uses: 1000,
-    used_count: 0,
-    active: 1,
-  },
+export const DEFAULT_COUPONS = [];
+
+export const DEFAULT_SPECIALISTS = [
+  { id: 'spec-samar', name_ar: 'سمر الأحمدي', name_en: 'Samar Al-Ahmadi', title_ar: 'أخصائية مساج علاجي واسترخائي معتمدة', title_en: 'Certified Massage Therapist', phone: '0500000011', bio_ar: 'خبرة 6 سنوات في تقنيات التدليك السويدي والأحجار الساخنة بالمدينة المنورة', bio_en: '6 years experience in Swedish & Hot Stone Massage' },
+  { id: 'spec-nada', name_ar: 'ندى الحربي', name_en: 'Nada Al-Harbi', title_ar: 'أخصائية عناية بالأظافر ومناكير وبدكير', title_en: 'Senior Nail Specialist', phone: '0500000012', bio_ar: 'متخصصة في العناية بأطراف الأظافر والفرنش الملكي وجل الأظافر الفاخر', bio_en: 'Specialist in Russian manicure & Royal French gel' },
+  { id: 'spec-fatima', name_ar: 'فاطمة الشريف', name_en: 'Fatima Al-Sharif', title_ar: 'خبيرة سبا واستشفاء متكامل', title_en: 'Holistic Spa Specialist', phone: '0500000013', bio_ar: 'خبرة في بروتوكولات الاسترخاء المنزلي وطقوس السبا الملكية للسيدات', bio_en: 'Expert in royal home spa rituals and stress relief' },
 ];
 
 const OLD_GENERIC_AR =
@@ -753,6 +680,8 @@ export function openDatabase(dbPath) {
     CREATE TABLE IF NOT EXISTS referrals(id TEXT PRIMARY KEY, referrer_id TEXT NOT NULL, code TEXT UNIQUE NOT NULL, invitee_id TEXT, booking_id TEXT, status TEXT NOT NULL DEFAULT 'pending', bonus_petals INTEGER DEFAULT 50, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS coupon_redemptions(id TEXT PRIMARY KEY, coupon_id TEXT NOT NULL, coupon_code TEXT NOT NULL, user_id TEXT, phone TEXT NOT NULL, booking_id TEXT, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS payment_receipts(id TEXT PRIMARY KEY, booking_id TEXT NOT NULL, reference TEXT NOT NULL, filename TEXT NOT NULL, mime_type TEXT NOT NULL, data_url TEXT NOT NULL, sender_name TEXT, transfer_ref TEXT, uploaded_by TEXT, created_at TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS specialists(id TEXT PRIMARY KEY, name_ar TEXT NOT NULL, name_en TEXT NOT NULL, title_ar TEXT NOT NULL, title_en TEXT NOT NULL, phone TEXT, bio_ar TEXT, bio_en TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS idx_specialists_active ON specialists(active);
     CREATE INDEX IF NOT EXISTS idx_payment_receipts_booking ON payment_receipts(booking_id);
     CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_phone ON coupon_redemptions(phone, coupon_code);
     CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
@@ -785,21 +714,28 @@ export function openDatabase(dbPath) {
     run('INSERT INTO config VALUES(1,?)', JSON.stringify(DEFAULT_SETTINGS));
   }
 
-  for (const c of DEFAULT_COUPONS) {
-    run(
-      'INSERT OR IGNORE INTO coupons(id, code, discount_type, discount_value, min_spend, valid_from, valid_until, max_uses, used_count, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
-      c.id,
-      c.code,
-      c.discount_type,
-      c.discount_value,
-      c.min_spend,
-      c.valid_from,
-      c.valid_until,
-      c.max_uses,
-      c.used_count,
-      c.active,
-      now(),
-    );
+  // Ensure unwanted mock coupons are removed so only admin-created coupons appear
+  try {
+    run("DELETE FROM coupons WHERE id LIKE 'coupon-%'");
+  } catch {}
+
+  const hasSpecialists = get('SELECT id FROM specialists LIMIT 1');
+  if (!hasSpecialists) {
+    for (const spec of DEFAULT_SPECIALISTS) {
+      run(
+        'INSERT OR IGNORE INTO specialists(id, name_ar, name_en, title_ar, title_en, phone, bio_ar, bio_en, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+        spec.id,
+        spec.name_ar,
+        spec.name_en,
+        spec.title_ar,
+        spec.title_en,
+        spec.phone,
+        spec.bio_ar,
+        spec.bio_en,
+        1,
+        now(),
+      );
+    }
   }
 
   const hasShades = get('SELECT id FROM nail_shades LIMIT 1');
@@ -1031,6 +967,7 @@ export function createHelpers(db) {
     audit,
     recordLedger,
     nailShades: () => db.all('SELECT * FROM nail_shades ORDER BY sort_order ASC, created_at DESC'),
+    specialists: () => db.all('SELECT * FROM specialists ORDER BY active DESC, created_at ASC'),
   };
 }
 

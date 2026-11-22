@@ -122,7 +122,7 @@ export function paymentsView(d) {
               <th>${t('العميلة', 'Client')}</th>
               <th>${t('المدفوع / المسترد / الصافي', 'Paid / Refund / Net')}</th>
               <th>${t('الوسيلة والتوثيق', 'Method & Status')}</th>
-              <th>${t('الإيصال والفاتورة', 'Receipt & Invoice')}</th>
+              <th>${t('الإجراء والإيصال والفاتورة', 'Action, Receipt & Invoice')}</th>
             </tr>
           </thead>
           <tbody>
@@ -133,17 +133,22 @@ export function paymentsView(d) {
                     <td><strong><bdi>${esc(p.reference)}</bdi></strong><div class="muted"><bdi>${esc(p.service_date)}</bdi></div></td>
                     <td>${esc(p.customer_name)}</td>
                     <td>
-                      <bdi>${money(p.paid_amount)}</bdi> / <bdi>${money(p.refund_amount)}</bdi> / <strong><bdi>${money(p.net_amount)}</bdi></strong>
+                      <bdi>${money(p.paid_amount || p.booking_total)}</bdi> / <bdi>${money(p.refund_amount)}</bdi> / <strong><bdi>${money(p.net_amount || p.booking_total)}</bdi></strong>
                     </td>
                     <td>
-                      <span class="badge">${esc(p.payment_method || '-')}</span>
-                      ${p.payment_verified ? `<span class="badge mfa-ok">${t('موثق', 'Verified')}</span>` : `<span class="badge pending">${t('بانتظار التوثيق', 'Awaiting Check')}</span>`}
+                      <span class="badge">${esc(p.payment_method || 'bank_transfer')}</span>
+                      ${p.payment_verified ? `<span class="badge mfa-ok" style="background:#2E4528;color:#fff">✓ ${t('موثق', 'Verified')}</span>` : `<span class="badge pending">${t('بانتظار التوثيق', 'Awaiting Check')}</span>`}
                     </td>
                     <td>
-                      <div class="ops-chip-row">
+                      <div class="ops-chip-row" style="gap:6px;flex-wrap:wrap">
+                        ${
+                          !p.payment_verified
+                            ? `<button type="button" class="btn small sage" data-verify-payment="${esc(p.booking_id)}" data-total="${esc(p.booking_total)}">✅ ${t('توثيق الدفع', 'Verify')}</button>`
+                            : ''
+                        }
                         ${
                           p.receipt_count > 0
-                            ? `<button type="button" class="btn small sage" data-view-receipt="${esc(p.booking_id)}">📎 ${t('عرض الإيصال', 'Receipt')} (${p.receipt_count})</button>`
+                            ? `<button type="button" class="btn small" style="background:var(--rose-gold);color:#fff" data-view-receipt="${esc(p.booking_id)}">📎 ${t('عرض الإيصال', 'Receipt')} (${p.receipt_count})</button>`
                             : `<span class="muted" style="font-size:.82rem">${t('بدون إيصال', 'No receipt')}</span>`
                         }
                         <a href="/api/ops/bookings/${esc(p.booking_id)}/invoice.pdf" target="_blank" rel="noopener noreferrer" class="btn small light">📄 PDF</a>
@@ -161,10 +166,11 @@ export function paymentsView(d) {
           .map(
             (p) => `
               <div class="ops-mobile-card">
-                <div class="ops-row"><strong><bdi>${esc(p.reference)}</bdi></strong>${p.payment_verified ? `<span class="badge mfa-ok">${t('موثق', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثق', 'Unverified')}</span>`}</div>
-                <div>${esc(p.customer_name)} · <bdi>${money(p.net_amount)}</bdi></div>
-                <div class="ops-chip-row" style="margin-top:8px">
-                  ${p.receipt_count > 0 ? `<button type="button" class="btn small sage" data-view-receipt="${esc(p.booking_id)}">📎 ${t('عرض الإيصال', 'Receipt')} (${p.receipt_count})</button>` : ''}
+                <div class="ops-row"><strong><bdi>${esc(p.reference)}</bdi></strong>${p.payment_verified ? `<span class="badge mfa-ok">✓ ${t('موثق', 'Verified')}</span>` : `<span class="badge pending">${t('غير موثق', 'Unverified')}</span>`}</div>
+                <div>${esc(p.customer_name)} · <bdi>${money(p.paid_amount || p.booking_total)}</bdi></div>
+                <div class="ops-chip-row" style="margin-top:8px;gap:6px;flex-wrap:wrap">
+                  ${!p.payment_verified ? `<button type="button" class="btn small sage" data-verify-payment="${esc(p.booking_id)}" data-total="${esc(p.booking_total)}">✅ ${t('توثيق الدفع', 'Verify')}</button>` : ''}
+                  ${p.receipt_count > 0 ? `<button type="button" class="btn small" style="background:var(--rose-gold);color:#fff" data-view-receipt="${esc(p.booking_id)}">📎 ${t('عرض الإيصال', 'Receipt')} (${p.receipt_count})</button>` : ''}
                   <a href="/api/ops/bookings/${esc(p.booking_id)}/invoice.pdf" target="_blank" rel="noopener noreferrer" class="btn small light">📄 ${t('فاتورة PDF', 'PDF Invoice')}</a>
                 </div>
               </div>
@@ -177,6 +183,23 @@ export function paymentsView(d) {
 }
 
 export function bindPayments(renderFn) {
+  document.querySelectorAll('[data-verify-payment]').forEach((btn) => {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      const bookingId = btn.dataset.verifyPayment;
+      const total = Number(btn.dataset.total) || undefined;
+      try {
+        await opsApi(`/bookings/${bookingId}/verify-payment`, { paid_amount: total });
+        await loadDashboard();
+        opsToast(t('تم توثيق الدفع واعتماد الفاتورة بنجاح ✅', 'Payment verified successfully!'));
+        renderFn();
+      } catch (err) {
+        opsToast(err.message);
+        btn.disabled = false;
+      }
+    };
+  });
+
   document.querySelectorAll('[data-view-receipt]').forEach((btn) => {
     btn.onclick = () => openReceiptModal(btn.dataset.viewReceipt);
   });

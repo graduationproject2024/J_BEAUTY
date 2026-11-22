@@ -53,9 +53,9 @@ export function header() {
 
   const annActive = s.announcement_active !== false;
   const annText = t(
-        'معاينة تجريبية لـ J Beauty Spa على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',
-        'J Beauty Spa static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',
-      );
+    s.announcement_text_ar || 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستك في راحة بيتك',
+    s.announcement_text_en || 'Luxury Women’s Home Spa in Al Madinah ✦ Personally Confirmed Appointments ✦ 20% Off Curated Packages ✦ Book Your Home Sanctuary',
+  );
   const annLink = s.announcement_link ? href(s.announcement_link.replace(/^\//, '')) : null;
   const annInner = `
     <div class="ticker-content">
@@ -75,7 +75,7 @@ export function header() {
 
   const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
   const waHeaderMsg = encodeURIComponent(
-    t('مرحباً فريق J Beauty Spa 🌸، أود الاستفسار عن خدمات السبا والعناية المنزلية...', 'Hello J Beauty Spa team 🌸, I would like to inquire about home spa services...'),
+    t('مرحباً خدمة عملاء J Beauty Spa 🌸، أود الاستفسار والدعم...', 'Hello J Beauty Spa customer care 🌸, I would like assistance...'),
   );
   const waUrl = `https://wa.me/${esc(waDigits)}?text=${waHeaderMsg}`;
   const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
@@ -87,7 +87,7 @@ export function header() {
     <div class="header-shell">
       <header class="wrap header">
         <a class="brand" href="${href('home')}">
-          <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="46" height="46">
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
           <span class="brand-wordmark">
             <strong>J Beauty Spa</strong>
             <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
@@ -106,10 +106,10 @@ export function header() {
         </nav>
         <div class="header-tools">
           <a class="header-social-btn wa" href="${waUrl}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="${t('تواصلي معنا عبر واتساب', 'Chat on WhatsApp')}">
-            <img src="/J_BEAUTY/apps/customer/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
+            <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
           </a>
           <a class="header-social-btn ig" href="${igUrl}" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="${t('حسابنا في انستغرام', 'Instagram')}">
-            <img src="/J_BEAUTY/apps/customer/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
+            <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
           </a>
           <button class="lang" id="language" type="button" aria-label="${t('Switch to English', 'التبديل للعربية')}">
             ${t('EN', 'عربي')}
@@ -132,7 +132,7 @@ export function footer() {
   const s = state.catalog.settings || {};
   const waDigits = String(s.business_phone || '').replace(/\D/g, '') || '966533718324';
   const waHeaderMsg = encodeURIComponent(
-    t('مرحباً فريق J Beauty Spa 🌸، أود الاستفسار عن خدمات السبا والعناية المنزلية...', 'Hello J Beauty Spa team 🌸, I would like to inquire about home spa services...'),
+    t('مرحباً خدمة عملاء J Beauty Spa 🌸، أود الاستفسار والدعم...', 'Hello J Beauty Spa customer care 🌸, I would like assistance...'),
   );
   const waUrl = `https://wa.me/${esc(waDigits)}?text=${waHeaderMsg}`;
   const igUrl = safeURL(s.instagram) ? esc(s.instagram) : 'https://www.instagram.com/j.beautyspa?vrfl=dzIzeGhieXNzY2hh';
@@ -145,7 +145,7 @@ export function footer() {
         <div class="footer-grid">
           <div>
             <a class="brand" href="${href('home')}">
-              <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="46" height="46">
+              <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
               <span class="brand-wordmark">
                 <strong>J Beauty Spa</strong>
                 <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
@@ -154,16 +154,16 @@ export function footer() {
             <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلك.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
             <div class="footer-social-bar">
               <a href="${igUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn ig" aria-label="Instagram" title="Instagram">
-                <img src="/J_BEAUTY/apps/customer/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
+                <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
               </a>
               <a href="${ttUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn tt" aria-label="TikTok" title="TikTok">
-                <img src="/J_BEAUTY/apps/customer/assets/social/tiktok.png" alt="TikTok" class="social-img-icon">
+                <img src="/assets/social/tiktok.png" alt="TikTok" class="social-img-icon">
               </a>
               <a href="${scUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn sc" aria-label="Snapchat" title="Snapchat">
-                <img src="/J_BEAUTY/apps/customer/assets/social/snapchat.png" alt="Snapchat" class="social-img-icon">
+                <img src="/assets/social/snapchat.png" alt="Snapchat" class="social-img-icon">
               </a>
               <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn wa" aria-label="WhatsApp" title="WhatsApp">
-                <img src="/J_BEAUTY/apps/customer/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
+                <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
               </a>
             </div>
           </div>
@@ -230,7 +230,7 @@ export function serviceArt(s, cls = '') {
   const src =
     s?.image && /^(\/[^/]|https:\/\/)/.test(s.image)
       ? s.image
-      : `/J_BEAUTY/apps/customer/assets/images/services/${s?.id || 'relaxation'}.webp`;
+      : `/assets/images/services/${s?.id || 'relaxation'}.webp`;
   const catLabel =
     s?.category === 'massage'
       ? t('المساج', 'Massage')
@@ -740,3 +740,42 @@ export const field = (label, key, type = 'text', value = '', extra = '') => {
       : '';
   return `<label class="field">${label}<input name="${key}" type="${type}" value="${esc(value)}" ${dirAttr} ${extra}></label>`;
 };
+
+export function localizeError(msg) {
+  if (!msg) return '';
+  const s = String(msg).trim();
+  const lower = s.toLowerCase();
+
+  const dict = {
+    'outside working hours': t('الموعد المختار خارج مواعيد العمل المعتمدة (يومياً من 9:00 صباحاً حتى 10:00 مساءً).', 'The selected appointment is outside working hours (9:00 AM to 10:00 PM).'),
+    'appointment is too soon': t('نرجو اختيار موعد يبعد ساعتين على الأقل من الآن لإتاحة التجهيز والوصول للأخصائية.', 'Please select a slot at least 2 hours in advance.'),
+    'date is unavailable': t('هذا التاريخ غير متاح للحجوزات حالياً، يرجى اختيار تاريخ آخر.', 'This date is currently unavailable for booking.'),
+    'invalid date or time': t('يرجى تحديد تاريخ ووقت صحيحين.', 'Invalid date or time format.'),
+    'invalid date': t('التاريخ المختار غير صالح.', 'Invalid date selected.'),
+    'invalid time': t('الوقت المختار غير صالح.', 'Invalid time selected.'),
+    'outside operating hours': t('الموعد خارج ساعات العمل (من 9:00 ص إلى 10:00 م).', 'Outside operating hours.'),
+    'neighborhood is outside configured service areas': t('نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.', 'Neighborhood is outside service coverage in Al Madinah.'),
+    'assigned practitioner has an overlapping appointment during this window': t('الأخصائية المختارة مرتبطة بموعد آخر خلال هذه الفترة.', 'Practitioner conflict during this window.'),
+    'assigned practitioner has an overlapping appointment or travel buffer during this window': t('الأخصائية المختارة لديها موعد أو وقت انتقال خلال هذه الفترة.', 'Practitioner schedule or travel conflict.'),
+    'capacity exceeded for this time slot': t('نعتذر، اكتملت السعة التشغيلية لهذا الوقت، يرجى اختيار موعد آخر.', 'Capacity exceeded for this time slot.'),
+    'coupon not found or inactive': t('كود الخصم غير صحيح أو غير مفعّل.', 'Coupon not found or inactive.'),
+    'coupon has expired': t('انتهت صلاحية كود الخصم.', 'Coupon has expired.'),
+    'minimum booking total not reached for this coupon': t('قيمة الحجز أقل من الحد الأدنى لتفعيل هذا الكوبون.', 'Minimum booking total not reached for this coupon.'),
+    'coupon usage limit reached': t('تم استنفاد الحد الأقصى لاستخدام هذا الكوبون.', 'Coupon usage limit reached.'),
+    'invalid authenticator code': t('رمز المصادقة غير صحيح، يرجى التأكد وإعادة المحاولة.', 'Invalid authenticator code.'),
+    'invalid csrf token': t('انتهت صلاحية الجلسة، يرجى تحديث الصفحة.', 'Invalid session token.'),
+    'invalid phone or password': t('رقم الجوال أو كلمة المرور غير صحيحة.', 'Invalid phone or password.'),
+    'staff account required to access operations portal': t('هذه البوابة مخصصة لمنسوبي وفريق J Beauty فقط.', 'Staff account required.'),
+    'method not allowed': t('العملية غير مسموحة.', 'Method not allowed.'),
+    'please sign in': t('يرجى تسجيل الدخول أولاً للمتابعة.', 'Please sign in to continue.'),
+    'valid receipt file is required': t('يرجى اختيار ملف إيصال صالح.', 'Valid receipt file is required.'),
+    'receipt file too large': t('حجم ملف الإيصال كبير جداً (الحد الأقصى 2.5 ميجابايت).', 'Receipt file too large (max 2.5MB).'),
+    'too many requests': t('تم تجاوز عدد المحاولات المسموحة، يرجى الانتظار قليلاً.', 'Too many requests, please wait a moment.'),
+    'failed to fetch': t('تعذر الاتصال بالخادم، يرجى التحقق من اتصالك بالإنترنت.', 'Failed to connect to server, please check internet.'),
+  };
+
+  for (const [k, v] of Object.entries(dict)) {
+    if (lower === k || lower.includes(k)) return v;
+  }
+  return s;
+}

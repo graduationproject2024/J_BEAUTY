@@ -112,7 +112,7 @@ export function home() {
           </div>
           <div class="hero-visual">
             <div class="hero-arch">
-              <img src="/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
+              <img src="/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
             </div>
             <div class="hero-seal">
               <strong>J Beauty · ${t('المدينة المنورة', 'AL MADINAH')}</strong>
@@ -229,7 +229,7 @@ export function home() {
             <div class="gift-spotlight-preview" aria-hidden="true">
               <div class="mini-foil-card">
                 <div class="mini-foil-top">
-                  <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="mini-foil-logo">
+                  <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="mini-foil-logo">
                   <span class="mini-foil-badge">VIP GIFT</span>
                 </div>
                 <div class="mini-foil-title">J Beauty Home Spa</div>
@@ -298,7 +298,7 @@ export function home() {
 
         <!-- 8. Final Booking CTA -->
         <section class="cta-band" data-reveal>
-          <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="cta-band-emblem">
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="cta-band-emblem">
           <span class="eyebrow">${t('✦ تجربة دلال منزلية استثنائية · سيدات فقط ✦', 'EXCLUSIVE WOMEN’S HOME SPA SANCTUARY')}</span>
           <h2>${t('احجزي طقسك المنزلي الفاخر', 'Reserve your calm moment at home')}</h2>
           <p>${t('خدمات سبا ومساج وعناية أظافر متكاملة تصلك إلى راحة منزلك، بأيدي خبيرات محترفات، حقائب وأدوات معقمة بالكامل وفق أعلى معايير الصالونات العالمية، لتستمتعي بلحظة هدوء واسترخاء تليق بك.', 'Curated home spa, therapeutic massage, and couture nail rituals delivered to your door with hospital-grade sanitization and five-star care.')}</p>
@@ -933,6 +933,14 @@ export function bindPublicInteractions(goFn, renderFn) {
             <div class="summary-line"><span>${t('الحي', 'Neighborhood')}</span><strong>${esc(data.neighborhood)}</strong></div>
             <div class="summary-line"><span>${t('مدة الجلسة', 'Duration')}</span><strong>${esc(data.duration)} دقيقة</strong></div>
             <div class="summary-line summary-total"><span>${t('إجمالي الحجز', 'Total')}</span><span>${money(data.total)}</span></div>
+            ${
+              data.assigned_specialist_name
+                ? `<div class="summary-line" style="color:var(--plum);background:rgba(217,183,192,0.18);padding:10px 14px;border-radius:10px;margin:10px 0;border:1px solid rgba(212,175,124,0.45)">
+                     <span>${t('الأخصائية المسؤولة عن خدمتك:', 'Assigned Specialist:')}</span>
+                     <strong>🌸 ${esc(data.assigned_specialist_name)} (${t('أخصائية معتمدة', 'Certified Specialist')})</strong>
+                   </div>`
+                : ''
+            }
 
             ${!hasReceipt && !isPaid ? `
               <div style="margin-top:16px;padding:12px;background:var(--cream-bg);border-radius:var(--r-md);border:1px dashed var(--rose-gold)">

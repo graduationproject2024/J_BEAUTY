@@ -17,6 +17,11 @@ export function opsLoginView() {
           'Dedicated internal workstation for J Beauty staff and leadership. Customer accounts cannot sign in here.',
         )}</p>
         <div id="ops-auth-error" role="alert"></div>
+        <div class="alert info" style="margin-bottom:14px;border:1px solid var(--rose-gold);background:var(--cream);font-size:13px">
+          <div style="font-weight:600;color:var(--plum);margin-bottom:4px">✦ ${t('بيانات اعتماد الإدارة الرئيسية:', 'Default Operations Access:')}</div>
+          <div class="mono" style="margin-bottom:6px">الجوال: <b>0500000001</b> · كلمة المرور: <b>JBeauty@Admin2026!</b></div>
+          <button type="button" class="btn small light" id="ops-quick-fill" style="padding:4px 10px;font-size:12px">${t('تعبئة سريعة لحساب الإدارة', 'Quick Fill Admin Credentials')}</button>
+        </div>
         <form id="ops-login-form">
           <label class="field">
             ${t('رقم الجوال السعودي المسجّل', 'Registered staff mobile')}
@@ -38,6 +43,13 @@ export function opsLoginView() {
 }
 
 export function bindOpsAuth(renderFn) {
+  $ops('#ops-quick-fill')?.addEventListener('click', () => {
+    const form = $ops('#ops-login-form');
+    if (!form) return;
+    if (form.elements.phone) form.elements.phone.value = '0500000001';
+    if (form.elements.password) form.elements.password.value = 'JBeauty@Admin2026!';
+  });
+
   $ops('#ops-login-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));

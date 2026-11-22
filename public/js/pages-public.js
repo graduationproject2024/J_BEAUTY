@@ -933,6 +933,14 @@ export function bindPublicInteractions(goFn, renderFn) {
             <div class="summary-line"><span>${t('الحي', 'Neighborhood')}</span><strong>${esc(data.neighborhood)}</strong></div>
             <div class="summary-line"><span>${t('مدة الجلسة', 'Duration')}</span><strong>${esc(data.duration)} دقيقة</strong></div>
             <div class="summary-line summary-total"><span>${t('إجمالي الحجز', 'Total')}</span><span>${money(data.total)}</span></div>
+            ${
+              data.assigned_specialist_name
+                ? `<div class="summary-line" style="color:var(--plum);background:rgba(217,183,192,0.18);padding:10px 14px;border-radius:10px;margin:10px 0;border:1px solid rgba(212,175,124,0.45)">
+                     <span>${t('الأخصائية المسؤولة عن خدمتك:', 'Assigned Specialist:')}</span>
+                     <strong>🌸 ${esc(data.assigned_specialist_name)} (${t('أخصائية معتمدة', 'Certified Specialist')})</strong>
+                   </div>`
+                : ''
+            }
 
             ${!hasReceipt && !isPaid ? `
               <div style="margin-top:16px;padding:12px;background:var(--cream-bg);border-radius:var(--r-md);border:1px dashed var(--rose-gold)">

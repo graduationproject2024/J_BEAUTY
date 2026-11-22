@@ -11,7 +11,7 @@ import {
   requireCapability,
 } from '../authorization/permissions.mjs';
 import { fail, maskPhone, money, phone, safeImageUrl, safeSocialUrl, text } from '../validation.mjs';
-import { generateInvoicePdfBuffer, invoiceToken, validateReceiptUpload } from '../pdf-invoice.mjs';
+import { generateInvoicePdfBuffer, invoiceToken, renderOccasionContractHtml, validateReceiptUpload } from '../pdf-invoice.mjs';
 
 function paginate(items, pageParam, limitParam, defaultLimit = 50) {
   const limit = Math.min(200, Math.max(1, Number(limitParam) || defaultLimit));
@@ -199,10 +199,10 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
             customer_name: b.name,
             customer_phone: isOwner ? b.phone : maskPhone(b.phone),
             booking_total: b.total,
-            paid_amount: b.paid_amount || 0,
+            paid_amount: b.paid_amount || (b.payment_verified ? b.total : (b.receipt_uploaded ? b.total : 0)),
             refund_amount: (b.refund_cents || 0) / 100,
-            outstanding_amount: Math.max(0, Math.round((b.total * 100 - (b.paid_cents || 0))) / 100),
-            net_amount: Math.max(0, (b.paid_cents || 0) - (b.refund_cents || 0)) / 100,
+            outstanding_amount: Math.max(0, Math.round((b.total * 100 - (b.paid_cents || (b.payment_verified ? b.total * 100 : (b.receipt_uploaded ? b.total * 100 : 0))))) / 100),
+            net_amount: Math.max(0, (b.paid_cents || (b.payment_verified ? b.total * 100 : (b.receipt_uploaded ? b.total * 100 : 0))) - (b.refund_cents || 0)) / 100,
             payment_method: b.payment_method,
             payment_verified: b.payment_verified,
             payment_verified_at: b.payment_verified_at || null,
@@ -323,6 +323,7 @@ export function getOpsDashboardPayload(db, helpers, user, query = {}) {
       ledger: { page: ledgerPage, limit: ledgerLimit, total: ledgerTotal, totalPages: Math.max(1, Math.ceil(ledgerTotal / ledgerLimit)) },
     },
     assignable_practitioners: assignablePractitioners,
+    specialists: db.all('SELECT * FROM specialists ORDER BY active DESC, created_at ASC'),
     customers,
     verifications: activeVerifications,
     payments,
@@ -442,6 +443,19 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
     if (!row) fail('Group request not found', 404);
     const receipts = db.all('SELECT * FROM payment_receipts WHERE booking_id=? OR reference=? ORDER BY created_at DESC', row.id, row.reference);
     return send({ reference: row.reference, receipts });
+  }
+
+  if (/^\/api\/ops\/group-requests\/[^/]+\/contract$/.test(route) && !body) {
+    const id = route.split('/')[4];
+    const row = db.get('SELECT id, reference, data FROM group_requests WHERE id=? OR reference=?', id, id);
+    if (!row) fail('Group request not found', 404);
+    const gr = JSON.parse(row.data);
+    const html = renderOccasionContractHtml(gr, helpers.settings());
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+    });
+    return res.end(html);
   }
 
   if (/^\/api\/ops\/bookings\/[^/]+\/receipt$/.test(route) && body) {
@@ -639,6 +653,111 @@ export function handleOpsRoute({ db, helpers, user, route, query, body, checkRat
     db.run('UPDATE group_requests SET data=? WHERE id=?', JSON.stringify(reqObj), row.id);
     helpers.audit(user, 'group.update', row.id, JSON.stringify({ status: body.status }));
     return send({ group_request: reqObj });
+  }
+
+  if (/^\/api\/ops\/bookings\/[^/]+\/verify-payment$/.test(route) && body) {
+    requireCapability(user, 'payments.verify');
+    const id = route.split('/')[4];
+    const b = helpers.bookings().find((x) => x.id === id);
+    if (!b) fail('Booking not found', 404);
+    b.payment_verified = true;
+    b.payment_verified_at = now();
+    b.paid_amount = Number(body.paid_amount || b.paid_amount || b.total);
+    b.paid_cents = Math.round(b.paid_amount * 100);
+    b.payment_method = body.payment_method || b.payment_method || 'bank_transfer';
+    b.payment_status = 'verified_paid';
+    b.hold_expires_at = null;
+    if (b.status === 'pending_confirmation') {
+      b.status = 'confirmed';
+    }
+    if (!b.assigned_staff_id) {
+      const defaultSpec = db.get('SELECT * FROM specialists WHERE active=1 ORDER BY created_at ASC LIMIT 1');
+      if (defaultSpec) {
+        b.assigned_staff_id = defaultSpec.id;
+        b.assigned_staff_name = defaultSpec.name_ar;
+        b.specialist = { id: defaultSpec.id, name_ar: defaultSpec.name_ar, name_en: defaultSpec.name_en, title_ar: defaultSpec.title_ar, phone: defaultSpec.phone };
+      }
+    }
+    helpers.saveBooking(b);
+    reconcileLoyalty(db, helpers, b);
+    helpers.audit(user, 'payment.verify_direct', b.id, JSON.stringify({ amount: b.paid_amount, method: b.payment_method }));
+    return send({ ok: true, booking: b });
+  }
+
+  if (/^\/api\/ops\/bookings\/[^/]+\/assign-specialist$/.test(route) && body) {
+    requireCapability(user, 'bookings.update');
+    const id = route.split('/')[4];
+    const b = helpers.bookings().find((x) => x.id === id);
+    if (!b) fail('Booking not found', 404);
+    const specId = body.specialist_id;
+    if (specId) {
+      const spec = db.get('SELECT * FROM specialists WHERE id=?', specId);
+      if (!spec) fail('Specialist not found', 404);
+      b.assigned_staff_id = spec.id;
+      b.assigned_staff_name = spec.name_ar;
+      b.specialist = { id: spec.id, name_ar: spec.name_ar, name_en: spec.name_en, title_ar: spec.title_ar, phone: spec.phone };
+    } else {
+      b.assigned_staff_id = null;
+      b.assigned_staff_name = null;
+      b.specialist = null;
+    }
+    helpers.saveBooking(b);
+    helpers.audit(user, 'booking.assign_specialist', b.id, JSON.stringify({ specialist_id: specId }));
+    return send({ ok: true, booking: b });
+  }
+
+  if (/^\/api\/ops\/group-requests\/[^/]+\/confirm-deposit$/.test(route) && body) {
+    requireCapability(user, 'occasions.manage');
+    const id = route.split('/')[4];
+    const row = db.get('SELECT * FROM group_requests WHERE id=? OR reference=?', id, id);
+    if (!row) fail('Group request not found', 404);
+    const reqObj = JSON.parse(row.data);
+    const depositAmt = Math.round(Number(reqObj.estimated_total || 0) * 0.3) || 100;
+    reqObj.status = 'confirmed';
+    reqObj.deposit_paid = depositAmt;
+    reqObj.payment_verified = true;
+    reqObj.payment_verified_at = now();
+    reqObj.updated_at = now();
+    db.run('UPDATE group_requests SET data=? WHERE id=?', JSON.stringify(reqObj), row.id);
+    helpers.audit(user, 'group.deposit_confirmed', row.id, JSON.stringify({ deposit_paid: depositAmt }));
+    return send({ ok: true, group_request: reqObj });
+  }
+
+  if (route === '/api/ops/specialists' && !body) {
+    return send({ specialists: db.all('SELECT * FROM specialists ORDER BY active DESC, created_at ASC') });
+  }
+
+  if (route === '/api/ops/specialists' && body) {
+    requireCapability(user, 'staff.manage');
+    const nameAr = String(body.name_ar || '').trim();
+    const nameEn = String(body.name_en || nameAr).trim();
+    const titleAr = String(body.title_ar || 'أخصائية عناية معتمدة').trim();
+    const titleEn = String(body.title_en || 'Certified Specialist').trim();
+    if (!nameAr) fail('اسم الأخصائية مطلوب');
+    const id = body.id || uid();
+    const phoneNum = body.phone ? phone(body.phone) : '';
+    const bioAr = String(body.bio_ar || '').trim();
+    const bioEn = String(body.bio_en || '').trim();
+    const active = body.active !== false ? 1 : 0;
+    db.run(
+      'INSERT OR REPLACE INTO specialists(id, name_ar, name_en, title_ar, title_en, phone, bio_ar, bio_en, active, created_at) VALUES(?,?,?,?,?,?,?,?,?,?)',
+      id, nameAr, nameEn, titleAr, titleEn, phoneNum, bioAr, bioEn, active, now()
+    );
+    helpers.audit(user, 'specialist.save', id, JSON.stringify({ name: nameAr, active }));
+    return send({ ok: true, specialist: { id, name_ar: nameAr, name_en: nameEn, title_ar: titleAr, title_en: titleEn, phone: phoneNum, bio_ar: bioAr, bio_en: bioEn, active } });
+  }
+
+  if (/^\/api\/ops\/customers\/[^/]+\/quick-verify$/.test(route) && body) {
+    requireCapability(user, 'customers.verify_identity');
+    const targetId = route.split('/')[4];
+    const target = db.get('SELECT * FROM users WHERE id=?', targetId);
+    if (!target) fail('Customer not found', 404);
+    db.run('UPDATE users SET verified=1 WHERE id=?', target.id);
+    for (const b of helpers.bookings().filter((x) => x.user_id === target.id)) {
+      reconcileLoyalty(db, helpers, b);
+    }
+    helpers.audit(user, 'customer.quick_verify', target.id, 'Verified phone ownership directly by staff');
+    return send({ ok: true, customer: { ...target, verified: 1 } });
   }
 
   if (/^\/api\/ops\/gift-requests\/[^/]+$/.test(route) && body) {

@@ -128,7 +128,8 @@ export function customersView(d) {
                         <div class="ops-chip-row">
                           ${
                             canVerify
-                              ? `<button type="button" class="btn small ${c.verified ? 'light' : 'sage'}" data-verify-toggle="${esc(c.id)}" data-next-verified="${c.verified ? '0' : '1'}">${c.verified ? t('إلغاء التوثيق', 'Unverify') : t('توثيق الحساب', 'Verify')}</button>`
+                              ? `<button type="button" class="btn small ${c.verified ? 'light' : 'sage'}" data-verify-toggle="${esc(c.id)}" data-next-verified="${c.verified ? '0' : '1'}">${c.verified ? t('إلغاء التوثيق', 'Unverify') : t('توثيق الحساب', 'Verify')}</button>
+                                 ${!c.verified ? `<button type="button" class="btn small" style="background:var(--rose-gold);color:#fff" data-quick-verify="${esc(c.id)}">⚡ ${t('توثيق فوري', 'Quick Verify')}</button>` : ''}`
                               : ''
                           }
                           <a href="https://wa.me/?text=${rebookMsg}" target="_blank" rel="noopener noreferrer" class="btn small light" title="${t('إرسال تذكير إعادة الحجز عبر واتساب', 'Send Re-booking reminder')}">
@@ -211,6 +212,22 @@ export function bindCustomers(renderFn) {
       opsToast(err.message);
       e.submitter.disabled = false;
     }
+  });
+
+  document.querySelectorAll('[data-quick-verify]').forEach((btn) => {
+    btn.onclick = async () => {
+      const id = btn.dataset.quickVerify;
+      btn.disabled = true;
+      try {
+        await opsApi(`/customers/${id}/quick-verify`, {});
+        await loadDashboard();
+        opsToast(t('تم توثيق حساب العميلة بنجاح 🌸', 'Customer ownership verified'));
+        renderFn();
+      } catch (err) {
+        opsToast(err.message);
+        btn.disabled = false;
+      }
+    };
   });
 
   document.querySelectorAll('[data-verify-toggle]').forEach((btn) => {

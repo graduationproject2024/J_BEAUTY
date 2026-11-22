@@ -24,6 +24,7 @@ import {
   generateInvoicePdfBuffer,
   invoiceToken,
   renderInvoiceHtml,
+  renderOccasionContractHtml,
   validateReceiptUpload,
   verifyInvoiceToken,
 } from './pdf-invoice.mjs';
@@ -249,7 +250,7 @@ export function createCustomerApp({
       let body;
       if (!['GET', 'HEAD'].includes(method)) {
         const expectedOrigin = `${secure ? 'https' : 'http'}://${req.headers.host}`;
-        const isReceiptRoute = /^\/api\/(bookings|gift-requests)\/[^/]+\/receipt$/.test(route);
+        const isReceiptRoute = /^\/api\/(bookings|gift-requests|group-requests)\/[^/]+\/receipt$/.test(route);
         body = await parseMutationRequest(
           req,
           session.csrf,
@@ -505,6 +506,27 @@ export function createCustomerApp({
         return send(createGroupRequest(db, helpers, user, body), 201);
       }
 
+      if (method === 'GET' && /^\/api\/group-requests\/[^/]+$/.test(route)) {
+        const id = route.split('/')[3];
+        const row = db.get('SELECT id, reference, data FROM group_requests WHERE id=? OR reference=?', id, id);
+        if (!row) fail('Group request not found', 404);
+        const gr = JSON.parse(row.data);
+        return send({ ok: true, group_request: gr });
+      }
+
+      if (method === 'GET' && /^\/api\/group-requests\/[^/]+\/invoice$/.test(route)) {
+        const id = route.split('/')[3];
+        const row = db.get('SELECT id, reference, data FROM group_requests WHERE id=? OR reference=?', id, id);
+        if (!row) fail('Group request not found', 404);
+        const gr = JSON.parse(row.data);
+        const html = renderOccasionContractHtml(gr, helpers.settings());
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store',
+        });
+        return res.end(html);
+      }
+
       if (method === 'GET' && /^\/api\/invoices\/[^/]+\/[^/]+$/.test(route)) {
         const parts = route.split('/');
         const ref = decodeURIComponent(parts[3] || '');
@@ -576,6 +598,11 @@ export function createCustomerApp({
           b.receipt_sender_name = parsed.sender_name;
           b.receipt_transfer_ref = parsed.transfer_ref;
           b.payment_status = 'receipt_submitted';
+          b.payment_method = 'bank_transfer';
+          if (!b.paid_cents || b.paid_cents <= 0) {
+            b.paid_amount = b.total;
+            b.paid_cents = Math.round(b.total * 100);
+          }
           b.hold_expires_at = new Date(Date.now() + 86400000).toISOString();
           helpers.saveBooking(b);
           helpers.audit(user, 'booking.receipt_upload', b.id, JSON.stringify({ reference: b.reference, filename: parsed.filename, transfer_ref: parsed.transfer_ref }));

@@ -3,7 +3,9 @@ import { $ops, can, canAny, esc, loadDashboard, money, num, opsApi, opsState, op
 export function bookingsView(d) {
   const list = d.bookings || [];
   const meta = d.pagination?.bookings || { page: 1, totalPages: 1, total: list.length };
-  const practitioners = d.assignable_practitioners || [];
+  const rawPractitioners = d.assignable_practitioners || [];
+  const rawSpecialists = (d.specialists || []).map((s) => ({ id: s.id, name: `${s.name_ar || s.name_en} (${s.title_ar || 'أخصائية معتمدة'})` }));
+  const practitioners = [...rawSpecialists, ...rawPractitioners.filter((p) => !rawSpecialists.some((s) => s.id === p.id))];
   const canFullEdit = can('bookings.update');
   const canConfirm = can('bookings.confirm') || canFullEdit;
   const canBasicStatus = can('bookings.update_status_basic') || canFullEdit;

@@ -1,5 +1,5 @@
 import { $, api, esc, href, minutes, money, nameOf, num, riyadhToday, state, t, toast } from './state.js';
-import { field, head, provisional } from './components.js';
+import { field, head, localizeError, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
 
 export function studioPage() {
@@ -9,9 +9,9 @@ export function studioPage() {
   const imgFor = (rec) => {
     if (rec.kind === 'package') {
       const first = allSvcs.find((sv) => sv.id === rec.item.service_ids?.[0]);
-      return first?.image || '/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp';
+      return first?.image || '/assets/images/hero-sanctuary.webp';
     }
-    return rec.item?.image || `/J_BEAUTY/apps/customer/assets/images/services/${rec.item?.id}.webp`;
+    return rec.item?.image || `/assets/images/services/${rec.item?.id}.webp`;
   };
 
   const moodOpts = [
@@ -152,7 +152,7 @@ export function lookbookPage() {
   const entries = [
     {
       cat: 'massage',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/hot-stone.webp',
+      img: '/assets/images/services/hot-stone.webp',
       ar: 'سكينة الأحجار الدافئة',
       en: 'Warm Basalt Sanctuary',
       sub_ar: 'مساج الأحجار الساخنة · 60 دقيقة · 265 ر.س',
@@ -161,7 +161,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/french-tip.webp',
+      img: '/assets/images/services/french-tip.webp',
       ar: 'فرنش كلاسيكي ناعم',
       en: 'Timeless Ivory French Tip',
       sub_ar: 'منيكير فرنش تيب · قاعدة وردية شفافة',
@@ -170,7 +170,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/colored-french.webp',
+      img: '/assets/images/services/colored-french.webp',
       ar: 'أطراف مريمية عصرية',
       en: 'Sage Micro-French Gel',
       sub_ar: 'جل فرنسي بأطراف ملونة · 60 دقيقة',
@@ -179,7 +179,7 @@ export function lookbookPage() {
     },
     {
       cat: 'nails',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/pedicure.webp',
+      img: '/assets/images/services/pedicure.webp',
       ar: 'طقوس العناية بالقدمين',
       en: 'Rose-Petal Foot Sanctuary',
       sub_ar: 'بديكير دافئ ببتلات الورد · 45 دقيقة',
@@ -188,7 +188,7 @@ export function lookbookPage() {
     },
     {
       cat: 'gel',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/french-gel.webp',
+      img: '/assets/images/services/french-gel.webp',
       ar: 'لمعان الفرنش الزجاجي',
       en: 'Glass-Shine French Gel',
       sub_ar: 'جل فرنسي ثابت · مثالي للمناسبات',
@@ -197,7 +197,7 @@ export function lookbookPage() {
     },
     {
       cat: 'massage',
-      img: '/J_BEAUTY/apps/customer/assets/images/services/lymphatic.webp',
+      img: '/assets/images/services/lymphatic.webp',
       ar: 'جلسة الخفة والانتعاش',
       en: 'Rose Quartz & Calm Flow',
       sub_ar: 'التصريف اللمفاوي · يتطلب اعتماد المؤهلات',
@@ -252,7 +252,8 @@ const OCCASION_TYPES = [
 ];
 
 const customGuestName = (p) => {
-  const raw = String(p?.label || '').trim();
+  if (!p) return '';
+  const raw = String(p.label ?? '').trim();
   if (!raw || /^(المستفيدة|Guest|Participant)\s*[\d\u0660-\u0669]+$/i.test(raw)) {
     return '';
   }
@@ -300,30 +301,94 @@ export function groupBookingPage() {
   if (state.groupResult) {
     const r = state.groupResult;
     const gr = r.group_request || {};
+    const total = Number(gr.estimated_total || 0);
+    const depositReq = Math.round(total * 0.3) || 100;
+    const isConfirmed = gr.status === 'confirmed';
+    const isApproved = gr.status === 'approved' || gr.status === 'deposit_receipt_uploaded' || isConfirmed;
+    const receiptDone = Boolean(state.groupReceiptDone || gr.receipt_uploaded);
+    const cfg = state.catalog?.settings || {};
+
     return `
       <main id="main" class="wrap">
         <div class="luxury-confirm-shell" data-reveal>
           <div class="luxury-confirm-header">
             <div class="luxury-confirm-crest">
-              <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="luxury-confirm-logo">
+              <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="luxury-confirm-logo">
             </div>
-            <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم تسجيل طلب المناسبة بنجاح', 'OCCASION REQUEST RECEIVED')} ✦</span>
-            <h1>${t('فريق تنسيق المناسبات بخدمتك 🌸', 'Our Occasions Concierge Is Ready 🌸')}</h1>
-            <p class="muted">${t('تم حفظ تفاصيل مناسبتك وتم فتح واتساب لتأكيد توفر الأخصائيات وتنسيق جميع التفاصيل معك مباشرة.', 'Your group ritual details are saved and WhatsApp has been opened to finalize specialist coordination.')}</p>
+            <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${isConfirmed ? t('تم تثبيت موعد المناسبة بنجاح', 'OCCASION CONFIRMED & FINALIZED') : t('تم تسجيل طلب المناسبة بنجاح', 'OCCASION REQUEST RECEIVED')} ✦</span>
+            <h1>${isConfirmed ? t('موعد مناسبتكم مثبت بكل دلال وفخامة 🌸', 'Your Occasion Sanctuary Is Confirmed 🌸') : t('فريق تنسيق المناسبات بخدمتك 🌸', 'Our Occasions Concierge Is Ready 🌸')}</h1>
+            <p class="muted">${isConfirmed ? t('تم استلام العربون وتثبيت فريق الأخصائيات لحضور جلستكم الفاخرة.', 'Deposit received and specialist team confirmed for your occasion.') : t('تم حفظ تفاصيل مناسبتك. لتثبيت الموعد، يرجى سداد العربون ورفع إيصال التحويل أدناه.', 'Your group ritual details are saved. To secure your slot, transfer the deposit and upload the receipt below.')}</p>
             <div class="luxury-ref-pill">
               <span>${t('رقم طلب المناسبة:', 'Occasion Ref:')}</span>
               <strong><bdi>${esc(gr.reference)}</bdi></strong>
             </div>
           </div>
-          <div class="card luxury-confirm-card" style="max-width:640px;margin:0 auto">
+
+          <div class="card luxury-confirm-card" style="max-width:680px;margin:0 auto 20px">
             <div class="summary-line"><span>${t('المنسّقة', 'Coordinator')}</span><strong>${esc(gr.organizer_name)}</strong></div>
             <div class="summary-line"><span>${t('عدد المستفيدات', 'Participants')}</span><strong>${num((gr.participants || []).length)}</strong></div>
             <div class="summary-line"><span>${t('الموعد والحي', 'Schedule & Area')}</span><strong><bdi>${esc(gr.date)} · ${esc(gr.time)}</bdi> · ${esc(gr.neighborhood)}</strong></div>
-            <div class="summary-line summary-total"><span>${t('إجمالي الباقة', 'Package Total')}</span><span>${money(gr.estimated_total)}</span></div>
-            <div class="hero-actions" style="margin-top:20px;justify-content:center;gap:12px">
-              ${r.whatsapp_url ? `<a class="btn shimmer-btn" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💬 ${t('متابعة التنسيق عبر واتساب', 'Continue on WhatsApp')}</a>` : ''}
-              <button type="button" class="btn light" id="new-group-req">${t('تنسيق مناسبة أخرى', 'Plan another occasion')}</button>
+            <div class="summary-line"><span>${t('إجمالي باقة المناسبة', 'Occasion Total')}</span><span>${money(gr.estimated_total)}</span></div>
+            <div class="summary-line" style="color:var(--sage-deep);font-weight:700"><span>${t('العربون المطلوب لتثبيت الموعد (30%):', 'Deposit Required (30%):')}</span><span>${money(gr.deposit_paid || depositReq)}</span></div>
+            <div class="summary-line"><span>${t('حالة الطلب:', 'Request Status:')}</span><span>${statusBadge(gr.status)}</span></div>
+          </div>
+
+          <div class="form-grid" style="max-width:680px;margin:0 auto 20px">
+            <div class="card luxury-confirm-card">
+              <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('بيانات الحساب البنكي', 'BANK TRANSFER DETAILS')} ✦</span>
+              <div style="margin-top:12px;font-size:14px;line-height:1.7">
+                <div><strong>${t('البنك:', 'Bank:')}</strong> ${esc(cfg.bank_name || 'مصرف الراجحي')}</div>
+                <div><strong>${t('المستفيد:', 'Beneficiary:')}</strong> ${esc(cfg.bank_account_holder || 'مؤسسة J Beauty Spa')}</div>
+                <div class="row" style="justify-content:space-between;align-items:center;background:#fff;padding:8px 12px;border-radius:var(--r-sm);border:1px dashed var(--rose-gold);margin-top:8px;gap:8px">
+                  <div>
+                    <span style="font-size:12px;display:block;color:var(--text-dark)">IBAN:</span>
+                    <bdi dir="ltr" class="mono" style="font-weight:700;letter-spacing:0.04em;color:var(--plum)" id="occ-iban-text">${esc(cfg.bank_iban || 'SA0380000000000000000000')}</bdi>
+                  </div>
+                  <button type="button" class="btn small light" id="copy-occ-iban-btn" style="padding:4px 10px;font-size:12px;white-space:nowrap">📋 ${t('نسخ الآيبان', 'Copy IBAN')}</button>
+                </div>
+              </div>
             </div>
+
+            <div class="card luxury-confirm-card">
+              <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('توثيق سداد العربون', 'DEPOSIT VERIFICATION')} ✦</span>
+              <h3 style="margin-top:6px;font-size:17px">${t('إرفاق إيصال سداد العربون', 'Upload Deposit Receipt')}</h3>
+              <p class="muted" style="font-size:13.5px">${t('ارفعي إيصال التحويل البنكي هنا ليتم تثبيت المناسبة وإصدار العقد الرسمي فوراً.', 'Upload bank transfer receipt to lock the date and issue the contract.')}</p>
+              ${
+                receiptDone
+                  ? `<div class="success" style="margin-top:12px">
+                       <strong>✓ ${t('تم استلام إيصال العربون بنجاح!', 'Deposit Receipt Received!')}</strong>
+                       <p style="margin:4px 0 0;font-size:13px">${t('وصل الإيصال لمنصة الإدارة ويتم مراجعته لتثبيت فريق الأخصائيات.', 'Your deposit receipt is being reviewed to finalize specialist allocation.')}</p>
+                     </div>`
+                  : `
+                    <form id="group-receipt-upload-form" data-group-id="${esc(gr.id || gr.reference)}" style="margin-top:12px;display:grid;gap:10px">
+                      <div id="group-receipt-error" role="alert"></div>
+                      <label class="field" style="margin:0">
+                        ${t('اسم المحوّلة (اختياري)', 'Sender Name (optional)')}
+                        <input type="text" name="sender_name" value="${esc(gr.organizer_name || '')}" maxlength="100">
+                      </label>
+                      <label class="field" style="margin:0">
+                        ${t('رقم العملية المرجعي (اختياري)', 'Transfer Ref (optional)')}
+                        <input type="text" name="transfer_ref" placeholder="${t('مثال: TRF-982341', 'e.g. TRF-982341')}" maxlength="80">
+                      </label>
+                      <div class="field" style="margin:0">
+                        <label class="receipt-dropzone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;border:1.5px dashed var(--rose-gold);border-radius:var(--r-md);background:var(--cream-bg);cursor:pointer;text-align:center;position:relative">
+                          <span style="font-size:22px;margin-bottom:2px">🧾</span>
+                          <strong id="group-file-label" style="font-size:12.5px;color:var(--plum)">${t('اضغطي هنا لاختيار صورة الإيصال أو PDF', 'Choose receipt image or PDF')}</strong>
+                          <small class="muted" style="font-size:11px;margin-top:2px">${t('يدعم JPG, PNG, WEBP, PDF بحد أقصى 2MB', 'Supports JPG, PNG, WEBP, PDF up to 2MB')}</small>
+                          <input type="file" id="group-receipt-file-input" name="receipt_file" accept="image/png,image/jpeg,image/webp,application/pdf" required style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden">
+                        </label>
+                      </div>
+                      <button type="submit" class="btn sage" style="width:100%">📤 ${t('إرسال إيصال العربون للإدارة', 'Submit Deposit Receipt')}</button>
+                    </form>
+                  `
+              }
+            </div>
+          </div>
+
+          <div class="hero-actions" style="margin-top:20px;justify-content:center;gap:12px;flex-wrap:wrap">
+            <a href="/api/group-requests/${encodeURIComponent(gr.id || gr.reference)}/invoice" target="_blank" rel="noopener noreferrer" class="btn light">📄 ${t('عرض عقد وفاتورة المناسبة', 'View Contract & Invoice')}</a>
+            ${r.whatsapp_url ? `<a class="btn shimmer-btn" href="${esc(r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💬 ${t('متابعة التنسيق عبر واتساب', 'Continue on WhatsApp')}</a>` : ''}
+            <button type="button" class="btn light" id="new-group-req">${t('تنسيق مناسبة أخرى', 'Plan another occasion')}</button>
           </div>
         </div>
       </main>
@@ -354,8 +419,14 @@ export function groupBookingPage() {
           ).join('')}
         </div>
         <div class="form-grid">
-          ${field(t('اسم منسّقة المناسبة', 'Coordinator name'), 'organizer_name', 'text', g.organizer_name, 'required')}
-          ${field(t('رقم الجوال السعودي', 'Saudi mobile'), 'organizer_phone', 'tel', g.organizer_phone, 'required placeholder="05xxxxxxxx"')}
+          <label class="field">
+            <span class="field-label">${t('اسم منسّقة المناسبة', 'Coordinator name')}</span>
+            <input name="organizer_name" id="occ-organizer-name" type="text" value="${esc(g.organizer_name || '')}" required maxlength="100" autocomplete="name" placeholder="${t('اكتبي اسمك الكريم...', 'Enter coordinator name...')}">
+          </label>
+          <label class="field">
+            <span class="field-label">${t('رقم الجوال السعودي', 'Saudi mobile')}</span>
+            <input name="organizer_phone" id="occ-organizer-phone" type="tel" dir="ltr" value="${esc(g.organizer_phone || '')}" required maxlength="15" autocomplete="tel" placeholder="05xxxxxxxx">
+          </label>
         </div>
       `;
     }
@@ -633,7 +704,7 @@ function renderLuxuryGiftCardHtml({
       <div class="gift-card-foil-shine" aria-hidden="true"></div>
       <div class="gift-card-top">
         <div class="gift-card-brand">
-          <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="gift-card-logo">
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="gift-card-logo">
           <div>
             <strong>J Beauty Spa</strong>
             <small>${t('سبا نسائي منزلي فاخر · باقات إهداء راقية', 'Luxury Women’s Home Spa · Bespoke Gifting')}</small>
@@ -678,7 +749,7 @@ async function downloadGiftCardPng(gift) {
   await new Promise((resolve) => {
     logoImg.onload = resolve;
     logoImg.onerror = resolve;
-    logoImg.src = '/J_BEAUTY/apps/customer/assets/brand/official-logo.png';
+    logoImg.src = '/assets/brand/official-logo.png';
   });
 
   // Background deep royal velvet plum gradient
@@ -771,18 +842,26 @@ async function downloadGiftCardPng(gift) {
   ctx.fillText(`✨ ${gift.chosen?.name_ar || 'جلسة عناية فاخرة خاصة'} ✨`, 600, 456);
 
   // Gift Code Box (Golden Seal Style)
+  const isApproved = Boolean(gift.payment_verified && (gift.status === 'approved_ready' || gift.status === 'active'));
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(350, 515, 500, 96);
+  ctx.fillRect(300, 515, 600, 96);
   ctx.strokeStyle = '#D4AF7C';
   ctx.lineWidth = 3;
-  ctx.strokeRect(350, 515, 500, 96);
+  ctx.strokeRect(300, 515, 600, 96);
 
   ctx.fillStyle = '#6B6464';
   ctx.font = '19px "IBM Plex Sans Arabic", sans-serif';
-  ctx.fillText('كود الإهداء الحصري (يُستخدم مباشرة عند حجز الموعد)', 600, 548);
-  ctx.fillStyle = '#3E2932';
-  ctx.font = 'bold 36px monospace';
-  ctx.fillText(gift.gift_code || gift.reference || '', 600, 594);
+  if (isApproved) {
+    ctx.fillText('كود الإهداء الحصري (يُستخدم مباشرة عند حجز الموعد)', 600, 548);
+    ctx.fillStyle = '#3E2932';
+    ctx.font = 'bold 36px monospace';
+    ctx.fillText(gift.gift_code || gift.reference || '', 600, 594);
+  } else {
+    ctx.fillText('حالة كود الإهداء (قيد التحقق وتأكيد السداد من الإدارة)', 600, 548);
+    ctx.fillStyle = '#8B4513';
+    ctx.font = 'bold 26px "IBM Plex Sans Arabic", monospace';
+    ctx.fillText('••••-••••-JGIFT (يُفعّل فور تأكيد الإدارة)', 600, 594);
+  }
 
   // Footer: Sender Line (NO "المدينة المنورة"!)
   ctx.fillStyle = '#D4AF7C';
@@ -892,10 +971,10 @@ export function giftsPage() {
           </div>
 
           <div class="hero-actions" style="justify-content:center;gap:12px;flex-wrap:wrap">
-            <button type="button" class="btn shimmer-btn" id="download-gift-card-png">🖼️ ${t('تحميل بطاقة الإهداء كصورة فاخرة', 'Download Luxury Card PNG')}</button>
             ${
               isApproved
-                ? `<a class="btn" href="${esc(r.share_whatsapp_url || r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💌 ${t('إرسال البطاقة للمستفيدة عبر واتساب', 'Send Gift to Recipient on WhatsApp')}</a>
+                ? `<button type="button" class="btn shimmer-btn" id="download-gift-card-png">🖼️ ${t('تحميل بطاقة الإهداء الفاخرة كصورة', 'Download Luxury Gift Card PNG')}</button>
+                   <a class="btn" href="${esc(r.share_whatsapp_url || r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💌 ${t('إرسال البطاقة للمستفيدة عبر واتساب', 'Send Gift to Recipient on WhatsApp')}</a>
                    <button type="button" class="btn light" id="copy-gift-code-btn" data-code="${esc(giftCode)}">📋 ${t('نسخ كود الإهداء', 'Copy Gift Code')}</button>`
                 : `<span class="badge pending" style="padding:10px 16px;font-size:13.5px">⏳ ${t('يتم إصدار كود الإهداء وتفعيله بعد التحقق من سداد التحويل البنكي لدى الإدارة', 'Gift code will be activated and issued once staff verifies your bank transfer')}</span>`
             }
@@ -1277,15 +1356,78 @@ export function bindExperiences(renderFn) {
       }
       renderFn();
     } catch (err) {
-      $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      $('#form-error').innerHTML = `<div class="error">${esc(localizeError(err.message))}</div>`;
       e.submitter.disabled = false;
     }
   });
 
   $('#new-group-req')?.addEventListener('click', () => {
     state.groupResult = null;
+    state.groupReceiptDone = false;
     state.occasionStep = 1;
     renderFn();
+  });
+
+  $('#copy-occ-iban-btn')?.addEventListener('click', async () => {
+    const iban = $('#occ-iban-text')?.textContent || '';
+    if (iban) {
+      try {
+        await navigator.clipboard.writeText(iban);
+        toast(t('تم نسخ الآيبان بنجاح 📋', 'IBAN copied to clipboard 📋'));
+      } catch {
+        toast(iban);
+      }
+    }
+  });
+
+  $('#group-receipt-file-input')?.addEventListener('change', (e) => {
+    const fn = e.target.files?.[0]?.name;
+    const lbl = $('#group-file-label');
+    if (lbl && fn) {
+      lbl.textContent = `✓ تم اختيار: ${fn}`;
+      lbl.style.color = 'var(--sage-deep)';
+    }
+  });
+
+  $('#group-receipt-upload-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const grpId = form.dataset.groupId;
+    const fileInput = form.elements.receipt_file;
+    const errEl = $('#group-receipt-error');
+    if (errEl) errEl.innerHTML = '';
+    const file = fileInput?.files?.[0];
+    if (!file) {
+      if (errEl) errEl.innerHTML = `<div class="error">${t('يرجى اختيار ملف الإيصال أولاً.', 'Please select a receipt file.')}</div>`;
+      return;
+    }
+    if (file.size > 2.5 * 1024 * 1024) {
+      if (errEl) errEl.innerHTML = `<div class="error">${t('الحد الأقصى لحجم الإيصال هو 2.5 ميجابايت.', 'Maximum receipt size is 2.5MB.')}</div>`;
+      return;
+    }
+    const submitBtn = e.submitter;
+    submitBtn.disabled = true;
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error(t('تعذر قراءة الملف', 'Failed to read file')));
+        reader.readAsDataURL(file);
+      });
+      await api(`/group-requests/${encodeURIComponent(grpId)}/receipt`, {
+        file_data: dataUrl,
+        filename: file.name,
+        mime_type: file.type,
+        sender_name: form.elements.sender_name?.value || '',
+        transfer_ref: form.elements.transfer_ref?.value || '',
+      });
+      state.groupReceiptDone = true;
+      toast(t('تم إرسال إيصال العربون للإدارة بنجاح ✓', 'Deposit receipt uploaded successfully ✓'));
+      renderFn();
+    } catch (err) {
+      if (errEl) errEl.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      submitBtn.disabled = false;
+    }
   });
 
   // Live Luxury Gift Card theme switcher & real-time preview sync
@@ -1401,7 +1543,7 @@ export function bindExperiences(renderFn) {
       renderFn();
       window.scrollTo(0, 0);
     } catch (err) {
-      $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      $('#form-error').innerHTML = `<div class="error">${esc(localizeError(err.message))}</div>`;
       e.submitter.disabled = false;
     }
   });

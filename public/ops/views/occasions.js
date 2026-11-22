@@ -99,6 +99,14 @@ export function occasionsView(d) {
                           : ''
                       }
                       ${
+                        canManageOcc && (g.status === 'approved' || g.status === 'deposit_receipt_uploaded')
+                          ? `<button type="button" class="btn small sage" data-confirm-deposit="${esc(g.id)}">💰 ${t('تأكيد استلام العربون وتثبيت المناسبة', 'Confirm Deposit & Finalize')}</button>`
+                          : ''
+                      }
+                      <a href="/api/ops/group-requests/${encodeURIComponent(g.id)}/contract" target="_blank" rel="noopener noreferrer" class="btn small light" title="${t('عرض عقد وفاتورة المناسبة', 'View Contract & Invoice')}">
+                        📄 ${t('عقد وفاتورة المناسبة', 'Contract & Invoice')}
+                      </a>
+                      ${
                         canManageOcc && g.status === 'pending_approval'
                           ? `<button type="button" class="btn small sage" data-occ-act="approved" data-occ-id="${esc(g.id)}">${t('اعتماد التنسيق', 'Approve')}</button>
                              <button type="button" class="btn small light" data-occ-act="cancelled" data-occ-id="${esc(g.id)}">${t('إلغاء الطلب', 'Cancel')}</button>`
@@ -108,6 +116,13 @@ export function occasionsView(d) {
                         g.status === 'approved' && g.organizer_phone
                           ? `<a href="${waOccApproveUrl}" target="_blank" rel="noopener noreferrer" class="btn small" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:4px">
                                <span>💬</span> ${t('إرسال اعتماد الحجز والعربون واتساب', 'Send Approval & Deposit WA')}
+                             </a>`
+                          : ''
+                      }
+                      ${
+                        g.status === 'confirmed' && g.organizer_phone
+                          ? `<a href="https://wa.me/${phone(g.organizer_phone)}?text=${encodeURIComponent(`مرحباً أ/ ${g.organizer_name} 🌸\nتم استلام وتأكيد سداد عربون مناسبتك الفاخرة بنجاح لدى J Beauty Spa ✨\n\n• رقم المناسبة: ${g.reference}\n• الموعد: ${g.date} ${g.time}\n• الحي: ${g.neighborhood}\n• عدد الضيفات: ${(g.participants || []).length}\n• العربون المستلم: ${g.deposit_paid || depositReq} ر.س\n\nتم تثبيت فريق الأخصائيات لحضور جلستكم في الموعد المحدد بكل دلال 🌸`)}" target="_blank" rel="noopener noreferrer" class="btn small" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:4px">
+                               <span>💬</span> ${t('إرسال تأكيد التثبيت النهائي واتساب', 'Send Confirmation WA')}
                              </a>`
                           : ''
                       }
@@ -248,6 +263,22 @@ export function bindOccasions(renderFn) {
         await opsApi(`/gift-requests/${btn.dataset.giftId}`, { status: btn.dataset.giftStatus });
         await loadDashboard();
         opsToast(t('تم تحديث حالة الإهداء', 'Gift status updated'));
+        renderFn();
+      } catch (err) {
+        opsToast(err.message);
+        btn.disabled = false;
+      }
+    };
+  });
+
+  document.querySelectorAll('[data-confirm-deposit]').forEach((btn) => {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      const occId = btn.dataset.confirmDeposit;
+      try {
+        await opsApi(`/group-requests/${occId}/confirm-deposit`, {});
+        await loadDashboard();
+        opsToast(t('تم تأكيد استلام العربون وتثبيت موعد المناسبة بنجاح 🌸', 'Occasion deposit confirmed and finalized'));
         renderFn();
       } catch (err) {
         opsToast(err.message);

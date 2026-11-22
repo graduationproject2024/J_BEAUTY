@@ -553,11 +553,17 @@ function stepFiveReviewHtml() {
     <h3>${t('مراجعة الطلب قبل التسجيل', 'Review your request')}</h3>
     <div class="card" style="margin-bottom:18px">
       <div class="row" style="margin-bottom:10px">
-        <strong>${esc(state.draft.name)}</strong>
-        <bdi class="muted">${esc(state.draft.phone)}</bdi>
+        <strong id="review-client-name">${esc(state.draft.name || '—')}</strong>
+        <bdi class="muted" id="review-client-phone">${esc(state.draft.phone || '')}</bdi>
       </div>
-      <p class="muted" style="margin-bottom:6px">${t('الموعد:', 'Schedule:')} ${esc(state.draft.date)} · ${esc(state.draft.time)}</p>
-      <p class="muted" style="margin-bottom:6px">${t('الحي:', 'Neighborhood:')} ${esc(state.draft.neighborhood)}</p>
+      <p class="muted" style="margin-bottom:6px">
+        <strong>${t('الموعد:', 'Schedule:')}</strong>
+        <span id="review-schedule-val"><bdi>${esc(state.draft.date || '—')} · ${esc(state.draft.time || '—')}</bdi></span>
+      </p>
+      <p class="muted" style="margin-bottom:6px">
+        <strong>${t('الحي:', 'Neighborhood:')}</strong>
+        <span id="review-neighborhood-val">${esc(state.draft.neighborhood || '—')}</span>
+      </p>
       <p class="muted" style="margin-bottom:6px">${t('المختار:', 'Selection:')} ${s.items.map((x) => esc(nameOf(x))).join(' + ')}</p>
       ${s.addOns.length ? `<p class="muted" style="margin-bottom:6px">${t('الخدمات الإضافية:', 'Add-ons:')} ${s.addOns.map((a) => `${esc(t(a.ar, a.en))} (+${money(a.price)})`).join(' · ')}</p>` : ''}
       <p class="muted" style="margin-bottom:6px">${t('مدة الجلسة:', 'Duration:')} ${minutes(s.duration)}</p>
@@ -582,7 +588,7 @@ function stepFiveReviewHtml() {
         <a class="text-link" href="${href('policies')}" target="_blank">${t('سياسة الحجز والإلغاء', 'booking & cancellation policies')}</a>
         ${t('و', 'and')}
         <a class="text-link" href="${href('privacy')}" target="_blank">${t('الخصوصية', 'privacy notice')}</a>.
-        ${t('أفهم أن الطلب ينتظر تأكيد فريق J Beauty يدوياً (بانتظار التأكيد).', 'I understand this request awaits manual staff confirmation (Pending Confirmation).')}
+        ${t('أتطلع لتنسيق لحظة استرخائي الفاخرة مع فريق J Beauty المعتمد 🌸', 'Looking forward to my bespoke luxury relaxation with certified J Beauty therapists 🌸')}
       </span>
     </label>
     ${provisional()}
@@ -772,7 +778,7 @@ export function booking() {
                   ? `<button type="button" class="btn light" id="back-step">${t('السابق (تعديل الخدمات)', 'Back (Edit Rituals)')}</button>`
                   : ''
               }
-              <button class="btn form-next-btn" type="submit" style="${currentStep > 1 ? 'background:linear-gradient(135deg,var(--plum),var(--plum-dark));font-size:16px;padding:14px 28px' : ''}">
+              <button class="btn form-next-btn" type="submit" style="${currentStep > 1 ? 'background:#3E2932 !important;color:#FFFFFF !important;font-weight:700;font-size:16px;padding:14px 28px;border:none;border-radius:var(--r-md);box-shadow:0 4px 14px rgba(62,41,50,0.35);' : ''}">
                 ${
                   currentStep === 2
                     ? t('تأكيد وإرسال طلب الحجز فوراً 🌸', 'Confirm & Book Appointment 🌸')
@@ -798,6 +804,20 @@ export function saveDraft() {
 }
 
 export function bindBooking(renderFn) {
+  const updateReviewCardLive = () => {
+    saveDraft();
+    const revDate = $('#review-schedule-val');
+    const revArea = $('#review-neighborhood-val');
+    const revName = $('#review-client-name');
+    const revPhone = $('#review-client-phone');
+    if (revDate) revDate.textContent = `${state.draft.date || '—'} · ${state.draft.time || '—'}`;
+    if (revArea) revArea.textContent = state.draft.neighborhood || '—';
+    if (revName) revName.textContent = state.draft.name || '—';
+    if (revPhone) revPhone.textContent = state.draft.phone || '';
+  };
+  $('#booking-form')?.addEventListener('input', updateReviewCardLive);
+  $('#booking-form')?.addEventListener('change', updateReviewCardLive);
+
   $('#summary-toggle')?.addEventListener('click', () => {
     state.summaryExpanded = !state.summaryExpanded;
     const body = $('#summary-body-content');

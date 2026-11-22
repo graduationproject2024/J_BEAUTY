@@ -193,6 +193,8 @@ function bindWorkspaceChrome(d) {
   document.querySelectorAll('[data-ops-tab]').forEach((btn) => {
     btn.onclick = async () => {
       opsState.tab = btn.dataset.opsTab;
+      localStorage.setItem('jb_ops_tab', opsState.tab);
+      window.location.hash = opsState.tab;
       opsState.drawerOpen = false;
       try {
         await loadDashboard();
@@ -244,6 +246,19 @@ window.addEventListener('keydown', (e) => {
       await loadDashboard();
     }
     render();
+
+    // Automated 5-second background realtime polling
+    setInterval(async () => {
+      if (opsState.user && (!opsState.mfa?.required || opsState.mfa?.verified)) {
+        const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+        if (!document.hidden && !isTyping) {
+          try {
+            await loadDashboard();
+            render();
+          } catch {}
+        }
+      }
+    }, 5000);
   } catch (err) {
     $ops('#ops-app').innerHTML = `<main class="ops-auth-wrap"><div class="ops-auth-card"><div class="alert error">${esc(err.message)}</div></div></main>`;
   }

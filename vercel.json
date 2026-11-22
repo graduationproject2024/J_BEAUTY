@@ -2,7 +2,7 @@
   "version": 2,
   "cleanUrls": false,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/[...path]?path=$1" },
+    { "source": "/api/(.*)", "destination": "https://jbeauty-production.up.railway.app/api/$1" },
     { "source": "/ops", "destination": "/ops/index.html" },
     { "source": "/ops/", "destination": "/ops/index.html" },
     { "source": "/ops.css", "destination": "/ops/ops.css" },

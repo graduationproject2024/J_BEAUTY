@@ -376,3 +376,124 @@ export function validateReceiptUpload(body) {
     transfer_ref: String(body?.transfer_ref || '').trim().slice(0, 80),
   };
 }
+
+export function renderOccasionContractHtml(g, settings = {}) {
+  const ref = escHtml(g.reference || 'OCC-000');
+  const invoiceNo = `OCC-INV-${String(g.reference || '').replace(/^OCC-/, '')}`;
+  const dateStr = escHtml(g.date || '');
+  const timeStr = escHtml(g.time || '');
+  const areaStr = escHtml(g.neighborhood || '');
+  const nameStr = escHtml(g.organizer_name || 'العميلة الكريمة');
+  const phoneStr = escHtml(g.organizer_phone || '');
+  const total = Number(g.estimated_total || 0);
+  const deposit = Number(g.deposit_paid || Math.round(total * 0.3) || 100);
+  const remaining = Math.max(0, total - deposit);
+  const isConfirmed = g.status === 'confirmed';
+  const participants = g.participants || [];
+
+  return `<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>عقد وفاتورة مناسبة — J Beauty Spa — ${ref}</title>
+  <style>
+    :root { --dusty-pink:#D9B7C0; --mauve-pink:#C9AEB6; --sage-green:#A7B79F; --rose-gold:#D4AF7C; --cream-bg:#EDE6E1; --text-dark:#6B6464; --plum:#3E2932; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:24px; background:var(--cream-bg); color:var(--plum); font-family:"IBM Plex Sans Arabic","Tahoma",sans-serif; }
+    .sheet { max-width:820px; margin:0 auto; background:#fff; border-radius:22px; overflow:hidden; border:1.5px solid rgba(212,175,124,.55); box-shadow:0 18px 48px rgba(62,41,50,.12); }
+    .top { background:linear-gradient(135deg,#FAF5F1,#EDE6E1); padding:28px 32px; border-bottom:2px solid var(--rose-gold); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+    .brand { display:flex; align-items:center; gap:14px; }
+    .brand img { width:58px; height:58px; border-radius:50%; border:1.5px solid var(--rose-gold); background:#fff; padding:3px; object-fit:contain; }
+    .brand h1 { margin:0; font-size:24px; color:var(--plum); }
+    .brand small { color:var(--text-dark); font-size:13px; }
+    .meta { text-align:left; font-size:13.5px; color:var(--text-dark); }
+    .status { display:inline-block; padding:5px 14px; border-radius:999px; font-weight:700; font-size:13px; margin-top:6px; }
+    .status.paid { background:var(--sage-green); color:#fff; }
+    .status.pending { background:var(--dusty-pink); color:var(--plum); }
+    .body { padding:28px 32px; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#FAF7F5; border:1px solid rgba(212,175,124,.35); border-radius:14px; padding:16px 20px; margin-bottom:22px; font-size:14px; }
+    table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+    th { background:var(--plum); color:#fff; padding:11px 14px; text-align:right; font-size:13.5px; }
+    td { padding:11px 14px; border-bottom:1px solid #EFE7E2; font-size:14px; }
+    .totals { max-width:340px; margin-right:auto; background:#FAF7F5; border:1px solid var(--rose-gold); border-radius:14px; padding:16px 18px; margin-bottom:24px; }
+    .tot-row { display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; }
+    .tot-row.grand { border-top:1px solid var(--rose-gold); padding-top:10px; margin-top:8px; font-size:18px; font-weight:700; color:var(--plum); }
+    .terms-box { background:#FAF8F6; border:1px dashed #D4AF7C; border-radius:12px; padding:16px 20px; font-size:13px; line-height:1.7; color:var(--text-dark); }
+    .actions { max-width:820px; margin:16px auto 0; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:999px; text-decoration:none; font-weight:700; font-size:14px; border:none; cursor:pointer; background:var(--plum); color:#fff; }
+    .btn.gold { background:linear-gradient(135deg,#D4AF7C,#B68B54); color:#fff; }
+    .foot { text-align:center; padding:18px 28px; background:#FAF7F5; border-top:1px solid #EFE7E2; color:var(--text-dark); font-size:12.5px; }
+    @media print { body { background:#fff; padding:0; } .actions { display:none; } .sheet { box-shadow:none; border:1px solid #ddd; } }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="top">
+      <div class="brand">
+        <img src="/assets/brand/official-logo.png" alt="J Beauty Spa">
+        <div>
+          <h1>J Beauty Spa</h1>
+          <small>سبا نسائي منزلي فاخر · المدينة المنورة</small>
+        </div>
+      </div>
+      <div class="meta">
+        <div><strong>وثيقة عقد وفاتورة مناسبة:</strong> <bdi>${invoiceNo}</bdi></div>
+        <div><strong>رقم طلب المناسبة:</strong> <bdi>${ref}</bdi></div>
+        <div><strong>الرقم الضريبي:</strong> <bdi>310000000000003</bdi></div>
+        <span class="status ${isConfirmed ? 'paid' : 'pending'}">
+          ${isConfirmed ? '✓ معتمد ومثبت رسمياً (العربون مسدد)' : '⏳ بانتظار سداد العربون وتأكيد التثبيت'}
+        </span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="info-grid">
+        <div><strong>المنسقة:</strong> ${nameStr}</div>
+        <div><strong>الجوال:</strong> <bdi dir="ltr">${phoneStr}</bdi></div>
+        <div><strong>تاريخ المناسبة:</strong> <bdi>${dateStr}</bdi> (${timeStr})</div>
+        <div><strong>الحي والموقع:</strong> ${areaStr} — المدينة المنورة</div>
+      </div>
+
+      <h3 style="margin:0 0 10px;color:var(--plum);font-size:16px">قائمة الضيفات والخدمات المعتمدة للجلسة:</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الضيفة / الصفة</th>
+            <th>الخدمات المختارة</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${participants.map((p, idx) => `
+            <tr>
+              <td>${idx + 1}</td>
+              <td><strong>${escHtml(p.label || `الضيفة ${idx + 1}`)}</strong></td>
+              <td>${(p.items || []).map((it) => escHtml(it.name_ar || it.name || '')).join(' + ') || 'عناية متكاملة'}</td>
+            </tr>
+          `).join('') || `<tr><td colspan="3">جلسة مناسبات مخصصة</td></tr>`}
+        </tbody>
+      </table>
+
+      <div class="totals">
+        <div class="tot-row"><span>إجمالي باقة المناسبة التقديري:</span><strong>${total} ر.س</strong></div>
+        <div class="tot-row" style="color:var(--sage-green)"><span>العربون ${isConfirmed ? 'المسدد' : 'المطلوب'}:</span><strong>${deposit} ر.س</strong></div>
+        <div class="tot-row grand"><span>المتبقي عند تقديم الخدمة:</span><strong>${remaining} ر.س</strong></div>
+      </div>
+
+      <div class="terms-box">
+        <strong>شروط واعتماد حجز جلسات المناسبات:</strong>
+        <div>• يتم تثبيت فريق الأخصائيات والأدوات المعقمة رسمياً فور تأكيد استلام العربون البنكي.</div>
+        <div>• المتبقي يسدد للأخصائيات عند الحضور وبدء تقديم الجلسة.</div>
+        <div>• جميع الأدوات مغلفة ومعقمة فردياً وفق أعلى معايير الصالونات العالمية للسيدات فقط في المدينة المنورة.</div>
+      </div>
+    </div>
+    <div class="foot">
+      <span>مؤسسة J Beauty Spa · المدينة المنورة · خدمة عملاء: 0533718324 · www.j-beauty.com</span>
+    </div>
+  </div>
+  <div class="actions">
+    <button type="button" class="btn gold" onclick="window.print()">🖨️ طباعة العقد والفاتورة</button>
+  </div>
+</body>
+</html>`;
+}

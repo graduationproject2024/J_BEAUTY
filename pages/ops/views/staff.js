@@ -101,6 +101,43 @@ export function staffView(d) {
     }
 
     <div class="ops-card">
+      <div class="ops-row" style="margin-bottom:12px">
+        <div>
+          <h2 style="margin:0 0 4px">${t('أخصائيات العناية الميدانية والجدولة', 'Field Practitioners & Scheduling Roster')}</h2>
+          <p class="muted" style="margin:0;font-size:13px">${t('هؤلاء الأخصائيات المعتمدات لتنفيذ الجلسات المنزلية والظهور للعميلة في إشعارات الموعد والتتبع.', 'Certified field specialists assigned to at-home visits and displayed to clients in tracking.')}</p>
+        </div>
+      </div>
+      <div class="ops-table-wrap">
+        <table class="ops-table">
+          <thead>
+            <tr>
+              <th>${t('الاسم', 'Name')}</th>
+              <th>${t('المسمى والتخصص', 'Title & Specialty')}</th>
+              <th>${t('الجوال', 'Mobile')}</th>
+              <th>${t('الحالة', 'Status')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(d.specialists || []).map((s) => `
+              <tr>
+                <td><strong>${esc(s.name_ar || s.name_en)}</strong></td>
+                <td>${esc(s.title_ar || 'أخصائية معتمدة')}</td>
+                <td><bdi dir="ltr">${esc(s.phone || '—')}</bdi></td>
+                <td><span class="badge ${s.active ? 'mfa-ok' : ''}">${s.active ? t('نشطة ومتاحة للجدولة', 'Active') : t('معطلة', 'Inactive')}</span></td>
+              </tr>
+            `).join('') || `<tr><td colspan="4" class="muted">${t('لا توجد أخصائيات مسجلات', 'No specialists')}</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+      <form id="ops-create-specialist-form" class="form-grid" style="margin-top:16px;align-items:end">
+        <label class="field">${t('اسم الأخصائية (عربي)', 'Specialist Name')}<input type="text" name="name_ar" required placeholder="مثال: ريم الحربي"></label>
+        <label class="field">${t('المسمى والتخصص', 'Title / Specialty')}<input type="text" name="title_ar" required value="أخصائية مساج وعناية معتمدة"></label>
+        <label class="field">${t('رقم الجوال', 'Mobile')}<input type="tel" name="phone" placeholder="05xxxxxxxx"></label>
+        <button type="submit" class="btn sage">${t('إضافة أخصائية جديدة', 'Add Specialist')}</button>
+      </form>
+    </div>
+
+    <div class="ops-card">
       <h2>${t('إضافة حساب موظفة / أخصائية جديدة', 'Create Staff Account')}</h2>
       <form id="ops-create-staff-form" class="form-grid" style="align-items:end">
         <label class="field">${t('الاسم الكامل', 'Full Name')}<input type="text" name="name" required></label>
@@ -303,6 +340,21 @@ export function bindStaff(renderFn) {
         btn.disabled = false;
       }
     };
+  });
+
+  $ops('#ops-create-specialist-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    e.submitter.disabled = true;
+    try {
+      await opsApi('/specialists', d);
+      await loadDashboard();
+      opsToast(t('تمت إضافة الأخصائية بنجاح 🌸', 'Specialist added successfully'));
+      renderFn();
+    } catch (err) {
+      opsToast(err.message);
+      e.submitter.disabled = false;
+    }
   });
 
   document.querySelectorAll('[data-staff-reset-mfa]').forEach((btn) => {

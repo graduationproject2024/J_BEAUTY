@@ -19,9 +19,10 @@ export function reconcileLoyalty(db, helpers, booking) {
     booking.id,
   ).n;
 
-  const eligible = booking.status === 'completed' && booking.payment_verified;
-  const netCents = Math.max(0, booking.paid_cents - (booking.refund_cents || 0));
-  const target = eligible ? Math.floor((netCents * booking.points_rate) / 100) : 0;
+  const eligible = booking.status === 'completed' && Boolean(booking.payment_verified);
+  const netCents = Math.max(0, (booking.paid_cents || (booking.paid_amount ? Math.round(booking.paid_amount * 100) : 0)) - (booking.refund_cents || 0));
+  const pointsRate = booking.points_rate || 1;
+  const target = eligible ? Math.floor((netCents * pointsRate) / 100) : 0;
   const delta = target - prior;
 
   if (!delta) return;

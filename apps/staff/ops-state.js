@@ -9,7 +9,7 @@ export const opsState = {
   mfa: { required: false, enabled: false, verified: false, setup_required: false, mode: 'optional' },
   customerOrigin: '',
   dashboard: null,
-  tab: 'overview',
+  tab: (window.location.hash.slice(1) || localStorage.getItem('jb_ops_tab') || 'overview'),
   bookingSearch: '',
   bookingStatus: '',
   bookingsPage: 1,

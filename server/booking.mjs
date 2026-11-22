@@ -328,10 +328,16 @@ export function createBooking(db, helpers, user, sessionId, body) {
 
   const finalTotal = Math.max(0, subtotal - discountAmount);
 
+  let customerUserId = user?.role === 'customer' ? user.id : null;
+  if (!customerUserId && clientPhone) {
+    const matchedCustomer = db.get("SELECT id FROM users WHERE role='customer' AND phone=?", clientPhone);
+    if (matchedCustomer) customerUserId = matchedCustomer.id;
+  }
+
   const booking = {
     id: uid(),
     reference: `J-${randomBytes(6).toString('hex').toUpperCase()}`,
-    user_id: user?.role === 'customer' ? user.id : null,
+    user_id: customerUserId,
     name: text(body.name, 100),
     phone: clientPhone,
     neighborhood: text(body.neighborhood, 150),
@@ -556,14 +562,34 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
       b.payment_method = body.payment_method;
     }
 
+    if (body.assigned_specialist_id !== undefined || body.assigned_staff_id !== undefined) {
+      const specId = body.assigned_specialist_id || body.assigned_staff_id;
+      if (specId) {
+        const spec = db.get('SELECT * FROM specialists WHERE id=?', specId);
+        if (spec) {
+          b.assigned_staff_id = spec.id;
+          b.assigned_staff_name = spec.name_ar;
+          b.specialist = { id: spec.id, name_ar: spec.name_ar, name_en: spec.name_en, title_ar: spec.title_ar, phone: spec.phone };
+        }
+      } else {
+        b.assigned_staff_id = null;
+        b.assigned_staff_name = null;
+        b.specialist = null;
+      }
+    }
+
     if (body.payment_verified !== undefined) {
       requireCapability(actorUser, 'payments.verify');
       if (typeof body.payment_verified !== 'boolean') fail('Invalid verification flag');
       if (b.payment_verified && !body.payment_verified) {
         fail('Use a refund to reverse verified payment');
       }
-      if (body.payment_verified && (!b.payment_method || b.paid_cents <= 0)) {
-        fail('Enter payment amount and method');
+      if (body.payment_verified) {
+        if (!b.payment_method) b.payment_method = 'bank_transfer';
+        if (!b.paid_cents || b.paid_cents <= 0) {
+          b.paid_amount = b.total;
+          b.paid_cents = Math.round(b.total * 100);
+        }
       }
       if (body.payment_verified && !b.payment_verified) {
         b.payment_verified_at = now();
@@ -576,13 +602,12 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
           b.status = 'confirmed';
         }
         if (!b.assigned_staff_id) {
-          try {
-            const autoAssign = autoAssignPractitioner(db, helpers, b);
-            if (autoAssign) {
-              b.assigned_staff_id = autoAssign.id;
-              b.assigned_staff_name = autoAssign.name;
-            }
-          } catch {}
+          const defaultSpec = db.get('SELECT * FROM specialists WHERE active=1 ORDER BY created_at ASC LIMIT 1');
+          if (defaultSpec) {
+            b.assigned_staff_id = defaultSpec.id;
+            b.assigned_staff_name = defaultSpec.name_ar;
+            b.specialist = { id: defaultSpec.id, name_ar: defaultSpec.name_ar, name_en: defaultSpec.name_en, title_ar: defaultSpec.title_ar, phone: defaultSpec.phone };
+          }
         }
       }
     }
