@@ -16,7 +16,7 @@ export function resolveDefaultDbPath() {
     if (!existsSync(tmpPath) && existsSync(seedDb)) {
       try {
         cpSync(seedDb, tmpPath);
-      } catch {}
+      } catch { }
     }
     return tmpPath;
   }
