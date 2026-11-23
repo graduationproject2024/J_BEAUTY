@@ -53,7 +53,7 @@ export const DEFAULT_SETTINGS = {
   capacity: 0,
   working_days: [0, 1, 2, 3, 4, 5, 6],
   opening_time: '09:00',
-  closing_time: '23:00',
+  closing_time: '22:00',
   blocked_dates: [],
   travel_buffer: 30,
   lead_hours: 12,

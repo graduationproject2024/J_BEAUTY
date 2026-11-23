@@ -10,19 +10,8 @@ import { fail } from './validation.mjs';
  * Refunds adjust points proportionally, rolling back atomically if balance would turn negative.
  */
 export function reconcileLoyalty(db, helpers, booking) {
-  let userId = booking.user_id;
-  if (!userId && booking.phone) {
-    const userMatch = db.get("SELECT id FROM users WHERE phone=? AND role='customer'", booking.phone);
-    if (userMatch) {
-      userId = userMatch.id;
-      booking.user_id = userId;
-      try {
-        db.run('UPDATE bookings SET user_id=? WHERE id=?', userId, booking.id);
-      } catch {}
-    }
-  }
-  if (!userId) return;
-  const user = db.get('SELECT * FROM users WHERE id=?', userId);
+  if (!booking.user_id) return;
+  const user = db.get('SELECT * FROM users WHERE id=?', booking.user_id);
   if (!user || user.role !== 'customer') return;
 
   const prior = db.get(
@@ -30,16 +19,15 @@ export function reconcileLoyalty(db, helpers, booking) {
     booking.id,
   ).n;
 
-  const isCancelled = booking.status === 'cancelled';
-  const eligible = !isCancelled && Boolean(booking.payment_verified);
-  const netCents = Math.max(0, (booking.paid_cents || (booking.paid_amount ? Math.round(booking.paid_amount * 100) : (booking.total ? Math.round(booking.total * 100) : 0))) - (booking.refund_cents || 0));
+  const eligible = booking.status === 'completed' && Boolean(booking.payment_verified);
+  const netCents = Math.max(0, (booking.paid_cents || (booking.paid_amount ? Math.round(booking.paid_amount * 100) : 0)) - (booking.refund_cents || 0));
   const pointsRate = booking.points_rate || 1;
   const target = eligible ? Math.floor((netCents * pointsRate) / 100) : 0;
   const delta = target - prior;
 
   if (!delta) return;
 
-  if (helpers.balance(userId) + delta < 0) {
+  if (helpers.balance(booking.user_id) + delta < 0) {
     fail(
       'Refund requires owner resolution: points were already redeemed. Reverse the related reward first.',
       409,
@@ -47,7 +35,7 @@ export function reconcileLoyalty(db, helpers, booking) {
   }
 
   helpers.recordLedger(
-    userId,
+    booking.user_id,
     booking.id,
     delta,
     `visit:${booking.id}:${uid()}`,

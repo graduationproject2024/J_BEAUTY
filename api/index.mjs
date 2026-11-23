@@ -7,49 +7,6 @@ import { createCustomerApp } from '../server/customer-server.mjs';
 import { createOpsApp } from '../server/ops-server.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const RAILWAY_URL = (process.env.RAILWAY_URL || 'https://jbeauty-production.up.railway.app').replace(/\/+$/, '');
-
-async function tryProxyToRailway(req, res, targetPath) {
-  const targetUrl = `${RAILWAY_URL}${targetPath}`;
-  const fwdHeaders = { ...req.headers };
-  delete fwdHeaders['host'];
-  delete fwdHeaders['content-length'];
-  fwdHeaders['x-forwarded-host'] = req.headers['host'] || 'j-spa.vercel.app';
-  fwdHeaders['x-forwarded-proto'] = 'https';
-
-  const method = req.method || 'GET';
-  const fetchOpts = {
-    method,
-    headers: fwdHeaders,
-    redirect: 'manual',
-    signal: AbortSignal.timeout(8000),
-  };
-
-  if (!['GET', 'HEAD'].includes(method.toUpperCase())) {
-    const chunks = [];
-    for await (const chunk of req) {
-      chunks.push(chunk);
-    }
-    if (chunks.length) {
-      fetchOpts.body = Buffer.concat(chunks);
-    }
-  }
-
-  const upstream = await fetch(targetUrl, fetchOpts);
-  for (const [key, val] of upstream.headers.entries()) {
-    if (key.toLowerCase() === 'transfer-encoding') continue;
-    res.setHeader(key, val);
-  }
-  const rawSetCookie = upstream.headers.getSetCookie?.() || upstream.headers.get('set-cookie');
-  if (rawSetCookie) {
-    res.setHeader('set-cookie', rawSetCookie);
-  }
-
-  res.statusCode = upstream.status;
-  const arrayBuffer = await upstream.arrayBuffer();
-  res.end(Buffer.from(arrayBuffer));
-  return true;
-}
 
 let cachedPlatform = null;
 
@@ -102,16 +59,6 @@ export default async function handler(req, res) {
     }
 
     const url = req.url || '/';
-
-    // On Vercel, forward API calls to the persistent Railway server first
-    if (process.env.VERCEL) {
-      try {
-        const proxied = await tryProxyToRailway(req, res, url);
-        if (proxied) return;
-      } catch (proxyErr) {
-        console.warn('Railway proxy attempt failed, falling back to local handler:', proxyErr?.message);
-      }
-    }
 
     // Route ops API requests to operations app
     if (url.startsWith('/api/ops')) {

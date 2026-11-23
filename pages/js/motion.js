@@ -95,7 +95,7 @@ export function renderSignatureBloomSVG(filledCount = 4, totalPetals = 8, lightM
         <div class="jb-medallion-beam" aria-hidden="true"></div>
         <div class="jb-medallion-ring" style="--petal-deg:${deg}deg">
           <div class="jb-medallion-core">
-            <img src="/J_BEAUTY/apps/customer/assets/brand/monogram.svg" alt="J Beauty Spa" class="jb-medallion-logo" style="width:58px;height:58px;object-fit:contain">
+            <img src="/assets/brand/monogram.svg" alt="J Beauty Spa" class="jb-medallion-logo" style="width:58px;height:58px;object-fit:contain">
           </div>
         </div>
       </div>

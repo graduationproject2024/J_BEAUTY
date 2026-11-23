@@ -22,7 +22,4 @@ cpSync(path.join(SHARED_DIR, 'tokens.css'), path.join(PUBLIC_DIR, 'shared', 'tok
 mkdirSync(PUBLIC_OPS_DIR, { recursive: true });
 cpSync(STAFF_DIR, PUBLIC_OPS_DIR, { recursive: true });
 
-// 4. Sync customer index.html to root index.html so root is always canonical
-cpSync(path.join(CUSTOMER_DIR, 'index.html'), path.join(ROOT, 'index.html'));
-
-console.log('Successfully synced apps/customer and apps/staff to public/ and root index.html!');
+console.log('Successfully synced apps/customer and apps/staff to public/!');

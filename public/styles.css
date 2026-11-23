@@ -438,22 +438,6 @@ p {
   color: var(--charcoal);
 }
 
-.ref-brand .ref-title {
-  font-family: 'Playfair Display', Didot, 'Cormorant Garamond', Georgia, serif;
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: #3D2630;
-}
-
-.ref-brand .ref-subtitle {
-  font-family: 'Amiri', 'Traditional Arabic', serif, var(--font-ar);
-  font-size: 13px;
-  color: #7E5B66;
-  letter-spacing: 0.01em;
-  font-weight: 500;
-}
-
 .brand-wordmark small {
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -470,47 +454,9 @@ p {
 .nav {
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-size: 14.5px;
+  gap: 22px;
+  font-size: 14px;
   font-weight: 500;
-}
-
-.nav a {
-  position: relative;
-  padding: 6px 2px;
-  color: #4A2828;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color 0.2s ease;
-  white-space: nowrap;
-}
-
-.nav a:hover,
-.nav a.active {
-  color: #3D2630;
-}
-
-.nav a.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  inset-inline: 0;
-  height: 2px;
-  background: #BA8D6B;
-  border-radius: 2px;
-}
-
-.nav-sep {
-  color: rgba(186, 141, 107, 0.45);
-  font-weight: 300;
-  user-select: none;
-  margin-inline: 2px;
-}
-
-@media (max-width: 1200px) and (min-width: 901px) {
-  .nav a.nav-item-more {
-    display: none;
-  }
 }
 
 .nav a {
@@ -800,275 +746,6 @@ button:disabled.btn {
   font-size: 13px;
   color: var(--ink-muted);
   margin-top: 2px;
-}
-
-/* ===== REFERENCE HERO QUIET LUXURY SANCTUARY ===== */
-.ref-hero {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  background: #FAF1EC linear-gradient(135deg, #FAF4EF 0%, #FAF0EC 40%, #F5DDD6 100%);
-  border: 1px solid rgba(212, 175, 124, 0.22);
-  border-radius: clamp(24px, 3.2vw, 42px);
-  overflow: hidden;
-  box-shadow: 0 20px 50px -15px rgba(90, 56, 68, 0.08);
-  margin-bottom: clamp(32px, 4vw, 54px);
-  padding: 0 !important;
-}
-
-.ref-hero-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  align-items: center;
-  min-height: 520px;
-  padding: clamp(36px, 4.5vw, 60px) clamp(24px, 4vw, 56px) 28px;
-  gap: clamp(24px, 3vw, 48px);
-  position: relative;
-}
-
-.ref-hero-copy {
-  max-width: 540px;
-  text-align: center;
-  margin-inline: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-}
-
-.ref-hero-title {
-  font-family: 'Noto Naskh Arabic', 'Amiri', 'Playfair Display', Georgia, serif;
-  font-weight: 600;
-  font-size: clamp(32px, 3.8vw, 50px);
-  line-height: 1.35;
-  color: #3D2630;
-  margin: 0 0 16px;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-}
-
-.ref-lotus-divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  width: 100%;
-  max-width: 320px;
-  margin: 8px auto 22px;
-  color: #BA8D6B;
-}
-
-.ref-lotus-wing {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(186, 141, 107, 0.45), transparent);
-}
-
-.ref-lotus-svg {
-  width: 52px;
-  height: 26px;
-  display: block;
-  flex-shrink: 0;
-  color: #C59B78;
-}
-
-.ref-hero-desc {
-  font-family: var(--font-ar), 'Segoe UI', system-ui, sans-serif;
-  font-size: clamp(15px, 1.4vw, 17.5px);
-  line-height: 1.85;
-  color: #553540;
-  margin: 0 0 28px;
-  max-width: 480px;
-}
-
-.ref-hero-desc p {
-  margin: 0 0 4px;
-}
-
-.ref-hero-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.ref-hero-btn {
-  background: #6F4551 !important;
-  border: 1.5px solid #6F4551 !important;
-  color: #FFFFFF !important;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 999px;
-  padding: 13px 36px;
-  min-height: 52px;
-  box-shadow: 0 10px 24px -6px rgba(111, 69, 81, 0.42);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-}
-
-.ref-hero-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px -6px rgba(111, 69, 81, 0.52);
-}
-
-.ref-cta-arrow {
-  font-size: 19px;
-  line-height: 1;
-  font-weight: 400;
-  margin-inline-start: 4px;
-}
-
-.ref-hero-link {
-  font-size: 15.5px;
-  font-weight: 600;
-  color: #3D2630;
-  text-decoration: underline;
-  text-underline-offset: 7px;
-  text-decoration-color: #BA8D6B;
-  transition: color 0.2s ease, text-decoration-color 0.2s ease;
-}
-
-.ref-hero-link:hover {
-  color: #6F4551;
-  text-decoration-color: #6F4551;
-}
-
-.ref-hero-visual {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.ref-hero-photo {
-  width: 100%;
-  height: 100%;
-  max-height: 560px;
-  object-fit: cover;
-  object-position: center bottom;
-  border-radius: 24px;
-  display: block;
-  box-shadow: 0 16px 40px -12px rgba(111, 76, 72, 0.16);
-}
-
-/* Bottom 3-Pillar Trust Strip */
-.ref-trust-strip {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto 1fr;
-  align-items: center;
-  justify-items: center;
-  border-top: 1px solid rgba(197, 155, 120, 0.28);
-  padding: 22px 32px 24px;
-  position: relative;
-  background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(10px);
-}
-
-.ref-trust-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-  z-index: 2;
-}
-
-.ref-trust-icon {
-  width: 36px;
-  height: 36px;
-  color: #BA8D6B;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ref-trust-icon svg {
-  width: 32px;
-  height: 32px;
-}
-
-.ref-trust-label {
-  font-size: 15px;
-  font-weight: 600;
-  color: #3D2630;
-  letter-spacing: -0.01em;
-}
-
-.ref-trust-divider {
-  width: 1px;
-  height: 44px;
-  background: rgba(197, 155, 120, 0.35);
-}
-
-.ref-trust-watermark {
-  position: absolute;
-  bottom: 0;
-  inset-inline-end: 8px;
-  width: 110px;
-  height: 80px;
-  color: #C59B78;
-  pointer-events: none;
-  opacity: 0.45;
-  z-index: 1;
-}
-
-@media (max-width: 900px) {
-  .ref-hero-grid {
-    grid-template-columns: 1fr;
-    padding: 24px 16px 20px;
-    gap: 22px;
-    text-align: center;
-  }
-  .ref-hero-visual {
-    order: -1;
-    margin: 0 auto;
-    max-width: 380px;
-    width: 100%;
-  }
-  .ref-hero-photo {
-    aspect-ratio: 16 / 10;
-    max-height: 230px;
-    border-radius: 18px;
-    object-position: center 25%;
-  }
-  .ref-hero-title {
-    font-size: 26px;
-    line-height: 1.35;
-  }
-  .ref-hero-desc {
-    font-size: 14.5px;
-    line-height: 1.75;
-  }
-  .ref-trust-strip {
-    grid-template-columns: 1fr auto 1fr auto 1fr;
-    gap: 6px;
-    padding: 16px 8px;
-  }
-  .ref-trust-col {
-    gap: 5px;
-  }
-  .ref-trust-icon {
-    width: 26px;
-    height: 26px;
-  }
-  .ref-trust-icon svg {
-    width: 24px;
-    height: 24px;
-  }
-  .ref-trust-label {
-    font-size: 12.5px;
-  }
-  .ref-trust-divider {
-    height: 30px;
-  }
-  .nav-sep {
-    display: none !important;
-  }
 }
 
 /* ===== BENEFITS STRIP ===== */
@@ -4966,8 +4643,8 @@ dialog::backdrop {
 
 /* ===== J BEAUTY SPA BRAND & WHEEL OF REWARDS EXTENSIONS ===== */
 .brand-official-logo {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   flex-shrink: 0;
   border-radius: 50%;
@@ -4985,8 +4662,8 @@ dialog::backdrop {
 
 @media (max-width: 640px) {
   .brand-official-logo {
-    width: 52px;
-    height: 52px;
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -5227,47 +4904,6 @@ body {
   color: var(--plum) !important;
   border: 1.5px solid var(--rose-gold) !important;
   font-weight: 600 !important;
-}
-
-/* --- High-Contrast Submit and Action Buttons Guarantee --- */
-.form-next-btn,
-button[type="submit"].btn,
-.btn.form-next-btn {
-  background: #3E2932 !important;
-  color: #FFFFFF !important;
-  font-weight: 700 !important;
-  border: 1.5px solid #3E2932 !important;
-  box-shadow: 0 4px 14px rgba(62, 41, 50, 0.28) !important;
-}
-.form-next-btn:hover,
-button[type="submit"].btn:hover {
-  background: #523844 !important;
-  color: #FFFFFF !important;
-  border-color: #523844 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(62, 41, 50, 0.35) !important;
-}
-
-/* --- Quiet Luxury Bespoke Textured Card Pattern --- */
-.card,
-.service-card,
-.package-card,
-.review-card,
-.mood-match-card,
-.occasion-type-card,
-.occasion-guest-card,
-.jb-loyalty-step,
-.timeline-step,
-.mood-btn,
-.mood-card {
-  background-color: #FFFFFF;
-  background-image: 
-    radial-gradient(circle at 100% 0%, rgba(212, 175, 124, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 0% 100%, rgba(184, 137, 150, 0.06) 0%, transparent 50%),
-    url("data:image/svg+xml,%3Csvg width='52' height='52' viewBox='0 0 52 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23D4AF7C' fill-opacity='0.035' fill-rule='evenodd'%3E%3Cpath d='M26 0l5 15 15 5-15 5-5 15-5-15-15-5 15-5z'/%3E%3Ccircle cx='26' cy='26' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
-  background-repeat: repeat;
-  border: 1px solid rgba(212, 175, 124, 0.35);
-  box-shadow: 0 4px 18px rgba(80, 60, 69, 0.05);
 }
 .jb-quiet-link:hover {
   background: var(--plum) !important;
@@ -5712,69 +5348,41 @@ button[type="submit"].btn:hover {
 }
 
 /* ===== LUXURY BOOKING TRACKING STEPPER & BADGES ===== */
-@keyframes jbTrackPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(212, 175, 124, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(212, 175, 124, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(212, 175, 124, 0);
-  }
-}
-
-.track-stepper-wrap {
-  margin: 22px 0 28px;
-  position: relative;
-}
 .track-stepper {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   position: relative;
+  margin: 24px 0 28px;
 }
-.track-progress-bar {
+.track-stepper::before {
+  content: '';
   position: absolute;
-  top: 16px;
-  right: 28px;
-  left: 28px;
-  height: 3px;
-  background: rgba(212, 175, 124, 0.25);
+  top: 15px;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: rgba(212, 175, 124, 0.3);
   z-index: 1;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.track-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #7E9676, #D4AF7C, #6F4551);
-  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: 4px;
 }
 .track-step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   position: relative;
   z-index: 2;
   flex: 1;
   text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-.track-step:hover {
-  transform: translateY(-2px);
 }
 .track-step span {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-dark);
   font-weight: 500;
-  transition: color 0.2s ease;
 }
 .track-dot {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--cream-bg);
   border: 2px solid rgba(212, 175, 124, 0.5);
@@ -5784,13 +5392,13 @@ button[type="submit"].btn:hover {
   font-size: 13px;
   font-weight: 700;
   color: var(--text-dark);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s ease;
 }
 .track-step.active .track-dot {
   background: var(--plum);
   border-color: var(--rose-gold);
   color: #FFFFFF;
-  animation: jbTrackPulse 2s infinite;
+  box-shadow: 0 0 0 4px rgba(212, 175, 124, 0.25);
 }
 .track-step.active span {
   color: var(--plum);
@@ -5804,19 +5412,6 @@ button[type="submit"].btn:hover {
 .track-step.completed span {
   color: var(--sage-deep);
   font-weight: 600;
-}
-.track-milestone-card {
-  margin-top: 16px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  background: rgba(250, 241, 236, 0.8);
-  border: 1px solid rgba(212, 175, 124, 0.35);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13.5px;
-  color: var(--plum);
-  animation: fadeIn 0.3s ease-out;
 }
 
 .badge-pending {

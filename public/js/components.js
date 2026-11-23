@@ -43,7 +43,7 @@ export function header() {
     ['home', 'الرئيسية', 'Home'],
     ['services', 'الخدمات', 'Services'],
     ['packages', 'الباقات', 'Packages'],
-    ['atelier', 'أنامل الأظافر', 'Nail Artistry'],
+    ['atelier', 'أتيليه الأظافر', 'Nail Atelier'],
     ['occasions', 'المناسبات', 'Occasions'],
     ['gifts', 'أهدي لحظة عناية', 'Gift a Ritual'],
     ['petals', 'بتلات J', 'J Petals'],
@@ -86,19 +86,18 @@ export function header() {
     ${annHtml}
     <div class="header-shell">
       <header class="wrap header">
-        <a class="brand ref-brand" href="${href('home')}">
-          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="58" height="58">
+        <a class="brand" href="${href('home')}">
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
           <span class="brand-wordmark">
-            <strong class="ref-title">J Beauty Spa</strong>
-            <small class="ref-subtitle">${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
+            <strong>J Beauty Spa</strong>
+            <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
           </span>
         </a>
         <nav class="nav" id="nav" aria-label="${t('التنقل الرئيسي', 'Main navigation')}">
           ${navLinks
             .map(
-              ([r, ar, en], idx) =>
-                `<a href="${href(r)}" class="${cur === r ? 'active' : ''} ${idx < 4 ? 'nav-item-ref' : 'nav-item-more'}">${t(ar, en)}</a>` +
-                (idx < 3 ? `<span class="nav-sep" aria-hidden="true">|</span>` : ''),
+              ([r, ar, en]) =>
+                `<a href="${href(r)}" class="${cur === r ? 'active' : ''}">${t(ar, en)}</a>`,
             )
             .join('')}
           <div class="nav-mobile-cta">
@@ -748,13 +747,13 @@ export function localizeError(msg) {
   const lower = s.toLowerCase();
 
   const dict = {
-    'outside working hours': t('الموعد المختار خارج مواعيد العمل المعتمدة (يومياً من 9:00 صباحاً حتى 11:00 مساءً). يرجى اختيار موعد يتسع لمدة الجلسة.', 'The selected appointment is outside working hours (9:00 AM to 11:00 PM). Please select a slot that accommodates the session duration.'),
+    'outside working hours': t('الموعد المختار خارج مواعيد العمل المعتمدة (يومياً من 9:00 صباحاً حتى 10:00 مساءً).', 'The selected appointment is outside working hours (9:00 AM to 10:00 PM).'),
     'appointment is too soon': t('نرجو اختيار موعد يبعد ساعتين على الأقل من الآن لإتاحة التجهيز والوصول للأخصائية.', 'Please select a slot at least 2 hours in advance.'),
     'date is unavailable': t('هذا التاريخ غير متاح للحجوزات حالياً، يرجى اختيار تاريخ آخر.', 'This date is currently unavailable for booking.'),
     'invalid date or time': t('يرجى تحديد تاريخ ووقت صحيحين.', 'Invalid date or time format.'),
     'invalid date': t('التاريخ المختار غير صالح.', 'Invalid date selected.'),
     'invalid time': t('الوقت المختار غير صالح.', 'Invalid time selected.'),
-    'outside operating hours': t('الموعد المختار خارج ساعات العمل (من 9:00 ص إلى 11:00 م).', 'Outside operating hours (9:00 AM to 11:00 PM).'),
+    'outside operating hours': t('الموعد خارج ساعات العمل (من 9:00 ص إلى 10:00 م).', 'Outside operating hours.'),
     'neighborhood is outside configured service areas': t('نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.', 'Neighborhood is outside service coverage in Al Madinah.'),
     'assigned practitioner has an overlapping appointment during this window': t('الأخصائية المختارة مرتبطة بموعد آخر خلال هذه الفترة.', 'Practitioner conflict during this window.'),
     'assigned practitioner has an overlapping appointment or travel buffer during this window': t('الأخصائية المختارة لديها موعد أو وقت انتقال خلال هذه الفترة.', 'Practitioner schedule or travel conflict.'),

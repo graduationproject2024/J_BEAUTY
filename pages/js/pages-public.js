@@ -91,88 +91,32 @@ export function home() {
   return `
     <main id="main">
       <div class="wrap">
-        <!-- 1. Pure Quiet-Luxury Reference Hero -->
-        <section class="hero ref-hero" id="hero">
-          <div class="ref-hero-grid">
-            <div class="hero-copy ref-hero-copy">
-              <h1 class="ref-hero-title">${t('جمالك . راحتك .<br>لحظتك الخاصة في بيتك .', 'Your Beauty . Your Comfort .<br>Your Private Moment At Home .')}</h1>
-              
-              <div class="ref-lotus-divider" aria-hidden="true">
-                <span class="ref-lotus-wing"></span>
-                <svg class="ref-lotus-svg" viewBox="0 0 64 32" fill="none" stroke="currentColor">
-                  <path d="M32 4 C28 13 22 22 32 28 C42 22 36 13 32 4 Z" stroke-width="1.3" stroke-linecap="round"/>
-                  <path d="M32 13 C24 14 15 19 19 26 C25 27 29 24 32 22" stroke-width="1.3" stroke-linecap="round"/>
-                  <path d="M32 13 C40 14 49 19 45 26 C39 27 35 24 32 22" stroke-width="1.3" stroke-linecap="round"/>
-                  <path d="M32 18 C20 19 11 23 16 28 C22 29 27 27 32 25" stroke-width="1.1" stroke-linecap="round"/>
-                  <path d="M32 18 C44 19 53 23 48 28 C42 29 37 27 32 25" stroke-width="1.1" stroke-linecap="round"/>
-                </svg>
-                <span class="ref-lotus-wing"></span>
-              </div>
-
-              <div class="ref-hero-desc">
-                <p>${t('لأنك تستحقين وقتاً لنفسك.', 'Because you deserve time for yourself.')}</p>
-                <p>${t('استمتعي بتجربة عناية منزلية فاخرة،', 'Enjoy a luxurious home sanctuary experience,')}</p>
-                <p>${t('تقدمها مختصات محترفات في أجواء تجمع', 'crafted by professional specialists in an atmosphere')}</p>
-                <p>${t('بين الراحة والخصوصية والدلال.', 'blending comfort, complete privacy, and pampering.')}</p>
-              </div>
-
-              <div class="ref-hero-actions">
-                <a class="btn ref-hero-btn" href="${href('booking')}">${t('احجزي موعدك', 'Book your moment')} <span class="ref-cta-arrow" aria-hidden="true">›</span></a>
-                <a class="ref-hero-link" href="${href('services')}">${t('اكتشفي خدماتنا', 'Discover our rituals')}</a>
-              </div>
+        <!-- 1. Premium Cinematic Hero -->
+        <section class="hero">
+          <div class="hero-copy">
+            <span class="eyebrow">${t('للسيدات فقط · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</span>
+            <h1>${t('جمالك. طقوسك.<br>لحظتك الخاصة في بيتك.', 'Your Beauty.<br>Your Ritual. Your Moment.')}</h1>
+            <p class="hero-lead">${t(
+              'عناية منزلية نسائية فاخرة من المساج إلى أتيليه الأظافر والجل — تصل إلى منزلك في المدينة المنورة بتفاصيل هادئة وتأكيد شخصي.',
+              'Quiet-luxury massage, nail artistry, and botanical home spa rituals delivered across Madinah with personal team confirmation.',
+            )}</p>
+            <div class="hero-actions">
+              <a class="btn" href="${href('booking')}">${t('احجزي موعدك', 'Book your moment')}</a>
+              <a class="text-link" href="${href('services')}">${t('اكتشفي خدماتنا (13)', 'Explore all rituals')}</a>
             </div>
-
-            <div class="hero-visual ref-hero-visual">
-              <img src="/J_BEAUTY/apps/customer/assets/images/hero-reference-sanctuary.png" alt="${t('أجواء سبا نسائي منزلي فاخر مع باقة هيدرانجيا ومناشف قطنية مطرزة بحرف J وشموع رخامية هادئة', 'Luxury quiet home spa sanctuary with fresh flowers, monogrammed towels, and glowing candle')}" class="ref-hero-photo">
+            <div class="hero-trust">
+              <span>✓ ${t('للسيدات فقط', 'Women only')}</span>
+              <span>✓ ${t('تأكيد يدوي شخصي', 'Personal team confirmation')}</span>
+              <span>✓ ${t('أتيليه أظافر تفاعلي', 'Interactive Nail Atelier')}</span>
             </div>
           </div>
-
-          <!-- Bottom Trust Strip (3 Pillars matching reference) -->
-          <div class="ref-trust-strip">
-            <div class="ref-trust-col">
-              <div class="ref-trust-icon">
-                <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.3">
-                  <path d="M18 4 C13 4 9.5 8 9.5 13.5 C9.5 18 11.5 21 14 22 C13 24 10.5 26.5 7 29.5" stroke-linecap="round"/>
-                  <path d="M18 4 C23 4 25.5 8 25.5 13.5 C25.5 18 23.5 22 23 29.5" stroke-linecap="round"/>
-                  <path d="M14.5 14 C15.5 16 17 17 19 17" stroke-linecap="round"/>
-                  <path d="M17.5 21.5 C16.5 24 17 26.5 19 29.5" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <span class="ref-trust-label">${t('للسيدات فقط', 'Women Only')}</span>
+          <div class="hero-visual">
+            <div class="hero-arch">
+              <img src="/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
             </div>
-
-            <div class="ref-trust-divider" aria-hidden="true"></div>
-
-            <div class="ref-trust-col">
-              <div class="ref-trust-icon">
-                <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.3">
-                  <path d="M18 4 L28 8.5 C28 19.5 22.5 27 18 30 C13.5 27 8 19.5 8 8.5 Z" stroke-linejoin="round"/>
-                  <path d="M13 17.5 L16.5 21 L23 14" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <span class="ref-trust-label">${t('تأكيد يدوي للحجز', 'Manual Booking Confirmation')}</span>
-            </div>
-
-            <div class="ref-trust-divider" aria-hidden="true"></div>
-
-            <div class="ref-trust-col">
-              <div class="ref-trust-icon">
-                <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.3">
-                  <path d="M6 15 L18 5 L30 15 V28 C30 29.1 29.1 30 28 30 H8 C6.9 30 6 29.1 6 28 Z" stroke-linejoin="round"/>
-                  <path d="M18 16 C16.2 13.8 13.2 14.8 13.2 17.2 C13.2 20.2 18 24 18 24 C18 24 22.8 20.2 22.8 17.2 C22.8 14.8 19.8 13.8 18 16 Z" fill="none" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <span class="ref-trust-label">${t('عناية في منزلك', 'Care In Your Home')}</span>
-            </div>
-
-            <!-- Corner botanical ornament watermark -->
-            <div class="ref-trust-watermark" aria-hidden="true">
-              <svg viewBox="0 0 120 90" fill="none" stroke="currentColor">
-                <path d="M115 85 C85 80 60 55 55 20 C65 50 90 70 115 85 Z" stroke-width="0.9" opacity="0.32"/>
-                <path d="M115 85 C95 55 75 32 40 15 C70 32 90 60 115 85 Z" stroke-width="0.9" opacity="0.32"/>
-                <path d="M115 85 C100 68 85 50 68 38 C85 55 102 72 115 85 Z" stroke-width="0.9" opacity="0.32"/>
-                <path d="M115 85 C110 50 90 25 70 5 C88 28 105 58 115 85 Z" stroke-width="0.9" opacity="0.32"/>
-              </svg>
+            <div class="hero-seal">
+              <strong>J Beauty · ${t('المدينة المنورة', 'AL MADINAH')}</strong>
+              <span>${t('لحظتك الخاصة… في راحة بيتك', 'Your Moment of Beauty, At Home.')}</span>
             </div>
           </div>
         </section>
@@ -285,7 +229,7 @@ export function home() {
             <div class="gift-spotlight-preview" aria-hidden="true">
               <div class="mini-foil-card">
                 <div class="mini-foil-top">
-                  <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="mini-foil-logo">
+                  <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="mini-foil-logo">
                   <span class="mini-foil-badge">VIP GIFT</span>
                 </div>
                 <div class="mini-foil-title">J Beauty Home Spa</div>
@@ -354,7 +298,7 @@ export function home() {
 
         <!-- 8. Final Booking CTA -->
         <section class="cta-band" data-reveal>
-          <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="cta-band-emblem">
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="cta-band-emblem">
           <span class="eyebrow">${t('✦ تجربة دلال منزلية استثنائية · سيدات فقط ✦', 'EXCLUSIVE WOMEN’S HOME SPA SANCTUARY')}</span>
           <h2>${t('احجزي طقسك المنزلي الفاخر', 'Reserve your calm moment at home')}</h2>
           <p>${t('خدمات سبا ومساج وعناية أظافر متكاملة تصلك إلى راحة منزلك، بأيدي خبيرات محترفات، حقائب وأدوات معقمة بالكامل وفق أعلى معايير الصالونات العالمية، لتستمتعي بلحظة هدوء واسترخاء تليق بك.', 'Curated home spa, therapeutic massage, and couture nail rituals delivered to your door with hospital-grade sanitization and five-star care.')}</p>
