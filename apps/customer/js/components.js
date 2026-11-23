@@ -94,24 +94,13 @@ export function header() {
           </span>
         </a>
         <nav class="nav" id="nav" aria-label="${t('التنقل الرئيسي', 'Main navigation')}">
-          <div class="nav-links-ref" role="navigation">
-            <a href="${href('home')}" class="${cur === 'home' ? 'active' : ''}">${t('الرئيسية', 'Home')}</a>
-            <span class="nav-sep" aria-hidden="true">|</span>
-            <a href="${href('services')}" class="${cur === 'services' ? 'active' : ''}">${t('الخدمات', 'Services')}</a>
-            <span class="nav-sep" aria-hidden="true">|</span>
-            <a href="${href('packages')}" class="${cur === 'packages' ? 'active' : ''}">${t('الباقات', 'Packages')}</a>
-            <span class="nav-sep" aria-hidden="true">|</span>
-            <a href="${href('atelier')}" class="${cur === 'atelier' ? 'active' : ''}">${t('أنامل الأظافر', 'Nail Artistry')}</a>
-          </div>
-          <div class="nav-extra-links">
-            ${navLinks
-              .slice(4)
-              .map(
-                ([r, ar, en]) =>
-                  `<a href="${href(r)}" class="${cur === r ? 'active' : ''}">${t(ar, en)}</a>`,
-              )
-              .join('')}
-          </div>
+          ${navLinks
+            .map(
+              ([r, ar, en], idx) =>
+                `<a href="${href(r)}" class="${cur === r ? 'active' : ''} ${idx < 4 ? 'nav-item-ref' : 'nav-item-more'}">${t(ar, en)}</a>` +
+                (idx < 3 ? `<span class="nav-sep" aria-hidden="true">|</span>` : ''),
+            )
+            .join('')}
           <div class="nav-mobile-cta">
             <a class="btn" href="${href('booking')}">${t('احجزي موعدك الآن', 'Book your moment')}</a>
           </div>

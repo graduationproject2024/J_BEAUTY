@@ -98,13 +98,15 @@ export function home() {
               <h1 class="ref-hero-title">${t('جمالك . راحتك .<br>لحظتك الخاصة في بيتك .', 'Your Beauty . Your Comfort .<br>Your Private Moment At Home .')}</h1>
               
               <div class="ref-lotus-divider" aria-hidden="true">
-                <svg class="ref-lotus-svg" viewBox="0 0 72 36" fill="none" stroke="currentColor">
-                  <path d="M36 4 C32 14 26 24 36 30 C46 24 40 14 36 4 Z" stroke-width="1.3" stroke-linecap="round"/>
-                  <path d="M36 14 C27 15 17 21 22 28 C28 29 33 26 36 24" stroke-width="1.3" stroke-linecap="round"/>
-                  <path d="M36 14 C45 15 55 21 50 28 C44 29 39 26 36 24" stroke-width="1.3" stroke-linecap="round"/>
-                  <path d="M36 19 C23 20 12 25 18 30 C24 31 30 29 36 27" stroke-width="1.1" stroke-linecap="round"/>
-                  <path d="M36 19 C49 20 60 25 54 30 C48 31 42 29 36 27" stroke-width="1.1" stroke-linecap="round"/>
+                <span class="ref-lotus-wing"></span>
+                <svg class="ref-lotus-svg" viewBox="0 0 64 32" fill="none" stroke="currentColor">
+                  <path d="M32 4 C28 13 22 22 32 28 C42 22 36 13 32 4 Z" stroke-width="1.3" stroke-linecap="round"/>
+                  <path d="M32 13 C24 14 15 19 19 26 C25 27 29 24 32 22" stroke-width="1.3" stroke-linecap="round"/>
+                  <path d="M32 13 C40 14 49 19 45 26 C39 27 35 24 32 22" stroke-width="1.3" stroke-linecap="round"/>
+                  <path d="M32 18 C20 19 11 23 16 28 C22 29 27 27 32 25" stroke-width="1.1" stroke-linecap="round"/>
+                  <path d="M32 18 C44 19 53 23 48 28 C42 29 37 27 32 25" stroke-width="1.1" stroke-linecap="round"/>
                 </svg>
+                <span class="ref-lotus-wing"></span>
               </div>
 
               <div class="ref-hero-desc">
@@ -121,9 +123,7 @@ export function home() {
             </div>
 
             <div class="hero-visual ref-hero-visual">
-              <div class="ref-hero-image-wrap">
-                <img src="/assets/images/hero-reference-sanctuary.png" alt="${t('صينية سبا رخامية فاخرة مع مناشف قطنية وزهور هيدرانجيا وردية وشموع هادئة', 'Luxury home spa sanctuary with fresh pink hydrangeas, monogrammed towels, and candle')}" class="ref-hero-img">
-              </div>
+              <img src="/assets/images/hero-reference-sanctuary.png" alt="${t('أجواء سبا نسائي منزلي فاخر مع باقة هيدرانجيا ومناشف قطنية مطرزة بحرف J وشموع رخامية هادئة', 'Luxury quiet home spa sanctuary with fresh flowers, monogrammed towels, and glowing candle')}" class="ref-hero-photo">
             </div>
           </div>
 
