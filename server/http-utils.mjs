@@ -26,7 +26,7 @@ export const MIME_TYPES = {
 export const IMMUTABLE_EXTS = new Set(['.woff2', '.woff', '.webp', '.avif', '.png', '.jpg', '.jpeg']);
 
 export const DEFAULT_CSP =
-  "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+  "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self' https://*.railway.app https://*.vercel.app https://*.j-beauty.com https://*.j-beauty-spa.com https://j-beauty.com https://j-beauty-spa.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
 
 export function setBaseSecurityHeaders(res, { secure, noindex = false, referrerPolicy = 'strict-origin-when-cross-origin' } = {}) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -103,10 +103,46 @@ function safeStrEqual(a, b) {
   return timingSafeEqual(ba, bb);
 }
 
+export function isTrustedHost(host) {
+  if (!host || typeof host !== 'string') return false;
+  const h = host.toLowerCase().split(':')[0].trim();
+  if (!h) return false;
+  if (h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0') return true;
+  if (h === 'j-beauty.com' || h.endsWith('.j-beauty.com')) return true;
+  if (h === 'j-beauty-spa.com' || h.endsWith('.j-beauty-spa.com')) return true;
+  if (h === 'jbeauty-production.up.railway.app' || (h.endsWith('.railway.app') && (h.includes('jbeauty') || h.includes('j-beauty')))) return true;
+  if (h.endsWith('.vercel.app') && (h.startsWith('j-beauty') || h.startsWith('jbeauty'))) return true;
+  return false;
+}
+
+export function isTrustedOrigin(origin, allowed = new Set()) {
+  if (!origin || typeof origin !== 'string') return false;
+  if (allowed.has(origin)) return true;
+  try {
+    const url = new URL(origin);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    return isTrustedHost(url.host);
+  } catch {
+    return false;
+  }
+}
+
 export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [], sessionId = '', maxBytes = 50000) {
-  const origin = req.headers.origin;
   const allowed = new Set(allowedOrigins.filter(Boolean));
-  if (origin && !allowed.has(origin)) {
+
+  if (req.headers['x-forwarded-host']) {
+    const fwdHost = String(req.headers['x-forwarded-host']).split(',')[0].trim();
+    if (fwdHost && req.headers.host && fwdHost !== req.headers.host) {
+      if (!isTrustedHost(fwdHost)) {
+        fail('Host header mismatch', 403);
+      }
+      const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
+      allowed.add(`${proto}://${fwdHost}`);
+    }
+  }
+
+  const origin = req.headers.origin;
+  if (origin && !allowed.has(origin) && !isTrustedOrigin(origin, allowed)) {
     fail('Cross-origin request rejected', 403);
   }
   if (req.headers['sec-fetch-site'] === 'cross-site') {
@@ -116,17 +152,11 @@ export async function parseMutationRequest(req, expectedCsrf, allowedOrigins = [
   if (referer) {
     try {
       const refOrigin = new URL(referer).origin;
-      if (refOrigin && !allowed.has(refOrigin)) {
+      if (refOrigin && !allowed.has(refOrigin) && !isTrustedOrigin(refOrigin, allowed)) {
         fail('Cross-origin referer rejected', 403);
       }
     } catch {
       fail('Invalid referer header', 400);
-    }
-  }
-  if (req.headers['x-forwarded-host']) {
-    const fwdHost = String(req.headers['x-forwarded-host']).split(',')[0].trim();
-    if (fwdHost && req.headers.host && fwdHost !== req.headers.host) {
-      fail('Host header mismatch', 403);
     }
   }
   const clientCsrf = req.headers['x-csrf-token'];

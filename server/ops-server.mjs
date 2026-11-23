@@ -33,6 +33,7 @@ import { isStaffRole } from './authorization/permissions.mjs';
 import { fail, phone, text } from './validation.mjs';
 import { handleOpsRoute } from './staff/ops.mjs';
 import {
+  isTrustedOrigin,
   parseMutationRequest,
   resolveSafeSubpath,
   serveFileResponse,
@@ -99,11 +100,17 @@ export function createOpsApp({
     setBaseSecurityHeaders(res, { secure, noindex: true, referrerPolicy: 'no-referrer' });
 
     const send = (data, status = 200) => {
-      res.writeHead(status, {
+      const origin = req.headers.origin;
+      const headers = {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'no-store',
         'X-Robots-Tag': 'noindex, nofollow',
-      });
+      };
+      if (origin && isTrustedOrigin(origin)) {
+        headers['Access-Control-Allow-Origin'] = origin;
+        headers['Access-Control-Allow-Credentials'] = 'true';
+      }
+      res.writeHead(status, headers);
       res.end(JSON.stringify(data));
     };
 
@@ -112,6 +119,22 @@ export function createOpsApp({
       const route = url.pathname;
       const method = req.method;
       const query = Object.fromEntries(url.searchParams.entries());
+
+      if (method === 'OPTIONS') {
+        const origin = req.headers.origin;
+        if (origin && isTrustedOrigin(origin)) {
+          res.writeHead(204, {
+            'Access-Control-Allow-Origin': origin,
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, X-CSRF-Token',
+            'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Max-Age': '86400',
+          });
+          return res.end();
+        }
+        res.writeHead(204);
+        return res.end();
+      }
 
       if (route === '/robots.txt') {
         res.writeHead(200, {
@@ -244,7 +267,15 @@ export function createOpsApp({
         body = await parseMutationRequest(
           req,
           session.csrf,
-          [expectedOrigin, process.env.OPS_ORIGIN],
+          [
+            expectedOrigin,
+            process.env.OPS_ORIGIN,
+            'https://www.j-beauty.com',
+            'https://j-beauty.com',
+            'https://j-beauty-spa.com',
+            'https://www.j-beauty-spa.com',
+            'https://jbeauty-production.up.railway.app',
+          ],
           sid,
           isReceiptRoute ? 2_900_000 : 50000,
         );
