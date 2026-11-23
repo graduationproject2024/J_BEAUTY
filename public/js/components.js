@@ -748,13 +748,13 @@ export function localizeError(msg) {
   const lower = s.toLowerCase();
 
   const dict = {
-    'outside working hours': t('الموعد المختار خارج مواعيد العمل المعتمدة (يومياً من 9:00 صباحاً حتى 10:00 مساءً).', 'The selected appointment is outside working hours (9:00 AM to 10:00 PM).'),
+    'outside working hours': t('الموعد المختار خارج مواعيد العمل المعتمدة (يومياً من 9:00 صباحاً حتى 11:00 مساءً). يرجى اختيار موعد يتسع لمدة الجلسة.', 'The selected appointment is outside working hours (9:00 AM to 11:00 PM). Please select a slot that accommodates the session duration.'),
     'appointment is too soon': t('نرجو اختيار موعد يبعد ساعتين على الأقل من الآن لإتاحة التجهيز والوصول للأخصائية.', 'Please select a slot at least 2 hours in advance.'),
     'date is unavailable': t('هذا التاريخ غير متاح للحجوزات حالياً، يرجى اختيار تاريخ آخر.', 'This date is currently unavailable for booking.'),
     'invalid date or time': t('يرجى تحديد تاريخ ووقت صحيحين.', 'Invalid date or time format.'),
     'invalid date': t('التاريخ المختار غير صالح.', 'Invalid date selected.'),
     'invalid time': t('الوقت المختار غير صالح.', 'Invalid time selected.'),
-    'outside operating hours': t('الموعد خارج ساعات العمل (من 9:00 ص إلى 10:00 م).', 'Outside operating hours.'),
+    'outside operating hours': t('الموعد المختار خارج ساعات العمل (من 9:00 ص إلى 11:00 م).', 'Outside operating hours (9:00 AM to 11:00 PM).'),
     'neighborhood is outside configured service areas': t('نعتذر، هذا الحي خارج نطاق التغطية حالياً في المدينة المنورة.', 'Neighborhood is outside service coverage in Al Madinah.'),
     'assigned practitioner has an overlapping appointment during this window': t('الأخصائية المختارة مرتبطة بموعد آخر خلال هذه الفترة.', 'Practitioner conflict during this window.'),
     'assigned practitioner has an overlapping appointment or travel buffer during this window': t('الأخصائية المختارة لديها موعد أو وقت انتقال خلال هذه الفترة.', 'Practitioner schedule or travel conflict.'),

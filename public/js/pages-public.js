@@ -962,26 +962,48 @@ export function bindPublicInteractions(goFn, renderFn) {
               <span class="badge ${badgeInfo.cls}">${t(badgeInfo.label_ar, badgeInfo.label_en)}</span>
             </div>
 
-            <div class="track-stepper" style="margin:20px 0;display:flex;justify-content:space-between;position:relative">
-              <div class="track-step ${step >= 1 ? 'completed' : ''}">
-                <div class="track-dot">${step >= 1 ? '✓' : '1'}</div>
-                <span>${t('استلام الطلب', 'Requested')}</span>
+            <div class="track-stepper-wrap">
+              <div class="track-stepper">
+                <div class="track-progress-bar" aria-hidden="true">
+                  <div class="track-progress-fill" style="width:${Math.max(10, Math.min(100, (step - 1) * 25))}%;"></div>
+                </div>
+                <div class="track-step ${step > 1 ? 'completed' : (step === 1 ? 'active' : '')}" data-step-info="1">
+                  <div class="track-dot">${step > 1 ? '✓' : '1'}</div>
+                  <span>${t('استلام الطلب', 'Requested')}</span>
+                </div>
+                <div class="track-step ${step > 2 ? 'completed' : (step === 2 ? 'active' : '')}" data-step-info="2">
+                  <div class="track-dot">${step > 2 ? '✓' : '2'}</div>
+                  <span>${t('إيصال التحويل', 'Receipt')}</span>
+                </div>
+                <div class="track-step ${step > 3 ? 'completed' : (step === 3 ? 'active' : '')}" data-step-info="3">
+                  <div class="track-dot">${step > 3 ? '✓' : '3'}</div>
+                  <span>${t('تأكيد الموعد', 'Confirmed')}</span>
+                </div>
+                <div class="track-step ${step > 4 ? 'completed' : (step === 4 ? 'active' : '')}" data-step-info="4">
+                  <div class="track-dot">${step > 4 ? '✓' : '4'}</div>
+                  <span>${t('تنفيذ الجلسة', 'Service')}</span>
+                </div>
+                <div class="track-step ${step >= 5 ? 'completed' : ''}" data-step-info="5">
+                  <div class="track-dot">${step >= 5 ? '✦' : '5'}</div>
+                  <span>${t('بتلات الولاء', 'Petals')}</span>
+                </div>
               </div>
-              <div class="track-step ${step >= 2 ? 'completed' : (step === 1 ? 'active' : '')}">
-                <div class="track-dot">${step >= 2 ? '✓' : '2'}</div>
-                <span>${t('إيصال التحويل', 'Receipt')}</span>
-              </div>
-              <div class="track-step ${step >= 3 ? 'completed' : (step === 2 ? 'active' : '')}">
-                <div class="track-dot">${step >= 3 ? '✓' : '3'}</div>
-                <span>${t('تأكيد الموعد', 'Confirmed')}</span>
-              </div>
-              <div class="track-step ${step >= 4 ? 'completed' : ''}">
-                <div class="track-dot">${step >= 4 ? '✓' : '4'}</div>
-                <span>${t('تنفيذ الجلسة', 'Service')}</span>
-              </div>
-              <div class="track-step ${step >= 5 ? 'completed' : ''}">
-                <div class="track-dot">${step >= 5 ? '✦' : '5'}</div>
-                <span>${t('بتلات الولاء', 'Petals')}</span>
+              <div class="track-milestone-card" id="track-milestone-desc">
+                <span style="font-size:18px">🌸</span>
+                <div>
+                  <strong>${
+                    step === 1
+                      ? t('طلبك مسجل وبانتظار إرفاق إيصال التحويل', 'Booking recorded, awaiting receipt')
+                      : step === 2
+                        ? t('تم استلام إيصال التحويل وجاري التحقق المالي', 'Receipt received, verifying payment')
+                        : step === 3
+                          ? t('الموعد مثبت رسمياً وتم تخصيص الأخصائية لخدمتك', 'Confirmed! Specialist assigned to your visit')
+                          : step === 4
+                            ? t('أخصائيتنا في طريقها إليك لتنفيذ طقس الدلال', 'Specialist en route to your sanctuary')
+                            : t('تمت الجلسة بنجاح وأُضيفت بتلاتك لرصيدك', 'Ritual complete, Petals credited')
+                  }</strong>
+                  <p class="muted" style="margin:2px 0 0;font-size:12px">${t('اضغطي على أي خطوة للاطلاع على تفاصيل مسار العناية', 'Click any step to view milestone details')}</p>
+                </div>
               </div>
             </div>
 
@@ -1009,6 +1031,51 @@ export function bindPublicInteractions(goFn, renderFn) {
             ` : ''}
           </div>
         `;
+
+        const stepDescriptions = {
+          '1': {
+            icon: '📝',
+            title: t('الخطوة 1: استلام وتوثيق الطلب', 'Step 1: Booking Requested'),
+            desc: t('تم تسجيل طلب الموعد في نظام J Beauty واختيار الخدمات والحي والوقت المفضل.', 'Your requested ritual and schedule preferences are safely logged.'),
+          },
+          '2': {
+            icon: '🧾',
+            title: t('الخطوة 2: إرفاق إيصال التحويل', 'Step 2: Bank Receipt Upload'),
+            desc: t('يتم تحويل العربون/المبلغ لحساب السبا ورفع الإيصال لمطابقته مالياً.', 'Upload your bank transfer receipt for verification by finance.'),
+          },
+          '3': {
+            icon: '🌸',
+            title: t('الخطوة 3: اعتماد الموعد وتثبيت الأخصائية', 'Step 3: Confirmed & Specialist Assigned'),
+            desc: t('الموعد معتمد رسمياً، وتتولى الأخصائية المحترفة المعتمدة الحضور لمنزلك.', 'Your appointment is officially confirmed with a dedicated certified specialist.'),
+          },
+          '4': {
+            icon: '✨',
+            title: t('الخطوة 4: تنفيذ الجلسة في منزلك', 'Step 4: Ritual in Your Home'),
+            desc: t('حضور الأخصائية بالأدوات المعقمة والمستلزمات الفاخرة للاستمتاع بوقتك.', 'Enjoy calm quiet-luxury treatments in the complete privacy of your home.'),
+          },
+          '5': {
+            icon: '🎁',
+            title: t('الخطوة 5: إضافة بتلات المكافآت', 'Step 5: Petals Loyalty Credited'),
+            desc: t('تُضاف نقاط البتلات فورياً إلى رصيدك لاستبدالها بخصومات في زياراتك القادمة.', 'Earn automatic Petals redeemable for exclusive future savings.'),
+          },
+        };
+
+        resContainer.querySelectorAll('[data-step-info]').forEach((el) => {
+          el.addEventListener('click', () => {
+            const stepNum = el.dataset.stepInfo;
+            const info = stepDescriptions[stepNum];
+            const descEl = $('#track-milestone-desc');
+            if (descEl && info) {
+              descEl.innerHTML = `
+                <span style="font-size:20px">${info.icon}</span>
+                <div>
+                  <strong>${info.title}</strong>
+                  <p class="muted" style="margin:3px 0 0;font-size:12.5px">${info.desc}</p>
+                </div>
+              `;
+            }
+          });
+        });
 
         const uploadForm = $('#track-upload-receipt-form');
         if (uploadForm) {

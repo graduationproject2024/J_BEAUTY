@@ -1,14 +1,14 @@
-import { $, api, esc, href, page, refreshSession, state, t } from './js/state.js';
-import { footer, head, header } from './js/components.js';
-import { initScrollReveals, trackFunnel } from './js/motion.js';
-import { atelierPage, bindAtelier, disposeAtelierRenderers } from './js/atelier.js';
+import { $, api, esc, href, page, refreshSession, state, t } from './js/state.js?v=20261123-final-v1';
+import { footer, head, header } from './js/components.js?v=20261123-final-v1';
+import { initScrollReveals, trackFunnel } from './js/motion.js?v=20261123-final-v1';
+import { atelierPage, bindAtelier, disposeAtelierRenderers } from './js/atelier.js?v=20261123-final-v1';
 import {
   bindExperiences,
   giftsPage,
   groupBookingPage,
   lookbookPage,
   studioPage,
-} from './js/experiences.js';
+} from './js/experiences.js?v=20261123-final-v1';
 import {
   bindPublicInteractions,
   contact,
@@ -22,10 +22,10 @@ import {
   reviewsPage,
   services,
   trackPage,
-} from './js/pages-public.js';
-import { bindBooking, booking } from './js/booking.js';
-import { accountPage, auth, bindAccount, petalsPage } from './js/account.js';
-import { initWheelFloatingButton, openRewardsWheelDialog, syncWheelFloatingVisibility } from './js/wheel.js';
+} from './js/pages-public.js?v=20261123-final-v1';
+import { bindBooking, booking } from './js/booking.js?v=20261123-final-v1';
+import { accountPage, auth, bindAccount, petalsPage } from './js/account.js?v=20261123-final-v1';
+import { initWheelFloatingButton, openRewardsWheelDialog, syncWheelFloatingVisibility } from './js/wheel.js?v=20261123-final-v1';
 
 let lastBeaconRoute = '';
 let loadedSharedCode = '';
