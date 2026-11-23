@@ -43,7 +43,7 @@ export function header() {
     ['home', 'الرئيسية', 'Home'],
     ['services', 'الخدمات', 'Services'],
     ['packages', 'الباقات', 'Packages'],
-    ['atelier', 'أتيليه الأظافر', 'Nail Atelier'],
+    ['atelier', 'أنامل الأظافر', 'Nail Artistry'],
     ['occasions', 'المناسبات', 'Occasions'],
     ['gifts', 'أهدي لحظة عناية', 'Gift a Ritual'],
     ['petals', 'بتلات J', 'J Petals'],
@@ -53,9 +53,9 @@ export function header() {
 
   const annActive = s.announcement_active !== false;
   const annText = t(
-    s.announcement_text_ar || 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستك في راحة بيتك',
-    s.announcement_text_en || 'Luxury Women’s Home Spa in Al Madinah ✦ Personally Confirmed Appointments ✦ 20% Off Curated Packages ✦ Book Your Home Sanctuary',
-  );
+        'معاينة تجريبية لـ J Beauty Spa على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',
+        'J Beauty Spa static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',
+      );
   const annLink = s.announcement_link ? href(s.announcement_link.replace(/^\//, '')) : null;
   const annInner = `
     <div class="ticker-content">
@@ -86,30 +86,42 @@ export function header() {
     ${annHtml}
     <div class="header-shell">
       <header class="wrap header">
-        <a class="brand" href="${href('home')}">
-          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
+        <a class="brand ref-brand" href="${href('home')}">
+          <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="58" height="58">
           <span class="brand-wordmark">
-            <strong>J Beauty Spa</strong>
-            <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
+            <strong class="ref-title">J Beauty Spa</strong>
+            <small class="ref-subtitle">${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
           </span>
         </a>
         <nav class="nav" id="nav" aria-label="${t('التنقل الرئيسي', 'Main navigation')}">
-          ${navLinks
-            .map(
-              ([r, ar, en]) =>
-                `<a href="${href(r)}" class="${cur === r ? 'active' : ''}">${t(ar, en)}</a>`,
-            )
-            .join('')}
+          <div class="nav-links-ref" role="navigation">
+            <a href="${href('home')}" class="${cur === 'home' ? 'active' : ''}">${t('الرئيسية', 'Home')}</a>
+            <span class="nav-sep" aria-hidden="true">|</span>
+            <a href="${href('services')}" class="${cur === 'services' ? 'active' : ''}">${t('الخدمات', 'Services')}</a>
+            <span class="nav-sep" aria-hidden="true">|</span>
+            <a href="${href('packages')}" class="${cur === 'packages' ? 'active' : ''}">${t('الباقات', 'Packages')}</a>
+            <span class="nav-sep" aria-hidden="true">|</span>
+            <a href="${href('atelier')}" class="${cur === 'atelier' ? 'active' : ''}">${t('أنامل الأظافر', 'Nail Artistry')}</a>
+          </div>
+          <div class="nav-extra-links">
+            ${navLinks
+              .slice(4)
+              .map(
+                ([r, ar, en]) =>
+                  `<a href="${href(r)}" class="${cur === r ? 'active' : ''}">${t(ar, en)}</a>`,
+              )
+              .join('')}
+          </div>
           <div class="nav-mobile-cta">
             <a class="btn" href="${href('booking')}">${t('احجزي موعدك الآن', 'Book your moment')}</a>
           </div>
         </nav>
         <div class="header-tools">
           <a class="header-social-btn wa" href="${waUrl}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="${t('تواصلي معنا عبر واتساب', 'Chat on WhatsApp')}">
-            <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
+            <img src="/J_BEAUTY/apps/customer/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
           </a>
           <a class="header-social-btn ig" href="${igUrl}" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="${t('حسابنا في انستغرام', 'Instagram')}">
-            <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
+            <img src="/J_BEAUTY/apps/customer/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
           </a>
           <button class="lang" id="language" type="button" aria-label="${t('Switch to English', 'التبديل للعربية')}">
             ${t('EN', 'عربي')}
@@ -145,7 +157,7 @@ export function footer() {
         <div class="footer-grid">
           <div>
             <a class="brand" href="${href('home')}">
-              <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
+              <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
               <span class="brand-wordmark">
                 <strong>J Beauty Spa</strong>
                 <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
@@ -154,16 +166,16 @@ export function footer() {
             <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلك.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
             <div class="footer-social-bar">
               <a href="${igUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn ig" aria-label="Instagram" title="Instagram">
-                <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
               </a>
               <a href="${ttUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn tt" aria-label="TikTok" title="TikTok">
-                <img src="/assets/social/tiktok.png" alt="TikTok" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/tiktok.png" alt="TikTok" class="social-img-icon">
               </a>
               <a href="${scUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn sc" aria-label="Snapchat" title="Snapchat">
-                <img src="/assets/social/snapchat.png" alt="Snapchat" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/snapchat.png" alt="Snapchat" class="social-img-icon">
               </a>
               <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn wa" aria-label="WhatsApp" title="WhatsApp">
-                <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
               </a>
             </div>
           </div>
@@ -230,7 +242,7 @@ export function serviceArt(s, cls = '') {
   const src =
     s?.image && /^(\/[^/]|https:\/\/)/.test(s.image)
       ? s.image
-      : `/assets/images/services/${s?.id || 'relaxation'}.webp`;
+      : `/J_BEAUTY/apps/customer/assets/images/services/${s?.id || 'relaxation'}.webp`;
   const catLabel =
     s?.category === 'massage'
       ? t('المساج', 'Massage')

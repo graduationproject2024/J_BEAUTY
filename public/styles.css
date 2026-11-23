@@ -438,6 +438,22 @@ p {
   color: var(--charcoal);
 }
 
+.ref-brand .ref-title {
+  font-family: 'Playfair Display', Didot, 'Cormorant Garamond', Georgia, serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #3D2630;
+}
+
+.ref-brand .ref-subtitle {
+  font-family: 'Amiri', 'Traditional Arabic', serif, var(--font-ar);
+  font-size: 13px;
+  color: #7E5B66;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+}
+
 .brand-wordmark small {
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -454,9 +470,58 @@ p {
 .nav {
   display: flex;
   align-items: center;
-  gap: 22px;
-  font-size: 14px;
+  gap: 18px;
+  font-size: 14.5px;
   font-weight: 500;
+}
+
+.nav-links-ref {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-links-ref a {
+  position: relative;
+  padding: 6px 2px;
+  color: #4A2828;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-links-ref a:hover,
+.nav-links-ref a.active {
+  color: #3D2630;
+}
+
+.nav-links-ref a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  inset-inline: 0;
+  height: 2px;
+  background: #BA8D6B;
+  border-radius: 2px;
+}
+
+.nav-sep {
+  color: rgba(186, 141, 107, 0.45);
+  font-weight: 300;
+  user-select: none;
+}
+
+.nav-extra-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .nav-extra-links {
+    display: none;
+  }
 }
 
 .nav a {
@@ -746,6 +811,269 @@ button:disabled.btn {
   font-size: 13px;
   color: var(--ink-muted);
   margin-top: 2px;
+}
+
+/* ===== REFERENCE HERO QUIET LUXURY SANCTUARY ===== */
+.ref-hero {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(145deg, #FDF7F4 0%, #FAF0EC 40%, #F5DDD6 100%);
+  border: 1px solid rgba(212, 175, 124, 0.25);
+  border-radius: clamp(24px, 3.2vw, 42px);
+  overflow: hidden;
+  box-shadow: 0 20px 50px -15px rgba(90, 56, 68, 0.08);
+  margin-bottom: clamp(32px, 4vw, 54px);
+  padding: 0 !important;
+}
+
+.ref-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  min-height: 520px;
+  padding: clamp(36px, 4.5vw, 60px) clamp(24px, 4vw, 56px) 28px;
+  gap: clamp(24px, 3vw, 48px);
+  position: relative;
+}
+
+.ref-hero-copy {
+  max-width: 540px;
+  text-align: center;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.ref-hero-title {
+  font-family: 'Amiri', 'Playfair Display', Didot, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: clamp(32px, 3.8vw, 50px);
+  line-height: 1.35;
+  color: #3D2630;
+  margin: 0 0 16px;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.ref-lotus-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 8px 0 20px;
+  color: #BA8D6B;
+}
+
+.ref-lotus-svg {
+  width: 60px;
+  height: 30px;
+  display: block;
+  color: #C59B78;
+}
+
+.ref-hero-desc {
+  font-family: var(--font-ar), 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(15px, 1.4vw, 17.5px);
+  line-height: 1.85;
+  color: #553540;
+  margin: 0 0 28px;
+  max-width: 480px;
+}
+
+.ref-hero-desc p {
+  margin: 0 0 4px;
+}
+
+.ref-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.ref-hero-btn {
+  background: #6F4551 !important;
+  border-color: #6F4551 !important;
+  color: #FFFFFF !important;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 13px 34px;
+  min-height: 50px;
+  box-shadow: 0 10px 24px -6px rgba(111, 69, 81, 0.42);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ref-hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -6px rgba(111, 69, 81, 0.52);
+}
+
+.ref-cta-arrow {
+  font-size: 19px;
+  line-height: 1;
+  font-weight: 400;
+  margin-inline-start: 4px;
+}
+
+.ref-hero-link {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #3D2630;
+  text-decoration: underline;
+  text-underline-offset: 7px;
+  text-decoration-color: #BA8D6B;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.ref-hero-link:hover {
+  color: #6F4551;
+  text-decoration-color: #6F4551;
+}
+
+.ref-hero-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.ref-hero-image-wrap {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 18px 42px -12px rgba(111, 76, 72, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  aspect-ratio: 440 / 670;
+  background: #FAF0EC;
+}
+
+.ref-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Bottom 3-Pillar Trust Strip */
+.ref-trust-strip {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  justify-items: center;
+  border-top: 1px solid rgba(197, 155, 120, 0.28);
+  padding: 22px 32px 24px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(10px);
+}
+
+.ref-trust-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  z-index: 2;
+}
+
+.ref-trust-icon {
+  width: 36px;
+  height: 36px;
+  color: #BA8D6B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ref-trust-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.ref-trust-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #3D2630;
+  letter-spacing: -0.01em;
+}
+
+.ref-trust-divider {
+  width: 1px;
+  height: 44px;
+  background: rgba(197, 155, 120, 0.35);
+}
+
+.ref-trust-watermark {
+  position: absolute;
+  bottom: 0;
+  inset-inline-end: 8px;
+  width: 110px;
+  height: 80px;
+  color: #C59B78;
+  pointer-events: none;
+  opacity: 0.45;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .ref-hero-grid {
+    grid-template-columns: 1fr;
+    padding: 28px 18px 20px;
+    gap: 28px;
+    text-align: center;
+  }
+  .ref-hero-visual {
+    order: -1;
+    margin: 0 auto;
+    max-width: 340px;
+  }
+  .ref-hero-image-wrap {
+    aspect-ratio: 4 / 3.4;
+    max-height: 280px;
+    border-radius: 22px;
+  }
+  .ref-hero-title {
+    font-size: 28px;
+    line-height: 1.3;
+  }
+  .ref-hero-desc {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .ref-trust-strip {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px 16px;
+  }
+  .ref-trust-divider {
+    display: none;
+  }
+  .ref-trust-col {
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+  }
+  .ref-trust-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .ref-trust-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .nav-links-ref {
+    display: none;
+  }
 }
 
 /* ===== BENEFITS STRIP ===== */

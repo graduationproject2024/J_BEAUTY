@@ -1,5 +1,5 @@
 import { $, api, esc, href, minutes, money, nameOf, num, riyadhToday, state, t, toast } from './state.js';
-import { field, head, localizeError, provisional } from './components.js';
+import { field, head, provisional } from './components.js';
 import { trackFunnel } from './motion.js';
 
 export function studioPage() {
@@ -31,10 +31,10 @@ export function studioPage() {
   return `
     <main id="main" class="wrap">
       ${head(
-        t('استوديو اختيار الخدمات', 'J Ritual Studio'),
-        t('حدّدي تفضيلاتك الأربعة لنرشّح لك الأنسب من خدماتنا وباقاتنا المعتمدة بأسعارها ومددها الفعلية.', 'Share 4 preferences to view tailored, catalog-verified services and packages with transparent pricing.'),
-        [[t('الرئيسية', 'Home'), 'home'], [t('استوديو الاختيار', 'J Ritual Studio'), '']],
-      )}
+    t('استوديو اختيار الخدمات', 'J Ritual Studio'),
+    t('حدّدي تفضيلاتك الأربعة لنرشّح لك الأنسب من خدماتنا وباقاتنا المعتمدة بأسعارها ومددها الفعلية.', 'Share 4 preferences to view tailored, catalog-verified services and packages with transparent pricing.'),
+    [[t('الرئيسية', 'Home'), 'home'], [t('استوديو الاختيار', 'J Ritual Studio'), '']],
+  )}
       <div class="studio-layout split">
         <form id="studio-form" class="card studio-form-card">
           <span class="eyebrow">${t('تفضيلات الجلسة', 'PREFERENCES')}</span>
@@ -47,11 +47,11 @@ export function studioPage() {
             <span class="control-label">${t('١. ما نوع العناية التي ترغبين بها؟', '1. What kind of care would you like?')}</span>
             <div class="chip-row studio-chip-grid">
               ${moodOpts
-                .map(
-                  ([val, label]) =>
-                    `<button type="button" class="mini-chip ${s.mood === val ? 'active' : ''}" data-studio-opt="mood" data-val="${val}">${label}</button>`,
-                )
-                .join('')}
+      .map(
+        ([val, label]) =>
+          `<button type="button" class="mini-chip ${s.mood === val ? 'active' : ''}" data-studio-opt="mood" data-val="${val}">${label}</button>`,
+      )
+      .join('')}
             </div>
           </div>
 
@@ -59,11 +59,11 @@ export function studioPage() {
             <span class="control-label">${t('٢. الوقت المتاح', '2. Available time')}</span>
             <div class="chip-row">
               ${timeOpts
-                .map(
-                  (m) =>
-                    `<button type="button" class="mini-chip ${Number(s.minutes_available) === m ? 'active' : ''}" data-studio-opt="minutes_available" data-val="${m}">${t(`حتى ${num(m)} دقيقة`, `Up to ${num(m)} min`)}</button>`,
-                )
-                .join('')}
+      .map(
+        (m) =>
+          `<button type="button" class="mini-chip ${Number(s.minutes_available) === m ? 'active' : ''}" data-studio-opt="minutes_available" data-val="${m}">${t(`حتى ${num(m)} دقيقة`, `Up to ${num(m)} min`)}</button>`,
+      )
+      .join('')}
             </div>
           </div>
 
@@ -71,11 +71,11 @@ export function studioPage() {
             <span class="control-label">${t('٣. الميزانية التقديرية', '3. Budget (SAR)')}</span>
             <div class="chip-row">
               ${budgetOpts
-                .map(
-                  (b) =>
-                    `<button type="button" class="mini-chip ${Number(s.budget) === b ? 'active' : ''}" data-studio-opt="budget" data-val="${b}">${t(`حتى ${money(b)}`, `Up to ${money(b)}`)}</button>`,
-                )
-                .join('')}
+      .map(
+        (b) =>
+          `<button type="button" class="mini-chip ${Number(s.budget) === b ? 'active' : ''}" data-studio-opt="budget" data-val="${b}">${t(`حتى ${money(b)}`, `Up to ${money(b)}`)}</button>`,
+      )
+      .join('')}
             </div>
           </div>
 
@@ -83,11 +83,11 @@ export function studioPage() {
             <span class="control-label">${t('٤. هل تفضلين خدمة مفردة أم باقة؟', '4. Single service or package?')}</span>
             <div class="chip-row">
               ${formatOpts
-                .map(
-                  ([val, label]) =>
-                    `<button type="button" class="mini-chip ${s.format === val ? 'active' : ''}" data-studio-opt="format" data-val="${val}">${label}</button>`,
-                )
-                .join('')}
+      .map(
+        ([val, label]) =>
+          `<button type="button" class="mini-chip ${s.format === val ? 'active' : ''}" data-studio-opt="format" data-val="${val}">${label}</button>`,
+      )
+      .join('')}
             </div>
           </div>
 
@@ -99,19 +99,18 @@ export function studioPage() {
             <h2 style="margin:0;font-size:22px">${t('الاقتراحات المطابقة لقائمتنا', 'Catalog-Matched Suggestions')}</h2>
             ${results.length ? `<span class="badge">${num(results.length)} ${t('خيارات', 'matches')}</span>` : ''}
           </div>
-          ${
-            results.length
-              ? `<div class="studio-cards">
+          ${results.length
+      ? `<div class="studio-cards">
                   ${results
-                    .map((r, idx) => {
-                      const item = r.item;
-                      const reasons = r[`reasons_${state.lang}`] || [];
-                      const bookUrl =
-                        r.kind === 'package'
-                          ? `${href('booking')}?package=${esc(item.id)}`
-                          : `${href('booking')}?service=${esc(item.id)}`;
-                      const detailUrl = r.kind === 'package' ? href('packages') : href('services/' + item.id);
-                      return `
+        .map((r, idx) => {
+          const item = r.item;
+          const reasons = r[`reasons_${state.lang}`] || [];
+          const bookUrl =
+            r.kind === 'package'
+              ? `${href('booking')}?package=${esc(item.id)}`
+              : `${href('booking')}?service=${esc(item.id)}`;
+          const detailUrl = r.kind === 'package' ? href('packages') : href('services/' + item.id);
+          return `
                       <article class="card studio-reco-card ${idx === 0 ? 'is-top-match' : ''}">
                         <img class="studio-thumb" src="${esc(imgFor(r))}" alt="${esc(nameOf(item))}" loading="lazy">
                         <div class="studio-reco-body">
@@ -130,17 +129,17 @@ export function studioPage() {
                         </div>
                       </article>
                     `;
-                    })
-                    .join('')}
+        })
+        .join('')}
                 </div>`
-              : `<div class="card empty-compact muted">
+      : `<div class="card empty-compact muted">
                    <p style="margin-bottom:10px">${t('جاري مطابقة خياراتك من كتالوج J Beauty المعتمد…', 'Matching your preferences against verified J Beauty services…')}</p>
                    <div class="hero-actions" style="gap:8px">
                      <a class="btn small light" href="${href('services')}">${t('تصفحي الخدمات (13)', 'Browse all services')}</a>
                      <a class="btn small light" href="${href('packages')}">${t('استعرضي الباقات', 'View packages')}</a>
                    </div>
                  </div>`
-          }
+    }
         </div>
       </div>
     </main>
@@ -210,24 +209,24 @@ export function lookbookPage() {
   return `
     <main id="main" class="wrap">
       ${head(
-        t('معرض الإطلالات والأناقة', 'Beauty Lookbook'),
-        t('أفكار منسّقة للجلسات والأظافر من صورنا المعتمدة مع رابط مباشر للتنفيذ أو التصميم.', 'Curated home spa and nail aesthetics linking straight to services or the interactive Nail Atelier.'),
-        [[t('الرئيسية', 'Home'), 'home'], [t('معرض الإطلالات', 'Lookbook'), '']],
-      )}
+    t('معرض الإطلالات والأناقة', 'Beauty Lookbook'),
+    t('أفكار منسّقة للجلسات والأظافر من صورنا المعتمدة مع رابط مباشر للتنفيذ أو التصميم.', 'Curated home spa and nail aesthetics linking straight to services or the interactive Nail Atelier.'),
+    [[t('الرئيسية', 'Home'), 'home'], [t('معرض الإطلالات', 'Lookbook'), '']],
+  )}
       <div class="filter">
         ${[
-          ['all', 'الكل', 'All'],
-          ['massage', 'المساج', 'Massage'],
-          ['nails', 'الأظافر', 'Nails'],
-          ['gel', 'الجل', 'Gel'],
-        ]
-          .map(([id, ar, en]) => `<button type="button" data-lookbook-filter="${id}" class="${f === id ? 'active' : ''}">${t(ar, en)}</button>`)
-          .join('')}
+      ['all', 'الكل', 'All'],
+      ['massage', 'المساج', 'Massage'],
+      ['nails', 'الأظافر', 'Nails'],
+      ['gel', 'الجل', 'Gel'],
+    ]
+      .map(([id, ar, en]) => `<button type="button" data-lookbook-filter="${id}" class="${f === id ? 'active' : ''}">${t(ar, en)}</button>`)
+      .join('')}
       </div>
       <div class="grid section-tight" style="padding-top:0">
         ${visible
-          .map(
-            (e) => `
+      .map(
+        (e) => `
           <article class="service-card">
             <div class="art"><img src="${e.img}" alt="${esc(t(e.ar, e.en))}" loading="lazy"></div>
             <div class="service-body">
@@ -237,8 +236,8 @@ export function lookbookPage() {
             </div>
           </article>
         `,
-          )
-          .join('')}
+      )
+      .join('')}
       </div>
     </main>
   `;
@@ -252,8 +251,7 @@ const OCCASION_TYPES = [
 ];
 
 const customGuestName = (p) => {
-  if (!p) return '';
-  const raw = String(p.label ?? '').trim();
+  const raw = String(p?.label || '').trim();
   if (!raw || /^(المستفيدة|Guest|Participant)\s*[\d\u0660-\u0669]+$/i.test(raw)) {
     return '';
   }
@@ -410,23 +408,17 @@ export function groupBookingPage() {
         <span class="control-label">${t('اختاري طابع المناسبة', 'Select occasion style')}</span>
         <div class="occasion-type-grid">
           ${OCCASION_TYPES.map(
-            ([id, ar, en, sub]) => `
+        ([id, ar, en, sub]) => `
               <button type="button" class="occasion-type-card ${g.occasion_type === id ? 'is-selected' : ''}" data-occ-type="${id}">
                 <strong>${t(ar, en)}</strong>
                 <small>${t(sub, en)}</small>
               </button>
             `,
-          ).join('')}
+      ).join('')}
         </div>
         <div class="form-grid">
-          <label class="field">
-            <span class="field-label">${t('اسم منسّقة المناسبة', 'Coordinator name')}</span>
-            <input name="organizer_name" id="occ-organizer-name" type="text" value="${esc(g.organizer_name || '')}" required maxlength="100" autocomplete="name" placeholder="${t('اكتبي اسمك الكريم...', 'Enter coordinator name...')}">
-          </label>
-          <label class="field">
-            <span class="field-label">${t('رقم الجوال السعودي', 'Saudi mobile')}</span>
-            <input name="organizer_phone" id="occ-organizer-phone" type="tel" dir="ltr" value="${esc(g.organizer_phone || '')}" required maxlength="15" autocomplete="tel" placeholder="05xxxxxxxx">
-          </label>
+          ${field(t('اسم منسّقة المناسبة', 'Coordinator name'), 'organizer_name', 'text', g.organizer_name, 'required')}
+          ${field(t('رقم الجوال السعودي', 'Saudi mobile'), 'organizer_phone', 'tel', g.organizer_phone, 'required placeholder="05xxxxxxxx"')}
         </div>
       `;
     }
@@ -455,18 +447,18 @@ export function groupBookingPage() {
                 </div>
                 <div class="occasion-quick-roles" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px">
                   ${[
-                    ['العروس', 'Bride'],
-                    ['أخت العروس', 'Sister of Bride'],
-                    ['والدة العروس', 'Mother of Bride'],
-                    ['وصيفة', 'Bridesmaid'],
-                    ['صديقة', 'Friend'],
-                    ['قريبة', 'Relative'],
-                  ]
-                    .map(([arRole, enRole]) => {
-                      const isSel = customGuestName(p) === arRole || customGuestName(p) === enRole;
-                      return `<button type="button" class="mini-chip quick-role-btn ${isSel ? 'active' : ''}" data-guest-idx="${idx}" data-role-ar="${arRole}" data-role-en="${enRole}">${t(arRole, enRole)}</button>`;
-                    })
-                    .join('')}
+                ['العروس', 'Bride'],
+                ['أخت العروس', 'Sister of Bride'],
+                ['والدة العروس', 'Mother of Bride'],
+                ['وصيفة', 'Bridesmaid'],
+                ['صديقة', 'Friend'],
+                ['قريبة', 'Relative'],
+              ]
+                .map(([arRole, enRole]) => {
+                  const isSel = customGuestName(p) === arRole || customGuestName(p) === enRole;
+                  return `<button type="button" class="mini-chip quick-role-btn ${isSel ? 'active' : ''}" data-guest-idx="${idx}" data-role-ar="${arRole}" data-role-en="${enRole}">${t(arRole, enRole)}</button>`;
+                })
+                .join('')}
                 </div>
                 <label class="field" style="margin-bottom:0">
                   <span style="font-size:13px;color:var(--ink-muted)">${t('الاسم أو الصفة المخصصة:', 'Custom Name / Role:')}</span>
@@ -488,30 +480,30 @@ export function groupBookingPage() {
           <h3 style="margin:0">${t('٣. اختاري خدمات كل مستفيدة', '3. Services per Participant')}</h3>
           <div class="chip-row">
             ${[
-              ['all', 'الكل', 'All'],
-              ['massage', 'المساج', 'Massage'],
-              ['nails', 'الأظافر', 'Nails'],
-              ['gel', 'الجل', 'Gel'],
-            ]
-              .map(
-                ([id, ar, en]) =>
-                  `<button type="button" class="mini-chip ${catFilter === id ? 'active' : ''}" data-occ-cat="${id}">${t(ar, en)}</button>`,
-              )
-              .join('')}
+          ['all', 'الكل', 'All'],
+          ['massage', 'المساج', 'Massage'],
+          ['nails', 'الأظافر', 'Nails'],
+          ['gel', 'الجل', 'Gel'],
+        ]
+          .map(
+            ([id, ar, en]) =>
+              `<button type="button" class="mini-chip ${catFilter === id ? 'active' : ''}" data-occ-cat="${id}">${t(ar, en)}</button>`,
+          )
+          .join('')}
           </div>
         </div>
         <div class="occasion-tabs" role="tablist" aria-label="${t('تبويبات المستفيدات', 'Participant service tabs')}">
           ${g.participants
-            .map((p, idx) => {
-              const label = displayGuestLabel(p, idx);
-              return `
+          .map((p, idx) => {
+            const label = displayGuestLabel(p, idx);
+            return `
                 <button type="button" role="tab" aria-selected="${guestIdx === idx}" class="occasion-tab ${guestIdx === idx ? 'active' : ''}" data-occ-tab="${idx}">
                   <span>${num(idx + 1)}. ${esc(label)}</span>
                   <span class="badge">${num(p.service_ids.length)}</span>
                 </button>
               `;
-            })
-            .join('')}
+          })
+          .join('')}
         </div>
         <div class="card occasion-guest-card" style="margin-bottom:0">
           <div class="row" style="margin-bottom:10px">
@@ -520,17 +512,17 @@ export function groupBookingPage() {
           </div>
           <div class="occasion-svc-grid" data-guest-services="${guestIdx}">
             ${visibleSvcs
-              .map((sv) => {
-                const active = activeGuest.service_ids.includes(sv.id);
-                return `
+          .map((sv) => {
+            const active = activeGuest.service_ids.includes(sv.id);
+            return `
                   <label class="occasion-svc-chip ${active ? 'is-selected' : ''}">
                     <input type="checkbox" data-guest-svc="${guestIdx}" value="${esc(sv.id)}" ${active ? 'checked' : ''}>
                     <span>${esc(nameOf(sv))}</span>
                     <small><bdi>${money(sv.price)}</bdi> · <bdi>${minutes(sv.duration)}</bdi></small>
                   </label>
                 `;
-              })
-              .join('')}
+          })
+          .join('')}
           </div>
         </div>
       `;
@@ -554,30 +546,28 @@ export function groupBookingPage() {
         <h3>${t('٤. التاريخ والوقت والحي في المدينة', '4. Date, Time & Neighborhood')}</h3>
         <div class="time-chips">
           ${nextDays
-            .map(
-              (d) =>
-                `<button type="button" class="time-chip ${g.date === d.iso ? 'active' : ''}" ${d.disabled ? 'disabled' : ''} data-occ-date="${d.iso}">${d.label}</button>`,
-            )
-            .join('')}
+          .map(
+            (d) =>
+              `<button type="button" class="time-chip ${g.date === d.iso ? 'active' : ''}" ${d.disabled ? 'disabled' : ''} data-occ-date="${d.iso}">${d.label}</button>`,
+          )
+          .join('')}
         </div>
         <div class="form-grid">
           ${field(t('التاريخ المفضل', 'Preferred date'), 'date', 'date', g.date, `required min="${riyadhToday()}"`)}
           ${field(t('الوقت المفضل', 'Preferred time'), 'time', 'time', g.time, 'required')}
         </div>
-        ${
-          suggestedTimes.length
-            ? `<div class="time-chips">${suggestedTimes
-                .map((slot) => `<button type="button" class="time-chip ${g.time === slot ? 'active' : ''}" data-occ-time="${slot}">${slot}</button>`)
-                .join('')}</div>`
-            : ''
+        ${suggestedTimes.length
+          ? `<div class="time-chips">${suggestedTimes
+            .map((slot) => `<button type="button" class="time-chip ${g.time === slot ? 'active' : ''}" data-occ-time="${slot}">${slot}</button>`)
+            .join('')}</div>`
+          : ''
         }
         <label class="field">
           ${t('الحي في المدينة المنورة', 'Madinah neighborhood')}
-          ${
-            s.areas?.length
-              ? `<select name="neighborhood" required><option value="">${t('اختاري الحي', 'Select')}</option>${s.areas.map((a) => `<option value="${esc(a)}" ${g.neighborhood === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>`
-              : `<input name="neighborhood" value="${esc(g.neighborhood)}" required>`
-          }
+          ${s.areas?.length
+          ? `<select name="neighborhood" required><option value="">${t('اختاري الحي', 'Select')}</option>${s.areas.map((a) => `<option value="${esc(a)}" ${g.neighborhood === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>`
+          : `<input name="neighborhood" value="${esc(g.neighborhood)}" required>`
+        }
         </label>
         <label class="field">
           ${t('ملاحظات تنسيقية إضافية (اختياري)', 'Additional notes (optional)')}
@@ -619,21 +609,21 @@ export function groupBookingPage() {
   return `
     <main id="main" class="wrap">
       ${head(
-        t('تنسيق جلسات المناسبات', 'Occasion Experiences'),
-        t('نسّقي جلسات العناية والاسترخاء والأظافر لمنزلك في المدينة المنورة لاحتفالاتك ومناسباتك في خمس خطوات واضحة.', 'Arrange coordinated home spa and nail sessions in Madinah across 5 guided steps (2 to 5 participants).'),
-        [[t('الرئيسية', 'Home'), 'home'], [t('تنسيق جلسات المناسبات', 'Occasion Experiences'), '']],
-      )}
+    t('تنسيق جلسات المناسبات', 'Occasion Experiences'),
+    t('نسّقي جلسات العناية والاسترخاء والأظافر لمنزلك في المدينة المنورة لاحتفالاتك ومناسباتك في خمس خطوات واضحة.', 'Arrange coordinated home spa and nail sessions in Madinah across 5 guided steps (2 to 5 participants).'),
+    [[t('الرئيسية', 'Home'), 'home'], [t('تنسيق جلسات المناسبات', 'Occasion Experiences'), '']],
+  )}
       <div class="progress five" role="navigation" aria-label="${t('خطوات تنسيق المناسبة', 'Occasion wizard steps')}">
         ${wizardSteps
-          .map(
-            ([n, ar, en]) => `
+      .map(
+        ([n, ar, en]) => `
               <span class="${step === n ? 'current' : step > n ? 'done' : ''}" ${n < step ? `data-occ-jump="${n}" style="cursor:pointer"` : ''}>
                 <b>${num(n)}</b>
                 <em>${t(ar, en)}</em>
               </span>
             `,
-          )
-          .join('')}
+      )
+      .join('')}
       </div>
       <div class="notice">${t(
         'تخضع طلبات المناسبات لمراجعة فريق العمليات وتنسيق الطاقة الاستيعابية وعدد المختصات قبل أي تأكيد.',
@@ -646,11 +636,10 @@ export function groupBookingPage() {
           ${renderStepBody()}
           <div class="form-actions" style="margin-top:18px;display:flex;justify-content:space-between;gap:12px">
             ${step > 1 ? `<button type="button" class="btn light" id="occ-prev">${t('السابق', 'Back')}</button>` : '<span></span>'}
-            ${
-              step < 5
-                ? `<button type="button" class="btn" id="occ-next">${t('التالي', 'Continue')}</button>`
-                : `<button type="submit" class="btn">${t('إرسال طلب تنسيق المناسبة', 'Submit Occasion Request')}</button>`
-            }
+            ${step < 5
+      ? `<button type="button" class="btn" id="occ-next">${t('التالي', 'Continue')}</button>`
+      : `<button type="submit" class="btn">${t('إرسال طلب تنسيق المناسبة', 'Submit Occasion Request')}</button>`
+    }
           </div>
         </div>
 
@@ -658,12 +647,12 @@ export function groupBookingPage() {
           <span class="eyebrow" style="margin-bottom:8px">${t('ملخص المناسبة التقديري', 'ESTIMATED OCCASION SUMMARY')}</span>
           <h3>${num(g.participants.length)} ${t('مستفيدات', 'Participants')}</h3>
           ${g.participants
-            .map((p, idx) => {
-              const pSvcs = p.service_ids.map((id) => svcs.find((x) => x.id === id)).filter(Boolean);
-              const subTotal = pSvcs.reduce((a, b) => a + Number(b.price || 0), 0);
-              return `<div class="summary-line"><span>${esc(displayGuestLabel(p, idx))} (${num(p.service_ids.length)})</span><span>${money(subTotal)}</span></div>`;
-            })
-            .join('')}
+      .map((p, idx) => {
+        const pSvcs = p.service_ids.map((id) => svcs.find((x) => x.id === id)).filter(Boolean);
+        const subTotal = pSvcs.reduce((a, b) => a + Number(b.price || 0), 0);
+        return `<div class="summary-line"><span>${esc(displayGuestLabel(p, idx))} (${num(p.service_ids.length)})</span><span>${money(subTotal)}</span></div>`;
+      })
+      .join('')}
           <div class="summary-line">
             <span>${t('المدة الإجمالية التقديرية', 'Estimated duration')}</span>
             <strong><bdi>${minutes(totalMin)}</bdi></strong>
@@ -673,9 +662,9 @@ export function groupBookingPage() {
             <span><bdi>${money(totalEst)}</bdi></span>
           </div>
           <p class="muted" style="margin-top:12px;margin-bottom:0">${t(
-            'يتطلب تأكيد طلبات المناسبات مراجعة السعة وعدد المختصات يدوياً عبر واتساب.',
-            'Team capacity and specialist allocation are confirmed manually via WhatsApp.',
-          )}</p>
+        'يتطلب تأكيد طلبات المناسبات مراجعة السعة وعدد المختصات يدوياً عبر واتساب.',
+        'Team capacity and specialist allocation are confirmed manually via WhatsApp.',
+      )}</p>
         </aside>
       </form>
     </main>
@@ -893,22 +882,22 @@ export function giftsPage() {
             <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم تسجيل طلب بطاقة الإهداء الفاخرة', 'LUXURY GIFT CARD REGISTERED')} ✦</span>
             <h1>${t('بطاقة الإهداء الخاصة بك 🎁', 'Your Luxury Gift Card 🎁')}</h1>
             <p class="muted">${t(
-              'لإتمام تفعيل كود الإهداء، يرجى إتمام التحويل البنكي وإرفاق الإيصال أدناه أو إرساله للإدارة عبر واتساب ليتم تفعيل الكود فوراً للاستخدام عند الحجز.',
-              'To activate your gift card, please complete the bank transfer and submit the receipt below or send it via WhatsApp.',
-            )}</p>
+      'لإتمام تفعيل كود الإهداء، يرجى إتمام التحويل البنكي وإرفاق الإيصال أدناه أو إرساله للإدارة عبر واتساب ليتم تفعيل الكود فوراً للاستخدام عند الحجز.',
+      'To activate your gift card, please complete the bank transfer and submit the receipt below or send it via WhatsApp.',
+    )}</p>
           </div>
 
           <div style="max-width:680px;margin:0 auto 24px">
             ${renderLuxuryGiftCardHtml({
-              themeId: gf.theme || 'royal_gold',
-              senderName: gf.sender_name,
-              recipientName: gf.recipient_name,
-              personalMessage: gf.personal_message,
-              giftName: gf.chosen ? nameOf(gf.chosen) : '',
-              giftPrice: gf.estimated_amount || gf.value,
-              code: giftCode,
-              isApproved,
-            })}
+      themeId: gf.theme || 'royal_gold',
+      senderName: gf.sender_name,
+      recipientName: gf.recipient_name,
+      personalMessage: gf.personal_message,
+      giftName: gf.chosen ? nameOf(gf.chosen) : '',
+      giftPrice: gf.estimated_amount || gf.value,
+      code: giftCode,
+      isApproved,
+    })}
           </div>
 
           <div class="luxury-confirm-grid" style="max-width:880px;margin:0 auto 28px">
@@ -938,13 +927,12 @@ export function giftsPage() {
               <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('توثيق سداد الهدية', 'PAYMENT VERIFICATION')} ✦</span>
               <h3 style="margin-top:6px">${t('إرفاق إيصال الدفع للهدية', 'Attach Payment Receipt')}</h3>
               <p class="muted" style="font-size:14px">${t('ارفعي إيصال التحويل البنكي هنا ليتم اعتماد وتفعيل بطاقة الإهداء فوراً من الإدارة.', 'Upload bank receipt to activate the gift card.')}</p>
-              ${
-                receiptDone
-                  ? `<div class="success" style="margin-top:14px">
+              ${receiptDone
+        ? `<div class="success" style="margin-top:14px">
                        <strong>✓ ${t('تم استلام إيصال التحويل بنجاح!', 'Payment Receipt Uploaded!')}</strong>
                        <p style="margin:6px 0 0;font-size:13.5px">${t('وصل الإيصال لمنصة الإدارة وجاري مراجعته وتفعيل كود الإهداء.', 'Your receipt is now with the management for activation.')}</p>
                      </div>`
-                  : `
+        : `
                     <form id="gift-receipt-upload-form" data-gift-id="${esc(gf.id || giftCode)}" style="margin-top:14px;display:grid;gap:10px">
                       <div id="gift-receipt-error" role="alert"></div>
                       <label class="field" style="margin:0">
@@ -966,7 +954,7 @@ export function giftsPage() {
                       <button type="submit" class="btn sage" style="width:100%">📤 ${t('إرسال إيصال السداد للإدارة', 'Submit Payment Receipt')}</button>
                     </form>
                   `
-              }
+      }
             </div>
           </div>
 
@@ -976,8 +964,8 @@ export function giftsPage() {
                 ? `<button type="button" class="btn shimmer-btn" id="download-gift-card-png">🖼️ ${t('تحميل بطاقة الإهداء الفاخرة كصورة', 'Download Luxury Gift Card PNG')}</button>
                    <a class="btn" href="${esc(r.share_whatsapp_url || r.whatsapp_url)}" target="_blank" rel="noopener noreferrer" style="background:linear-gradient(135deg,#25D366,#128C7E);color:#fff">💌 ${t('إرسال البطاقة للمستفيدة عبر واتساب', 'Send Gift to Recipient on WhatsApp')}</a>
                    <button type="button" class="btn light" id="copy-gift-code-btn" data-code="${esc(giftCode)}">📋 ${t('نسخ كود الإهداء', 'Copy Gift Code')}</button>`
-                : `<span class="badge pending" style="padding:10px 16px;font-size:13.5px">⏳ ${t('يتم إصدار كود الإهداء وتفعيله بعد التحقق من سداد التحويل البنكي لدى الإدارة', 'Gift code will be activated and issued once staff verifies your bank transfer')}</span>`
-            }
+        : `<span class="badge pending" style="padding:10px 16px;font-size:13.5px">⏳ ${t('يتم إصدار كود الإهداء وتفعيله بعد التحقق من سداد التحويل البنكي لدى الإدارة', 'Gift code will be activated and issued once staff verifies your bank transfer')}</span>`
+      }
             <button type="button" class="btn light" id="new-gift-req">${t('تصميم بطاقة إهداء أخرى', 'Create another gift')}</button>
           </div>
         </div>
@@ -991,31 +979,31 @@ export function giftsPage() {
   return `
     <main id="main" class="wrap">
       ${head(
-        t('أهدي لحظة عناية فاخرة', 'Gift a Luxury Ritual'),
-        t('صمّمي بطاقة إهداء إلكترونية فاخرة باسم من تحبين ورسالتك الخاصة، تفعّل فورياً بعد التحويل البنكي.', 'Design a bespoke luxury digital gift card with your personal dedication, activated upon verified transfer.'),
-        [[t('الرئيسية', 'Home'), 'home'], [t('أهدي لحظة عناية', 'Gift a Ritual'), '']],
-      )}
+    t('أهدي لحظة عناية فاخرة', 'Gift a Luxury Ritual'),
+    t('صمّمي بطاقة إهداء إلكترونية فاخرة باسم من تحبين ورسالتك الخاصة، تفعّل فورياً بعد التحويل البنكي.', 'Design a bespoke luxury digital gift card with your personal dedication, activated upon verified transfer.'),
+    [[t('الرئيسية', 'Home'), 'home'], [t('أهدي لحظة عناية', 'Gift a Ritual'), '']],
+  )}
       <div class="gift-studio-grid">
         <div class="gift-studio-preview-col">
           <div class="gift-theme-picker" role="radiogroup" aria-label="${t('اختاري تصميم البطاقة', 'Choose card theme')}">
             ${GIFT_THEMES.map(
-              (th) => `
+    (th) => `
                 <button type="button" class="mini-chip ${activeTheme === th.id ? 'active' : ''}" data-gift-theme="${th.id}">
                   ✦ ${t(th.ar, th.en)}
                 </button>
               `,
-            ).join('')}
+  ).join('')}
           </div>
           ${renderLuxuryGiftCardHtml({
-            themeId: activeTheme,
-            senderName: state.user?.name || '',
-            recipientName: '',
-            personalMessage: '',
-            giftName: defaultChoice.name,
-            giftPrice: defaultChoice.price,
-            code: '••••-••••-JGIFT',
-            isApproved: false,
-          })}
+    themeId: activeTheme,
+    senderName: state.user?.name || '',
+    recipientName: '',
+    personalMessage: '',
+    giftName: defaultChoice.name,
+    giftPrice: defaultChoice.price,
+    code: '••••-••••-JGIFT',
+    isApproved: false,
+  })}
           <p class="muted" style="text-align:center;font-size:13px;margin-top:12px">
             ✨ ${t('بطاقة رقمية فاخرة مصممة بختم J Beauty مع كود حجز رسمي موثق.', 'Luxury digital card crafted with the J Beauty seal and official booking code.')}
           </p>
@@ -1352,11 +1340,11 @@ export function bindExperiences(renderFn) {
       if (r.whatsapp_url) {
         try {
           window.open(r.whatsapp_url, '_blank', 'noopener,noreferrer');
-        } catch {}
+        } catch { }
       }
       renderFn();
     } catch (err) {
-      $('#form-error').innerHTML = `<div class="error">${esc(localizeError(err.message))}</div>`;
+      $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
       e.submitter.disabled = false;
     }
   });
@@ -1466,7 +1454,7 @@ export function bindExperiences(renderFn) {
   });
 
   const giftForm = $('#gift-form');
-  let syncGiftPreview = () => {};
+  let syncGiftPreview = () => { };
   if (giftForm) {
     syncGiftPreview = () => {
       const recEl = $('#gc-preview-recipient');
@@ -1543,7 +1531,7 @@ export function bindExperiences(renderFn) {
       renderFn();
       window.scrollTo(0, 0);
     } catch (err) {
-      $('#form-error').innerHTML = `<div class="error">${esc(localizeError(err.message))}</div>`;
+      $('#form-error').innerHTML = `<div class="error">${esc(err.message)}</div>`;
       e.submitter.disabled = false;
     }
   });

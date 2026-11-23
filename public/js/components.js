@@ -43,7 +43,7 @@ export function header() {
     ['home', 'الرئيسية', 'Home'],
     ['services', 'الخدمات', 'Services'],
     ['packages', 'الباقات', 'Packages'],
-    ['atelier', 'أتيليه الأظافر', 'Nail Atelier'],
+    ['atelier', 'أنامل الأظافر', 'Nail Artistry'],
     ['occasions', 'المناسبات', 'Occasions'],
     ['gifts', 'أهدي لحظة عناية', 'Gift a Ritual'],
     ['petals', 'بتلات J', 'J Petals'],
@@ -86,20 +86,32 @@ export function header() {
     ${annHtml}
     <div class="header-shell">
       <header class="wrap header">
-        <a class="brand" href="${href('home')}">
-          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
+        <a class="brand ref-brand" href="${href('home')}">
+          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="58" height="58">
           <span class="brand-wordmark">
-            <strong>J Beauty Spa</strong>
-            <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
+            <strong class="ref-title">J Beauty Spa</strong>
+            <small class="ref-subtitle">${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
           </span>
         </a>
         <nav class="nav" id="nav" aria-label="${t('التنقل الرئيسي', 'Main navigation')}">
-          ${navLinks
-            .map(
-              ([r, ar, en]) =>
-                `<a href="${href(r)}" class="${cur === r ? 'active' : ''}">${t(ar, en)}</a>`,
-            )
-            .join('')}
+          <div class="nav-links-ref" role="navigation">
+            <a href="${href('home')}" class="${cur === 'home' ? 'active' : ''}">${t('الرئيسية', 'Home')}</a>
+            <span class="nav-sep" aria-hidden="true">|</span>
+            <a href="${href('services')}" class="${cur === 'services' ? 'active' : ''}">${t('الخدمات', 'Services')}</a>
+            <span class="nav-sep" aria-hidden="true">|</span>
+            <a href="${href('packages')}" class="${cur === 'packages' ? 'active' : ''}">${t('الباقات', 'Packages')}</a>
+            <span class="nav-sep" aria-hidden="true">|</span>
+            <a href="${href('atelier')}" class="${cur === 'atelier' ? 'active' : ''}">${t('أنامل الأظافر', 'Nail Artistry')}</a>
+          </div>
+          <div class="nav-extra-links">
+            ${navLinks
+              .slice(4)
+              .map(
+                ([r, ar, en]) =>
+                  `<a href="${href(r)}" class="${cur === r ? 'active' : ''}">${t(ar, en)}</a>`,
+              )
+              .join('')}
+          </div>
           <div class="nav-mobile-cta">
             <a class="btn" href="${href('booking')}">${t('احجزي موعدك الآن', 'Book your moment')}</a>
           </div>
