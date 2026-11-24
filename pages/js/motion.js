@@ -39,6 +39,13 @@ export function initScrollReveals() {
         io.observe(el);
       }
     });
+
+    // Safety auto-reveal after 500ms so nothing ever remains hidden
+    setTimeout(() => {
+      document.querySelectorAll('[data-reveal].will-reveal').forEach((el) => {
+        el.classList.add('is-revealed');
+      });
+    }, 500);
   }
 
   // Interactive cursor spotlight on luxury cards (21st.dev Spotlight Card effect)
@@ -95,7 +102,7 @@ export function renderSignatureBloomSVG(filledCount = 4, totalPetals = 8, lightM
         <div class="jb-medallion-beam" aria-hidden="true"></div>
         <div class="jb-medallion-ring" style="--petal-deg:${deg}deg">
           <div class="jb-medallion-core">
-            <img src="/assets/brand/monogram.svg" alt="J Beauty Spa" class="jb-medallion-logo" style="width:58px;height:58px;object-fit:contain">
+            <img src="/J_BEAUTY/apps/customer/assets/brand/monogram.svg" alt="J Beauty Spa" class="jb-medallion-logo" style="width:58px;height:58px;object-fit:contain">
           </div>
         </div>
       </div>

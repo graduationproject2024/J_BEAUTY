@@ -226,7 +226,7 @@ function stepOneCategoryHtml() {
       en: 'Massage Therapy',
       sub_ar: 'استرخائي، علاجي، الأحجار الساخنة، التصريف اللمفاوي',
       sub_en: 'Relaxation, therapeutic, hot stone, lymphatic drainage',
-      img: '/assets/images/services/hot-stone.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/hot-stone.webp',
       count: svcs.filter((x) => x.category === 'massage').length,
     },
     {
@@ -235,7 +235,7 @@ function stepOneCategoryHtml() {
       en: 'Nail Care',
       sub_ar: 'منيكير وبديكير كلاسيك، بديكير، فرنش تيب وطلاء فرنسي',
       sub_en: 'Classic mani-pedi, pedicure, French tip, French polish',
-      img: '/assets/images/services/classic.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/classic.webp',
       count: svcs.filter((x) => x.category === 'nails').length,
     },
     {
@@ -244,7 +244,7 @@ function stepOneCategoryHtml() {
       en: 'Gel Services',
       sub_ar: 'طلاء جل، جل فرنسي، أطراف ملونة، إزالة وإعادة تطبيق',
       sub_en: 'Gel polish, French gel, colored micro-tips, removal',
-      img: '/assets/images/services/french-gel.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/services/french-gel.webp',
       count: svcs.filter((x) => x.category === 'gel').length,
     },
     {
@@ -253,7 +253,7 @@ function stepOneCategoryHtml() {
       en: 'Curated Packages',
       sub_ar: 'إشراقة J، لحظة هدوء، طقوس الورد، وباقة J المميزة',
       sub_en: 'J Nail Glow, J Serenity, J Rose Ritual, J Signature',
-      img: '/assets/images/hero-sanctuary.webp',
+      img: '/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp',
       count: pkgs.length,
     },
   ];
@@ -326,7 +326,7 @@ function stepTwoServiceHtml() {
                 const imgSrc =
                   s.image && /^(\/[^/]|https:\/\/)/.test(s.image)
                     ? s.image
-                    : `/assets/images/services/${s.id}.webp`;
+                    : `/J_BEAUTY/apps/customer/assets/images/services/${s.id}.webp`;
                 return `
                 <label class="selection">
                   <input type="checkbox" name="service" value="${esc(s.id)}" ${checked ? 'checked' : ''}>
@@ -551,25 +551,25 @@ function stepFiveReviewHtml() {
   const s = selectedSummary();
   return `
     <h3>${t('مراجعة الطلب قبل التسجيل', 'Review your request')}</h3>
-    <div class="card" style="margin-bottom:18px">
-      <div class="row" style="margin-bottom:10px">
-        <strong id="review-client-name">${esc(state.draft.name || '—')}</strong>
-        <bdi class="muted" id="review-client-phone">${esc(state.draft.phone || '')}</bdi>
+    <div class="card booking-review-card" style="margin-bottom:18px;border:1.5px solid rgba(212,175,124,0.55);background:#FFFFFF;box-shadow:0 8px 24px rgba(62,41,50,0.06)">
+      <div class="row" style="margin-bottom:12px;border-bottom:1px solid rgba(212,175,124,0.25);padding-bottom:10px;justify-content:space-between;align-items:center">
+        <strong id="review-client-name" style="color:#3E2932;font-size:16px">${esc(state.draft.name || t('ضيفتنا الكريمة', 'Honored Guest'))}</strong>
+        <bdi id="review-client-phone" style="color:#5A4A52;font-weight:600">${esc(state.draft.phone || '')}</bdi>
       </div>
-      <p class="muted" style="margin-bottom:6px">
-        <strong>${t('الموعد:', 'Schedule:')}</strong>
-        <span id="review-schedule-val"><bdi>${esc(state.draft.date || '—')} · ${esc(state.draft.time || '—')}</bdi></span>
+      <p style="margin-bottom:8px;color:#3E2932">
+        <strong style="color:var(--rose-gold-deep)">${t('الموعد:', 'Schedule:')}</strong>
+        <span id="review-schedule-val" style="font-weight:600"><bdi>${(state.draft.date && state.draft.time) ? `${esc(state.draft.date)} · ${esc(state.draft.time)}` : `<span style="color:var(--rose-gold-deep)">${t('حددي اليوم والوقت في الأعلى 👆', 'Select date & time above 👆')}</span>`}</bdi></span>
       </p>
-      <p class="muted" style="margin-bottom:6px">
-        <strong>${t('الحي:', 'Neighborhood:')}</strong>
-        <span id="review-neighborhood-val">${esc(state.draft.neighborhood || '—')}</span>
+      <p style="margin-bottom:8px;color:#3E2932">
+        <strong style="color:var(--rose-gold-deep)">${t('الحي:', 'Neighborhood:')}</strong>
+        <span id="review-neighborhood-val" style="font-weight:600">${state.draft.neighborhood ? esc(state.draft.neighborhood) : `<span style="color:var(--rose-gold-deep)">${t('حددي الحي السكني في الأعلى 👆', 'Select neighborhood above 👆')}</span>`}</span>
       </p>
-      <p class="muted" style="margin-bottom:6px">${t('المختار:', 'Selection:')} ${s.items.map((x) => esc(nameOf(x))).join(' + ')}</p>
-      ${s.addOns.length ? `<p class="muted" style="margin-bottom:6px">${t('الخدمات الإضافية:', 'Add-ons:')} ${s.addOns.map((a) => `${esc(t(a.ar, a.en))} (+${money(a.price)})`).join(' · ')}</p>` : ''}
-      <p class="muted" style="margin-bottom:6px">${t('مدة الجلسة:', 'Duration:')} ${minutes(s.duration)}</p>
-      ${s.discount > 0 ? `<p class="muted" style="margin-bottom:6px">${t('المجموع قبل الخصم:', 'Subtotal:')} ${money(s.subtotal)} · <span style="color:var(--sage-deep);font-weight:600">${t('الخصم:', 'Discount:')} -${money(s.discount)} (${esc(s.coupon.code)})</span></p>` : ''}
-      <p style="margin-bottom:0"><strong>${t('إجمالي الحجز:', 'Booking total:')} ${money(s.total)}</strong></p>
-      ${state.draft.notes ? `<p class="muted" style="margin-top:8px;margin-bottom:0">${t('ملاحظات:', 'Notes:')} ${esc(state.draft.notes)}</p>` : ''}
+      <p style="margin-bottom:8px;color:#3E2932"><strong style="color:var(--rose-gold-deep)">${t('المختار:', 'Selection:')}</strong> <span style="font-weight:600">${s.items.map((x) => esc(nameOf(x))).join(' + ')}</span></p>
+      ${s.addOns.length ? `<p style="margin-bottom:8px;color:#3E2932"><strong style="color:var(--rose-gold-deep)">${t('الخدمات الإضافية:', 'Add-ons:')}</strong> ${s.addOns.map((a) => `${esc(t(a.ar, a.en))} (+${money(a.price)})`).join(' · ')}</p>` : ''}
+      <p style="margin-bottom:8px;color:#3E2932"><strong style="color:var(--rose-gold-deep)">${t('مدة الجلسة:', 'Duration:')}</strong> <span style="font-weight:600">${minutes(s.duration)}</span></p>
+      ${s.discount > 0 ? `<p style="margin-bottom:8px;color:#3E2932"><strong>${t('المجموع قبل الخصم:', 'Subtotal:')}</strong> ${money(s.subtotal)} · <span style="color:var(--sage-deep);font-weight:700">${t('الخصم:', 'Discount:')} -${money(s.discount)} (${esc(s.coupon.code)})</span></p>` : ''}
+      <p style="margin-bottom:0;font-size:17px;color:#3E2932;border-top:1px solid rgba(212,175,124,0.25);padding-top:10px"><strong>${t('إجمالي الحجز:', 'Booking total:')} <span style="color:var(--rose-gold-deep)">${money(s.total)}</span></strong></p>
+      ${state.draft.notes ? `<p style="margin-top:8px;margin-bottom:0;color:#5A4A52"><strong>${t('ملاحظات:', 'Notes:')}</strong> ${esc(state.draft.notes)}</p>` : ''}
     </div>
     ${
       !state.user
@@ -606,7 +606,7 @@ export function bookingSuccess() {
       <div class="luxury-confirm-shell" data-reveal>
         <div class="luxury-confirm-header">
           <div class="luxury-confirm-crest">
-            <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="luxury-confirm-logo">
+            <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="luxury-confirm-logo">
           </div>
           <span class="eyebrow" style="color:var(--rose-gold-deep)">✦ ${t('تم استلام حجزك بنجاح', 'RESERVATION RECEIVED')} ✦</span>
           <h1>${t('أهلاً بك في لحظة دلالك القادمة 🌸', 'Your Calm Sanctuary Moment Awaits 🌸')}</h1>
@@ -810,9 +810,17 @@ export function bindBooking(renderFn) {
     const revArea = $('#review-neighborhood-val');
     const revName = $('#review-client-name');
     const revPhone = $('#review-client-phone');
-    if (revDate) revDate.textContent = `${state.draft.date || '—'} · ${state.draft.time || '—'}`;
-    if (revArea) revArea.textContent = state.draft.neighborhood || '—';
-    if (revName) revName.textContent = state.draft.name || '—';
+    if (revDate) {
+      if (state.draft.date && state.draft.time) {
+        revDate.innerHTML = `<bdi>${esc(state.draft.date)} · ${esc(state.draft.time)}</bdi>`;
+      } else {
+        revDate.innerHTML = `<span style="color:var(--rose-gold-deep)">${t('حددي اليوم والوقت في الأعلى 👆', 'Select date & time above 👆')}</span>`;
+      }
+    }
+    if (revArea) {
+      revArea.innerHTML = state.draft.neighborhood ? esc(state.draft.neighborhood) : `<span style="color:var(--rose-gold-deep)">${t('حددي الحي السكني في الأعلى 👆', 'Select neighborhood above 👆')}</span>`;
+    }
+    if (revName) revName.textContent = state.draft.name || t('ضيفتنا الكريمة', 'Honored Guest');
     if (revPhone) revPhone.textContent = state.draft.phone || '';
   };
   $('#booking-form')?.addEventListener('input', updateReviewCardLive);
@@ -1080,12 +1088,27 @@ export function bindBooking(renderFn) {
       return;
     }
 
-    // Auto-normalize 12h evening time (e.g. 06:30 -> 18:30)
+    // Auto-normalize 12h evening time (e.g. 6:30 or 06:30 -> 18:30, handles AM/PM)
     let chosenTime = state.draft.time;
-    if (chosenTime && /^0[1-8]:\d{2}$/.test(chosenTime)) {
-      const [hh, mm] = chosenTime.split(':');
-      chosenTime = `${Number(hh) + 12}:${mm}`;
-      state.draft.time = chosenTime;
+    if (chosenTime) {
+      let s = String(chosenTime).trim();
+      const isPM = /(?:pm|م|مساءً?)/i.test(s);
+      const isAM = /(?:am|ص|صباحا|صباحاً)/i.test(s);
+      s = s.replace(/(?:pm|am|م|ص|مساءً?|صباحا|صباحاً)/gi, '').trim();
+      const parts = s.split(':');
+      if (parts.length >= 2) {
+        let hh = parseInt(parts[0], 10);
+        const mm = parts[1].padStart(2, '0').slice(0, 2);
+        if (!isNaN(hh)) {
+          if (isPM && hh < 12) hh += 12;
+          else if (isAM && hh === 12) hh = 0;
+          else if (!isAM && hh >= 1 && hh <= 8) {
+            hh += 12; // 1:00 to 8:59 entered is afternoon/evening (13:00 to 20:59)
+          }
+          chosenTime = `${String(hh).padStart(2, '0')}:${mm}`;
+          state.draft.time = chosenTime;
+        }
+      }
     }
 
     const submitBtn = e.submitter;

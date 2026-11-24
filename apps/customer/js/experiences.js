@@ -601,7 +601,7 @@ export function groupBookingPage() {
         .join('')}
       <label class="check" style="margin-top:12px">
         <input type="checkbox" name="terms" required>
-        <span>${t('أوافق على السياسات وأفهم أن طلب المناسبة ينتظر موافقة الفريق وتوفر المختصات.', 'I accept the terms and understand occasion requests await team capacity approval.')}</span>
+        <span>${t('أوافق على سياسات الحجز وأتطلع لتنسيق مناسبتي الخاصة مع فريق J Beauty المعتمد 🌸', 'I accept the booking policies and look forward to coordinating my occasion with certified J Beauty specialists 🌸')}</span>
       </label>
     `;
   };

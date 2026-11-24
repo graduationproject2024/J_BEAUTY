@@ -57,7 +57,7 @@ const MOODS = [
 
 function moodPreviewHtml() {
   const m = MOODS.find((x) => x.id === state.homeMood) || MOODS[0];
-  const matched = state.catalog.services.filter((s) => m.ids.includes(s.id));
+  const matched = (state.catalog?.services || []).filter((s) => m.ids.includes(s.id));
   return `
     <div class="mood-result" id="mood-result">
       <div class="mood-result-grid">
@@ -91,32 +91,66 @@ export function home() {
   return `
     <main id="main">
       <div class="wrap">
-        <!-- 1. Premium Cinematic Hero -->
-        <section class="hero">
-          <div class="hero-copy">
-            <span class="eyebrow">${t('للسيدات فقط · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</span>
-            <h1>${t('جمالك. طقوسك.<br>لحظتك الخاصة في بيتك.', 'Your Beauty.<br>Your Ritual. Your Moment.')}</h1>
-            <p class="hero-lead">${t(
-              'عناية منزلية نسائية فاخرة من المساج إلى أتيليه الأظافر والجل — تصل إلى منزلك في المدينة المنورة بتفاصيل هادئة وتأكيد شخصي.',
-              'Quiet-luxury massage, nail artistry, and botanical home spa rituals delivered across Madinah with personal team confirmation.',
-            )}</p>
-            <div class="hero-actions">
-              <a class="btn" href="${href('booking')}">${t('احجزي موعدك', 'Book your moment')}</a>
-              <a class="text-link" href="${href('services')}">${t('اكتشفي خدماتنا (13)', 'Explore all rituals')}</a>
+        <!-- 1. Reference Quiet-Luxury Hero Sanctuary -->
+        <section class="hero-reference-card" aria-label="${t('واجهة J Beauty Spa الترحيبية', 'Welcome to J Beauty Spa')}">
+          <div class="hero-main-grid">
+            <div class="hero-editorial-copy">
+              <h1 class="hero-headline">${t('جمالك . راحتك .<br>لحظتك الخاصة في بيتك .', 'Your Beauty . Your Comfort .<br>Your Sanctuary at Home .')}</h1>
+              
+              <div class="hero-lotus-divider" aria-hidden="true">
+                <svg width="140" height="24" viewBox="0 0 140 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 12H52" stroke="#D4AF7C" stroke-width="1" stroke-linecap="round"/>
+                  <path d="M88 12H140" stroke="#D4AF7C" stroke-width="1" stroke-linecap="round"/>
+                  <g stroke="#D4AF7C" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                    <path d="M70 4C65 10 65 17 70 20C75 17 75 10 70 4Z"/>
+                    <path d="M62 10C60 14 63 18 70 20"/>
+                    <path d="M78 10C80 14 77 18 70 20"/>
+                  </g>
+                </svg>
+              </div>
+
+              <p class="hero-description">${t(
+                'لأنك تستحقين وقتاً لنفسك، استمتعي بتجربة عناية منزلية فاخرة، تقدمها مختصات محترفات في أجواء تجمع بين الراحة والخصوصية والدلال.',
+                'Because you deserve dedicated time for yourself. Enjoy a bespoke luxury home spa experience delivered by certified specialists in total comfort and privacy.',
+              )}</p>
+
+              <div class="hero-cta-cluster">
+                <a class="hero-btn-pill" href="${href('booking')}">
+                  <span>${t('احجزي موعدك', 'Book Your Ritual')}</span>
+                  <span class="hero-btn-arrow" aria-hidden="true">›</span>
+                </a>
+                <a class="hero-link-underline" href="${href('services')}">${t('اكتشفي خدماتنا', 'Discover Our Rituals')}</a>
+              </div>
             </div>
-            <div class="hero-trust">
-              <span>✓ ${t('للسيدات فقط', 'Women only')}</span>
-              <span>✓ ${t('تأكيد يدوي شخصي', 'Personal team confirmation')}</span>
-              <span>✓ ${t('أتيليه أظافر تفاعلي', 'Interactive Nail Atelier')}</span>
+
+            <div class="hero-visual-col">
+              <div class="hero-visual-frame">
+                <img src="/assets/images/hero-reference-sanctuary.png" alt="${t('أجواء سبا منزلي فاخر مع مناشف قطنية مطرزة بحرف J وشموع وزهور هيدرانجيا', 'Luxury home spa sanctuary with monogrammed embroidered towels, glowing candles, and fresh hydrangea blossoms')}" class="hero-sanctuary-img" loading="eager" width="350" height="650">
+              </div>
             </div>
           </div>
-          <div class="hero-visual">
-            <div class="hero-arch">
-              <img src="/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
+
+          <div class="hero-trust-bar">
+            <div class="hero-trust-item">
+              <svg class="hero-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                <path d="M12 11c-1.2-1.5-3.5-.8-3.5 1 0 1.8 3.5 4 3.5 4s3.5-2.2 3.5-4c0-1.8-2.3-2.5-3.5-1z" stroke-width="1.3" fill="rgba(217,183,192,0.3)"/>
+              </svg>
+              <span>${t('عناية في منزلك', 'Care in Your Home')}</span>
             </div>
-            <div class="hero-seal">
-              <strong>J Beauty · ${t('المدينة المنورة', 'AL MADINAH')}</strong>
-              <span>${t('لحظتك الخاصة… في راحة بيتك', 'Your Moment of Beauty, At Home.')}</span>
+            <div class="hero-trust-item">
+              <svg class="hero-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9 12l2 2 4-4"/>
+              </svg>
+              <span>${t('تأكيد يدوي للحجز', 'Personal Confirmation')}</span>
+            </div>
+            <div class="hero-trust-item">
+              <svg class="hero-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 4a4 4 0 0 1 4 4c0 3-4 6-4 6s-4-3-4-6a4 4 0 0 1 4-4z"/>
+                <path d="M6 20v-1a6 6 0 0 1 12 0v1"/>
+              </svg>
+              <span>${t('للسيدات فقط', 'Women Only')}</span>
             </div>
           </div>
         </section>
@@ -894,6 +928,22 @@ export function bindPublicInteractions(goFn, renderFn) {
           },
         };
 
+        const stepDescriptions = {
+          1: t('تم تسجيل طلبك بنجاح وحفظ كافة بيانات الحجز في نظام J Beauty بنجاح.', 'Your booking request is logged and saved in the J Beauty system.'),
+          2: hasReceipt
+            ? (isPaid
+                ? t('تم استلام إيصال التحويل البنكي وتوثيقه مالياً بنجاح ✦', 'Payment receipt received and verified ✦')
+                : t('تم استلام إيصال التحويل البنكي وجاري تدقيقه من الإدارة المالية.', 'Receipt received and currently under finance review.'))
+            : t('بانتظار إرفاق إيصال التحويل البنكي لتأكيد وتثبيت الموعد.', 'Awaiting bank transfer receipt to verify and confirm your slot.'),
+          3: isPaid
+            ? t('تم اعتماد الموعد رسمياً وتجهيز حقيبة التعقيم الفندقية وتنسيق الأخصائية.', 'Appointment confirmed, sanitized tools prepared, specialist allocated.')
+            : t('الموعد بانتظار التحقق من التحويل البنكي ليتم تأكيده بشكل رسمي.', 'Awaiting payment verification before official confirmation.'),
+          4: t('تصلك أخصائيتنا في راحة منزلك بكامل أدوات العناية الفاخرة المغلفة والمعقمة.', 'Certified specialist arrives at your home with sanitized spa kit.'),
+          5: isCompleted
+            ? t('اكتملت الجلسة بنجاح، وتمت إضافة نقاط بتلات J تلقائياً إلى رصيدك 🌸', 'Ritual completed and loyalty Petals credited to your account 🌸')
+            : t('تُضاف بتلات الولاء تلقائياً إلى رصيدك فور اكتمال الجلسة (1 ريال = 1 بتلة).', 'Petals will be credited automatically upon service completion (1 SAR = 1 Petal).'),
+        };
+
         const badgeInfo = statusBadges[data.status] || statusBadges.pending_confirmation;
 
         resContainer.innerHTML = `
@@ -906,26 +956,34 @@ export function bindPublicInteractions(goFn, renderFn) {
               <span class="badge ${badgeInfo.cls}">${t(badgeInfo.label_ar, badgeInfo.label_en)}</span>
             </div>
 
-            <div class="track-stepper" style="margin:20px 0;display:flex;justify-content:space-between;position:relative">
-              <div class="track-step ${step >= 1 ? 'completed' : ''}">
-                <div class="track-dot">${step >= 1 ? '✓' : '1'}</div>
-                <span>${t('استلام الطلب', 'Requested')}</span>
+            <div class="track-stepper-wrap" style="margin:24px 0 20px">
+              <div class="track-stepper" role="progressbar" aria-valuenow="${step}" style="display:flex;justify-content:space-between;position:relative;align-items:center">
+                <div class="track-progress-bar" style="position:absolute;top:20px;left:20px;right:20px;height:4px;background:rgba(212,175,124,0.25);z-index:1;border-radius:99px">
+                  <div class="track-progress-fill" style="width:${Math.max(0, Math.min(100, (step - 1) * 25))}%;height:100%;background:linear-gradient(90deg, #D4AF7C, #90A98F);border-radius:99px;transition:width 0.8s ease-in-out"></div>
+                </div>
+                <button type="button" class="track-step-btn ${step >= 1 ? 'completed' : ''}" data-step-idx="1" style="z-index:2;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <div class="track-dot ${step === 1 ? 'pulsing-step' : ''}" style="width:40px;height:40px;border-radius:50%;background:${step >= 1 ? '#90A98F' : '#FAF5F2'};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:0 3px 10px rgba(62,41,50,0.12);border:2px solid ${step >= 1 ? '#90A98F' : 'rgba(212,175,124,0.5)'}">${step > 1 ? '✓' : '1'}</div>
+                  <span style="font-size:12px;font-weight:600;color:${step >= 1 ? '#3E2932' : '#887B82'}">${t('استلام الطلب', 'Requested')}</span>
+                </button>
+                <button type="button" class="track-step-btn ${step >= 2 ? 'completed' : (step === 1 ? 'active' : '')}" data-step-idx="2" style="z-index:2;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <div class="track-dot ${step === 2 ? 'pulsing-step' : ''}" style="width:40px;height:40px;border-radius:50%;background:${step >= 2 ? '#90A98F' : (step === 1 ? '#3E2932' : '#FAF5F2')};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:${step === 2 ? '0 0 0 6px rgba(212,175,124,0.35)' : '0 3px 10px rgba(62,41,50,0.12)'};border:2px solid ${step >= 2 ? '#90A98F' : 'rgba(212,175,124,0.5)'}">${step > 2 ? '✓' : '2'}</div>
+                  <span style="font-size:12px;font-weight:600;color:${step >= 2 ? '#3E2932' : '#887B82'}">${t('إيصال التحويل', 'Receipt')}</span>
+                </button>
+                <button type="button" class="track-step-btn ${step >= 3 ? 'completed' : (step === 2 ? 'active' : '')}" data-step-idx="3" style="z-index:2;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <div class="track-dot ${step === 3 ? 'pulsing-step' : ''}" style="width:40px;height:40px;border-radius:50%;background:${step >= 3 ? (isPaid ? '#90A98F' : '#3E2932') : '#FAF5F2'};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:${step === 3 ? '0 0 0 6px rgba(212,175,124,0.35)' : '0 3px 10px rgba(62,41,50,0.12)'};border:2px solid ${step >= 3 ? '#90A98F' : 'rgba(212,175,124,0.5)'}">${step > 3 ? '✓' : '3'}</div>
+                  <span style="font-size:12px;font-weight:600;color:${step >= 3 ? '#3E2932' : '#887B82'}">${t('تأكيد الموعد', 'Confirmed')}</span>
+                </button>
+                <button type="button" class="track-step-btn ${step >= 4 ? 'completed' : ''}" data-step-idx="4" style="z-index:2;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <div class="track-dot ${step === 4 ? 'pulsing-step' : ''}" style="width:40px;height:40px;border-radius:50%;background:${step >= 4 ? '#90A98F' : '#FAF5F2'};color:${step >= 4 ? '#fff' : '#887B82'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:0 3px 10px rgba(62,41,50,0.12);border:2px solid ${step >= 4 ? '#90A98F' : 'rgba(212,175,124,0.5)'}">${step > 4 ? '✓' : '4'}</div>
+                  <span style="font-size:12px;font-weight:600;color:${step >= 4 ? '#3E2932' : '#887B82'}">${t('تنفيذ الجلسة', 'Service')}</span>
+                </button>
+                <button type="button" class="track-step-btn ${step >= 5 ? 'completed' : ''}" data-step-idx="5" style="z-index:2;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px">
+                  <div class="track-dot ${step === 5 ? 'pulsing-step' : ''}" style="width:40px;height:40px;border-radius:50%;background:${step >= 5 ? 'linear-gradient(135deg, #D4AF7C, #B38646)' : '#FAF5F2'};color:${step >= 5 ? '#fff' : '#887B82'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;box-shadow:0 3px 10px rgba(62,41,50,0.12);border:2px solid rgba(212,175,124,0.6)">✦</div>
+                  <span style="font-size:12px;font-weight:600;color:${step >= 5 ? '#3E2932' : '#887B82'}">${t('بتلات الولاء', 'Petals')}</span>
+                </button>
               </div>
-              <div class="track-step ${step >= 2 ? 'completed' : (step === 1 ? 'active' : '')}">
-                <div class="track-dot">${step >= 2 ? '✓' : '2'}</div>
-                <span>${t('إيصال التحويل', 'Receipt')}</span>
-              </div>
-              <div class="track-step ${step >= 3 ? 'completed' : (step === 2 ? 'active' : '')}">
-                <div class="track-dot">${step >= 3 ? '✓' : '3'}</div>
-                <span>${t('تأكيد الموعد', 'Confirmed')}</span>
-              </div>
-              <div class="track-step ${step >= 4 ? 'completed' : ''}">
-                <div class="track-dot">${step >= 4 ? '✓' : '4'}</div>
-                <span>${t('تنفيذ الجلسة', 'Service')}</span>
-              </div>
-              <div class="track-step ${step >= 5 ? 'completed' : ''}">
-                <div class="track-dot">${step >= 5 ? '✦' : '5'}</div>
-                <span>${t('بتلات الولاء', 'Petals')}</span>
+              <div id="track-step-detail-box" style="margin-top:16px;padding:12px 16px;border-radius:12px;background:rgba(212,175,124,0.08);border:1px solid rgba(212,175,124,0.3);text-align:center;font-size:13.5px;color:#3E2932;line-height:1.6">
+                <strong>✦ ${t('مرحلة الحجز الحالية:', 'Current Booking Stage:')}</strong> ${stepDescriptions[step] || stepDescriptions[1]}
               </div>
             </div>
 
@@ -953,6 +1011,16 @@ export function bindPublicInteractions(goFn, renderFn) {
             ` : ''}
           </div>
         `;
+
+        resContainer.querySelectorAll('[data-step-idx]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const idx = btn.dataset.stepIdx;
+            const detailBox = $('#track-step-detail-box');
+            if (detailBox && stepDescriptions[idx]) {
+              detailBox.innerHTML = `<strong>✦ ${btn.querySelector('span')?.textContent || ''}:</strong> ${stepDescriptions[idx]}`;
+            }
+          });
+        });
 
         const uploadForm = $('#track-upload-receipt-form');
         if (uploadForm) {

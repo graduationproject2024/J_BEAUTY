@@ -53,9 +53,9 @@ export function header() {
 
   const annActive = s.announcement_active !== false;
   const annText = t(
-    s.announcement_text_ar || 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستك في راحة بيتك',
-    s.announcement_text_en || 'Luxury Women’s Home Spa in Al Madinah ✦ Personally Confirmed Appointments ✦ 20% Off Curated Packages ✦ Book Your Home Sanctuary',
-  );
+        'معاينة تجريبية لـ J Beauty Spa على GitHub Pages · الحجز الفعلي والحسابات والمكافآت تتطلب تشغيل الخادم',
+        'J Beauty Spa static preview on GitHub Pages · Live bookings, accounts and rewards require the application server',
+      );
   const annLink = s.announcement_link ? href(s.announcement_link.replace(/^\//, '')) : null;
   const annInner = `
     <div class="ticker-content">
@@ -87,7 +87,7 @@ export function header() {
     <div class="header-shell">
       <header class="wrap header">
         <a class="brand" href="${href('home')}">
-          <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
+          <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
           <span class="brand-wordmark">
             <strong>J Beauty Spa</strong>
             <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
@@ -106,10 +106,10 @@ export function header() {
         </nav>
         <div class="header-tools">
           <a class="header-social-btn wa" href="${waUrl}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="${t('تواصلي معنا عبر واتساب', 'Chat on WhatsApp')}">
-            <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
+            <img src="/J_BEAUTY/apps/customer/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
           </a>
           <a class="header-social-btn ig" href="${igUrl}" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="${t('حسابنا في انستغرام', 'Instagram')}">
-            <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
+            <img src="/J_BEAUTY/apps/customer/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
           </a>
           <button class="lang" id="language" type="button" aria-label="${t('Switch to English', 'التبديل للعربية')}">
             ${t('EN', 'عربي')}
@@ -145,7 +145,7 @@ export function footer() {
         <div class="footer-grid">
           <div>
             <a class="brand" href="${href('home')}">
-              <img src="/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
+              <img src="/J_BEAUTY/apps/customer/assets/brand/official-logo.png" alt="J Beauty Spa" class="brand-official-logo" width="64" height="64">
               <span class="brand-wordmark">
                 <strong>J Beauty Spa</strong>
                 <small>${t('سبا نسائي منزلي · المدينة المنورة', 'WOMEN’S HOME SPA · AL MADINAH')}</small>
@@ -154,16 +154,16 @@ export function footer() {
             <p>${t('عناية منزلية نسائية فاخرة في المدينة المنورة: خدمات المساج والعناية بالأظافر والجل في راحة منزلك.', 'Quiet-luxury women’s home spa in Al Madinah: curated massage, nail care, and gel treatments delivered to your door.')}</p>
             <div class="footer-social-bar">
               <a href="${igUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn ig" aria-label="Instagram" title="Instagram">
-                <img src="/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/instagram.png" alt="Instagram" class="social-img-icon">
               </a>
               <a href="${ttUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn tt" aria-label="TikTok" title="TikTok">
-                <img src="/assets/social/tiktok.png" alt="TikTok" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/tiktok.png" alt="TikTok" class="social-img-icon">
               </a>
               <a href="${scUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn sc" aria-label="Snapchat" title="Snapchat">
-                <img src="/assets/social/snapchat.png" alt="Snapchat" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/snapchat.png" alt="Snapchat" class="social-img-icon">
               </a>
               <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="social-icon-btn wa" aria-label="WhatsApp" title="WhatsApp">
-                <img src="/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
+                <img src="/J_BEAUTY/apps/customer/assets/social/whatsapp.png" alt="WhatsApp" class="social-img-icon">
               </a>
             </div>
           </div>
@@ -230,7 +230,7 @@ export function serviceArt(s, cls = '') {
   const src =
     s?.image && /^(\/[^/]|https:\/\/)/.test(s.image)
       ? s.image
-      : `/assets/images/services/${s?.id || 'relaxation'}.webp`;
+      : `/J_BEAUTY/apps/customer/assets/images/services/${s?.id || 'relaxation'}.webp`;
   const catLabel =
     s?.category === 'massage'
       ? t('المساج', 'Massage')
@@ -772,6 +772,9 @@ export function localizeError(msg) {
     'receipt file too large': t('حجم ملف الإيصال كبير جداً (الحد الأقصى 2.5 ميجابايت).', 'Receipt file too large (max 2.5MB).'),
     'too many requests': t('تم تجاوز عدد المحاولات المسموحة، يرجى الانتظار قليلاً.', 'Too many requests, please wait a moment.'),
     'failed to fetch': t('تعذر الاتصال بالخادم، يرجى التحقق من اتصالك بالإنترنت.', 'Failed to connect to server, please check internet.'),
+    'cross-origin request rejected': t('تعذر إتمام الطلب مع الخادم، يرجى تحديث الصفحة والمحاولة مجدداً.', 'Cross-origin request rejected, please refresh and retry.'),
+    'cross-origin': t('تعذر إتمام الطلب مع الخادم، يرجى تحديث الصفحة والمحاولة مجدداً.', 'Cross-origin request rejected, please refresh and retry.'),
+    'network error': t('حدث خطأ في شبكة الاتصال، يرجى إعادة المحاولة.', 'Network error occurred, please retry.'),
   };
 
   for (const [k, v] of Object.entries(dict)) {

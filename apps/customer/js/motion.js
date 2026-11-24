@@ -39,6 +39,13 @@ export function initScrollReveals() {
         io.observe(el);
       }
     });
+
+    // Safety auto-reveal after 500ms so nothing ever remains hidden
+    setTimeout(() => {
+      document.querySelectorAll('[data-reveal].will-reveal').forEach((el) => {
+        el.classList.add('is-revealed');
+      });
+    }, 500);
   }
 
   // Interactive cursor spotlight on luxury cards (21st.dev Spotlight Card effect)

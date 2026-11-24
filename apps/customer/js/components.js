@@ -772,6 +772,9 @@ export function localizeError(msg) {
     'receipt file too large': t('حجم ملف الإيصال كبير جداً (الحد الأقصى 2.5 ميجابايت).', 'Receipt file too large (max 2.5MB).'),
     'too many requests': t('تم تجاوز عدد المحاولات المسموحة، يرجى الانتظار قليلاً.', 'Too many requests, please wait a moment.'),
     'failed to fetch': t('تعذر الاتصال بالخادم، يرجى التحقق من اتصالك بالإنترنت.', 'Failed to connect to server, please check internet.'),
+    'cross-origin request rejected': t('تعذر إتمام الطلب مع الخادم، يرجى تحديث الصفحة والمحاولة مجدداً.', 'Cross-origin request rejected, please refresh and retry.'),
+    'cross-origin': t('تعذر إتمام الطلب مع الخادم، يرجى تحديث الصفحة والمحاولة مجدداً.', 'Cross-origin request rejected, please refresh and retry.'),
+    'network error': t('حدث خطأ في شبكة الاتصال، يرجى إعادة المحاولة.', 'Network error occurred, please retry.'),
   };
 
   for (const [k, v] of Object.entries(dict)) {
