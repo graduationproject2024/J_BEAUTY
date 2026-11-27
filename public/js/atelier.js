@@ -1,6 +1,9 @@
 import { $, api, esc, href, money, nameOf, state, t, toast } from './state.js';
 import { head } from './components.js';
 import { trackFunnel } from './motion.js';
+import { Atelier3DRenderer } from './atelier/renderer-3d.js';
+import { paintAtelier25DCanvas } from './atelier/renderer-25d.js';
+import { evaluateAtelierServiceMatch } from './atelier/service-mapping.js';
 
 export const NAIL_SHADES = [
   { id: 'sheer-blush', hex: '#F3DCE1', ar: 'وردي شفاف', en: 'Sheer Blush' },
@@ -24,13 +27,13 @@ export const TIP_SHADES = [
 ];
 
 export const SKIN_TONES = [
-  { id: 'fair', base: '#F4D7C8', ar: 'فاتحة', en: 'Fair' },
-  { id: 'warm', base: '#E4BD9F', ar: 'حنطية دافئة', en: 'Warm Sand' },
-  { id: 'olive', base: '#C79672', ar: 'قمحية زيتونية', en: 'Olive' },
-  { id: 'deep', base: '#7B513A', ar: 'سمراء غنية', en: 'Deep Rich' },
+  { id: 'fair', base: '#EEC9B8', ar: 'فاتحة', en: 'Fair' },
+  { id: 'warm', base: '#DDA982', ar: 'حنطية دافئة', en: 'Warm Sand' },
+  { id: 'olive', base: '#BC8861', ar: 'قمحية زيتونية', en: 'Olive' },
+  { id: 'deep', base: '#714732', ar: 'سمراء غنية', en: 'Deep Rich' },
 ];
 
-const SHAPES = [
+export const SHAPES = [
   ['almond', 'لوزي', 'Almond'],
   ['oval', 'بيضاوي', 'Oval'],
   ['squoval', 'مربع ناعم', 'Soft Square'],
@@ -38,13 +41,13 @@ const SHAPES = [
   ['coffin', 'كوفين أنيق', 'Coffin'],
 ];
 
-const LENGTHS = [
+export const LENGTHS = [
   ['short', 'قصير', 'Short'],
   ['medium', 'متوسط', 'Medium'],
   ['long', 'طويل', 'Long'],
 ];
 
-const FRENCH_STYLES = [
+export const FRENCH_STYLES = [
   ['none', 'طلاء كامل', 'Full Polish'],
   ['classic', 'فرنش كلاسيك', 'Classic French'],
   ['micro', 'مايكرو فرنش', 'Micro French'],
@@ -52,486 +55,178 @@ const FRENCH_STYLES = [
   ['ombre', 'تدرج ناعم (أومبري)', 'Soft Ombre'],
 ];
 
-const FINISHES = [
+export const FINISHES = [
   ['gloss', 'لمعة زجاجية', 'High Gloss'],
   ['pearl', 'لؤلؤي ناعم', 'Pearl Sheen'],
   ['matte', 'مخملي مطفي', 'Velvet Matte'],
 ];
 
-const ACCENTS = [
+export const ACCENTS = [
   ['none', 'طلاء صافٍ', 'Clean'],
   ['gold_foil', 'رقائق ذهب وردي', 'Rose Gold Foil'],
   ['pearl_dot', 'حبة لؤلؤ ناعمة', 'Pearl Cabochon'],
   ['floral_dot', 'لمسة زهرية ناعمة', 'Botanical Blossom'],
 ];
 
-// Calibrated 5-digit anatomical nail bed anchors on `/assets/images/atelier-hand-base.webp` (720x720)
-const HAND_NAILS = [
-  { id: 'thumb', cx: 241, cy: 397, w: 34, h: 57, a: 2.48, skewX: 0.08, blur: 0 },
-  { id: 'index', cx: 413, cy: 465, w: 35, h: 60, a: 2.49, skewX: -0.04, blur: 0 },
-  { id: 'middle', cx: 483, cy: 463, w: 35.5, h: 61, a: 2.49, skewX: -0.03, blur: 0 },
-  { id: 'ring', cx: 512, cy: 405, w: 32.5, h: 57, a: 2.52, skewX: -0.04, blur: 0 },
-  { id: 'pinky', cx: 513, cy: 317, w: 26, h: 45, a: 2.45, skewX: -0.05, blur: 0.12 },
+const CAMERA_VIEWS = [
+  ['editorial', 'إطلالة شاملة', 'Full Hand'],
+  ['closeup', 'عن قرب', 'Close-Up'],
+  ['overhead', 'من الأعلى', 'Overhead'],
+  ['profile', 'الجانب', 'Side Apex'],
 ];
 
-let handBasePromise = null;
-const skinCanvasCache = new Map();
+const ACTIVE_RENDERERS = new Map();
 
-function loadStudioHandResources() {
-  if (!handBasePromise) {
-    handBasePromise = new Promise((resolve, reject) => {
-      const img = new Image();
-      img.decoding = 'async';
-      img.onload = () => {
-        const c = document.createElement('canvas');
-        c.width = 720;
-        c.height = 720;
-        const g = c.getContext('2d');
-        g.drawImage(img, 0, 0, 720, 720);
-        const baseRaw = g.getImageData(0, 0, 720, 720).data;
-
-        // Feathered anatomical hand/wrist/forearm silhouette extending seamlessly to top-left frame corner
-        const mC = document.createElement('canvas');
-        mC.width = 720;
-        mC.height = 720;
-        const mg = mC.getContext('2d');
-        mg.fillStyle = '#000';
-        mg.fillRect(0, 0, 720, 720);
-        mg.filter = 'blur(10px)';
-        mg.fillStyle = '#fff';
-        mg.beginPath();
-        mg.moveTo(-12, -12);
-        mg.lineTo(58, -12);
-        mg.lineTo(124, 68);
-        mg.lineTo(188, 136);
-        mg.lineTo(285, 175);
-        mg.lineTo(415, 222);
-        mg.lineTo(522, 305);
-        mg.lineTo(542, 342);
-        mg.lineTo(516, 368);
-        mg.lineTo(540, 422);
-        mg.lineTo(514, 495);
-        mg.lineTo(445, 502);
-        mg.lineTo(395, 468);
-        mg.lineTo(340, 405);
-        mg.lineTo(272, 434);
-        mg.lineTo(212, 412);
-        mg.lineTo(112, 336);
-        mg.lineTo(48, 228);
-        mg.lineTo(-12, 195);
-        mg.closePath();
-        mg.fill();
-        mg.filter = 'none';
-        const maskData = mg.getImageData(0, 0, 720, 720).data;
-
-        skinCanvasCache.set('warm', c);
-        resolve({ baseCanvas: c, baseRaw, maskData });
-      };
-      img.onerror = reject;
-      img.src = '/assets/images/atelier-hand-base.webp';
-    }).catch(() => null);
+export function disposeAtelierRenderers() {
+  for (const entry of ACTIVE_RENDERERS.values()) {
+    try {
+      entry.renderer?.dispose?.();
+    } catch {}
   }
-  return handBasePromise;
+  ACTIVE_RENDERERS.clear();
 }
 
-function applyMelaninCurve(r, g, b, toneId) {
-  if (toneId === 'fair') {
-    const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    const lifted = Math.pow(luma, 0.78);
-    const boost = (lifted - luma) * 235;
-    return [
-      Math.max(0, Math.min(255, r + boost + 10)),
-      Math.max(0, Math.min(255, g + boost + 4)),
-      Math.max(0, Math.min(255, b + boost + 7)),
-    ];
-  }
-  if (toneId === 'olive') {
-    return [
-      Math.min(255, Math.pow(r / 255, 1.18) * 246),
-      Math.min(255, Math.pow(g / 255, 1.22) * 238),
-      Math.min(255, Math.pow(b / 255, 1.28) * 222),
-    ];
-  }
-  // Natural espresso cocoa umber for 'deep'
-  const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  const darkCurve = Math.pow(luma, 1.72);
-  const nr = darkCurve * 240 * 0.94 + (r - luma * 255) * 0.42;
-  const ng = darkCurve * 222 * 0.90 + (g - luma * 255) * 0.42;
-  const nb = darkCurve * 204 * 0.86 + (b - luma * 255) * 0.42;
-  return [Math.max(0, Math.min(255, nr)), Math.max(0, Math.min(255, ng)), Math.max(0, Math.min(255, nb))];
+export function recommendedServiceForStyle(cfg = {}) {
+  return evaluateAtelierServiceMatch(cfg).primaryServiceId;
 }
 
-function getSkinHandCanvas(resources, toneId) {
-  const tone = ['fair', 'warm', 'olive', 'deep'].includes(toneId) ? toneId : 'warm';
-  if (skinCanvasCache.has(tone)) return skinCanvasCache.get(tone);
-
-  const c = document.createElement('canvas');
-  c.width = 720;
-  c.height = 720;
-  const g = c.getContext('2d');
-  const imgData = new ImageData(new Uint8ClampedArray(resources.baseRaw), 720, 720);
-  const d = imgData.data;
-  const maskData = resources.maskData;
-
-  for (let i = 0; i < d.length; i += 4) {
-    const m = maskData[i] / 255;
-    if (m > 0.03) {
-      const r = d[i];
-      const gr = d[i + 1];
-      const bl = d[i + 2];
-      const neutralPaper = r - bl < 9 && r > 205;
-      const alpha = neutralPaper ? m * 0.15 : m;
-      const [nr, ng, nb] = applyMelaninCurve(r, gr, bl, tone);
-      d[i] = r + (nr - r) * alpha;
-      d[i + 1] = gr + (ng - gr) * alpha;
-      d[i + 2] = bl + (nb - bl) * alpha;
-    }
-  }
-  g.putImageData(imgData, 0, 0);
-  skinCanvasCache.set(tone, c);
-  return c;
+export function localizedShapeLabel(shape) {
+  const found = SHAPES.find((x) => x[0] === shape);
+  return found ? t(found[1], found[2]) : String(shape || '');
 }
 
-function nailPath(ctx, w, bedH, ext, shape) {
-  const hw = (w / 2) * 1.04;
-  const baseD = bedH * 0.49;
-  const shoulder = -bedH * 0.16;
-  const tipY = -bedH * 0.50 - ext;
-  ctx.beginPath();
-  ctx.moveTo(-hw, 0);
-  ctx.bezierCurveTo(-hw, baseD * 0.80, -hw * 0.62, baseD, 0, baseD);
-  ctx.bezierCurveTo(hw * 0.62, baseD, hw, baseD * 0.80, hw, 0);
-  ctx.lineTo(hw * 0.99, shoulder);
-
-  if (shape === 'almond') {
-    ctx.bezierCurveTo(hw * 0.96, tipY * 0.42, hw * 0.52, tipY * 0.94, 0, tipY * 1.05);
-    ctx.bezierCurveTo(-hw * 0.52, tipY * 0.94, -hw * 0.96, tipY * 0.42, -hw * 0.99, shoulder);
-  } else if (shape === 'coffin') {
-    const tw = hw * 0.56;
-    ctx.bezierCurveTo(hw * 0.90, shoulder + (tipY - shoulder) * 0.34, tw * 1.10, tipY * 0.85, tw * 1.02, tipY * 1.01);
-    ctx.quadraticCurveTo(tw, tipY * 1.05, tw * 0.80, tipY * 1.05);
-    ctx.lineTo(-tw * 0.80, tipY * 1.05);
-    ctx.quadraticCurveTo(-tw, tipY * 1.05, -tw * 1.02, tipY * 1.01);
-    ctx.bezierCurveTo(-tw * 1.10, tipY * 0.85, -hw * 0.90, shoulder + (tipY - shoulder) * 0.34, -hw * 0.99, shoulder);
-  } else if (shape === 'square') {
-    ctx.lineTo(hw * 0.91, tipY * 0.85);
-    ctx.quadraticCurveTo(hw * 0.90, tipY * 0.98, hw * 0.68, tipY * 1.00);
-    ctx.quadraticCurveTo(0, tipY * 1.02, -hw * 0.68, tipY * 1.00);
-    ctx.quadraticCurveTo(-hw * 0.90, tipY * 0.98, -hw * 0.91, tipY * 0.85);
-    ctx.lineTo(-hw * 0.99, shoulder);
-  } else if (shape === 'squoval' || shape === 'soft_square') {
-    ctx.lineTo(hw * 0.96, tipY * 0.78);
-    ctx.quadraticCurveTo(hw * 0.95, tipY * 1.01, hw * 0.48, tipY * 1.01);
-    ctx.lineTo(-hw * 0.48, tipY * 1.01);
-    ctx.quadraticCurveTo(-hw * 0.95, tipY * 1.01, -hw * 0.96, tipY * 0.78);
-    ctx.lineTo(-hw * 0.99, shoulder);
-  } else {
-    ctx.bezierCurveTo(hw * 0.98, tipY * 0.56, hw * 0.62, tipY * 1.00, 0, tipY * 1.04);
-    ctx.bezierCurveTo(-hw * 0.62, tipY * 1.00, -hw * 0.98, tipY * 0.56, -hw * 0.99, shoulder);
-  }
-  ctx.closePath();
+export function localizedFinishLabel(finish) {
+  const found = FINISHES.find((x) => x[0] === finish);
+  return found ? t(found[1], found[2]) : String(finish || '');
 }
 
-export function recommendedServiceForStyle(cfg) {
-  if (cfg.french_style === 'colored') return 'colored-french';
-  if (cfg.french_style !== 'none') return 'french-gel';
-  return 'gel-polish';
+export function localizedLengthLabel(len) {
+  const found = LENGTHS.find((x) => x[0] === len);
+  return found ? t(found[1], found[2]) : String(len || '');
 }
 
-function drawTipOverlay(sg, n, ext, topReach, cfg) {
-  const tipColor = cfg.tip_color || '#F5EFE8';
-  if (cfg.french_style === 'ombre') {
-    const om = sg.createLinearGradient(0, -topReach, 0, n.h * 0.16);
-    om.addColorStop(0, tipColor);
-    om.addColorStop(0.50, tipColor);
-    om.addColorStop(1, 'rgba(255,255,255,0)');
-    sg.globalAlpha = 0.76;
-    sg.fillStyle = om;
-    sg.fillRect(-n.w, -topReach - 10, n.w * 2, topReach + n.h * 0.25);
-    return;
-  }
-
-  sg.globalAlpha = 0.96;
-  sg.fillStyle = tipColor;
-  const isMicro = cfg.french_style === 'micro';
-  const tipY = -n.h * 0.50 - ext;
-  const flatTip = cfg.shape === 'square' || cfg.shape === 'squoval' || cfg.shape === 'coffin';
-  const bandDepth = isMicro ? n.h * 0.048 : n.h * 0.16 + ext * 0.45;
-  const smileApex = tipY + bandDepth;
-  const smileSpanX = n.w * 0.62;
-  const wingRise = isMicro ? (flatTip ? n.h * 0.01 : n.h * 0.055) : flatTip ? n.h * 0.05 : n.h * 0.14;
-  sg.beginPath();
-  sg.moveTo(-smileSpanX, tipY + wingRise + (isMicro ? bandDepth * 0.55 : bandDepth * 0.28));
-  sg.quadraticCurveTo(0, smileApex + (isMicro ? 0.5 : 2.4), smileSpanX, tipY + wingRise + (isMicro ? bandDepth * 0.55 : bandDepth * 0.28));
-  sg.lineTo(n.w, -topReach - 16);
-  sg.lineTo(-n.w, -topReach - 16);
-  sg.closePath();
-  sg.fill();
+// Lightweight fallback / non-WebGL preview stage markup (0 WebGL context cost unless mounted interactively)
+export function paintAtelierCanvas(canvas, cfg, lightX = 42) {
+  return paintAtelier25DCanvas(canvas, cfg, lightX);
 }
 
-function drawAccentDetail(sg, n, cfg) {
-  if (cfg.accent === 'gold_foil' && n.id !== 'thumb') {
-    const leaves = [
-      { cx: -3.2, cy: -n.h * 0.08, rx: 2.3, ry: 1.5, rot: -0.35 },
-      { cx: 3.1, cy: 1.2, rx: 2.6, ry: 1.4, rot: 0.42 },
-      { cx: -0.8, cy: n.h * 0.14, rx: 2.0, ry: 1.3, rot: 0.22 },
-      { cx: 1.8, cy: -n.h * 0.22, rx: 1.7, ry: 1.1, rot: -0.58 },
-    ];
-    leaves.forEach((lf, fi) => {
-      sg.save();
-      sg.translate(lf.cx, lf.cy);
-      sg.rotate(lf.rot);
-      const fg = sg.createRadialGradient(-lf.rx * 0.25, -lf.ry * 0.25, 0.2, 0, 0, Math.max(lf.rx, lf.ry) * 1.15);
-      fg.addColorStop(0, '#FFFDF0');
-      fg.addColorStop(0.45, fi % 2 === 0 ? '#F3D693' : '#E3BC6E');
-      fg.addColorStop(0.85, '#B7863E');
-      fg.addColorStop(1, 'rgba(183, 134, 62, 0)');
-      sg.fillStyle = fg;
-      sg.beginPath();
-      sg.moveTo(-lf.rx, 0);
-      sg.bezierCurveTo(-lf.rx * 0.6, -lf.ry * 1.1, lf.rx * 0.7, -lf.ry * 0.9, lf.rx, 0.15);
-      sg.bezierCurveTo(lf.rx * 0.6, lf.ry * 1.05, -lf.rx * 0.7, lf.ry * 0.85, -lf.rx, 0);
-      sg.closePath();
-      sg.fill();
-      sg.restore();
-    });
-  } else if (cfg.accent === 'pearl_dot') {
-    const py = n.h * 0.24;
-    sg.save();
-    const pg = sg.createRadialGradient(-0.8, py - 0.8, 0.3, 0, py, 2.5);
-    pg.addColorStop(0, '#FFFFFF');
-    pg.addColorStop(0.65, '#F2EAE2');
-    pg.addColorStop(1, '#CBB39B');
-    sg.fillStyle = pg;
-    sg.beginPath();
-    sg.arc(0, py, 2.5, 0, Math.PI * 2);
-    sg.fill();
-    sg.restore();
-  } else if (cfg.accent === 'floral_dot' && n.id === 'ring') {
-    const py = n.h * 0.06;
-    sg.save();
-    sg.translate(0, py);
-    for (let i = 0; i < 5; i++) {
-      sg.save();
-      sg.rotate((i * Math.PI * 2) / 5);
-      const petG = sg.createRadialGradient(0, -2.8, 0.2, 0, -2.8, 3.2);
-      petG.addColorStop(0, '#FFFFFF');
-      petG.addColorStop(0.65, 'rgba(255, 249, 246, 0.95)');
-      petG.addColorStop(1, 'rgba(232, 208, 214, 0.82)');
-      sg.fillStyle = petG;
-      sg.beginPath();
-      sg.moveTo(0, -0.5);
-      sg.bezierCurveTo(2.4, -1.8, 2.3, -5.2, 0, -5.6);
-      sg.bezierCurveTo(-2.3, -5.2, -2.4, -1.8, 0, -0.5);
-      sg.closePath();
-      sg.fill();
-      sg.restore();
-    }
-    const core = sg.createRadialGradient(-0.3, -0.3, 0.1, 0, 0, 1.55);
-    core.addColorStop(0, '#F5DFA2');
-    core.addColorStop(1, '#C59A54');
-    sg.fillStyle = core;
-    sg.beginPath();
-    sg.arc(0, 0, 1.45, 0, Math.PI * 2);
-    sg.fill();
-    sg.restore();
-  }
-}
-
-export async function paintAtelierCanvas(canvas, cfg, lightX = 45) {
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  const resources = await loadStudioHandResources();
-  if (!resources) return;
-
-  const skinCanvas = getSkinHandCanvas(resources, cfg.skin || 'warm');
-  ctx.clearRect(0, 0, 720, 720);
-  ctx.drawImage(skinCanvas, 0, 0, 720, 720);
-
-  const extBaseMap = { short: 2.0, medium: 5.2, long: 9.6 };
-  const extVal = extBaseMap[cfg.length] ?? 5.2;
-  const polish = cfg.polish_color || '#F3DCE1';
-  const hasFrench = cfg.french_style && cfg.french_style !== 'none';
-  const lightShift = ((lightX - 45) / 45) * 4.5;
-  const cuticleShadeBySkin = {
-    fair: ['rgba(162, 108, 96, 0.20)', 'rgba(182, 126, 112, 0.06)'],
-    warm: ['rgba(128, 78, 58, 0.26)', 'rgba(148, 92, 70, 0.07)'],
-    olive: ['rgba(98, 62, 44, 0.30)', 'rgba(124, 78, 56, 0.08)'],
-    deep: ['rgba(48, 26, 19, 0.38)', 'rgba(72, 42, 32, 0.10)'],
-  };
-  const [cutDeep, cutMid] = cuticleShadeBySkin[cfg.skin] || cuticleShadeBySkin.warm;
-
-  for (const n of HAND_NAILS) {
-    const ext = extVal * (n.h / 52) * (n.id === 'ring' ? 0.78 : 1);
-    const topReach = n.h * 0.56 + ext;
-
-    // Diffused studio contact shadow onto the linen/fingerpad beneath extended nail tips
-    if (ext > 2.4) {
-      ctx.save();
-      ctx.translate(n.cx + 1.4, n.cy + 2.8);
-      ctx.rotate(n.a);
-      ctx.transform(1, 0, n.skewX || 0, 1, 0, 0);
-      ctx.scale(0.90, 0.99);
-      nailPath(ctx, n.w, n.h, ext * 0.94, cfg.shape);
-      ctx.filter = 'blur(3.0px)';
-      ctx.fillStyle = ext > 6.5 ? 'rgba(42, 28, 20, 0.17)' : 'rgba(42, 28, 20, 0.11)';
-      ctx.fill();
-      ctx.filter = 'none';
-      ctx.restore();
-    }
-
-    const spr = document.createElement('canvas');
-    spr.width = 160;
-    spr.height = 180;
-    const sg = spr.getContext('2d');
-    sg.translate(80, 90);
-    sg.transform(1, 0, n.skewX || 0, 1, 0, 0);
-
-    // Clipped nail plate compositing
-    sg.save();
-    nailPath(sg, n.w, n.h, ext, cfg.shape);
-    sg.clip();
-
-    if (hasFrench) {
-      sg.fillStyle = '#EED4D8';
-      sg.globalAlpha = 0.85;
-      sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
-    }
-    sg.globalAlpha = hasFrench ? 0.92 : 0.99;
-    sg.fillStyle = polish;
-    sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
-
-    if (hasFrench) {
-      const bedG = sg.createLinearGradient(0, n.h * 0.48, 0, -topReach * 0.2);
-      bedG.addColorStop(0, 'rgba(235, 182, 188, 0.38)');
-      bedG.addColorStop(0.55, 'rgba(244, 210, 216, 0.20)');
-      bedG.addColorStop(1, 'rgba(252, 238, 242, 0.04)');
-      sg.globalAlpha = 1;
-      sg.fillStyle = bedG;
-      sg.fillRect(-n.w, -topReach, n.w * 2, topReach + n.h);
-    }
-
-    // 3D cylindrical C-curve sidewall shading & dome luminescence on base plate
-    sg.globalAlpha = 1;
-    const baseCyl = sg.createLinearGradient(-n.w * 0.54, 0, n.w * 0.54, 0);
-    baseCyl.addColorStop(0, 'rgba(34, 18, 20, 0.17)');
-    baseCyl.addColorStop(0.18, 'rgba(34, 18, 20, 0.04)');
-    baseCyl.addColorStop(0.46, 'rgba(255, 255, 255, 0.09)');
-    baseCyl.addColorStop(0.82, 'rgba(34, 18, 20, 0.04)');
-    baseCyl.addColorStop(1, 'rgba(34, 18, 20, 0.17)');
-    sg.fillStyle = baseCyl;
-    sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h);
-
-    if (hasFrench) {
-      drawTipOverlay(sg, n, ext, topReach, cfg);
-      const tipWrap = sg.createLinearGradient(-n.w * 0.52, 0, n.w * 0.52, 0);
-      tipWrap.addColorStop(0, 'rgba(36, 20, 22, 0.05)');
-      tipWrap.addColorStop(0.20, 'rgba(255, 255, 255, 0.04)');
-      tipWrap.addColorStop(0.50, 'rgba(255, 255, 255, 0.06)');
-      tipWrap.addColorStop(0.80, 'rgba(255, 255, 255, 0.02)');
-      tipWrap.addColorStop(1, 'rgba(36, 20, 22, 0.05)');
-      sg.globalAlpha = 1;
-      sg.fillStyle = tipWrap;
-      sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach * 0.72);
-    }
-
-    drawAccentDetail(sg, n, cfg);
-
-    // Top coat finish studio lighting extending cleanly through the tip edge
-    sg.globalAlpha = 1;
-    if (cfg.finish === 'gloss' || cfg.finish === 'pearl') {
-      if (cfg.finish === 'pearl') {
-        const pr = sg.createRadialGradient(-n.w * 0.10 + lightShift * 0.4, -n.h * 0.14, 2, 0, -n.h * 0.05, n.w * 0.72);
-        pr.addColorStop(0, 'rgba(255,250,255,0.55)');
-        pr.addColorStop(0.45, 'rgba(252,226,238,0.24)');
-        pr.addColorStop(0.82, 'rgba(232,238,246,0.12)');
-        pr.addColorStop(1, 'rgba(255,255,255,0)');
-        sg.fillStyle = pr;
-        sg.fillRect(-n.w, -topReach - 6, n.w * 2, topReach + n.h + 6);
-      }
-      const hx = Math.max(-n.w * 0.30, Math.min(n.w * 0.28, -n.w * 0.14 + lightShift));
-      const ribHalf = cfg.finish === 'gloss' ? 6.8 : 8.2;
-      const peakA = cfg.finish === 'gloss' ? 0.52 : 0.36;
-      const rib = sg.createLinearGradient(hx - ribHalf, 0, hx + ribHalf, 0);
-      rib.addColorStop(0, 'rgba(255,255,255,0)');
-      rib.addColorStop(0.32, `rgba(255,255,255,${(peakA * 0.38).toFixed(2)})`);
-      rib.addColorStop(0.50, `rgba(255,255,255,${peakA.toFixed(2)})`);
-      rib.addColorStop(0.68, `rgba(255,255,255,${(peakA * 0.34).toFixed(2)})`);
-      rib.addColorStop(1, 'rgba(255,255,255,0)');
-      sg.fillStyle = rib;
-      sg.fillRect(hx - ribHalf, -topReach - 4, ribHalf * 2, topReach + 4 + n.h * 0.40);
-
-      const rimR = sg.createLinearGradient(n.w * 0.20, 0, n.w * 0.44, 0);
-      rimR.addColorStop(0, 'rgba(255,250,246,0)');
-      rimR.addColorStop(0.55, 'rgba(255,250,246,0.14)');
-      rimR.addColorStop(1, 'rgba(255,250,246,0)');
-      sg.fillStyle = rimR;
-      sg.fillRect(n.w * 0.20, -topReach - 2, n.w * 0.26, topReach + n.h * 0.4);
-    } else {
-      // Velvet satin matte with distinct 3D cylindrical dome curvature & recessed sidewalls
-      const mt = sg.createLinearGradient(-n.w * 0.54, 0, n.w * 0.54, 0);
-      mt.addColorStop(0, 'rgba(30, 18, 16, 0.14)');
-      mt.addColorStop(0.22, 'rgba(255, 255, 255, 0.04)');
-      mt.addColorStop(0.45, 'rgba(255, 255, 255, 0.16)');
-      mt.addColorStop(0.72, 'rgba(255, 255, 255, 0.03)');
-      mt.addColorStop(1, 'rgba(30, 18, 16, 0.15)');
-      sg.fillStyle = mt;
-      sg.fillRect(-n.w, -topReach - 8, n.w * 2, topReach + n.h + 8);
-    }
-
-    // Subtle lateral sidewall crease & skin-toned proximal cuticle pocket fold
-    const groove = sg.createLinearGradient(-n.w * 0.54, 0, n.w * 0.54, 0);
-    groove.addColorStop(0, cutDeep);
-    groove.addColorStop(0.06, 'rgba(0,0,0,0)');
-    groove.addColorStop(0.94, 'rgba(0,0,0,0)');
-    groove.addColorStop(1, cutDeep);
-    sg.fillStyle = groove;
-    sg.fillRect(-n.w, -topReach - 6, n.w * 2, topReach + n.h + 6);
-
-    const cut = sg.createLinearGradient(0, n.h * 0.50, 0, n.h * 0.20);
-    cut.addColorStop(0, cutDeep);
-    cut.addColorStop(0.42, cutMid);
-    cut.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    sg.fillStyle = cut;
-    sg.fillRect(-n.w, n.h * 0.16, n.w * 2, n.h * 0.40);
-    sg.restore();
-
-    ctx.save();
-    ctx.translate(n.cx, n.cy);
-    ctx.rotate(n.a);
-    if (n.blur > 0) ctx.filter = `blur(${n.blur}px)`;
-    ctx.drawImage(spr, -80, -90);
-    ctx.filter = 'none';
-    ctx.restore();
-  }
-}
-
-let drawQueued = false;
-function syncAtelierCanvases() {
-  if (drawQueued) return;
-  drawQueued = true;
-  requestAnimationFrame(() => {
-    drawQueued = false;
-    document.querySelectorAll('.atelier-hand-canvas').forEach((canvas) => {
-      paintAtelierCanvas(canvas, state.atelier, state.atelier.lightX || 45);
-    });
-  });
-}
-
-export function renderNailPreviewSVG(cfg, lightX = 45) {
-  syncAtelierCanvases();
+export function renderNailPreviewSVG(cfg = state.atelier) {
+  const isFrench = cfg.french_style && cfg.french_style !== 'none';
+  const tipCss = isFrench ? esc(cfg.tip_color || '#F5EFE8') : esc(cfg.polish_color || '#F3DCE1');
+  const radius =
+    cfg.shape === 'square' ? '3px' : cfg.shape === 'squoval' ? '8px' : cfg.shape === 'coffin' ? '4px 4px 10px 10px' : '999px';
   return `
-    <div class="atelier-canvas-frame">
-      <canvas
-        class="atelier-hand-canvas atelier-hand-svg"
-        width="720"
-        height="720"
-        role="img"
-        data-light-x="${Math.round(lightX)}"
-        aria-label="${t('معاينة واقعية لتصميم الأظافر على اليد', 'Photographic studio nail design preview on hand')}">
+    <span class="atelier-swatch-nail" style="background:${esc(cfg.polish_color || '#F3DCE1')};border-radius:${radius}" aria-hidden="true">
+      ${isFrench ? `<span class="atelier-swatch-tip" style="background:${tipCss}"></span>` : ''}
+    </span>
+  `;
+}
+
+function mountHybridStage(containerId, cfg, { interactive = true, onFallback } = {}) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return null;
+
+  const prev = ACTIVE_RENDERERS.get(containerId);
+  if (prev && prev.wrap === wrap && prev.mode === '3d' && !prev.renderer.disposed) {
+    prev.renderer.setCameraPreset(cfg.cameraPreset || 'editorial', false);
+    prev.renderer.updateConfig(cfg, { lightX: cfg.lightX ?? 42 });
+    return prev;
+  }
+  if (prev) {
+    try {
+      prev.renderer?.dispose?.();
+    } catch {}
+    ACTIVE_RENDERERS.delete(containerId);
+  }
+
+  wrap.innerHTML = '';
+
+  const activateFallback = (reason = 'webgl-unavailable') => {
+    const existing = ACTIVE_RENDERERS.get(containerId);
+    if (existing?.mode === '25d' && existing.canvas?.isConnected) {
+      paintAtelier25DCanvas(existing.canvas, cfg, cfg.lightX ?? 42);
+      return existing;
+    }
+    try {
+      existing?.renderer?.dispose?.();
+    } catch {}
+    wrap.innerHTML = `
+      <canvas class="atelier-hand-canvas atelier-fallback-canvas" width="720" height="720" role="img"
+        aria-label="${t('معاينة استوديو تصميم الأظافر', 'Studio nail design preview')}">
       </canvas>
+    `;
+    const fbCanvas = wrap.querySelector('canvas');
+    paintAtelier25DCanvas(fbCanvas, cfg, cfg.lightX ?? 42);
+    const rec = { mode: '25d', wrap, canvas: fbCanvas, reason };
+    ACTIVE_RENDERERS.set(containerId, rec);
+    if (onFallback) onFallback(reason);
+    const fbNote = document.getElementById('atelier-fallback-note');
+    if (fbNote) fbNote.hidden = false;
+    return rec;
+  };
+
+  // Explicit test hook / environment check for software fallback verification
+  if (window.__ATELIER_FORCE_FALLBACK__) {
+    return activateFallback('forced-fallback');
+  }
+
+  try {
+    const ren = new Atelier3DRenderer(wrap, {
+      interactive,
+      onContextLost: () => activateFallback('webglcontextlost'),
+    });
+    ren.setCameraPreset(cfg.cameraPreset || 'editorial', true);
+    ren.updateConfig(cfg, { lightX: cfg.lightX ?? 42, immediate: true });
+    const rec = { mode: '3d', wrap, renderer: ren };
+    ACTIVE_RENDERERS.set(containerId, rec);
+    const fbNote = document.getElementById('atelier-fallback-note');
+    if (fbNote) fbNote.hidden = true;
+    return rec;
+  } catch {
+    return activateFallback('webgl-init-error');
+  }
+}
+
+export function renderServiceSummaryHtml(cfg = state.atelier) {
+  const match = evaluateAtelierServiceMatch(cfg);
+  const svcs = state.catalog?.services || [];
+  const svc = svcs.find((s) => s.id === match.primaryServiceId);
+  const remSvc = svcs.find((s) => s.id === 'gel-removal');
+  const highlights = state.lang === 'ar' ? match.highlightsAr : match.highlightsEn;
+  const totalEst = Number(svc?.price || 0) + (state.atelier.includeRemoval ? Number(remSvc?.price || 0) : 0);
+  const baseDur = Number(svc?.duration || 45);
+  const totalMins = baseDur + match.extraMinutes + (state.atelier.includeRemoval ? Number(remSvc?.duration || 25) : 0);
+
+  return `
+    <div class="atelier-tier-row">
+      <span class="atelier-tier-pill">${esc(t(match.tierAr, match.tierEn))}</span>
+      <span class="muted" style="font-size:13px"><bdi>~${totalMins}</bdi> ${t('دقيقة تقديرياً', 'min est.')}</span>
     </div>
+    ${
+      svc
+        ? `<p class="atelier-matched-line">
+             ${t('الخدمة المقترحة:', 'Matched service:')}
+             <strong>${esc(nameOf(svc))}</strong>
+             (<bdi>${money(totalEst)}</bdi>)
+           </p>`
+        : ''
+    }
+    ${
+      highlights.length
+        ? `<ul class="atelier-highlights">
+             ${highlights.map((item) => `<li>${esc(item)}</li>`).join('')}
+           </ul>`
+        : ''
+    }
+    <p class="muted atelier-prep-note">${esc(t(match.prepAdvisoryAr, match.prepAdvisoryEn))}</p>
+    ${
+      remSvc
+        ? `<label class="check atelier-removal-opt">
+             <input type="checkbox" id="at-removal-check" ${cfg.includeRemoval ? 'checked' : ''}>
+             <span>${t('إضافة إزالة جل سابق', 'Include soak-off Gel Removal')} (+<bdi>${money(remSvc.price)}</bdi>)</span>
+           </label>`
+        : ''
+    }
   `;
 }
 
@@ -540,15 +235,13 @@ export function atelierMiniWidget() {
   return `
     <div class="atelier-mini card">
       <div class="atelier-mini-grid">
-        <div class="atelier-stage" id="mini-atelier-stage">
-          ${renderNailPreviewSVG(cfg)}
-        </div>
+        <div class="atelier-stage atelier-stage-mini" id="mini-atelier-stage" role="region" aria-label="${t('معاينة ثلاثية الأبعاد لتصميم الأظافر', 'Interactive 3D nail design preview')}"></div>
         <div>
-          <span class="eyebrow">${t('أتيليه J للأظافر · معاينة واقعية', 'J NAIL ATELIER · INTERACTIVE STUDIO')}</span>
-          <h3>${t('صمّمي إطلالة أظافركِ قبل الحجز', 'Preview your manicure look before booking')}</h3>
+          <span class="eyebrow">${t('أتيليه J للأظافر · استوديو ثلاثي الأبعاد', 'J NAIL ATELIER · 3D INTERACTIVE STUDIO')}</span>
+          <h3>${t('صمّمي إطلالة أظافركِ قبل الحجز', 'Design and inspect your manicure in 3D before booking')}</h3>
           <p class="muted">${t(
-            'اختاري شكل الظفر ودرجات الجل أو الفرنش على معاينة واقعية، واحفظي التصميم أو ابدئي حجزه مباشرة.',
-            'Explore nail shapes, polish shades, and French tips in real time on a live studio preview, then save or book your look.',
+            'جرّبي شكل الظفر واللون واللمعة على يد ثلاثية الأبعاد بوضوح استوديو حقيقي، واحفظي التصميم أو احجزي مباشرة.',
+            'Explore shapes, shades, French styles, and finishes on an interactive 3D studio hand, then save or book your look.',
           )}</p>
           <div class="swatch-row" style="margin:14px 0">
             ${NAIL_SHADES.slice(0, 6)
@@ -566,7 +259,7 @@ export function atelierMiniWidget() {
               )
               .join('')}
           </div>
-          <a class="btn small" href="${href('atelier')}">${t('افتحي أتيليه الأظافر الكامل', 'Open Full Nail Atelier')}</a>
+          <a class="btn small" href="${href('atelier')}">${t('افتحي أتيليه الأظافر الكامل', 'Open Full 3D Nail Atelier')}</a>
         </div>
       </div>
     </div>
@@ -575,22 +268,37 @@ export function atelierMiniWidget() {
 
 export function atelierPage() {
   const cfg = state.atelier;
-  const svcId = recommendedServiceForStyle(cfg);
-  const svc = state.catalog.services.find((s) => s.id === svcId);
+  const activeTab = cfg.activeTab || 'shape';
+  const curCam = cfg.cameraPreset || 'editorial';
 
   return `
-    <main id="main" class="wrap">
+    <main id="main" class="wrap atelier-main">
       ${head(
         t('أتيليه J للأظافر', 'J Nail Atelier'),
-        t('اختاري الشكل والطول واللون والفرنش واللمعة النهائية على معاينة استوديو واقعية قبل طلب موعدكِ.', 'Customize nail shape, length, polish shade, French tip, and finish with live studio photographic rendering.'),
+        t('عايني الشكل والطول واللون والفرنش بزاوية 360 درجة على نموذج يد ثلاثي الأبعاد قبل طلب موعدكِ.', 'Customize nail shape, length, polish shade, French tip, and finish on an interactive 3D manicure stage before booking.'),
         [[t('الرئيسية', 'Home'), 'home'], [t('أتيليه الأظافر', 'J Nail Atelier'), '']],
       )}
 
       <div class="atelier-layout">
         <div class="atelier-canvas-card card">
-          <div id="atelier-canvas-wrap" class="atelier-stage" title="${t('حرّكي المؤشر لمعاينة انعكاس الإضاءة', 'Move pointer to shift studio specular highlight')}">
-            ${renderNailPreviewSVG(cfg, cfg.lightX || 45)}
+          <div class="atelier-viewer-head">
+            <span class="atelier-drag-hint">${t('اسحبي باللمس لتدوير اليد · اختاري الزاوية', 'Drag to orbit · Select angle')}</span>
+            <button type="button" class="btn small light atelier-reset-btn" id="at-reset-look">${t('إعادة ضبط', 'Reset')}</button>
           </div>
+
+          <div id="atelier-canvas-wrap" class="atelier-stage atelier-stage-3d" role="region" aria-label="${t('منصة المعاينة ثلاثية الأبعاد لتصميم الأظافر', 'Interactive 3D hand and manicure preview stage')}"></div>
+
+          <div id="atelier-fallback-note" class="muted" style="font-size:12px;margin-top:6px" hidden>
+            ${t('تم تفعيل المعاينة الخفيفة (WebGL غير نشط على هذا الجهاز).', 'Lightweight studio fallback active (WebGL unavailable on this device).')}
+          </div>
+
+          <div class="atelier-cam-bar" role="group" aria-label="${t('زوايا المعاينة', 'Camera angles')}">
+            ${CAMERA_VIEWS.map(
+              ([id, ar, en]) =>
+                `<button type="button" class="mini-chip atelier-cam-pill ${curCam === id ? 'active' : ''}" data-at-cam="${id}">${t(ar, en)}</button>`,
+            ).join('')}
+          </div>
+
           <div class="atelier-skin-bar">
             <span class="muted">${t('لون البشرة:', 'Skin undertone:')}</span>
             <div class="swatch-row">
@@ -600,107 +308,119 @@ export function atelierPage() {
               ).join('')}
             </div>
           </div>
-          ${
-            cfg.lastShareUrl
-              ? `<div class="success" style="margin-top:14px;text-align:start">
-                   <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بكِ:', 'Your share link is ready:')}</strong></p>
-                   <pre style="margin:0;padding:8px 10px" dir="ltr">${esc(cfg.lastShareUrl)}</pre>
-                   <button type="button" class="btn small light" id="copy-style-url" style="margin-top:8px">${t('نسخ الرابط', 'Copy URL')}</button>
-                 </div>`
-              : ''
-          }
+
+          <div id="at-share-panel" ${cfg.lastShareUrl ? '' : 'hidden'}>
+            ${
+              cfg.lastShareUrl
+                ? `<div class="success atelier-share-box">
+                     <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بكِ:', 'Your share link is ready:')}</strong></p>
+                     <pre style="margin:0;padding:8px 10px" dir="ltr">${esc(cfg.lastShareUrl)}</pre>
+                     <button type="button" class="btn small light" id="copy-style-url" style="margin-top:8px">${t('نسخ الرابط', 'Copy URL')}</button>
+                   </div>`
+                : ''
+            }
+          </div>
         </div>
 
         <div class="atelier-controls card">
-          <div class="control-group">
-            <label class="control-label" for="at-name">${t('اسم التصميم (اختياري للحفظ)', 'Look name')}</label>
-            <input id="at-name" type="text" maxlength="80" value="${esc(cfg.name || '')}" placeholder="${t('مثال: فرنش لؤلؤي ناعم', 'e.g. Eid Soft French')}">
+          <div class="atelier-mobile-tabs" role="tablist" aria-label="${t('أقسام تخصيص الأظافر', 'Manicure studio controls')}">
+            <button type="button" role="tab" class="atelier-tab-btn ${activeTab === 'shape' ? 'active' : ''}" aria-selected="${activeTab === 'shape'}" data-at-tab="shape">${t('الشكل والطول', 'Shape & Length')}</button>
+            <button type="button" role="tab" class="atelier-tab-btn ${activeTab === 'colors' ? 'active' : ''}" aria-selected="${activeTab === 'colors'}" data-at-tab="colors">${t('الألوان والفرنش', 'Colors & Styles')}</button>
+            <button type="button" role="tab" class="atelier-tab-btn ${activeTab === 'finish' ? 'active' : ''}" aria-selected="${activeTab === 'finish'}" data-at-tab="finish">${t('اللمسة والزخرفة', 'Finish & Details')}</button>
           </div>
 
-          <div class="control-group">
-            <span class="control-label">1. ${t('شكل الظفر', 'Nail Shape')}</span>
-            <div class="chip-row">
-              ${SHAPES.map(
-                ([id, ar, en]) =>
-                  `<button type="button" class="mini-chip ${cfg.shape === id ? 'active' : ''}" data-at-shape="${id}">${t(ar, en)}</button>`,
-              ).join('')}
+          <div class="atelier-panel ${activeTab === 'shape' ? 'is-active' : ''}" data-at-panel="shape">
+            <div class="control-group">
+              <label class="control-label" for="at-name">${t('اسم التصميم (اختياري للحفظ)', 'Look name (optional)')}</label>
+              <input id="at-name" type="text" maxlength="80" value="${esc(cfg.name || '')}" placeholder="${t('مثال: فرنش لؤلؤي ناعم', 'e.g. Eid Soft French')}">
+            </div>
+
+            <div class="control-group">
+              <span class="control-label">1. ${t('شكل الظفر', 'Nail Shape')}</span>
+              <div class="chip-row">
+                ${SHAPES.map(
+                  ([id, ar, en]) =>
+                    `<button type="button" class="mini-chip ${cfg.shape === id ? 'active' : ''}" data-at-shape="${id}">${t(ar, en)}</button>`,
+                ).join('')}
+              </div>
+            </div>
+
+            <div class="control-group">
+              <span class="control-label">2. ${t('طول الأظافر', 'Length')}</span>
+              <div class="chip-row">
+                ${LENGTHS.map(
+                  ([id, ar, en]) =>
+                    `<button type="button" class="mini-chip ${cfg.length === id ? 'active' : ''}" data-at-len="${id}">${t(ar, en)}</button>`,
+                ).join('')}
+              </div>
             </div>
           </div>
 
-          <div class="control-group">
-            <span class="control-label">2. ${t('طول الأظافر', 'Length')}</span>
-            <div class="chip-row">
-              ${LENGTHS.map(
-                ([id, ar, en]) =>
-                  `<button type="button" class="mini-chip ${cfg.length === id ? 'active' : ''}" data-at-len="${id}">${t(ar, en)}</button>`,
-              ).join('')}
+          <div class="atelier-panel ${activeTab === 'colors' ? 'is-active' : ''}" data-at-panel="colors">
+            <div class="control-group">
+              <span class="control-label">3. ${t('درجة اللون الأساسية', 'Base Shade')}</span>
+              <div class="swatch-row">
+                ${NAIL_SHADES.map(
+                  (s) =>
+                    `<button type="button" class="swatch ${cfg.polish_color === s.hex ? 'active' : ''}" data-at-color="${s.hex}" title="${t(s.ar, s.en)}" aria-label="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
+                ).join('')}
+              </div>
+            </div>
+
+            <div class="control-group">
+              <span class="control-label">4. ${t('نمط الفرنش والأطراف', 'Tip / French Style')}</span>
+              <div class="chip-row">
+                ${FRENCH_STYLES.map(
+                  ([id, ar, en]) =>
+                    `<button type="button" class="mini-chip ${cfg.french_style === id ? 'active' : ''}" data-at-french="${id}">${t(ar, en)}</button>`,
+                ).join('')}
+              </div>
+            </div>
+
+            <div class="control-group" id="at-tip-color-group" ${cfg.french_style === 'none' ? 'hidden' : ''}>
+              <span class="control-label">${t('لون الطرف الفرنسي', 'French Tip Shade')}</span>
+              <div class="swatch-row">
+                ${TIP_SHADES.map(
+                  (s) =>
+                    `<button type="button" class="swatch small ${cfg.tip_color === s.hex ? 'active' : ''}" data-at-tip="${s.hex}" title="${t(s.ar, s.en)}" aria-label="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
+                ).join('')}
+              </div>
             </div>
           </div>
 
-          <div class="control-group">
-            <span class="control-label">3. ${t('درجة اللون الأساسية', 'Base Shade')}</span>
-            <div class="swatch-row">
-              ${NAIL_SHADES.map(
-                (s) =>
-                  `<button type="button" class="swatch ${cfg.polish_color === s.hex ? 'active' : ''}" data-at-color="${s.hex}" title="${t(s.ar, s.en)}" aria-label="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
-              ).join('')}
+          <div class="atelier-panel ${activeTab === 'finish' ? 'is-active' : ''}" data-at-panel="finish">
+            <div class="control-group">
+              <span class="control-label">5. ${t('اللمسة النهائية (التغطية)', 'Top Coat Finish')}</span>
+              <div class="chip-row">
+                ${FINISHES.map(
+                  ([id, ar, en]) =>
+                    `<button type="button" class="mini-chip ${cfg.finish === id ? 'active' : ''}" data-at-finish="${id}">${t(ar, en)}</button>`,
+                ).join('')}
+              </div>
             </div>
-          </div>
 
-          <div class="control-group">
-            <span class="control-label">4. ${t('نمط الفرنش والأطراف', 'Tip / French Style')}</span>
-            <div class="chip-row">
-              ${FRENCH_STYLES.map(
-                ([id, ar, en]) =>
-                  `<button type="button" class="mini-chip ${cfg.french_style === id ? 'active' : ''}" data-at-french="${id}">${t(ar, en)}</button>`,
-              ).join('')}
+            <div class="control-group">
+              <span class="control-label">6. ${t('الزخرفة والإضافة الدقيقة', 'Botanical Detail')}</span>
+              <div class="chip-row">
+                ${ACCENTS.map(
+                  ([id, ar, en]) =>
+                    `<button type="button" class="mini-chip ${cfg.accent === id ? 'active' : ''}" data-at-accent="${id}">${t(ar, en)}</button>`,
+                ).join('')}
+              </div>
             </div>
-          </div>
 
-          ${
-            cfg.french_style !== 'none'
-              ? `<div class="control-group">
-                   <span class="control-label">${t('لون الطرف الفرنسي', 'French Tip Shade')}</span>
-                   <div class="swatch-row">
-                     ${TIP_SHADES.map(
-                       (s) =>
-                         `<button type="button" class="swatch small ${cfg.tip_color === s.hex ? 'active' : ''}" data-at-tip="${s.hex}" title="${t(s.ar, s.en)}" aria-label="${t(s.ar, s.en)}" style="background:${s.hex}"></button>`,
-                     ).join('')}
-                   </div>
-                 </div>`
-              : ''
-          }
-
-          <div class="control-group">
-            <span class="control-label">5. ${t('اللمسة النهائية (التغطية)', 'Top Coat Finish')}</span>
-            <div class="chip-row">
-              ${FINISHES.map(
-                ([id, ar, en]) =>
-                  `<button type="button" class="mini-chip ${cfg.finish === id ? 'active' : ''}" data-at-finish="${id}">${t(ar, en)}</button>`,
-              ).join('')}
-            </div>
-          </div>
-
-          <div class="control-group">
-            <span class="control-label">6. ${t('الزخرفة والإضافة الدقيقة', 'Botanical Detail')}</span>
-            <div class="chip-row">
-              ${ACCENTS.map(
-                ([id, ar, en]) =>
-                  `<button type="button" class="mini-chip ${cfg.accent === id ? 'active' : ''}" data-at-accent="${id}">${t(ar, en)}</button>`,
-              ).join('')}
+            <div class="control-group atelier-light-group">
+              <label class="control-label" for="at-light-slider">${t('زاوية إضاءة الاستوديو', 'Studio Softbox Angle')}</label>
+              <input id="at-light-slider" type="range" min="15" max="85" step="1" value="${Math.round(cfg.lightX ?? 42)}" dir="ltr">
             </div>
           </div>
 
           <div class="atelier-action-box">
-            ${
-              svc
-                ? `<p class="muted" style="margin-bottom:12px">${t('الخدمة المقترحة لهذا التصميم:', 'Suggested matching service:')} <strong>${esc(nameOf(svc))}</strong> (<bdi>${money(svc.price)}</bdi>)</p>`
-                : ''
-            }
+            <div id="at-service-summary">${renderServiceSummaryHtml(cfg)}</div>
             <div class="hero-actions atelier-cta-row">
               <button type="button" class="btn" id="at-book-look">${t('اطلبي الخدمة بهذا التصميم', 'Book This Look')}</button>
               <button type="button" class="btn light" id="at-save-look">${t('حفظ في جواز الجمال', 'Save to Passport')}</button>
-              <button type="button" class="btn light" id="at-share-look">${t('إنشاء رابط مشاركة', 'Share Look')}</button>
+              <button type="button" class="btn light" id="at-share-look">${t('مشاركة التصميم', 'Share Look')}</button>
             </div>
           </div>
         </div>
@@ -710,20 +430,43 @@ export function atelierPage() {
 }
 
 export function bindAtelier(goFn, renderFn) {
-  function refreshPreview() {
-    document.querySelectorAll('.atelier-hand-canvas').forEach((canvas) => {
-      paintAtelierCanvas(canvas, state.atelier, state.atelier.lightX || 45);
+  function syncActiveRenderers() {
+    if (document.getElementById('atelier-canvas-wrap')) {
+      mountHybridStage('atelier-canvas-wrap', state.atelier, { interactive: true });
+    }
+    if (document.getElementById('mini-atelier-stage')) {
+      mountHybridStage('mini-atelier-stage', state.atelier, { interactive: false });
+    }
+  }
+
+  function refreshInPlace() {
+    syncActiveRenderers();
+    const tipGroup = document.getElementById('at-tip-color-group');
+    if (tipGroup) tipGroup.hidden = state.atelier.french_style === 'none';
+
+    const summaryEl = document.getElementById('at-service-summary');
+    if (summaryEl) {
+      summaryEl.innerHTML = renderServiceSummaryHtml(state.atelier);
+      bindRemovalCheckbox();
+    }
+  }
+
+  function bindRemovalCheckbox() {
+    document.getElementById('at-removal-check')?.addEventListener('change', (e) => {
+      state.atelier.includeRemoval = !!e.target.checked;
+      refreshInPlace();
     });
   }
 
-  // Trigger initial studio draw immediately upon route mount
-  syncAtelierCanvases();
+  syncActiveRenderers();
+  bindRemovalCheckbox();
 
+  // Homepage mini widget controls
   document.querySelectorAll('[data-mini-shade]').forEach((b) => {
     b.onclick = () => {
       state.atelier.polish_color = b.dataset.miniShade;
       document.querySelectorAll('[data-mini-shade]').forEach((x) => x.classList.toggle('active', x === b));
-      refreshPreview();
+      syncActiveRenderers();
     };
   });
 
@@ -731,20 +474,43 @@ export function bindAtelier(goFn, renderFn) {
     b.onclick = () => {
       state.atelier.shape = b.dataset.miniShape;
       document.querySelectorAll('[data-mini-shape]').forEach((x) => x.classList.toggle('active', x === b));
-      refreshPreview();
+      syncActiveRenderers();
     };
   });
 
-  const bindProp = (attr, key, needsFullRender = false) => {
+  // Mobile 3-tab switcher (never tears down 3D WebGL stage!)
+  document.querySelectorAll('[data-at-tab]').forEach((b) => {
+    b.onclick = () => {
+      const targetTab = b.dataset.atTab;
+      state.atelier.activeTab = targetTab;
+      document.querySelectorAll('[data-at-tab]').forEach((btn) => {
+        const on = btn.dataset.atTab === targetTab;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', String(on));
+      });
+      document.querySelectorAll('[data-at-panel]').forEach((panel) => {
+        panel.classList.toggle('is-active', panel.dataset.atPanel === targetTab);
+      });
+    };
+  });
+
+  // 3D Camera Angle Preset switcher
+  document.querySelectorAll('[data-at-cam]').forEach((b) => {
+    b.onclick = () => {
+      const cam = b.dataset.atCam;
+      state.atelier.cameraPreset = cam;
+      document.querySelectorAll('[data-at-cam]').forEach((x) => x.classList.toggle('active', x === b));
+      const rec = ACTIVE_RENDERERS.get('atelier-canvas-wrap');
+      if (rec?.mode === '3d') rec.renderer.setCameraPreset(cam, false);
+    };
+  });
+
+  const bindProp = (attr, key) => {
     document.querySelectorAll(`[${attr}]`).forEach((b) => {
       b.onclick = () => {
         state.atelier[key] = b.getAttribute(attr);
-        if (needsFullRender) {
-          renderFn();
-        } else {
-          document.querySelectorAll(`[${attr}]`).forEach((x) => x.classList.toggle('active', x === b));
-          refreshPreview();
-        }
+        document.querySelectorAll(`[${attr}]`).forEach((x) => x.classList.toggle('active', x === b));
+        refreshInPlace();
       };
     });
   };
@@ -753,7 +519,7 @@ export function bindAtelier(goFn, renderFn) {
   bindProp('data-at-shape', 'shape');
   bindProp('data-at-len', 'length');
   bindProp('data-at-color', 'polish_color');
-  bindProp('data-at-french', 'french_style', true);
+  bindProp('data-at-french', 'french_style');
   bindProp('data-at-tip', 'tip_color');
   bindProp('data-at-finish', 'finish');
   bindProp('data-at-accent', 'accent');
@@ -762,24 +528,42 @@ export function bindAtelier(goFn, renderFn) {
     state.atelier.name = e.target.value;
   });
 
-  const stage = $('#atelier-canvas-wrap');
-  if (stage) {
-    stage.addEventListener('pointermove', (e) => {
-      const rect = stage.getBoundingClientRect();
-      state.atelier.lightX = Math.max(15, Math.min(85, ((e.clientX - rect.left) / rect.width) * 100));
-      const canvas = stage.querySelector('.atelier-hand-canvas');
-      if (canvas) paintAtelierCanvas(canvas, state.atelier, state.atelier.lightX);
+  $('#at-light-slider')?.addEventListener('input', (e) => {
+    state.atelier.lightX = Number(e.target.value) || 42;
+    const rec = ACTIVE_RENDERERS.get('atelier-canvas-wrap');
+    if (rec?.mode === '3d') rec.renderer.setLightAngle(state.atelier.lightX);
+    else if (rec?.mode === '25d') paintAtelier25DCanvas(rec.canvas, state.atelier, state.atelier.lightX);
+  });
+
+  $('#at-reset-look')?.addEventListener('click', () => {
+    Object.assign(state.atelier, {
+      name: '',
+      shape: 'almond',
+      length: 'medium',
+      polish_color: '#F3DCE1',
+      french_style: 'classic',
+      tip_color: '#F5EFE8',
+      finish: 'gloss',
+      accent: 'none',
+      skin: 'warm',
+      lightX: 42,
+      cameraPreset: 'editorial',
+      includeRemoval: false,
+      lastShareUrl: '',
     });
-  }
+    renderFn();
+    toast(t('تمت إعادة ضبط التصميم الافتراضي', 'Studio look reset'));
+  });
 
   $('#at-book-look')?.addEventListener('click', () => {
-    const svcId = recommendedServiceForStyle(state.atelier);
-    const summary = `[Nail Atelier] Shape:${state.atelier.shape}, Length:${state.atelier.length}, Base:${state.atelier.polish_color}, Tip:${state.atelier.french_style}${state.atelier.french_style !== 'none' ? ` (${state.atelier.tip_color})` : ''}, Finish:${state.atelier.finish}, Accent:${state.atelier.accent}`;
+    const match = evaluateAtelierServiceMatch(state.atelier);
+    const chosenIds = state.atelier.includeRemoval ? [match.primaryServiceId, 'gel-removal'] : [match.primaryServiceId];
+    const summary = `[Nail Atelier · ${match.tierEn}] Shape:${state.atelier.shape}, Length:${state.atelier.length}, Base:${state.atelier.polish_color}, Tip:${state.atelier.french_style}${state.atelier.french_style !== 'none' ? ` (${state.atelier.tip_color})` : ''}, Finish:${state.atelier.finish}, Accent:${state.atelier.accent}${state.atelier.includeRemoval ? ' + Soak-Off Removal' : ''}`;
     state.bookingStep = 2;
     state.bookingMode = 'services';
     state.bookingCategory = 'gel';
     state.draft.package_id = null;
-    state.draft.service_ids = [svcId];
+    state.draft.service_ids = chosenIds;
     state.draft.notes = state.draft.notes ? `${state.draft.notes}\n${summary}` : summary;
     goFn('booking');
   });
@@ -813,7 +597,23 @@ export function bindAtelier(goFn, renderFn) {
         share: true,
       });
       state.atelier.lastShareUrl = new URL(href('atelier') + '?style=' + res.style.share_code, location.origin).href;
-      renderFn();
+      const box = document.getElementById('at-share-panel');
+      if (box) {
+        box.hidden = false;
+        box.innerHTML = `
+          <div class="success atelier-share-box">
+            <p style="margin-bottom:6px"><strong>${t('تم إنشاء رابط المشاركة الخاص بكِ:', 'Your share link is ready:')}</strong></p>
+            <pre style="margin:0;padding:8px 10px" dir="ltr">${esc(state.atelier.lastShareUrl)}</pre>
+            <button type="button" class="btn small light" id="copy-style-url" style="margin-top:8px">${t('نسخ الرابط', 'Copy URL')}</button>
+          </div>
+        `;
+        box.querySelector('#copy-style-url')?.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(state.atelier.lastShareUrl || '');
+            toast(t('تم نسخ الرابط بنجاح', 'Link copied'));
+          } catch {}
+        });
+      }
     } catch (err) {
       toast(err.message);
     }

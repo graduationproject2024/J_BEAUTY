@@ -1,40 +1,36 @@
-# J SPA — Security Architecture & Review (`SECURITY.md`)
+# J Beauty — Security Architecture & Platform Separation (`SECURITY.md`)
 
-## 1. Threat Model & Key Controls
-J SPA collects names, Saudi mobile numbers, Madinah neighborhoods, optional appointment notes, and staff-recorded payment statuses for women-only home visits. No card numbers are stored or processed by the application.
+## 1. Dual-Origin Platform Separation
+J Beauty physically and logically separates customer-facing browsing/booking (`apps/customer` on port `3000` / proposed `https://jbeauty.sa`) from internal operations and administration (`apps/staff` on port `3100` / proposed `https://ops.jbeauty.sa`):
+- **Bundle & Route Isolation:** Zero staff modules, admin routes (`/ar/admin`, `/en/admin`, `/api/admin*`), or footer navigation links exist in `apps/customer/` or the GitHub Pages showcase export (`pages/`, `index.html`). Visiting retired `/admin` paths on Customer returns `404` with `X-Robots-Tag: noindex, nofollow`.
+- **Standalone Operations Shell:** The Operations Portal sets `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store`, and disallows indexing in `/robots.txt` (`Disallow: /`).
+- **Scoped Host-Only Session Cookies (`server/auth.mjs`):**
+  - Customer origin uses `jb_customer_session` (`__Host-jb_customer_session` in `NODE_ENV=production`).
+  - Operations origin uses `jb_ops_session` (`__Host-jb_ops_session` in `NODE_ENV=production`).
+  - Both omit the `Domain` attribute strictly, bind `Path=/; HttpOnly; SameSite=Strict`, and map to `sessions.app_scope` (`'customer'` vs `'ops'`). Cross-origin cookie replay returns `401`.
+- **Cross-Role Login Prevention & Origin Allowlists:**
+  - Customer `/api/login` rejects staff roles (`403`). Operations `/api/ops/login` rejects customers (`403`).
+  - Customer mutations accept only Customer origins (`expectedOrigin`, `CUSTOMER_ORIGIN`, `PUBLIC_ORIGIN`). Operations mutations accept only Operations origins (`expectedOrigin`, `OPS_ORIGIN`).
 
-### Authentication & Password Storage
-- **Password Hashing:** `server/auth.mjs` uses Node 24’s native **Argon2id** (`crypto.argon2Sync('argon2id', { memory: 65536, passes: 3, parallelism: 1, tagLength: 32 })`) with 16-byte random nonces for all new passwords (`register`, `staff`, `reset`, `--create-owner`). Legacy `salt:scryptHex` hashes remain verifiable for seamless backward compatibility.
-- **Session Management:** Opaque 256-bit session cookies (`jspa_session`), stored SHA-256 hashed in SQLite (`sessions`), rotated on every login/register (`rotateAuthSession`), flagged `HttpOnly; SameSite=Strict` (plus `Secure` when `NODE_ENV=production`).
-- **CSRF & Origin Protection:** Every mutating `/api/*` request validates `Origin` against host / `PUBLIC_ORIGIN`, blocks `Sec-Fetch-Site: cross-site`, enforces `Content-Type: application/json`, caps request body size at 50 KB, and checks `X-CSRF-Token` against the session secret.
-- **Rate Limiting:** Database-persisted sliding windows (`rate_limits`) throttle `/api/register`, `/api/login` (by IP and by phone), `/api/verification/request`, `/api/reset`, `/api/bookings`, and `/api/admin/recovery`.
+## 2. Mandatory Staff TOTP MFA & Encryption at Rest (`server/auth/mfa.mjs`)
+- **Production Default (`OPS_MFA_REQUIRED=all`):** Every staff member (`owner`, `ops_manager`, `reception`, `finance`, `practitioner`, `legacy_employee`) enters an enrollment-only / challenge-only barrier on login until TOTP verification succeeds (`sessions.mfa_verified = 1`). All operational endpoints (`/api/ops/*`) return `403 MFA verification required` prior to completion.
+- **RFC 6238 TOTP & Recovery Codes:** Enrollment generates 160-bit Base32 secrets and 8 single-use hashed recovery codes (`sha256`). Already-enrolled accounts cannot overwrite MFA via `/api/ops/mfa/setup` without passing an active MFA challenge (`403`).
+- **AES-256-GCM Secret Encryption:** MFA secrets are never persisted in plaintext SQLite; `users.mfa_secret_enc` stores authenticated ciphertext encrypted via `OPS_MFA_SECRET_KEY` (32-byte base64/hex key, or auto-generated local dev key file outside the static root).
+- **Idle Timeout:** Operations sessions enforce automatic idle expiry (`OPS_IDLE_MINUTES`, default `60`).
 
-### Authorization & Least Privilege
-- **Customer Isolation (IDOR Prevention):** Customers only access bookings, ledger entries, reward requests, reviews, favorites (`passport_favorites`), saved Atelier styles (`nail_styles`), personal care preferences (`passport_prefs`), and own group/gift requests tied directly to `session.user_id === user.id`. Historical guest bookings are **never** auto-merged by matching phone numbers, and cross-customer style deletion returns `403 Forbidden`.
-- **Employee vs. Owner RBAC (`server/admin.mjs`):**
-  - `owner` has full access to catalog, packages, settings, staff, reviews, payments, ledger, aggregate funnel analytics (`analytics.funnel`), group/gift requests, and paginated audit logs.
-  - `employee` is strictly restricted to operational duties (`bookings` active/unpaid/recent scope with masked phones/omitted notes on closed bookings, masked `customers.phone_masked`, masked `sender_phone` on `gift_requests`, pending `verifications`, pending `reward_requests`, and read-only catalog/schedule config). Employees receive empty `payments`, `ledger`, `reviews`, `settings`, `staff`, `audit`, and `analytics`, and receive `403 Forbidden` on any owner-only mutation or refund attempt.
-  - Disabling an employee immediately deletes all of their active SQLite sessions.
-- **Privacy-Safe Funnel Telemetry:** `/api/telemetry/event` accepts an allowlisted event identifier (`home_view`, `booking_start`, `studio_complete`, `atelier_save`, `whatsapp_handoff_click`, etc.) and increments daily aggregate counts (`funnel_events`) in SQLite with **zero cookies, IPs, or personal identifiers** stored.
-- **Group & Gift Integrity:** Group requests default strictly to `pending_approval` and validate active services and schedule bounds; Gift requests default strictly to `pending_staff_payment` and reject transition to `redeemed` unless `payment_verified === true`.
-- **Irreversible Admin Action Safeguards:** UI confirmation dialogs (`confirmActionDialog`) guard owner refunds, staff account revocations, and loyalty reward commits/cancellations.
+## 3. Fine-Grained Capability RBAC & Least-Privilege Migration (`server/authorization/permissions.mjs`)
+- **Default-Deny Enforcement:** Every route and booking field checks explicit capabilities (`requireCapability` / `hasCapability`) rather than relying on UI visibility.
+- **Staff Roles:**
+  - `owner`: full platform governance, owner-only sovereign actions (`refunds.approve`, `loyalty.adjust`, `services.manage`, `packages.manage`, `settings.manage`, `staff.manage`, `audit.read`).
+  - `ops_manager`: booking dispatch, practitioner assignment (`bookings.assign`), practitioner conflict checks (`validatePractitionerConflict`), calendar management, identity verification, recovery links, occasions & review moderation. Blocked from payment verification, refunds, settings, staff, and financial analytics.
+  - `reception`: active booking lifecycle, identity verification, recovery links, occasion management.
+  - `finance`: payment verification (`payments.verify`), gift payment verification (`gifts.verify_payment`), reward commits/cancellations (`loyalty.redeem`), financial reporting, and step-1 refund requests (`refunds.request`)—blocked from self-approving refunds (`refunds.approve` -> `403`) and identity/staff/catalog mutations.
+  - `practitioner`: queries strictly via indexed `bookings.assigned_staff_id`, sees only own active bookings, and can update status (`in_progress` / `completed`) without accessing financial totals, unmasked closed client contacts, or other staff schedules.
+  - `legacy_employee`: migration safety profile applied automatically to existing v1 `employee` rows (`server/database/migrations.mjs`) with strictly read/basic confirmation scope only—zero identity verify, password recovery, payment verify, refunds, loyalty adjustments, or moderation until explicitly upgraded by Owner.
+- **Instant Session Invalidation:** Updating any staff member's role/capabilities, resetting MFA, disabling an account (`disabled_employee`), or running v2 migration invalidates active non-customer sessions immediately while preserving customer sessions intact.
 
-### Manual Phone Ownership & Recovery Integrity
-- Typing a mobile number never grants verification (`verified = 0`).
-- Verification creates a 30-minute one-time reference (`verification`), hashed via SHA-256. Staff must check the `checked: true` confirmation and supply the actual WhatsApp sender number (`observed_phone`) matching `users.phone` before verification succeeds.
-- Staff-assisted recovery creates a 15-minute single-use token (`recovery`), hashed via SHA-256, and invalidates all active sessions upon reset. Reclaiming an unverified phone detaches previous unverified self-created records (`user_id = NULL`) before issuing recovery.
-
-### Financial & Loyalty Integrity
-- All currency arithmetic runs server-side in integer halalas (`money()`).
-- Points are reconciled atomically inside `BEGIN IMMEDIATE` SQLite transactions (`reconcileLoyalty`) strictly when `status === 'completed'`, `payment_verified === true`, and `user.verified === true`.
-- Verified payments are immutable (changes require owner cumulative refunds with a mandatory written reason); refunds that would drive a balance negative abort (`409 Conflict`) and roll back atomically until the related reward is reversed.
-- Reward commits and cancellations execute atomically with unique event keys (`reward:<id>`, `reward-cancel:<id>`).
-
-### Static Serving & Headers
-- Security headers applied to every response: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, `Content-Security-Policy` (`default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'none'`), and `Strict-Transport-Security` in production.
-- Static handler rejects dotfiles/traversal (`..`), serves strictly within `public/`, and returns `404` for missing asset extensions instead of falling back to `index.html`.
-- SQLite files, backups, and `server/` modules reside outside `public/` and cannot be downloaded via HTTP.
-
-### Pre-Launch Security & Privacy Reminder
-Local automated security tests verify the controls above against synthetic test databases, but do **not** constitute production certification or formal legal PDPL sign-off. Before public launch, configure `PUBLIC_ORIGIN`, HTTPS reverse proxy TLS, off-host encrypted backups, and formal Saudi PDPL legal review (see `OPERATIONS.md` and `LAUNCH-CHECKLIST.md`).
-
+## 4. Financial, Loyalty & Verification Integrity
+- Passwords hashed with **Argon2id** (`64 MiB`, `t=3`, legacy `scrypt` verification kept for compatibility).
+- Phone ownership verification (`observed_phone` + 30-min one-time reference) and 15-min recovery tokens (generating `customerOrigin/ar/reset#...` URLs) never link historical bookings by phone alone.
+- Currency arithmetic runs server-side in integer halalas; verified payments are immutable (`400` on overwrite); loyalty credits reconcile atomically in `BEGIN IMMEDIATE` transactions only when `status === 'completed'`, `payment_verified === true`, and `user.verified === true`.
+- Security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, strict `Content-Security-Policy`, `HSTS` in production) apply on every listener. Local automated tests prove controls against synthetic/ephemeral SQLite DBs; production deployment also requires HTTPS proxy TLS, off-host encrypted SQLite backups, and qualified Saudi PDPL legal review (`OPERATIONS.md`).

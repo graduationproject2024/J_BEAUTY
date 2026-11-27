@@ -2,6 +2,28 @@ import { randomBytes } from 'node:crypto';
 import { now, uid } from './db.mjs';
 import { fail, money, phone, text, whatsappUrl } from './validation.mjs';
 import { reconcileLoyalty } from './loyalty.mjs';
+import { hasCapability, requireCapability } from './authorization/permissions.mjs';
+
+function validatePractitionerConflict(helpers, booking, staffId) {
+  if (!staffId) return;
+  const s = helpers.settings();
+  const start = +new Date(`${booking.date}T${booking.time}:00+03:00`);
+  const end = start + (booking.duration + s.travel_buffer) * 60000;
+  for (const other of helpers.bookings()) {
+    if (
+      other.id === booking.id ||
+      other.assigned_staff_id !== staffId ||
+      !['confirmed', 'in_progress'].includes(other.status)
+    ) {
+      continue;
+    }
+    const oStart = +new Date(`${other.date}T${other.time}:00+03:00`);
+    const oEnd = oStart + (other.duration + s.travel_buffer) * 60000;
+    if (oStart < end && oEnd > start) {
+      fail('Assigned practitioner has an overlapping appointment during this window', 409);
+    }
+  }
+}
 
 export function validateSchedule(helpers, booking, confirmed = false, enforceLead = true) {
   const s = helpers.settings();
@@ -150,6 +172,9 @@ export function createBooking(db, helpers, user, sessionId, body) {
     payment_method: null,
     refund_cents: 0,
     points_rate: s.points_per_sar,
+    assigned_staff_id: null,
+    assigned_staff_name: null,
+    internal_notes: '',
     created_at: now(),
   };
 
@@ -161,13 +186,14 @@ export function createBooking(db, helpers, user, sessionId, body) {
 
   db.tx(() => {
     db.run(
-      'INSERT INTO bookings VALUES(?,?,?,?,?,?)',
+      'INSERT INTO bookings(id,reference,user_id,scope,idempotency,data,assigned_staff_id) VALUES(?,?,?,?,?,?,?)',
       booking.id,
       booking.reference,
       booking.user_id,
       scope,
       idempotencyKey,
       JSON.stringify(booking),
+      null,
     );
     helpers.audit(user, 'booking.request', booking.id);
   });
@@ -190,25 +216,93 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
     if (!b) fail('Booking not found', 404);
     const prev = { ...b };
 
+    const isPractitionerOnly =
+      !hasCapability(actorUser, 'bookings.update') &&
+      !hasCapability(actorUser, 'bookings.update_status_basic') &&
+      !hasCapability(actorUser, 'bookings.confirm') &&
+      hasCapability(actorUser, 'bookings.update_assigned_status');
+
+    if (isPractitionerOnly) {
+      if (b.assigned_staff_id !== actorUser.id) {
+        fail('Access restricted to your assigned bookings', 403);
+      }
+      if (
+        body.date !== undefined ||
+        body.time !== undefined ||
+        body.assigned_staff_id !== undefined ||
+        body.paid_amount !== undefined ||
+        body.payment_method !== undefined ||
+        body.payment_verified !== undefined ||
+        body.refund_amount !== undefined
+      ) {
+        fail('Missing required permission for this booking modification', 403);
+      }
+      if (body.status && !['in_progress', 'completed'].includes(body.status)) {
+        fail('Practitioners can only update assigned visits to in progress or completed', 403);
+      }
+    }
+
     if (body.status && body.status !== b.status) {
+      if (body.status === 'confirmed' && b.status === 'pending_confirmation') {
+        if (!hasCapability(actorUser, 'bookings.confirm') && !hasCapability(actorUser, 'bookings.update')) {
+          fail('Missing required permission: bookings.confirm', 403);
+        }
+      } else if (!isPractitionerOnly) {
+        if (
+          !hasCapability(actorUser, 'bookings.update') &&
+          !hasCapability(actorUser, 'bookings.update_status_basic')
+        ) {
+          fail('Missing required permission: bookings.update', 403);
+        }
+      }
       if (!transitions[b.status]?.includes(body.status)) {
         fail('Invalid booking status transition');
       }
       b.status = body.status;
     }
 
-    if (body.date !== undefined) b.date = body.date;
-    if (body.time !== undefined) b.time = body.time;
-    if ((body.date || body.time) && !['pending_confirmation', 'confirmed'].includes(b.status)) {
-      fail('Cannot reschedule this booking');
+    if (body.date !== undefined || body.time !== undefined) {
+      requireCapability(actorUser, 'bookings.update');
+      if (body.date !== undefined) b.date = body.date;
+      if (body.time !== undefined) b.time = body.time;
+      if (!['pending_confirmation', 'confirmed'].includes(b.status)) {
+        fail('Cannot reschedule this booking');
+      }
     }
-    if (['confirmed', 'in_progress'].includes(b.status) && (b.status !== prev.status || body.date || body.time)) {
+
+    if (body.assigned_staff_id !== undefined) {
+      requireCapability(actorUser, 'bookings.assign');
+      const staffId = body.assigned_staff_id ? String(body.assigned_staff_id).trim() : null;
+      if (!staffId) {
+        b.assigned_staff_id = null;
+        b.assigned_staff_name = null;
+      } else {
+        const assignee = db.get(
+          "SELECT id,name,role FROM users WHERE id=? AND role IN ('practitioner','ops_manager','owner')",
+          staffId,
+        );
+        if (!assignee) fail('Valid active staff practitioner required for assignment', 400);
+        b.assigned_staff_id = assignee.id;
+        b.assigned_staff_name = assignee.name;
+      }
+    }
+
+    if (body.internal_notes !== undefined) {
+      if (!hasCapability(actorUser, 'bookings.update') && !hasCapability(actorUser, 'bookings.confirm')) {
+        fail('Missing required permission to edit internal notes', 403);
+      }
+      b.internal_notes = typeof body.internal_notes === 'string' ? body.internal_notes.trim().slice(0, 1000) : '';
+    }
+
+    if (['confirmed', 'in_progress'].includes(b.status) && (b.status !== prev.status || body.date || body.time || body.assigned_staff_id !== undefined)) {
       validateSchedule(helpers, b, true, b.status !== 'in_progress');
+      validatePractitionerConflict(helpers, b, b.assigned_staff_id);
     } else if (body.date || body.time) {
       validateSchedule(helpers, b);
     }
 
     if (body.paid_amount !== undefined) {
+      requireCapability(actorUser, 'payments.verify');
       const cents = money(body.paid_amount);
       if (b.payment_verified && cents !== b.paid_cents) {
         fail('Verified payments are immutable. Record a refund instead.');
@@ -218,6 +312,7 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
     }
 
     if (body.payment_method !== undefined) {
+      requireCapability(actorUser, 'payments.verify');
       if (!['cash', 'card', 'bank_transfer', 'other'].includes(body.payment_method)) {
         fail('Invalid payment method');
       }
@@ -225,6 +320,7 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
     }
 
     if (body.payment_verified !== undefined) {
+      requireCapability(actorUser, 'payments.verify');
       if (typeof body.payment_verified !== 'boolean') fail('Invalid verification flag');
       if (b.payment_verified && !body.payment_verified) {
         fail('Use a refund to reverse verified payment');
@@ -239,7 +335,7 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
     }
 
     if (body.refund_amount !== undefined) {
-      if (actorUser.role !== 'owner') fail('Owner access required', 403);
+      requireCapability(actorUser, 'refunds.approve');
       text(body.reason, 500);
       const refund = money(body.refund_amount);
       if (!b.payment_verified || refund > b.paid_cents || refund < (b.refund_cents || 0)) {
@@ -261,6 +357,7 @@ export function updateBookingAdmin(db, helpers, actorUser, bookingId, body) {
       b.id,
       JSON.stringify({
         status: b.status,
+        assigned_staff_id: b.assigned_staff_id || null,
         paid_amount: b.paid_amount,
         refund_amount: (b.refund_cents || 0) / 100,
         reason: typeof body.reason === 'string' ? body.reason.slice(0, 200) : '',

@@ -1,15 +1,32 @@
-import { DatabaseSync } from 'node:sqlite';
+import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { applyMigrations } from './database/migrations.mjs';
+
+const require = createRequire(import.meta.url);
+let DatabaseSync;
+try {
+  const sqlite = require('node:sqlite');
+  DatabaseSync = sqlite.DatabaseSync;
+} catch {
+  // Detected on older Node versions
+}
 
 export const uid = () => randomUUID();
 export const now = () => new Date().toISOString();
 
 export const DEFAULT_SETTINGS = {
   business_phone: '',
-  instagram: '',
-  tiktok: '',
+  instagram: 'https://instagram.com/jbeauty.spa',
+  tiktok: 'https://tiktok.com/@jbeauty.spa',
+  snapchat: 'https://snapchat.com/add/jbeauty.spa',
+  whatsapp: '',
+  announcement_text_ar: 'سبا نسائي منزلي فاخر في المدينة المنورة ✦ مواعيد بتأكيد شخصي من فريقنا ✦ خصم 20% على باقات العناية المتكاملة ✦ احجزي جلستكِ في راحة بيتكِ',
+  announcement_text_en: 'Luxury Women’s Home Spa in Al Madinah ✦ Personally Confirmed Appointments ✦ 20% Off Curated Packages ✦ Book Your Home Sanctuary',
+  announcement_active: true,
+  announcement_link: '/booking',
   areas: [],
   capacity: 0,
   working_days: [0, 1, 2, 3, 4, 5, 6],
@@ -20,8 +37,33 @@ export const DEFAULT_SETTINGS = {
   lead_hours: 12,
   points_per_sar: 1,
   rewards: [
-    { id: 'petal-200', points: 200, value: 10 },
-    { id: 'petal-500', points: 500, value: 30 },
+    {
+      id: 'petal-200',
+      points: 200,
+      value: 10,
+      name_ar: 'قسيمة خصم ترحيبية (10 ر.س)',
+      name_en: 'Welcome Petals Voucher (10 SAR)',
+      description_ar: 'تُخصم مباشرة من قيمة جلستكِ القادمة عند تأكيد الموعد.',
+      description_en: 'Deducted directly from your next eligible appointment.',
+    },
+    {
+      id: 'petal-500',
+      points: 500,
+      value: 30,
+      name_ar: 'مكافأة الدلال الفضي (30 ر.س)',
+      name_en: 'Silver Indulgence Reward (30 SAR)',
+      description_ar: 'خصم مالي يمنحكِ ترقية أو إضافة خدمة عناية خاصة لموعدكِ.',
+      description_en: 'Special savings to upgrade or add ritual treatments to your visit.',
+    },
+    {
+      id: 'petal-800',
+      points: 800,
+      value: 60,
+      name_ar: 'مكافأة الدلال الذهبي (60 ر.س)',
+      name_en: 'Golden Blossom Privilege (60 SAR)',
+      description_ar: 'خصم استثنائي تقديراً لولائكِ وثقتكِ الدائمة بخدمات J Beauty.',
+      description_en: 'Our premier privilege discount honoring your lasting loyalty.',
+    },
   ],
   business_approved: false,
   about_ar: '',
@@ -424,11 +466,40 @@ export const SEED_PACKAGES = [
 ];
 
 export function openDatabase(dbPath) {
-  if (dbPath !== ':memory:') {
-    mkdirSync(path.dirname(path.resolve(dbPath)), { recursive: true });
+  if (!DatabaseSync) {
+    throw new Error(
+      `Node.js 22.5.0 or higher is required for built-in SQLite (current version: ${process.version}). Please configure Node 22.x or 24.x in your hosting environment settings.`
+    );
   }
-  const db = new DatabaseSync(dbPath);
-  db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+
+  let resolvedPath = dbPath;
+  if (dbPath !== ':memory:') {
+    try {
+      resolvedPath = path.resolve(dbPath);
+      mkdirSync(path.dirname(resolvedPath), { recursive: true });
+    } catch {
+      resolvedPath = path.join(os.tmpdir(), 'jspa.sqlite');
+      try {
+        mkdirSync(path.dirname(resolvedPath), { recursive: true });
+      } catch {
+        resolvedPath = ':memory:';
+      }
+    }
+  }
+
+  let db;
+  try {
+    db = new DatabaseSync(resolvedPath);
+    db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+  } catch {
+    try {
+      db = new DatabaseSync(resolvedPath);
+      db.exec('PRAGMA journal_mode=MEMORY; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
+    } catch {
+      db = new DatabaseSync(':memory:');
+      db.exec('PRAGMA foreign_keys=ON;');
+    }
+  }
   db.exec(`
     CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY,name TEXT NOT NULL,phone TEXT UNIQUE NOT NULL,password TEXT NOT NULL,role TEXT NOT NULL DEFAULT 'customer',verified INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,user_id TEXT,csrf TEXT NOT NULL,expires INTEGER NOT NULL);
@@ -456,6 +527,8 @@ export function openDatabase(dbPath) {
     CREATE INDEX IF NOT EXISTS idx_group_requests_user ON group_requests(user_id);
     CREATE INDEX IF NOT EXISTS idx_gift_requests_user ON gift_requests(user_id);
   `);
+
+  applyMigrations(db);
 
   const all = (q, ...args) => db.prepare(q).all(...args);
   const get = (q, ...args) => db.prepare(q).get(...args);
@@ -595,15 +668,24 @@ export function createHelpers(db) {
   };
 
   const bookings = () =>
-    db.all('SELECT * FROM bookings').map((row) => ({
-      ...JSON.parse(row.data),
-      id: row.id,
-      reference: row.reference,
-      user_id: row.user_id,
-    }));
+    db.all('SELECT * FROM bookings').map((row) => {
+      const parsed = JSON.parse(row.data);
+      return {
+        ...parsed,
+        id: row.id,
+        reference: row.reference,
+        user_id: row.user_id,
+        assigned_staff_id: row.assigned_staff_id ?? parsed.assigned_staff_id ?? null,
+      };
+    });
 
   const saveBooking = (b) => {
-    db.run('UPDATE bookings SET data=? WHERE id=?', JSON.stringify(b), b.id);
+    db.run(
+      'UPDATE bookings SET data=?, assigned_staff_id=? WHERE id=?',
+      JSON.stringify(b),
+      b.assigned_staff_id || null,
+      b.id,
+    );
   };
 
   const balance = (userId) =>

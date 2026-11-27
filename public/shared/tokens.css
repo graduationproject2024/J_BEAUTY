@@ -1,0 +1,57 @@
+/* J Beauty Shared Design Tokens — Official Brand Identity from Photo.pdf */
+:root {
+  /* Core Brand Palette from Photo.pdf */
+  --dusty-pink: #D9B7C0;
+  --dusty-pink-light: #F4E7EB;
+  --mauve-pink: #C9AEB6;
+  --mauve-pink-light: #ECE1E5;
+  --sage: #A7B79F;
+  --sage-light: #DDE6D9;
+  --sage-deep: #556B4E;
+  --rose-gold: #D4AF7C;
+  --rose-gold-light: #EBD6BC;
+  --rose-gold-deep: #9E743F;
+
+  /* Supporting Surfaces & Luxury Ink */
+  --ivory: #FAF7F5;
+  --cream: #F4ECE7;
+  --plum: #3E2932;
+  --plum-hover: #543945;
+  --charcoal: #2C2427;
+  --white: #FFFFFF;
+  --ink-muted: #6D5B62;
+  --border: #E6DCD7;
+  --border-strong: #CEBDB7;
+  --border-gold: rgba(212, 175, 124, 0.38);
+
+  /* Semantic Status */
+  --sage-tint: #EEF4EB;
+  --sage-ink: #2E4528;
+  --blush-tint: #F8EDEF;
+  --warning-bg: #F8EFE3;
+  --warning-border: #D4AF7C;
+  --error-bg: #FCE8E9;
+  --error-text: #8B2533;
+  --pending-bg: #F7EBD4;
+  --pending-text: #6B4E22;
+
+  /* Typography */
+  --font-ar: 'IBM Plex Sans Arabic', 'Tahoma', sans-serif;
+  --font-ar-display: 'Noto Naskh Arabic', 'IBM Plex Sans Arabic', serif;
+  --font-en: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-en-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+
+  /* Radii & Shadows */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-xl: 30px;
+  --shadow-soft: 0 10px 30px rgba(62, 41, 50, 0.06);
+  --shadow-elevated: 0 18px 46px rgba(44, 36, 39, 0.1);
+  --shadow-gold: 0 12px 36px rgba(212, 175, 124, 0.22);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur: 240ms;
+}
+

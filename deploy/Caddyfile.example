@@ -1,0 +1,45 @@
+# J Beauty — Dual-Origin Reverse Proxy Example (Caddy)
+# Customer origin: https://jbeauty.sa -> 127.0.0.1:3000
+# Operations origin: https://ops.jbeauty.sa -> 127.0.0.1:3100
+
+jbeauty.sa {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+  }
+
+  @blocked_customer_admin path_regexp ^/(ar|en)/(admin|ops)(/|$) ^/api/(admin|ops)(/|$)
+  handle @blocked_customer_admin {
+    header X-Robots-Tag "noindex, nofollow"
+    respond 404
+  }
+
+  reverse_proxy 127.0.0.1:3000 {
+    header_up Host {host}
+    header_up X-Forwarded-Proto https
+  }
+}
+
+ops.jbeauty.sa {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Robots-Tag "noindex, nofollow"
+    Cache-Control "no-store"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+  }
+
+  @legacy_admin path_regexp ^/api/admin(/|$)
+  respond @legacy_admin 404
+
+  reverse_proxy 127.0.0.1:3100 {
+    header_up Host {host}
+    header_up X-Forwarded-Proto https
+  }
+}
+

@@ -38,11 +38,7 @@ export function header() {
     ['reviews', 'التقييمات', 'Reviews'],
     ['petals', 'بتلات J', 'J Petals'],
   ];
-  const accountRoute = state.user
-    ? ['owner', 'employee'].includes(state.user.role)
-      ? 'admin'
-      : 'account'
-    : 'login';
+  const accountRoute = state.user ? 'account' : 'login';
 
   return `
     <div class="announcement">
@@ -139,7 +135,6 @@ export function footer() {
               ['policies', 'سياسة الحجز', 'Booking policies'],
               ['privacy', 'سياسة الخصوصية', 'Privacy policy'],
               ['terms', 'الشروط والأحكام', 'Terms & conditions'],
-              ['admin', 'لوحة الفريق والإدارة', 'Staff access'],
             ]
               .map(([r, ar, en]) => `<a href="${href(r)}">${t(ar, en)}</a>`)
               .join('')}
@@ -186,7 +181,7 @@ export function serviceArt(s, cls = '') {
   const src =
     s?.image && /^(\/[^/]|https:\/\/)/.test(s.image)
       ? s.image
-      : `/J_BEAUTY/public/assets/images/services/${s?.id || 'relaxation'}.webp`;
+      : `/J_BEAUTY/apps/customer/assets/images/services/${s?.id || 'relaxation'}.webp`;
   const catLabel =
     s?.category === 'massage'
       ? t('المساج', 'Massage')
@@ -196,7 +191,7 @@ export function serviceArt(s, cls = '') {
 
   return `
     <div class="art ${cls}">
-      <img src="${esc(src)}" alt="${esc(nameOf(s))}" loading="eager" decoding="async">
+      <img src="${esc(src)}" alt="${esc(nameOf(s))}" loading="eager" decoding="sync">
       <span class="service-badge">${catLabel}</span>
     </div>
   `;

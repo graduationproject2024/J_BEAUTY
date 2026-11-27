@@ -1,6 +1,6 @@
 const { chromium } = require('playwright');
 const { spawn, spawnSync } = require('node:child_process');
-const { mkdtempSync, mkdirSync, writeFileSync } = require('node:fs');
+const { mkdtempSync, mkdirSync, rmSync, writeFileSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join, resolve } = require('node:path');
 const assert = require('node:assert/strict');
@@ -12,28 +12,34 @@ mkdirSync(out, { recursive: true });
 (async () => {
   let server = null;
   let base = process.env.TEST_BASE_URL;
+  let opsBase = process.env.OPS_TEST_BASE_URL;
+  let tmpDir = '';
+
   if (!base) {
-    const dir = mkdtempSync(join(tmpdir(), 'jspa-routes-'));
+    tmpDir = mkdtempSync(join(tmpdir(), 'jspa-routes-'));
     const port = 3191;
+    const opsPort = 3192;
     base = `http://127.0.0.1:${port}`;
+    opsBase = `http://127.0.0.1:${opsPort}`;
     const env = {
       ...process.env,
       PORT: String(port),
-      DB_PATH: join(dir, 'test.sqlite'),
+      OPS_PORT: String(opsPort),
+      CUSTOMER_ORIGIN: base,
+      OPS_ORIGIN: opsBase,
+      OPS_MFA_REQUIRED: 'off',
+      DB_PATH: join(tmpDir, 'test.sqlite'),
       OWNER_NAME: 'Route Test Owner',
       OWNER_PHONE: '0500000021',
       OWNER_PASSWORD: 'OwnerRoutes!2026',
     };
-    const boot = spawnSync(process.execPath, ['server.mjs', '--create-owner'], {
-      cwd: root,
-      env,
-      encoding: 'utf8',
-    });
+    const boot = spawnSync(process.execPath, ['server.mjs', '--create-owner'], { cwd: root, env, encoding: 'utf8' });
     assert.equal(boot.status, 0, boot.stderr);
     server = spawn(process.execPath, ['server.mjs'], { cwd: root, env, stdio: 'ignore' });
     for (let i = 0; i < 100; i++) {
       try {
         await fetch(base + '/api/session');
+        await fetch(opsBase + '/api/ops/session');
         break;
       } catch {
         await new Promise((r) => setTimeout(r, 100));
@@ -51,7 +57,7 @@ mkdirSync(out, { recursive: true });
   const failedRequests = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('response', (res) => {
-    if (res.status() >= 400 && !res.url().includes('/api/')) {
+    if (res.status() >= 400 && !res.url().includes('/api/') && !res.url().includes('/admin') && !res.url().includes('/404')) {
       failedRequests.push(`${res.status()} ${res.url()}`);
     }
   });
@@ -79,10 +85,12 @@ mkdirSync(out, { recursive: true });
 
   const results = [];
   try {
-    const r404 = await fetch(base + '/ar/unknown-route-404');
-    assert.equal(r404.status, 404, 'Unknown route must return HTTP 404');
-    const html404 = await r404.text();
-    assert.ok(html404.includes('noindex'), '404 route must include noindex');
+    for (const badAdmin of ['/ar/admin', '/en/admin', '/ar/unknown-route-404']) {
+      const r404 = await fetch(base + badAdmin);
+      assert.equal(r404.status, 404, `${badAdmin} on Customer origin must return HTTP 404`);
+      const html404 = await r404.text();
+      assert.ok(html404.includes('noindex') || String(r404.headers.get('x-robots-tag') || '').includes('noindex'));
+    }
     const rRedir = await fetch(base + '/ar/group-booking', { redirect: 'manual' });
     assert.equal(rRedir.status, 301, 'Legacy group-booking route must 301 redirect to occasions');
     assert.equal(rRedir.headers.get('location'), '/ar/occasions');
@@ -98,12 +106,12 @@ mkdirSync(out, { recursive: true });
           });
           for (let y = 0; y <= document.body.scrollHeight; y += 500) {
             window.scrollTo({ top: y, behavior: 'instant' });
-            await new Promise((r) => setTimeout(r, 40));
+            await new Promise((r) => setTimeout(r, 35));
           }
           window.scrollTo({ top: 0, behavior: 'instant' });
         });
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(120);
+        await page.waitForTimeout(100);
         const info = await page.evaluate(async () => {
           const imgs = [...document.querySelectorAll('img')];
           await Promise.all(
@@ -175,6 +183,21 @@ mkdirSync(out, { recursive: true });
           await page.screenshot({ path: join(out, `${slug}-${width}.png`), fullPage: true });
         }
       }
+
+      // Check standalone Operations Portal responsiveness across all breakpoints too
+      if (opsBase) {
+        await page.goto(opsBase + '/', { waitUntil: 'networkidle' });
+        await page.locator('#ops-login-form').waitFor();
+        const opsOverflow = await page.evaluate(() => ({
+          scroll: document.documentElement.scrollWidth,
+          client: document.documentElement.clientWidth,
+        }));
+        assert.ok(
+          opsOverflow.scroll <= opsOverflow.client + 1,
+          `Ops Login overflow at ${width}px: ${opsOverflow.scroll} > ${opsOverflow.client}`,
+        );
+        results.push(`${width}px ops-login: OK`);
+      }
     }
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -203,10 +226,13 @@ mkdirSync(out, { recursive: true });
       join(root, 'BROWSER-RESULTS.json'),
       JSON.stringify({ date: new Date().toISOString(), count: results.length, passed: results, errors }, null, 2),
     );
-    console.log(`${results.length} responsive route checks passed; screenshots saved.`);
+    console.log(`${results.length} responsive Customer & Operations route checks passed; screenshots saved.`);
   } finally {
     await browser.close();
     if (server) server.kill();
+    try {
+      if (tmpDir) rmSync(tmpDir, { recursive: true, force: true });
+    } catch {}
   }
 })().catch((e) => {
   console.error(e);

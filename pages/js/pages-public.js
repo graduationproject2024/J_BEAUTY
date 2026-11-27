@@ -107,10 +107,10 @@ export function home() {
           </div>
           <div class="hero-visual">
             <div class="hero-arch">
-              <img src="/J_BEAUTY/public/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
+              <img src="/J_BEAUTY/apps/customer/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
             </div>
             <div class="hero-seal">
-              <strong>J Beauty · ${t('المدينة المنورة', 'MADINAH')}</strong>
+              <strong>J Beauty · ${t('المدينة المنورة', 'AL MADINAH')}</strong>
               <span>${t('لحظتكِ الخاصة… في راحة بيتكِ', 'Your Moment of Beauty, At Home.')}</span>
             </div>
           </div>

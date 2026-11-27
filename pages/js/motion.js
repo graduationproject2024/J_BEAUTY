@@ -24,8 +24,8 @@ export function renderSignatureBloomSVG(filledCount = 4, totalPetals = 8, lightM
   const ratio = Math.max(0, Math.min(1, filledCount / Math.max(1, totalPetals)));
   const isAdvancedTier = lightMode || ratio >= 0.4;
   const imgSrc = lightMode
-    ? '/J_BEAUTY/public/assets/images/botanical/rose-damascena.webp'
-    : '/J_BEAUTY/public/assets/images/botanical/rose-bloom.webp';
+    ? '/J_BEAUTY/apps/customer/assets/images/botanical/rose-damascena.webp'
+    : '/J_BEAUTY/apps/customer/assets/images/botanical/rose-bloom.webp';
   const stageClass = ratio >= 1 ? 'is-radiant' : ratio >= 0.4 ? 'is-bloom' : ratio > 0 ? 'is-opening' : 'is-bud';
   const alt = isAdvancedTier
     ? 'لوحة نباتية أرشيفية لوردة Rosa damascena'
@@ -35,7 +35,7 @@ export function renderSignatureBloomSVG(filledCount = 4, totalPetals = 8, lightM
     <div class="petal-cameo ${lightMode ? 'is-ivory' : 'is-plum'} ${stageClass}" role="img" aria-label="${alt}">
       <div class="petal-cameo-ring">
         <div class="petal-cameo-mat">
-          <img src="${imgSrc}" alt="" loading="eager" decoding="async">
+          <img src="${imgSrc}" alt="" loading="eager" decoding="sync">
         </div>
       </div>
     </div>

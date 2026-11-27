@@ -110,7 +110,7 @@ export function home() {
               <img src="/assets/images/hero-sanctuary.webp" alt="${t('صينية سبا فاخرة من الرخام مع مناشف قطنية وزيت نباتي وأحجار ساخنة ووردة', 'Quiet luxury travertine home spa tray with ivory towels, botanical oil, basalt stones, and tea rose')}">
             </div>
             <div class="hero-seal">
-              <strong>J Beauty · ${t('المدينة المنورة', 'MADINAH')}</strong>
+              <strong>J Beauty · ${t('المدينة المنورة', 'AL MADINAH')}</strong>
               <span>${t('لحظتكِ الخاصة… في راحة بيتكِ', 'Your Moment of Beauty, At Home.')}</span>
             </div>
           </div>
@@ -206,12 +206,12 @@ export function home() {
           ${atelierMiniWidget()}
         </section>
 
-        <!-- 6. J Beauty loyalty: archival botanical cameo + clear verified-only rules -->
+        <!-- 6. J Beauty loyalty: Luxury bloom medallion + clear rewarding flow -->
         <section class='loyalty-band jb-loyalty-intro' data-reveal>
           <div class='loyalty-copy-col'>
             <span class='eyebrow'>J BEAUTY · PETALS CLUB</span>
-            <h2>${t('بتلاتكِ… مكافآت واضحة لكل زيارة مستحقة', 'Real visits. Clear rewards.')}</h2>
-            <p>${t('تعرفي على طريقة اكتساب البتلات والمكافآت المتاحة. لا تُضاف بتلات إلى حسابكِ إلا بعد اكتمال الخدمة وتوثيق الدفع والتحقق من الحساب.', 'Explore how Petals are earned and redeemed. Points are credited only after completed services, verified payment, and account verification.')}</p>
+            <h2>${t('بتلاتكِ… كل لحظة عناية تُهديكِ مزيداً من الدلال', 'Every moment of care brings you closer to luxury rewards.')}</h2>
+            <p>${t('برنامج "بتلات J" يمنحكِ نقاط وفاء تقديرية مع كل جلسة منزلية مكتملة. اجمعي البتلات واستبدليها بخصومات وترقيات راقية لجلساتكِ القادمة.', 'Earn reward Petals with each completed home sanctuary visit. Redeem your balance for exclusive savings and ritual upgrades.')}</p>
             <div class='hero-actions' style='margin-top:22px'>
               <a class='btn rose' href="${href('petals')}">${t('اكتشفي نادي البتلات', 'Explore Petals Rewards')}</a>
               <a class='btn jb-quiet-link' href="${href('reviews')}">${t('اطّلعي على تجارب العميلات', 'Customer reviews')}</a>
@@ -219,9 +219,9 @@ export function home() {
           </div>
           <div class='jb-loyalty-side'>
             <div class='jb-loyalty-steps' aria-label="${t('كيف يعمل برنامج البتلات', 'How Petals works')}">
-              <div class='jb-loyalty-step'><span>01</span><div><strong>${t('احجزي واستمتعي بالخدمة', 'Book and enjoy')}</strong><p>${t('يؤكد فريقنا الموعد ثم تُقدّم الخدمة.', 'Your appointment is confirmed and completed.')}</p></div></div>
-              <div class='jb-loyalty-step'><span>02</span><div><strong>${t('تُوثّق الزيارة والدفع', 'Verify your visit and payment')}</strong><p>${t('تُحتسب البتلات المستحقة وفق القواعد المعتمدة.', 'Eligible Petals are calculated under the program rules.')}</p></div></div>
-              <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتكِ', 'Choose your reward')}</strong><p>${t('يمكن طلب مكافأة متاحة وتطبيقها بعد موافقة الفريق على حجز مؤهل.', 'Request an eligible reward for staff-approved use on a future booking.')}</p></div></div>
+              <div class='jb-loyalty-step'><span>01</span><div><strong>${t('احجزي واستمتعي بالخدمة', 'Book & enjoy your ritual')}</strong><p>${t('اختاري خدماتكِ واستقبلي أخصائياتنا في راحة منزلكِ.', 'Select your treatments and welcome our specialists home.')}</p></div></div>
+              <div class='jb-loyalty-step'><span>02</span><div><strong>${t('اجمعي البتلات تلقائياً', 'Earn Petals automatically')}</strong><p>${t('تُضاف بتلاتكِ إلى رصيدكِ مباشرة فور اكتمال الجلسة.', 'Petals are added directly to your account upon completion.')}</p></div></div>
+              <div class='jb-loyalty-step'><span>03</span><div><strong>${t('اختاري مكافأتكِ ودلالكِ', 'Choose your reward')}</strong><p>${t('استبدلي رصيدكِ بخصومات مباشرة على حجوزاتكِ القادمة.', 'Redeem your balance for immediate discounts on upcoming visits.')}</p></div></div>
             </div>
             <div class='jb-petals-cameo-sm' aria-hidden='true'>${petalBloomSVG(4, 8, false)}</div>
           </div>
@@ -396,10 +396,10 @@ export function reviewsPage() {
       <div class="card reviews-cta-card">
         <div>
           <span class="eyebrow">${t('شاركينا انطباعكِ', 'SHARE YOUR IMPRESSION')}</span>
-          <h2 style="margin:4px 0 8px">${t('هل زرتنا مؤخراً؟ رأيكِ يهمنا', 'Visited recently? Share your thoughts')}</h2>
+          <h2 style="margin:4px 0 8px">${t('هل جربتِ خدماتنا؟ رأيكِ يهمنا', 'Experienced our rituals? Share your thoughts')}</h2>
           <p class="muted" style="margin:0">${t(
-            'التقييم متاح للعميلات بعد إتمام زيارة منزلية وتوثيق الحساب، ويُراجع إدارياً قبل النشر العام.',
-            'Available for verified accounts with completed visits. Reviews undergo staff moderation before appearing publicly.',
+            'نرحب بآراء وتقييمات عميلاتنا وزائراتنا الكرام. تُراجع التقييمات من فريقنا بعناية لضمان المصداقية وحماية الخصوصية.',
+            'We welcome reviews from our cherished clients and guests. All feedback is reviewed to preserve authenticity and privacy.',
           )}</p>
         </div>
         <button type="button" class="btn" id="open-review-cta">${t('قيّمي تجربتكِ معنا', 'Rate Your Experience')}</button>
@@ -661,66 +661,28 @@ export function bindPublicInteractions(goFn, renderFn) {
   };
 
   $('#open-review-cta')?.addEventListener('click', async () => {
-    if (!state.user) {
-      openDialog(`
-        <h2>${t('قيّمي تجربتكِ معنا', 'Rate Your Experience')}</h2>
-        <p class="muted">${t(
-          'لضمان أن تعكس الآراء تجارب حقيقية، يتطلب إرسال التقييم تسجيل الدخول بحساب عميلة موثق وزيارة منزلية مكتملة. لا يتم ربط طلبات الزائرات تلقائياً برقم الجوال حفاظاً على الخصوصية.',
-          'To keep feedback genuine, reviewing requires a signed-in verified customer account with a completed home visit. Guest bookings are never auto-linked by phone number.',
-        )}</p>
-        <div class="hero-actions" style="margin-top:20px">
-          <button type="button" class="btn small" data-modal-go="login">${t('تسجيل الدخول', 'Sign in')}</button>
-          <button type="button" class="btn small light" data-modal-go="register">${t('إنشاء حساب', 'Create account')}</button>
-          <button type="button" class="text-link" data-modal-go="recovery">${t('استعادة حساب سابق', 'Account recovery')}</button>
-        </div>
-      `);
-      bindModalNav();
-      return;
+    let completedBookings = [];
+    let existingReviews = [];
+    if (state.user) {
+      try {
+        const acc = state.account || (await api('/account'));
+        state.account = acc;
+        completedBookings = (acc.bookings || []).filter((b) => b.status === 'completed');
+        existingReviews = acc.reviews || [];
+      } catch {}
     }
-    if (!state.user.verified) {
-      openDialog(`
-        <h2>${t('يتطلب توثيق رقم الجوال', 'Phone Verification Required')}</h2>
-        <p class="muted">${t(
-          'يرجى توثيق ملكية رقم جوالكِ عبر واتساب من صفحة جواز الجمال قبل إضافة التقييم.',
-          'Please complete manual WhatsApp phone ownership verification in your Beauty Passport before submitting a review.',
-        )}</p>
-        <div class="hero-actions" style="margin-top:20px">
-          <button type="button" class="btn small" data-modal-go="account">${t('الذهاب للتوثيق في جواز الجمال', 'Go to Beauty Passport')}</button>
-        </div>
-      `);
-      bindModalNav();
-      return;
-    }
-
-    try {
-      const acc = state.account || (await api('/account'));
-      state.account = acc;
-      const completed = (acc.bookings || []).filter((b) => b.status === 'completed');
-      if (!completed.length) {
-        openDialog(`
-          <h2>${t('لا توجد زيارة مكتملة مؤهلة بعد', 'No Completed Visit Available Yet')}</h2>
-          <p class="muted">${t(
-            'ستتمكنين من تقييم تجربتكِ واختيار التقييم بالنجوم فور اكتمال أول موعد منزلي لكِ في حسابكِ.',
-            'Once your first home spa visit is marked completed in your account, you can rate your experience here.',
-          )}</p>
-          <div class="hero-actions" style="margin-top:20px">
-            <button type="button" class="btn small" data-modal-go="booking">${t('تقديم طلب موعد', 'Request an appointment')}</button>
-          </div>
-        `);
-        bindModalNav();
-        return;
-      }
-      openReviewModal({
-        bookings: acc.bookings || [],
-        existingReviews: acc.reviews || [],
-        onSaved: async () => {
-          state.account = await api('/account');
-          if (renderFn) renderFn();
-        },
-      });
-    } catch (err) {
-      toast(err.message);
-    }
+    openReviewModal({
+      bookings: completedBookings,
+      existingReviews,
+      onSaved: async () => {
+        if (state.user) {
+          try {
+            state.account = await api('/account');
+          } catch {}
+        }
+        if (renderFn) renderFn();
+      },
+    });
   });
 
   document.querySelectorAll('[data-edit-my-review]').forEach((btn) => {

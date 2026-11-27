@@ -1,0 +1,9 @@
+.git
+.github
+.agents
+tests
+screenshots
+docs
+*.log
+.DS_Store
+Thumbs.db

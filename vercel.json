@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "cleanUrls": false,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/[...path]?path=$1" },
+    { "source": "/ops", "destination": "/apps/staff/index.html" },
+    { "source": "/ops/:path*", "destination": "/apps/staff/:path*" },
+    { "source": "/ar/ops", "destination": "/apps/staff/index.html" },
+    { "source": "/en/ops", "destination": "/apps/staff/index.html" },
+    { "source": "/ar/ops/:path*", "destination": "/apps/staff/:path*" },
+    { "source": "/en/ops/:path*", "destination": "/apps/staff/:path*" },
+    { "source": "/shared/:path*", "destination": "/shared/:path*" },
+    { "source": "/ar", "destination": "/index.html" },
+    { "source": "/ar/:path*", "destination": "/index.html" },
+    { "source": "/en", "destination": "/index.html" },
+    { "source": "/en/:path*", "destination": "/index.html" }
+  ]
+}

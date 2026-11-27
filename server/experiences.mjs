@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { now, uid } from './db.mjs';
 import { validateSchedule } from './booking.mjs';
 import { fail, optionalText, phone, text, whatsappUrl } from './validation.mjs';
+import { evaluateAtelierServiceMatch } from '../apps/customer/js/atelier/service-mapping.js';
 
 const ALLOWED_FUNNEL_EVENTS = new Set([
   'home_view',
@@ -190,6 +191,16 @@ export function saveNailStyle(db, user, body) {
 
   const id = uid();
   const shareCode = body.share ? randomBytes(4).toString('hex').toUpperCase() : null;
+  const match = evaluateAtelierServiceMatch({
+    shape,
+    length,
+    polish_color: polishColor,
+    french_style: frenchStyle,
+    tip_color: tipColor,
+    finish,
+    accent,
+  });
+
   const payload = {
     id,
     name,
@@ -200,12 +211,10 @@ export function saveNailStyle(db, user, body) {
     tip_color: tipColor,
     finish,
     accent,
-    recommended_service_id:
-      frenchStyle === 'colored'
-        ? 'colored-french'
-        : frenchStyle !== 'none'
-          ? 'french-gel'
-          : 'gel-polish',
+    skin: ['fair', 'warm', 'olive', 'deep'].includes(body.skin) ? body.skin : 'warm',
+    recommended_service_id: match.primaryServiceId,
+    complexity_tier: match.complexityKey,
+    extra_minutes: match.extraMinutes,
   };
 
   if (user || shareCode) {
@@ -266,22 +275,22 @@ export function getPassportData(db, helpers, user) {
     preferences: prefRow
       ? JSON.parse(prefRow.data)
       : {
-          preferred_neighborhood: '',
-          pressure: 'medium',
-          nail_finish: 'gloss',
-          reminder_opt_in: false,
-          scent_note: '',
-        },
+        preferred_neighborhood: '',
+        pressure: 'medium',
+        nail_finish: 'gloss',
+        reminder_opt_in: false,
+        scent_note: '',
+      },
     last_booking: lastBooking
       ? {
-          id: lastBooking.id,
-          reference: lastBooking.reference,
-          package_id: lastBooking.package_id || null,
-          service_ids: (lastBooking.items || []).map((i) => i.id),
-          neighborhood: lastBooking.neighborhood,
-          items: lastBooking.items,
-          total: lastBooking.total,
-        }
+        id: lastBooking.id,
+        reference: lastBooking.reference,
+        package_id: lastBooking.package_id || null,
+        service_ids: (lastBooking.items || []).map((i) => i.id),
+        neighborhood: lastBooking.neighborhood,
+        items: lastBooking.items,
+        total: lastBooking.total,
+      }
       : null,
     group_requests: groupReqs,
     gift_requests: giftReqs,

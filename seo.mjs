@@ -25,7 +25,6 @@ const APP_ONLY_ROUTES = new Set([
   'bookings',
   'rewards',
   'loyalty',
-  'admin',
   'login',
   'register',
   'recovery',
